@@ -261,7 +261,7 @@
       gap: 6px;
     }
     .agent-head-icon {
-      width: 32px; height: 38px;
+      width: 34px; height: 40px;
       background: rgba(22, 33, 44, 0.85);
       border: 1px solid rgba(255, 255, 255, 0.2);
       display: flex;
@@ -712,7 +712,7 @@
     .sb-row.header { font-size: 12px; color: #8899a6; border-bottom: 2px solid var(--val-border); }
     .sb-row.self { background: rgba(0, 240, 255, 0.12); border-left: 3px solid var(--val-cyan); }
 
-    /* Buy Menu ([B]) - 6 WEAPONS & SHIELDS */
+    /* Buy Menu ([B]) - 6 WEAPONS & 2 SHIELDS */
     #buy-menu {
       position: absolute;
       top: 0; left: 0; width: 100%; height: 100%;
@@ -972,7 +972,7 @@
 
   <div id="toast-msg">시스템 메시지</div>
 
-  <!-- Blade Storm Dagger Counter HUD -->
+  <!-- Blade Storm Kunai Counter HUD -->
   <div id="blade-counter-panel">
     <span class="blade-pip" id="blade-1">🗡️</span>
     <span class="blade-pip" id="blade-2">🗡️</span>
@@ -1236,7 +1236,7 @@
 
   <script>
     /* ==========================================================
-       1. SYNTHESIZED WEB AUDIO ENGINE (ZERO EXTERNAL ASSETS)
+       1. SYNTHESIZED WEB AUDIO & TACTICAL RADIO VOICE
        ========================================================== */
     class SoundEngine {
       constructor() {
@@ -1615,6 +1615,25 @@
     }
 
     const sound = new SoundEngine();
+
+    /* BROWSER NATIVE TACTICAL RADIO VOICE */
+    class RadioVoiceEngine {
+      constructor() {
+        this.synth = window.speechSynthesis;
+      }
+      speak(text) {
+        if (!this.synth) return;
+        try {
+          this.synth.cancel();
+          const utter = new SpeechSynthesisUtterance(text);
+          utter.lang = 'en-US';
+          utter.rate = 1.05;
+          utter.pitch = 0.95;
+          this.synth.speak(utter);
+        } catch (e) {}
+      }
+    }
+    const radioVoice = new RadioVoiceEngine();
 
     /* ==========================================================
        2. WEAPONS ARSENAL (6 WEAPONS)
@@ -2020,7 +2039,7 @@
     }
 
     /* ==========================================================
-       6. MAP BUILDERS (ASCENT, BIND, HAVEN, THE RANGE)
+       6. MAP BUILDERS & SIGNATURE AGENT 3D MODELING
        ========================================================== */
     let mapObjects = [];
     let colliders = [];
@@ -2030,7 +2049,6 @@
     let teleporters = [];
     let barriersList = [];
     let activeSmokes = [];
-    let activeKnives = [];
     let spikeSiteAreas = [];
 
     const spikeState = {
@@ -2045,6 +2063,7 @@
 
     let roundState = 'BUY_PHASE'; // 'BUY_PHASE' | 'IN_ROUND' | 'ROUND_ENDED'
     let roundTimer = 10;
+    let lastTpTime = 0;
 
     const matConcrete = new THREE.MeshStandardMaterial({ color: 0x505760, roughness: 0.8 });
     const matWallStone = new THREE.MeshStandardMaterial({ color: 0xc8ced4, roughness: 0.65 });
@@ -2092,7 +2111,8 @@
       return plane;
     }
 
-    function createAgentModel(isTeammate) {
+    /* DISTINCT PROCEDURAL 3D AGENT MODELING FOR ALL 8 AGENTS */
+    function createAgentModel(isTeammate, agentName = 'Jett') {
       const grp = new THREE.Group();
       const glowColor = isTeammate ? 0x00ffaa : 0xff1122;
       const armorColor = isTeammate ? 0x162828 : 0x281616;
@@ -2125,6 +2145,35 @@
       legR.position.set(0.16, 0.4, 0);
       grp.add(legL);
       grp.add(legR);
+
+      // Signature Accessories for each Agent
+      if (agentName === 'Jett') {
+        const hair = new THREE.Mesh(new THREE.SphereGeometry(0.12, 8, 8), new THREE.MeshStandardMaterial({ color: 0xffffff }));
+        hair.position.set(0, 1.95, -0.16);
+        grp.add(hair);
+      } else if (agentName === 'Phoenix') {
+        const flame = new THREE.Mesh(new THREE.ConeGeometry(0.1, 0.28, 6), new THREE.MeshBasicMaterial({ color: 0xff6600 }));
+        flame.position.set(0, 2.05, 0);
+        grp.add(flame);
+      } else if (agentName === 'Omen') {
+        const hood = new THREE.Mesh(new THREE.ConeGeometry(0.32, 0.35, 8), new THREE.MeshStandardMaterial({ color: 0x111625 }));
+        hood.position.set(0, 1.92, -0.04);
+        grp.add(hood);
+      } else if (agentName === 'Brimstone') {
+        const beret = new THREE.Mesh(new THREE.CylinderGeometry(0.26, 0.22, 0.08, 10), new THREE.MeshStandardMaterial({ color: 0x5d4037 }));
+        beret.rotation.z = 0.2;
+        beret.position.set(0.04, 1.95, 0);
+        grp.add(beret);
+      } else if (agentName === 'Sova') {
+        const bow = new THREE.Mesh(new THREE.TorusGeometry(0.32, 0.02, 6, 12, Math.PI), new THREE.MeshStandardMaterial({ color: 0xd4af37 }));
+        bow.position.set(0, 1.25, -0.22);
+        bow.rotation.z = Math.PI / 4;
+        grp.add(bow);
+      } else if (agentName === 'Sage') {
+        const braid = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.02, 0.6, 6), new THREE.MeshStandardMaterial({ color: 0x050505 }));
+        braid.position.set(0, 1.45, -0.22);
+        grp.add(braid);
+      }
 
       return { mesh: grp, head, body, legs: [legL, legR] };
     }
@@ -2213,7 +2262,7 @@
         spikeSiteAreas.push({ minX: -36, maxX: -16, minZ: -32, maxZ: -12, name: 'B SITE' });
         addBox(-26, 1.5, -22, 5, 3, 5, matWallStone); // B Octagon
 
-        // TELEPORTER 1: A Short (20, 0, 5) -> B Short Exit (-16, 0, -10)
+        // TELEPORTER 1: A Short (18, 0, 5) -> B Short Exit (-16, 0, -10)
         const tp1Mesh = addBox(18, 2, 5, 3, 4, 3, new THREE.MeshStandardMaterial({
           color: 0x00f0ff, emissive: 0x00f0ff, emissiveIntensity: 0.9, transparent: true, opacity: 0.55
         }), false);
@@ -2283,7 +2332,7 @@
 
         // Spawn 4 Practice Targets that respawn instantly when eliminated
         [-10, -20, -30, -50].forEach((zPos, idx) => {
-          const m = createAgentModel(false);
+          const m = createAgentModel(false, 'Omen');
           m.mesh.position.set((idx % 2 === 0 ? 4 : -4), 0, zPos);
           scene.add(m.mesh);
           practiceBots.push({
@@ -2313,7 +2362,7 @@
         for (let i = 0; i < 4; i++) {
           const slotIdx = (i < mySlotIdx) ? i : (i + 1);
           const slotInfo = lobbySlots[myTeam][slotIdx];
-          const m = createAgentModel(true);
+          const m = createAgentModel(true, slotInfo ? slotInfo.agent : 'Sova');
           m.mesh.position.set(allyOffsets[i], 0, mySpawnZ + (Math.random() * 4 - 2));
           scene.add(m.mesh);
 
@@ -2323,7 +2372,8 @@
             agent: slotInfo ? slotInfo.agent : 'Jett',
             hp: 100, maxHp: 100,
             mesh: m.mesh, head: m.head, body: m.body, legs: m.legs,
-            isDead: false, patrolDir: 1
+            isDead: false, patrolDir: 1,
+            targetSite: (i % 2 === 0 ? 'A' : 'B')
           });
         }
 
@@ -2332,7 +2382,7 @@
         const enemyOffsets = [-16, -8, 0, 8, 16];
         for (let i = 0; i < 5; i++) {
           const slotInfo = lobbySlots[enemyTeamKey][i];
-          const m = createAgentModel(false);
+          const m = createAgentModel(false, slotInfo ? slotInfo.agent : 'Omen');
           m.mesh.position.set(enemyOffsets[i], 0, enemySpawnZ + (Math.random() * 4 - 2));
           scene.add(m.mesh);
 
@@ -2342,7 +2392,8 @@
             agent: slotInfo ? slotInfo.agent : 'Omen',
             hp: 100, maxHp: 100,
             mesh: m.mesh, head: m.head, body: m.body, legs: m.legs,
-            isDead: false, patrolDir: -1
+            isDead: false, patrolDir: -1,
+            targetSite: (i % 2 === 0 ? 'A' : 'B')
           });
         }
       }
@@ -2403,6 +2454,7 @@
 
     let isInspecting = false;
     let inspectTimer = 0;
+    let recoilOffset = 0;
 
     const keys = {};
     let isPointerLocked = false;
@@ -2703,10 +2755,12 @@
       banner.classList.add('active');
       if (won) {
         sound.playVictoryHorn();
+        radioVoice.speak('Round won! Outstanding clutch.');
         player.credits += 3000;
         const scoreAtk = document.getElementById('score-atk');
         scoreAtk.innerText = parseInt(scoreAtk.innerText) + 1;
       } else {
+        radioVoice.speak('Round lost. Prepare for next round.');
         player.credits += 1900;
         const scoreDef = document.getElementById('score-def');
         scoreDef.innerText = parseInt(scoreDef.innerText) + 1;
@@ -2753,7 +2807,9 @@
       if (!player.isGrounded) spread += 0.065;
       else if (keys['KeyW'] || keys['KeyS'] || keys['KeyA'] || keys['KeyD']) spread += 0.045;
 
+      // Dynamic Recoil Gain with tracked offset
       pitch += currentWeapon.recoilGain;
+      recoilOffset += currentWeapon.recoilGain;
 
       const rayDir = new THREE.Vector3(
         (Math.random() - 0.5) * spread,
@@ -2868,6 +2924,7 @@
         if (abilities.x.active) {
           abilities.x.knives = 5;
           sound.playBladeStorm();
+          radioVoice.speak('Watch this!');
           showToast('비수 재충전! (KNIVES RESTORED)');
           renderBladePips();
         }
@@ -2878,7 +2935,9 @@
         renderTopAgentsBar();
 
         const remainingEnemies = enemiesList.filter(e => !e.isDead).length;
-        if (remainingEnemies === 0) {
+        if (remainingEnemies === 1) {
+          radioVoice.speak('One enemy remaining!');
+        } else if (remainingEnemies === 0) {
           triggerRoundCeremony(true, 'ENEMY TEAM WIPED // ALL HOSTILES DOWN');
         }
       }
@@ -2987,16 +3046,28 @@
       setTimeout(() => scene.remove(ring), 400);
     }
 
-    // E: Tailwind Dash (Instant directional burst + speedlines)
+    // E: Tailwind Dash (Instant movement-directional burst + speedlines)
     function castSkillE() {
       const now = performance.now() / 1000;
       if (!cheats.noCooldowns && now - abilities.e.lastUsed < abilities.e.cd) return;
       abilities.e.lastUsed = now;
       sound.playDash();
 
-      const dir = new THREE.Vector3(0, 0, -1).applyAxisAngle(new THREE.Vector3(0, 1, 0), yaw);
-      player.velocity.x += dir.x * 42;
-      player.velocity.z += dir.z * 42;
+      const moveDir = new THREE.Vector3();
+      if (keys['KeyW']) moveDir.z -= 1;
+      if (keys['KeyS']) moveDir.z += 1;
+      if (keys['KeyA']) moveDir.x -= 1;
+      if (keys['KeyD']) moveDir.x += 1;
+
+      let dashDir;
+      if (moveDir.lengthSq() > 0) {
+        dashDir = moveDir.normalize().applyAxisAngle(new THREE.Vector3(0, 1, 0), yaw);
+      } else {
+        dashDir = new THREE.Vector3(0, 0, -1).applyAxisAngle(new THREE.Vector3(0, 1, 0), yaw);
+      }
+
+      player.velocity.x += dashDir.x * 45;
+      player.velocity.z += dashDir.z * 45;
       showToast('순풍 대시 (TAILWIND)');
 
       const sl = document.getElementById('speed-lines-overlay');
@@ -3009,6 +3080,7 @@
       abilities.x.active = true;
       abilities.x.knives = 5;
       sound.playBladeStorm();
+      radioVoice.speak('Watch this!');
       gunGroup.visible = false;
       kunaiRig.visible = true;
       document.getElementById('blade-counter-panel').style.display = 'flex';
@@ -3083,10 +3155,14 @@
       showToast('칼날 폭풍 종료');
     }
 
-    /* TELEPORTER CHECK */
+    /* TELEPORTER CHECK WITH DEBOUNCE */
     function checkTeleporters() {
+      const now = performance.now() / 1000;
+      if (now - lastTpTime < 1.4) return;
+
       teleporters.forEach(tp => {
-        if (camera.position.distanceTo(tp.pos) < 2.2) {
+        if (camera.position.distanceTo(tp.pos) < 2.4) {
+          lastTpTime = now;
           sound.playTeleport();
           camera.position.copy(tp.dest);
           const flash = document.getElementById('tp-flash-overlay');
@@ -3125,6 +3201,8 @@
             player.credits += 300;
             progContainer.style.display = 'none';
             plantSpikeProp(camera.position.x, 0, camera.position.z);
+            sound.playSpikeBeep(1);
+            radioVoice.speak('Spike planted!');
             showToast('스파이크가 설치되었습니다! (SPIKE PLANTED)');
             renderTopAgentsBar();
           }
@@ -3149,6 +3227,7 @@
 
           if (prevDefuse < 0.5 && spikeState.defuseProgress >= 0.5) {
             sound.playDefuseHalf();
+            radioVoice.speak('Half defused!');
             showToast('스파이크 절반(50%) 해체 완료!');
           }
 
@@ -3275,6 +3354,7 @@
 
     let lastTime = performance.now();
     let enemyShotTimer = 0;
+    let botAiTimer = 0;
 
     function animate() {
       requestAnimationFrame(animate);
@@ -3282,6 +3362,13 @@
       const now = performance.now();
       const dt = Math.min((now - lastTime) / 1000, 0.1);
       lastTime = now;
+
+      // Smooth Recoil Recovery
+      if (recoilOffset > 0 && !keys['Mouse0']) {
+        const recoveryAmount = Math.min(recoilOffset, 0.04 * dt * 60);
+        pitch -= recoveryAmount * 0.3;
+        recoilOffset -= recoveryAmount * 0.3;
+      }
 
       // ROUND TIMER
       if (roundState === 'BUY_PHASE') {
@@ -3296,6 +3383,7 @@
             colliders = colliders.filter(c => c.mesh !== b);
           });
           document.getElementById('round-state-text').innerText = 'ROUND ACTIVE';
+          radioVoice.speak('Round commenced. Clear the area.');
           showToast('결계벽 해제! 교전 시작! (ROUND COMMENCED)');
         }
       } else if (roundState === 'IN_ROUND') {
@@ -3416,16 +3504,42 @@
           }
         }
 
-        enemiesList.forEach(e => {
-          if (e.isDead) return;
-          e.mesh.position.x += e.patrolDir * 2.0 * dt;
-          if (Math.abs(e.mesh.position.x) > 30) e.patrolDir *= -1;
-        });
-        teammatesList.forEach(t => {
-          if (t.isDead) return;
-          t.mesh.position.x += t.patrolDir * 1.8 * dt;
-          if (Math.abs(t.mesh.position.x) > 25) t.patrolDir *= -1;
-        });
+        // AI Tactical Navigation & Autonomous Spike Planting
+        if (roundState === 'IN_ROUND') {
+          // If player is Defender and spike not planted, let an attacker bot plant it on site!
+          if (myTeam === 'def' && !spikeState.isPlanted && enemiesList.length > 0) {
+            const carrierBot = enemiesList.find(e => !e.isDead);
+            if (carrierBot && spikeSiteAreas.length > 0) {
+              const targetSite = spikeSiteAreas[0];
+              const siteCenter = new THREE.Vector3((targetSite.minX + targetSite.maxX) / 2, 0, (targetSite.minZ + targetSite.maxZ) / 2);
+              const dirToSite = new THREE.Vector3().subVectors(siteCenter, carrierBot.mesh.position);
+              if (dirToSite.length() > 2) {
+                dirToSite.normalize();
+                carrierBot.mesh.position.addScaledVector(dirToSite, 2.5 * dt);
+              } else {
+                // Plant!
+                spikeState.isPlanted = true;
+                plantSpikeProp(carrierBot.mesh.position.x, 0, carrierBot.mesh.position.z);
+                sound.playSpikeBeep(1);
+                radioVoice.speak('Spike planted!');
+                showToast('적군이 스파이크를 설치했습니다! (ENEMY PLANTED SPIKE)');
+                renderTopAgentsBar();
+              }
+            }
+          }
+
+          // Patrol movements
+          enemiesList.forEach(e => {
+            if (e.isDead) return;
+            e.mesh.position.x += e.patrolDir * 2.2 * dt;
+            if (Math.abs(e.mesh.position.x) > 30) e.patrolDir *= -1;
+          });
+          teammatesList.forEach(t => {
+            if (t.isDead) return;
+            t.mesh.position.x += t.patrolDir * 1.8 * dt;
+            if (Math.abs(t.mesh.position.x) > 25) t.patrolDir *= -1;
+          });
+        }
 
         checkTeleporters();
         checkSpikeActions(dt);
