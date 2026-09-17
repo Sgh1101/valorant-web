@@ -1,0 +1,23 @@
+# Netlify Configuration for VALORANT 5v5 Web Protocol
+
+[build]
+  # The directory containing the site's files (HTML, JS, CSS, Assets)
+  publish = "."
+
+# Global Security and Performance Headers
+[[headers]]
+  for = "/*"
+  [headers.values]
+    # Allow full WebGL and audio rendering
+    X-Frame-Options = "SAMEORIGIN"
+    X-Content-Type-Options = "nosniff"
+    X-XSS-Protection = "1; mode=block"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+    Access-Control-Allow-Origin = "*"
+    Cache-Control = "public, max-age=3600"
+
+# Fallback Routing (Single Page App structure)
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200

@@ -1,0 +1,20 @@
+{
+  "name": "valorant-5v5-web",
+  "version": "1.0.0",
+  "description": "VALORANT // 5V5 CUSTOM PROTOCOL - 3D Tactical FPS Web Edition",
+  "main": "index.html",
+  "scripts": {
+    "start": "npx serve -l 3000 .",
+    "deploy": "npx netlify deploy --dir=. --prod"
+  },
+  "keywords": [
+    "valorant",
+    "threejs",
+    "webgl",
+    "fps",
+    "esports",
+    "netlify"
+  ],
+  "author": "",
+  "license": "MIT"
+}
