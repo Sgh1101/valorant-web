@@ -1542,8 +1542,18 @@
         </div>
       </div>
 
-      <!-- Controls & Volume -->
+      <!-- Controls, Graphics Quality & Volume -->
       <div style="border-top:1px solid var(--val-border); padding-top:12px;">
+        <div class="settings-row">
+          <span>그래픽 품질 (Graphics Quality)</span>
+          <select id="cfg-graphics" style="background:#070b10; border:1px solid var(--val-border); color:var(--val-cyan); font-family:var(--font-hud); font-size:14px; padding:3px 8px; outline:none; cursor:pointer;">
+            <option value="min">최소 (0.6x, 그림자 끔)</option>
+            <option value="perf">성능 (0.8x, 저사양)</option>
+            <option value="balanced" selected>균형 (1.0x, 1024 그림자)</option>
+            <option value="visual">비주얼 (1.4x, 2048 그림자)</option>
+            <option value="ultra">최고 (2.0x, 4096 그림자)</option>
+          </select>
+        </div>
         <div class="settings-row">
           <span>마우스 감도 (Sensitivity)</span>
           <input type="range" id="cfg-sens" min="5" max="35" value="18" style="cursor: pointer;">
@@ -1777,6 +1787,12 @@
           <div style="font-size: 11px; color:#8899a6; letter-spacing: 1px;">선택된 전장 (MAP)</div>
           <div style="font-family: var(--font-title); font-size: 32px; color:#fff;" id="lobby-map-title">ASCENT (어센트)</div>
           <button class="map-select-btn val-clip" id="btn-cycle-map">맵 변경 (CYCLE MAP)</button>
+        </div>
+        <div style="margin-top:10px; display:flex; gap:6px; justify-content:center; align-items:center;">
+          <span style="font-size:12px; color:#8899a6;">선취 라운드:</span>
+          <button class="map-select-btn val-clip active-round-btn" id="btn-round-13" style="width:75px; padding:4px 6px; font-size:13px;">13선취</button>
+          <button class="map-select-btn val-clip" id="btn-round-7" style="width:75px; padding:4px 6px; font-size:13px; background:rgba(255,255,255,0.06); border-color:#8899a6;">7선취</button>
+          <button class="map-select-btn val-clip" id="btn-round-3" style="width:75px; padding:4px 6px; font-size:13px; background:rgba(255,255,255,0.06); border-color:#8899a6;">3선취</button>
         </div>
         <div style="font-size: 12px; color:#8899a6; text-align: center; line-height: 1.5;">
           💡 <b>자리 고르기 & 멀티 안내:</b><br>
@@ -3610,6 +3626,57 @@
       document.getElementById('settings-modal').style.display = 'none';
       canvas.requestPointerLock();
     });
+
+    // 5-Tier Graphics Presets
+    document.getElementById('cfg-graphics').addEventListener('change', (e) => {
+      const q = e.target.value;
+      if (q === 'min') {
+        renderer.setPixelRatio(0.6);
+        renderer.shadowMap.enabled = false;
+        scene.fog.density = 0.015;
+      } else if (q === 'perf') {
+        renderer.setPixelRatio(0.8);
+        renderer.shadowMap.enabled = false;
+        scene.fog.density = 0.012;
+      } else if (q === 'balanced') {
+        renderer.setPixelRatio(1.0);
+        renderer.shadowMap.enabled = true;
+        renderer.shadowMap.type = THREE.PCFShadowMap;
+        scene.fog.density = 0.009;
+      } else if (q === 'visual') {
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.4));
+        renderer.shadowMap.enabled = true;
+        renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+        scene.fog.density = 0.007;
+      } else if (q === 'ultra') {
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2.0));
+        renderer.shadowMap.enabled = true;
+        renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+        scene.fog.density = 0.005;
+      }
+      showToast(`그래픽 품질 변경: ${q.toUpperCase()}`);
+    });
+
+    let targetRounds = 13;
+    function setTargetRounds(r) {
+      targetRounds = r;
+      ['btn-round-13', 'btn-round-7', 'btn-round-3'].forEach(id => {
+        const btn = document.getElementById(id);
+        if (btn) {
+          if (id === `btn-round-${r}`) {
+            btn.style.background = 'var(--val-red)';
+            btn.style.borderColor = 'var(--val-red)';
+          } else {
+            btn.style.background = 'rgba(255,255,255,0.06)';
+            btn.style.borderColor = '#8899a6';
+          }
+        }
+      });
+      showToast(`경기 선취 라운드 설정: ${r}선취 (공수교대: ${Math.ceil(r * 12 / 13)}라운드)`);
+    }
+    document.getElementById('btn-round-13').addEventListener('click', () => setTargetRounds(13));
+    document.getElementById('btn-round-7').addEventListener('click', () => setTargetRounds(7));
+    document.getElementById('btn-round-3').addEventListener('click', () => setTargetRounds(3));
     document.getElementById('btn-quit-to-lobby').addEventListener('click', () => {
       document.getElementById('settings-modal').style.display = 'none';
       document.getElementById('hud').style.display = 'none';
@@ -3957,6 +4024,34 @@
       if (crPanel) {
         crPanel.style.display = 'flex';
         renderCombatReport('dealt');
+      }
+
+      const curScoreAtk = parseInt(document.getElementById('score-atk').innerText);
+      const curScoreDef = parseInt(document.getElementById('score-def').innerText);
+      const totalRounds = curScoreAtk + curScoreDef;
+      const halftimeRound = Math.ceil(targetRounds * 12 / 13);
+
+      // Check Match Victory
+      if (curScoreAtk >= targetRounds || curScoreDef >= targetRounds) {
+        const didWinMatch = (myTeam === 'atk' && curScoreAtk >= targetRounds) || (myTeam === 'def' && curScoreDef >= targetRounds);
+        setTimeout(() => {
+          banner.classList.remove('active');
+          showToast(didWinMatch ? 'MATCH VICTORY // 최종 승리!' : 'MATCH DEFEAT // 경기 종료');
+          radioVoice.speak(didWinMatch ? 'Victory! Outstanding match.' : 'Defeat. Well fought.');
+          document.getElementById('settings-modal').style.display = 'none';
+          document.getElementById('hud').style.display = 'none';
+          document.getElementById('custom-lobby').style.display = 'flex';
+          clearMap();
+        }, 5000);
+        return;
+      }
+
+      // Check Halftime Side Swap
+      if (totalRounds === halftimeRound) {
+        radioVoice.speak('Switching sides! Halftime swap.');
+        showToast('공수 교대 (HALFTIME SWAP) // 공격팀 <-> 수비팀 진영 변경!');
+        myTeam = (myTeam === 'atk') ? 'def' : 'atk';
+        document.getElementById('my-slot-desc').innerText = `${myTeam === 'atk' ? '공격팀' : '수비팀'} 1번 (JETT)`;
       }
 
       setTimeout(() => {
