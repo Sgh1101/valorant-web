@@ -89,7 +89,7 @@
       transition: opacity 0.3s ease-out;
     }
 
-    /* Dynamic Crosshair */
+    /* Dynamic Customizable Crosshair */
     #crosshair-container {
       position: absolute;
       top: 50%; left: 50%;
@@ -491,27 +491,257 @@
     .ammo-reserve { font-family: var(--font-title); font-size: 24px; color: #778899; }
     .credits-tag { font-family: var(--font-mono); font-size: 13px; color: var(--val-gold); font-weight: 700; }
 
-    /* Kill Banner with Valorant Skull */
+    /* Enhanced Kill Banner with Valorant Skull & Multi-Kill Tiers */
     #kill-banner {
       position: absolute;
-      bottom: 125px; left: 50%;
+      bottom: 130px; left: 50%;
       transform: translateX(-50%) scale(0.7);
-      background: linear-gradient(90deg, transparent 0%, rgba(255, 70, 85, 0.94) 25%, rgba(255, 70, 85, 0.94) 75%, transparent 100%);
-      padding: 10px 70px;
+      background: linear-gradient(90deg, transparent 0%, rgba(14, 20, 28, 0.95) 20%, rgba(255, 70, 85, 0.92) 50%, rgba(14, 20, 28, 0.95) 80%, transparent 100%);
+      padding: 10px 80px;
       color: #fff;
-      font-family: var(--font-title);
-      font-size: 36px; font-weight: 800; letter-spacing: 4px;
-      text-transform: uppercase;
       opacity: 0;
       pointer-events: none;
       transition: all 0.22s cubic-bezier(0.175, 0.885, 0.32, 1.275);
       display: flex;
       align-items: center;
-      gap: 16px;
-      text-shadow: 0 2px 12px rgba(0,0,0,0.9);
-      box-shadow: 0 0 35px rgba(255, 70, 85, 0.6);
+      gap: 20px;
+      z-index: 32;
+      box-shadow: 0 0 45px rgba(255, 70, 85, 0.7);
+      border-top: 2px solid var(--val-red);
+      border-bottom: 2px solid var(--val-red);
     }
     #kill-banner.active { opacity: 1; transform: translateX(-50%) scale(1); }
+    #kill-banner.tier-ace {
+      background: linear-gradient(90deg, transparent 0%, rgba(14, 20, 28, 0.96) 20%, rgba(255, 200, 59, 0.94) 50%, rgba(14, 20, 28, 0.96) 80%, transparent 100%);
+      border-color: var(--val-gold);
+      box-shadow: 0 0 65px rgba(255, 200, 59, 0.85);
+    }
+    #kill-skull-emblem {
+      color: #fff;
+      filter: drop-shadow(0 0 8px rgba(255, 70, 85, 0.9));
+      animation: skullPop 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+    .tier-ace #kill-skull-emblem {
+      color: var(--val-gold);
+      filter: drop-shadow(0 0 14px rgba(255, 200, 59, 1));
+    }
+    @keyframes skullPop {
+      0% { transform: scale(0.4) rotate(-10deg); }
+      50% { transform: scale(1.3) rotate(5deg); }
+      100% { transform: scale(1) rotate(0deg); }
+    }
+    .kill-info-block {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+    }
+    #kill-banner-streak {
+      font-family: var(--font-mono);
+      font-size: 13px;
+      font-weight: 800;
+      color: var(--val-gold);
+      letter-spacing: 2px;
+      line-height: 1;
+    }
+    #kill-banner-text {
+      font-family: var(--font-title);
+      font-size: 38px;
+      font-weight: 800;
+      letter-spacing: 4px;
+      text-transform: uppercase;
+      line-height: 1;
+      text-shadow: 0 2px 10px rgba(0,0,0,0.9);
+    }
+
+    /* Post-Round & On-Demand Combat Report ([N]) */
+    #combat-report-panel {
+      position: absolute;
+      top: 90px; right: 25px;
+      width: 390px;
+      background: rgba(10, 16, 24, 0.94);
+      border: 1px solid var(--val-border);
+      border-left: 4px solid var(--val-red);
+      backdrop-filter: blur(14px);
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.85);
+      z-index: 36;
+      display: none;
+      flex-direction: column;
+      padding: 16px 20px;
+      gap: 12px;
+      animation: crSlide 0.25s ease-out;
+    }
+    @keyframes crSlide {
+      from { transform: translateX(60px); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
+    }
+    .cr-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+      padding-bottom: 8px;
+    }
+    .cr-title {
+      font-family: var(--font-title);
+      font-size: 24px;
+      font-weight: 800;
+      color: #fff;
+      letter-spacing: 2px;
+    }
+    .cr-title span { color: var(--val-red); font-size: 14px; font-family: var(--font-hud); }
+    .cr-hint {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--val-cyan);
+      font-weight: 700;
+    }
+    .cr-tabs {
+      display: flex;
+      gap: 8px;
+    }
+    .cr-tab {
+      flex: 1;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid var(--val-border);
+      color: #8899a6;
+      font-family: var(--font-hud);
+      font-size: 12px;
+      font-weight: 700;
+      padding: 5px 0;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .cr-tab:hover { color: #fff; border-color: rgba(255,255,255,0.3); }
+    .cr-tab.active {
+      background: rgba(255, 70, 85, 0.2);
+      border-color: var(--val-red);
+      color: #fff;
+    }
+    .cr-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      max-height: 280px;
+      overflow-y: auto;
+    }
+    .cr-card {
+      background: rgba(18, 26, 36, 0.8);
+      border: 1px solid rgba(255,255,255,0.08);
+      padding: 8px 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-radius: 2px;
+      transition: background 0.15s;
+    }
+    .cr-card:hover { background: rgba(24, 34, 46, 0.9); }
+    .cr-card.cr-dead { border-right: 3px solid var(--val-red); }
+    .cr-agent-info {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .cr-agent-avatar {
+      width: 32px; height: 32px;
+      border-radius: 50%;
+      background: #141c24;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      border: 1px solid rgba(255,255,255,0.15);
+    }
+    .cr-agent-name {
+      font-family: var(--font-title);
+      font-size: 20px;
+      color: #fff;
+      line-height: 1;
+    }
+    .cr-sub { font-size: 10px; color: #8899a6; font-weight: 600; }
+    .cr-hits-breakdown {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-family: var(--font-mono);
+      font-size: 11px;
+    }
+    .cr-hit-chip {
+      background: rgba(0,0,0,0.4);
+      padding: 2px 6px;
+      border-radius: 2px;
+      display: flex;
+      align-items: center;
+      gap: 3px;
+    }
+    .cr-hit-head { color: var(--val-red); font-weight: 800; }
+    .cr-hit-body { color: #fff; }
+    .cr-hit-leg { color: #8899a6; }
+    .cr-dmg-total {
+      font-family: var(--font-title);
+      font-size: 28px;
+      font-weight: 800;
+      color: var(--val-gold);
+      min-width: 50px;
+      text-align: right;
+    }
+
+    /* Ascent B Door Interaction Prompt */
+    #door-prompt {
+      position: absolute;
+      top: 62%; left: 50%;
+      transform: translate(-50%, -50%);
+      background: rgba(12, 18, 24, 0.95);
+      border: 1px solid var(--val-cyan);
+      box-shadow: 0 0 20px rgba(0, 240, 255, 0.4);
+      padding: 8px 22px;
+      display: none;
+      align-items: center;
+      gap: 12px;
+      z-index: 26;
+      pointer-events: none;
+      font-family: var(--font-hud);
+      font-weight: 700;
+    }
+    .dp-key {
+      font-family: var(--font-mono);
+      font-size: 14px;
+      background: var(--val-cyan);
+      color: #080c10;
+      padding: 2px 8px;
+      border-radius: 2px;
+      font-weight: 800;
+    }
+
+    /* HUD Keybinds Bar */
+    #keybinds-bar {
+      position: absolute;
+      bottom: 6px; left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      gap: 14px;
+      background: rgba(8, 12, 16, 0.85);
+      padding: 3px 18px;
+      border-radius: 12px;
+      border: 1px solid rgba(255,255,255,0.08);
+      pointer-events: none;
+      z-index: 10;
+    }
+    .kb-item {
+      font-size: 10px;
+      color: #8899a6;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+    }
+    .kb-item kbd {
+      background: rgba(255,255,255,0.12);
+      color: #fff;
+      padding: 1px 5px;
+      border-radius: 2px;
+      font-family: var(--font-mono);
+      font-size: 9px;
+      margin-right: 3px;
+    }
+
 
     /* Round Victory / Defeat Ceremony Banner */
     #round-ceremony-banner {
@@ -757,6 +987,60 @@
       background: rgba(255, 70, 85, 0.15);
     }
 
+    /* IN-GAME SETTINGS & CROSSHAIR MODAL ([ESC]) */
+    #settings-modal {
+      position: absolute;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(8, 12, 16, 0.92);
+      z-index: 48;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      backdrop-filter: blur(14px);
+    }
+    .settings-container {
+      background: rgba(14, 22, 30, 0.98);
+      border: 1px solid var(--val-border);
+      border-top: 4px solid var(--val-cyan);
+      padding: 28px 40px;
+      max-width: 820px;
+      width: 90%;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+    .settings-title {
+      font-family: var(--font-title);
+      font-size: 38px;
+      color: #fff;
+      display: flex;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--val-border);
+      padding-bottom: 8px;
+    }
+    .settings-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 15px;
+      font-weight: 700;
+      padding: 6px 0;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+    }
+    .color-picker-box {
+      display: flex;
+      gap: 8px;
+    }
+    .color-swatch {
+      width: 24px; height: 24px;
+      border-radius: 2px;
+      cursor: pointer;
+      border: 2px solid transparent;
+      transition: transform 0.1s;
+    }
+    .color-swatch:hover { transform: scale(1.15); }
+    .color-swatch.active-swatch { border-color: #fff; box-shadow: 0 0 8px #fff; }
+
     /* 5V5 CUSTOM GAME LOBBY */
     #custom-lobby {
       position: absolute;
@@ -954,13 +1238,13 @@
   <div id="speed-lines-overlay"></div>
   <div id="tp-flash-overlay"></div>
 
-  <!-- Dynamic Crosshair -->
+  <!-- Dynamic Customizable Crosshair -->
   <div id="crosshair-container">
     <div class="ch-part ch-t" id="ch-t"></div>
     <div class="ch-part ch-b" id="ch-b"></div>
     <div class="ch-part ch-l" id="ch-l"></div>
     <div class="ch-part ch-r" id="ch-r"></div>
-    <div class="ch-part ch-dot"></div>
+    <div class="ch-part ch-dot" id="ch-dot"></div>
   </div>
 
   <div id="hit-marker">
@@ -1054,6 +1338,77 @@
     </div>
   </div>
 
+  <!-- IN-GAME SETTINGS & CROSSHAIR CUSTOMIZER ([ESC]) -->
+  <div id="settings-modal">
+    <div class="settings-container val-clip-tl-br">
+      <div class="settings-title">
+        <span>TACTICAL SETTINGS // 환경 설정</span>
+        <span style="font-size: 16px; color: var(--val-cyan); font-family: var(--font-mono);">[ESC] 닫기</span>
+      </div>
+
+      <!-- Crosshair Settings -->
+      <div style="display:flex; gap:30px;">
+        <div style="flex:1;">
+          <div style="font-size: 13px; color: var(--val-gold); margin-bottom: 8px; letter-spacing: 1px;">조준선 색상 (CROSSHAIR COLOR)</div>
+          <div class="color-picker-box">
+            <div class="color-swatch active-swatch" style="background:#00ff88;" data-color="#00ff88"></div>
+            <div class="color-swatch" style="background:#00f0ff;" data-color="#00f0ff"></div>
+            <div class="color-swatch" style="background:#ffc83b;" data-color="#ffc83b"></div>
+            <div class="color-swatch" style="background:#ffffff;" data-color="#ffffff"></div>
+            <div class="color-swatch" style="background:#ff4655;" data-color="#ff4655"></div>
+            <div class="color-swatch" style="background:#ff3399;" data-color="#ff3399"></div>
+          </div>
+
+          <div class="settings-row" style="margin-top:14px;">
+            <span>중앙 점 (Center Dot)</span>
+            <input type="checkbox" id="cfg-dot" checked style="transform: scale(1.3); cursor: pointer;">
+          </div>
+          <div class="settings-row">
+            <span>선 길이 (Length)</span>
+            <input type="range" id="cfg-len" min="4" max="14" value="8" style="cursor: pointer;">
+          </div>
+          <div class="settings-row">
+            <span>선 두께 (Thickness)</span>
+            <input type="range" id="cfg-thick" min="1" max="4" value="2" style="cursor: pointer;">
+          </div>
+          <div class="settings-row">
+            <span>선 간격 (Gap)</span>
+            <input type="range" id="cfg-gap" min="1" max="10" value="5" style="cursor: pointer;">
+          </div>
+        </div>
+
+        <div style="width:200px; display:flex; flex-direction:column; align-items:center; justify-content:center; background:#070b10; border:1px solid var(--val-border); padding:20px;">
+          <div style="font-size:11px; color:#8899a6; margin-bottom:20px;">실시간 조준선 미리보기</div>
+          <div style="position:relative; width:60px; height:60px;" id="preview-crosshair-box">
+            <div id="pv-dot" style="position:absolute; width:2px; height:2px; background:#00ff88; left:29px; top:29px;"></div>
+            <div id="pv-t" style="position:absolute; width:2px; height:8px; background:#00ff88; left:29px; top:16px;"></div>
+            <div id="pv-b" style="position:absolute; width:2px; height:8px; background:#00ff88; left:29px; top:36px;"></div>
+            <div id="pv-l" style="position:absolute; width:8px; height:2px; background:#00ff88; left:16px; top:29px;"></div>
+            <div id="pv-r" style="position:absolute; width:8px; height:2px; background:#00ff88; left:36px; top:29px;"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Controls & Volume -->
+      <div style="border-top:1px solid var(--val-border); padding-top:12px;">
+        <div class="settings-row">
+          <span>마우스 감도 (Sensitivity)</span>
+          <input type="range" id="cfg-sens" min="5" max="35" value="18" style="cursor: pointer;">
+        </div>
+        <div class="settings-row">
+          <span>마스터 볼륨 (Master Volume)</span>
+          <input type="range" id="cfg-vol" min="0" max="100" value="80" style="cursor: pointer;">
+        </div>
+      </div>
+
+      <!-- Action Buttons -->
+      <div style="display:flex; justify-content:space-between; margin-top:10px;">
+        <button class="map-select-btn val-clip" style="width:200px; background:rgba(255,255,255,0.08); border-color:#8899a6;" id="btn-quit-to-lobby">로비로 나가기 (QUIT)</button>
+        <button class="map-select-btn val-clip" style="width:220px;" id="btn-resume-game">게임 계속하기 (RESUME)</button>
+      </div>
+    </div>
+  </div>
+
   <!-- Scoreboard Overlay ([TAB]) -->
   <div id="scoreboard-overlay">
     <div class="score-table-card val-clip-tl-br">
@@ -1101,7 +1456,7 @@
       <div class="map-badge" id="hud-map-badge">ASCENT</div>
     </div>
 
-    <!-- Minimap Radar -->
+    <!-- Minimap Radar with Vision Cone -->
     <div id="minimap-card">
       <canvas id="minimap-canvas" width="190" height="190"></canvas>
       <div id="map-name-tag">RADAR // ACTIVE</div>
@@ -1110,8 +1465,52 @@
     <div id="kill-feed"></div>
 
     <div id="kill-banner">
-      <span style="font-size: 34px;">💀</span>
-      <span id="kill-banner-text">HEADSHOT // ELIMINATED</span>
+      <div id="kill-skull-emblem">
+        <svg id="kill-skull-svg" width="46" height="46" viewBox="0 0 48 48" fill="none">
+          <path d="M24 4 C14 4 6 12 6 22 C6 27 8 30 11 33 L11 39 C11 41 13 43 15 43 L33 43 C35 43 37 41 37 39 L37 33 C40 30 42 27 42 22 C42 12 34 4 24 4 Z" fill="currentColor"/>
+          <ellipse cx="17" cy="22" rx="4" ry="5.5" fill="#080c10"/>
+          <ellipse cx="31" cy="22" rx="4" ry="5.5" fill="#080c10"/>
+          <polygon points="24,26 21,32 27,32" fill="#080c10"/>
+          <rect x="17" y="37" width="3" height="5" fill="#080c10"/>
+          <rect x="22.5" y="37" width="3" height="5" fill="#080c10"/>
+          <rect x="28" y="37" width="3" height="5" fill="#080c10"/>
+        </svg>
+      </div>
+      <div class="kill-info-block">
+        <div id="kill-banner-streak">KILL 1</div>
+        <div id="kill-banner-text">HEADSHOT // ELIMINATED</div>
+      </div>
+    </div>
+
+    <!-- Post-Round & On-Demand Combat Report ([N]) -->
+    <div id="combat-report-panel" class="val-clip-tl-br">
+      <div class="cr-header">
+        <div class="cr-title">COMBAT REPORT <span>// 전투 보고서</span></div>
+        <div class="cr-hint">[N] 닫기/열기</div>
+      </div>
+      <div class="cr-tabs">
+        <button class="cr-tab active" id="cr-tab-dealt">내가 가한 피해 (DEALT)</button>
+        <button class="cr-tab" id="cr-tab-taken">내가 받은 피해 (TAKEN)</button>
+      </div>
+      <div id="cr-content" class="cr-list"></div>
+    </div>
+
+    <!-- Ascent B Shutter Door Interaction Prompt -->
+    <div id="door-prompt" class="val-clip">
+      <span class="dp-key">F</span>
+      <span id="door-prompt-text">셔터 도어 스위치 조작</span>
+      <span id="door-hp-text">HP: 500/500</span>
+    </div>
+
+    <!-- Subtle Keybind HUD Bar -->
+    <div id="keybinds-bar">
+      <span class="kb-item"><kbd>B</kbd> 상점</span>
+      <span class="kb-item"><kbd>ESC</kbd> 설정</span>
+      <span class="kb-item"><kbd>TAB</kbd> 점수판</span>
+      <span class="kb-item"><kbd>N</kbd> 전투보고서</span>
+      <span class="kb-item"><kbd>F</kbd> 상호작용</span>
+      <span class="kb-item"><kbd>Y</kbd> 무기조사</span>
+      <span class="kb-item"><kbd>Shift</kbd> 걷기</span>
     </div>
 
     <div id="action-progress-container">
@@ -1241,6 +1640,7 @@
     class SoundEngine {
       constructor() {
         this.ctx = null;
+        this.masterGain = null;
         this.killStreak = 0;
         this.lastKillTime = 0;
         this.lastStepTime = 0;
@@ -1249,8 +1649,19 @@
         if (!this.ctx) {
           const AudioCtx = window.AudioContext || window.webkitAudioContext;
           this.ctx = new AudioCtx();
+          this.masterGain = this.ctx.createGain();
+          this.masterGain.gain.setValueAtTime(0.8, this.ctx.currentTime);
+          this.masterGain.connect(this.ctx.destination);
         }
         if (this.ctx.state === 'suspended') this.ctx.resume();
+      }
+      get dest() {
+        return this.masterGain || (this.ctx ? this.ctx.destination : null);
+      }
+      setMasterVolume(val) {
+        if (this.masterGain) {
+          this.masterGain.gain.setValueAtTime(Math.max(0, Math.min(1, val)), this.ctx.currentTime);
+        }
       }
 
       playGunshot(weaponKey = 'vandal') {
@@ -1266,7 +1677,7 @@
           gain.gain.setValueAtTime(0.98, now);
           gain.gain.exponentialRampToValueAtTime(0.01, now + 0.6);
           osc.connect(gain);
-          gain.connect(this.ctx.destination);
+          gain.connect(this.dest);
           osc.start(now);
           osc.stop(now + 0.62);
           return;
@@ -1281,7 +1692,7 @@
           gain.gain.setValueAtTime(0.85, now);
           gain.gain.exponentialRampToValueAtTime(0.01, now + 0.28);
           osc.connect(gain);
-          gain.connect(this.ctx.destination);
+          gain.connect(this.dest);
           osc.start(now);
           osc.stop(now + 0.29);
           return;
@@ -1305,7 +1716,7 @@
         noiseGain.gain.exponentialRampToValueAtTime(0.01, now + 0.12);
         noise.connect(noiseFilter);
         noiseFilter.connect(noiseGain);
-        noiseGain.connect(this.ctx.destination);
+        noiseGain.connect(this.dest);
         noise.start(now);
 
         const osc = this.ctx.createOscillator();
@@ -1316,7 +1727,7 @@
         oscGain.gain.setValueAtTime(isSilenced ? 0.3 : 0.6, now);
         oscGain.gain.exponentialRampToValueAtTime(0.01, now + 0.13);
         osc.connect(oscGain);
-        oscGain.connect(this.ctx.destination);
+        oscGain.connect(this.dest);
         osc.start(now);
         osc.stop(now + 0.14);
       }
@@ -1332,7 +1743,7 @@
           gain.gain.setValueAtTime(0.38 / (idx + 1), now);
           gain.gain.exponentialRampToValueAtTime(0.001, now + 0.42);
           osc.connect(gain);
-          gain.connect(this.ctx.destination);
+          gain.connect(this.dest);
           osc.start(now);
           osc.stop(now + 0.42);
         });
@@ -1349,7 +1760,7 @@
         gain.gain.setValueAtTime(0.3, now);
         gain.gain.exponentialRampToValueAtTime(0.01, now + 0.08);
         osc.connect(gain);
-        gain.connect(this.ctx.destination);
+        gain.connect(this.dest);
         osc.start(now);
         osc.stop(now + 0.09);
       }
@@ -1372,7 +1783,7 @@
           gain.gain.setValueAtTime(0.28, now);
           gain.gain.exponentialRampToValueAtTime(0.001, now + (this.killStreak === 5 ? 1.4 : 0.6));
           osc.connect(gain);
-          gain.connect(this.ctx.destination);
+          gain.connect(this.dest);
           osc.start(now);
           osc.stop(now + (this.killStreak === 5 ? 1.5 : 0.7));
         });
@@ -1390,7 +1801,7 @@
           gain.gain.setValueAtTime(0.25, now + i * 0.12);
           gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.12 + 1.2);
           osc.connect(gain);
-          gain.connect(this.ctx.destination);
+          gain.connect(this.dest);
           osc.start(now + i * 0.12);
           osc.stop(now + i * 0.12 + 1.3);
         });
@@ -1407,9 +1818,88 @@
         gain.gain.setValueAtTime(0.3, now);
         gain.gain.exponentialRampToValueAtTime(0.01, now + 0.25);
         osc.connect(gain);
-        gain.connect(this.ctx.destination);
+        gain.connect(this.dest);
         osc.start(now);
         osc.stop(now + 0.26);
+      }
+
+      playAceSound() {
+        if (!this.ctx) return;
+        const now = this.ctx.currentTime;
+        const chords = [
+          [261.63, 329.63, 392.00, 523.25],
+          [329.63, 392.00, 523.25, 659.25],
+          [392.00, 523.25, 659.25, 783.99],
+          [523.25, 659.25, 783.99, 1046.50, 1318.51]
+        ];
+        chords.forEach((chord, step) => {
+          chord.forEach(freq => {
+            const osc = this.ctx.createOscillator();
+            const gain = this.ctx.createGain();
+            osc.type = 'sawtooth';
+            osc.frequency.setValueAtTime(freq, now + step * 0.22);
+            gain.gain.setValueAtTime(0.18, now + step * 0.22);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + step * 0.22 + 1.2);
+            osc.connect(gain);
+            gain.connect(this.dest);
+            osc.start(now + step * 0.22);
+            osc.stop(now + step * 0.22 + 1.25);
+          });
+        });
+      }
+
+      playDoorSlide() {
+        if (!this.ctx) return;
+        const now = this.ctx.currentTime;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(140, now);
+        osc.frequency.linearRampToValueAtTime(80, now + 1.0);
+        gain.gain.setValueAtTime(0.35, now);
+        gain.gain.exponentialRampToValueAtTime(0.01, now + 1.0);
+        osc.connect(gain);
+        gain.connect(this.dest);
+        osc.start(now);
+        osc.stop(now + 1.05);
+      }
+
+      playDoorBreak() {
+        if (!this.ctx) return;
+        const now = this.ctx.currentTime;
+        const bufferSize = this.ctx.sampleRate * 0.6;
+        const buffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
+        const data = buffer.getChannelData(0);
+        for (let i = 0; i < bufferSize; i++) data[i] = (Math.random() * 2 - 1) * Math.exp(-i / (this.ctx.sampleRate * 0.2));
+        const noise = this.ctx.createBufferSource();
+        noise.buffer = buffer;
+        const filter = this.ctx.createBiquadFilter();
+        filter.type = 'lowpass';
+        filter.frequency.setValueAtTime(800, now);
+        filter.frequency.exponentialRampToValueAtTime(60, now + 0.55);
+        const gain = this.ctx.createGain();
+        gain.gain.setValueAtTime(0.8, now);
+        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.55);
+        noise.connect(filter);
+        filter.connect(gain);
+        gain.connect(this.dest);
+        noise.start(now);
+      }
+
+      playSwitchClick() {
+        if (!this.ctx) return;
+        const now = this.ctx.currentTime;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(1800, now);
+        osc.frequency.exponentialRampToValueAtTime(300, now + 0.05);
+        gain.gain.setValueAtTime(0.4, now);
+        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.05);
+        osc.connect(gain);
+        gain.connect(this.dest);
+        osc.start(now);
+        osc.stop(now + 0.06);
       }
 
       playTakeoverWarp() {
@@ -1423,7 +1913,7 @@
         gain.gain.setValueAtTime(0.5, now);
         gain.gain.exponentialRampToValueAtTime(0.01, now + 0.45);
         osc.connect(gain);
-        gain.connect(this.ctx.destination);
+        gain.connect(this.dest);
         osc.start(now);
         osc.stop(now + 0.47);
       }
@@ -1439,7 +1929,7 @@
         gain.gain.setValueAtTime(0.12, now);
         gain.gain.exponentialRampToValueAtTime(0.001, now + 0.06);
         osc.connect(gain);
-        gain.connect(this.ctx.destination);
+        gain.connect(this.dest);
         osc.start(now);
         osc.stop(now + 0.07);
       }
@@ -1455,7 +1945,7 @@
           gain.gain.setValueAtTime(0.2, now + delay);
           gain.gain.exponentialRampToValueAtTime(0.01, now + delay + 0.05);
           osc.connect(gain);
-          gain.connect(this.ctx.destination);
+          gain.connect(this.dest);
           osc.start(now + delay);
           osc.stop(now + delay + 0.06);
         });
@@ -1472,7 +1962,7 @@
         gain.gain.setValueAtTime(0.45, now);
         gain.gain.exponentialRampToValueAtTime(0.01, now + 0.32);
         osc.connect(gain);
-        gain.connect(this.ctx.destination);
+        gain.connect(this.dest);
         osc.start(now);
         osc.stop(now + 0.33);
       }
@@ -1489,7 +1979,7 @@
         gain.gain.setValueAtTime(0.7, now);
         gain.gain.exponentialRampToValueAtTime(0.01, now + 0.55);
         osc.connect(gain);
-        gain.connect(this.ctx.destination);
+        gain.connect(this.dest);
         osc.start(now);
         osc.stop(now + 0.56);
       }
@@ -1512,7 +2002,7 @@
         gain.gain.exponentialRampToValueAtTime(0.01, now + 0.4);
         noise.connect(filter);
         filter.connect(gain);
-        gain.connect(this.ctx.destination);
+        gain.connect(this.dest);
         noise.start(now);
       }
 
@@ -1527,7 +2017,7 @@
           gain.gain.setValueAtTime(0.3, now + i * 0.06);
           gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.06 + 0.5);
           osc.connect(gain);
-          gain.connect(this.ctx.destination);
+          gain.connect(this.dest);
           osc.start(now + i * 0.06);
           osc.stop(now + i * 0.06 + 0.52);
         });
@@ -1544,7 +2034,7 @@
         gain.gain.setValueAtTime(0.4, now);
         gain.gain.exponentialRampToValueAtTime(0.01, now + 0.15);
         osc.connect(gain);
-        gain.connect(this.ctx.destination);
+        gain.connect(this.dest);
         osc.start(now);
         osc.stop(now + 0.16);
       }
@@ -1560,7 +2050,7 @@
         gain.gain.setValueAtTime(0.4, now);
         gain.gain.exponentialRampToValueAtTime(0.01, now + 0.6);
         osc.connect(gain);
-        gain.connect(this.ctx.destination);
+        gain.connect(this.dest);
         osc.start(now);
         osc.stop(now + 0.62);
       }
@@ -1576,7 +2066,7 @@
           gain.gain.setValueAtTime(0.3, now + i * 0.08);
           gain.gain.exponentialRampToValueAtTime(0.01, now + i * 0.08 + 0.25);
           osc.connect(gain);
-          gain.connect(this.ctx.destination);
+          gain.connect(this.dest);
           osc.start(now + i * 0.08);
           osc.stop(now + i * 0.08 + 0.26);
         });
@@ -1592,7 +2082,7 @@
         gain.gain.setValueAtTime(0.32, now);
         gain.gain.exponentialRampToValueAtTime(0.01, now + 0.08);
         osc.connect(gain);
-        gain.connect(this.ctx.destination);
+        gain.connect(this.dest);
         osc.start(now);
         osc.stop(now + 0.09);
       }
@@ -1608,7 +2098,7 @@
         gain.gain.setValueAtTime(0.95, now);
         gain.gain.exponentialRampToValueAtTime(0.001, now + 2.6);
         osc.connect(gain);
-        gain.connect(this.ctx.destination);
+        gain.connect(this.dest);
         osc.start(now);
         osc.stop(now + 2.7);
       }
@@ -2058,12 +2548,23 @@
       timer: 45,
       lastBeep: 0,
       carrierId: 0,
-      mesh: null
+      mesh: null,
+      ring1: null,
+      ring2: null,
+      coreMesh: null
+    };
+
+    let ascentDoor = null;
+    let spikeTetherLine = null;
+    const roundCombatData = {
+      dealt: {},
+      taken: {}
     };
 
     let roundState = 'BUY_PHASE'; // 'BUY_PHASE' | 'IN_ROUND' | 'ROUND_ENDED'
     let roundTimer = 10;
     let lastTpTime = 0;
+    let mouseSensitivity = 0.0022;
 
     const matConcrete = new THREE.MeshStandardMaterial({ color: 0x505760, roughness: 0.8 });
     const matWallStone = new THREE.MeshStandardMaterial({ color: 0xc8ced4, roughness: 0.65 });
@@ -2198,7 +2699,28 @@
       spikeState.plantProgress = 0;
       spikeState.defuseProgress = 0;
       spikeState.timer = 45;
+      spikeState.ring1 = null;
+      spikeState.ring2 = null;
+      spikeState.coreMesh = null;
       spikeSiteAreas = [];
+
+      if (ascentDoor && ascentDoor.mesh) {
+        scene.remove(ascentDoor.mesh);
+        scene.remove(ascentDoor.switchMesh);
+      }
+      ascentDoor = null;
+      const dp = document.getElementById('door-prompt');
+      if (dp) dp.style.display = 'none';
+
+      if (spikeTetherLine) {
+        scene.remove(spikeTetherLine);
+        spikeTetherLine = null;
+      }
+
+      roundCombatData.dealt = {};
+      roundCombatData.taken = {};
+      const cr = document.getElementById('combat-report-panel');
+      if (cr && roundState !== 'ROUND_ENDED') cr.style.display = 'none';
     }
 
     function build5v5Map(mapKey) {
@@ -2241,6 +2763,44 @@
 
         addBox(-28, 3, -24, 4, 6, 4, matBrick);
         addBox(-32, 1.25, -22, 2.5, 2.5, 2.5, matRadianiteBox);
+
+        // Ascent B Connector Shutter Door & Switch (Interactive [F] + 500 HP destructible)
+        addBox(-23, 3.5, -14, 6, 7, 1.2, matWallStone);
+        addBox(-13, 3.5, -14, 6, 7, 1.2, matWallStone);
+        addBox(-18, 7.5, -14, 4, 1.2, 1.2, matConcrete);
+
+        const doorGeo = new THREE.BoxGeometry(4, 6.8, 0.35);
+        const doorMat = new THREE.MeshStandardMaterial({
+          color: 0x1c2430, roughness: 0.3, metalness: 0.8
+        });
+        const doorMesh = new THREE.Mesh(doorGeo, doorMat);
+        doorMesh.position.set(-18, 3.4, -14);
+        doorMesh.castShadow = true;
+        doorMesh.receiveShadow = true;
+        scene.add(doorMesh);
+        mapObjects.push(doorMesh);
+        colliders.push({ box: new THREE.Box3().setFromObject(doorMesh), mesh: doorMesh });
+
+        const swGeo = new THREE.BoxGeometry(0.3, 0.4, 0.2);
+        const swMat = new THREE.MeshStandardMaterial({
+          color: 0x00ff88, emissive: 0x00ff88, emissiveIntensity: 0.8
+        });
+        const switchMesh = new THREE.Mesh(swGeo, swMat);
+        switchMesh.position.set(-15.8, 1.6, -13.3);
+        scene.add(switchMesh);
+        mapObjects.push(switchMesh);
+
+        ascentDoor = {
+          mesh: doorMesh,
+          switchMesh: switchMesh,
+          swMat: swMat,
+          isOpen: false,
+          targetY: 3.4,
+          hp: 500,
+          maxHp: 500,
+          isDestroyed: false,
+          switchPos: new THREE.Vector3(-15.8, 1.6, -13.3)
+        };
       }
       // 2. BIND (바인드 - WITH 2 WORKING TELEPORTERS!)
       else if (mapKey === 'bind') {
@@ -2456,6 +3016,58 @@
     let inspectTimer = 0;
     let recoilOffset = 0;
 
+    const crosshairSettings = {
+      color: '#00ff88',
+      dot: true,
+      length: 8,
+      thickness: 2,
+      gap: 5
+    };
+
+    function applyCrosshairSettings() {
+      const parts = document.querySelectorAll('.ch-part');
+      parts.forEach(p => { p.style.backgroundColor = crosshairSettings.color; });
+
+      const dot = document.getElementById('ch-dot');
+      dot.style.display = crosshairSettings.dot ? 'block' : 'none';
+      dot.style.width = `${crosshairSettings.thickness}px`;
+      dot.style.height = `${crosshairSettings.thickness}px`;
+      dot.style.left = `${-crosshairSettings.thickness / 2}px`;
+      dot.style.top = `${-crosshairSettings.thickness / 2}px`;
+
+      const t = document.getElementById('ch-t');
+      const b = document.getElementById('ch-b');
+      const l = document.getElementById('ch-l');
+      const r = document.getElementById('ch-r');
+
+      t.style.width = `${crosshairSettings.thickness}px`;
+      t.style.height = `${crosshairSettings.length}px`;
+      t.style.left = `${-crosshairSettings.thickness / 2}px`;
+      t.style.top = `${-(crosshairSettings.gap + crosshairSettings.length)}px`;
+
+      b.style.width = `${crosshairSettings.thickness}px`;
+      b.style.height = `${crosshairSettings.length}px`;
+      b.style.left = `${-crosshairSettings.thickness / 2}px`;
+      b.style.top = `${crosshairSettings.gap}px`;
+
+      l.style.height = `${crosshairSettings.thickness}px`;
+      l.style.width = `${crosshairSettings.length}px`;
+      l.style.top = `${-crosshairSettings.thickness / 2}px`;
+      l.style.left = `${-(crosshairSettings.gap + crosshairSettings.length)}px`;
+
+      r.style.height = `${crosshairSettings.thickness}px`;
+      r.style.width = `${crosshairSettings.length}px`;
+      r.style.top = `${-crosshairSettings.thickness / 2}px`;
+      r.style.left = `${crosshairSettings.gap}px`;
+
+      // Update Preview
+      const pvBox = document.getElementById('preview-crosshair-box');
+      if (pvBox) {
+        pvBox.querySelectorAll('div').forEach(d => { d.style.backgroundColor = crosshairSettings.color; });
+        document.getElementById('pv-dot').style.display = crosshairSettings.dot ? 'block' : 'none';
+      }
+    }
+
     const keys = {};
     let isPointerLocked = false;
     let yaw = 0;
@@ -2471,6 +3083,8 @@
       if (e.code === 'KeyR') reloadWeapon();
       if (e.code === 'KeyB') toggleBuyMenu();
       if (e.code === 'KeyY') startInspect();
+      if (e.code === 'KeyN') toggleCombatReport();
+      if (e.code === 'KeyF') interactDoorOrObject();
       if (e.code === 'KeyC') castSkillC();
       if (e.code === 'KeyQ') castSkillQ();
       if (e.code === 'KeyE') castSkillE();
@@ -2496,7 +3110,9 @@
     });
 
     canvas.addEventListener('click', () => {
-      if (!isPointerLocked && document.getElementById('custom-lobby').style.display === 'none' && document.getElementById('buy-menu').style.display === 'none' && !isChatActive) {
+      if (!isPointerLocked && document.getElementById('custom-lobby').style.display === 'none' && 
+          document.getElementById('buy-menu').style.display === 'none' && 
+          document.getElementById('settings-modal').style.display === 'none' && !isChatActive) {
         canvas.requestPointerLock();
       }
     });
@@ -2507,12 +3123,63 @@
         document.getElementById('crosshair-container').style.display = 'block';
         document.getElementById('hud').style.display = 'block';
         document.getElementById('buy-menu').style.display = 'none';
+        document.getElementById('settings-modal').style.display = 'none';
+      } else {
+        // When pointer lock is released during match, open Settings/Pause menu
+        if (document.getElementById('custom-lobby').style.display === 'none' && 
+            document.getElementById('buy-menu').style.display === 'none' && 
+            !player.isDead && !isChatActive) {
+          document.getElementById('settings-modal').style.display = 'flex';
+        }
       }
+    });
+
+    document.getElementById('btn-resume-game').addEventListener('click', () => {
+      document.getElementById('settings-modal').style.display = 'none';
+      canvas.requestPointerLock();
+    });
+    document.getElementById('btn-quit-to-lobby').addEventListener('click', () => {
+      document.getElementById('settings-modal').style.display = 'none';
+      document.getElementById('hud').style.display = 'none';
+      document.getElementById('custom-lobby').style.display = 'flex';
+      clearMap();
+    });
+
+    // Crosshair UI Event Listeners
+    document.querySelectorAll('.color-swatch').forEach(swatch => {
+      swatch.addEventListener('click', () => {
+        document.querySelectorAll('.color-swatch').forEach(s => s.classList.remove('active-swatch'));
+        swatch.classList.add('active-swatch');
+        crosshairSettings.color = swatch.getAttribute('data-color');
+        applyCrosshairSettings();
+      });
+    });
+    document.getElementById('cfg-dot').addEventListener('change', (e) => {
+      crosshairSettings.dot = e.target.checked;
+      applyCrosshairSettings();
+    });
+    document.getElementById('cfg-len').addEventListener('input', (e) => {
+      crosshairSettings.length = parseInt(e.target.value);
+      applyCrosshairSettings();
+    });
+    document.getElementById('cfg-thick').addEventListener('input', (e) => {
+      crosshairSettings.thickness = parseInt(e.target.value);
+      applyCrosshairSettings();
+    });
+    document.getElementById('cfg-gap').addEventListener('input', (e) => {
+      crosshairSettings.gap = parseInt(e.target.value);
+      applyCrosshairSettings();
+    });
+    document.getElementById('cfg-sens').addEventListener('input', (e) => {
+      mouseSensitivity = (parseInt(e.target.value) / 100) * 0.012;
+    });
+    document.getElementById('cfg-vol').addEventListener('input', (e) => {
+      sound.setMasterVolume(parseInt(e.target.value) / 100);
     });
 
     window.addEventListener('mousemove', (e) => {
       if (!isPointerLocked) return;
-      const sens = player.isADS ? 0.0011 : 0.0022;
+      const sens = player.isADS ? mouseSensitivity * 0.5 : mouseSensitivity;
       yaw -= e.movementX * sens;
       pitch -= e.movementY * sens;
       pitch = Math.max(-Math.PI / 2.1, Math.min(Math.PI / 2.1, pitch));
@@ -2766,6 +3433,13 @@
         scoreDef.innerText = parseInt(scoreDef.innerText) + 1;
       }
 
+      // Show Combat Report on Round End
+      const crPanel = document.getElementById('combat-report-panel');
+      if (crPanel) {
+        crPanel.style.display = 'flex';
+        renderCombatReport('dealt');
+      }
+
       setTimeout(() => {
         banner.classList.remove('active');
         build5v5Map(MAP_LIST[currentMapIndex]);
@@ -2840,17 +3514,26 @@
         if (enemy.isDead) continue;
         const headHits = raycaster.intersectObject(enemy.head);
         if (headHits.length > 0) {
-          damageEnemy(enemy, currentWeapon.dmgHead, true);
+          damageEnemy(enemy, currentWeapon.dmgHead, 'head');
           return;
         }
         const bodyHits = raycaster.intersectObject(enemy.body);
         if (bodyHits.length > 0) {
-          damageEnemy(enemy, currentWeapon.dmgBody, false);
+          damageEnemy(enemy, currentWeapon.dmgBody, 'body');
           return;
         }
         const legHits = raycaster.intersectObjects(enemy.legs);
         if (legHits.length > 0) {
-          damageEnemy(enemy, currentWeapon.dmgLeg, false);
+          damageEnemy(enemy, currentWeapon.dmgLeg, 'leg');
+          return;
+        }
+      }
+
+      // Check Ascent B Shutter Door Impact
+      if (ascentDoor && !ascentDoor.isDestroyed && ascentDoor.mesh && !ascentDoor.isOpen) {
+        const doorHits = raycaster.intersectObject(ascentDoor.mesh);
+        if (doorHits.length > 0) {
+          damageAscentDoor(currentWeapon.dmgBody, doorHits[0].point, doorHits[0].face.normal);
           return;
         }
       }
@@ -2905,7 +3588,28 @@
       }
     }
 
-    function damageEnemy(enemy, amount, isHeadshot) {
+    function damageEnemy(enemy, amount, hitPart = 'body') {
+      const isHeadshot = (hitPart === true || hitPart === 'head');
+      const isLeg = (hitPart === 'leg');
+
+      if (!roundCombatData.dealt[enemy.id]) {
+        roundCombatData.dealt[enemy.id] = {
+          id: enemy.id,
+          name: enemy.name,
+          agent: enemy.agent,
+          head: 0,
+          body: 0,
+          leg: 0,
+          totalDmg: 0,
+          killed: false
+        };
+      }
+      const cDealt = roundCombatData.dealt[enemy.id];
+      cDealt.totalDmg += amount;
+      if (isHeadshot) cDealt.head++;
+      else if (isLeg) cDealt.leg++;
+      else cDealt.body++;
+
       enemy.hp -= amount;
       showHitmarker(isHeadshot);
       showDamagePopup(amount, isHeadshot);
@@ -2914,6 +3618,7 @@
       else sound.playBodyHit();
 
       if (enemy.hp <= 0 && !enemy.isDead) {
+        cDealt.killed = true;
         enemy.isDead = true;
         enemy.mesh.visible = false;
         player.kills++;
@@ -2943,6 +3648,101 @@
       }
     }
 
+    function damageAscentDoor(amount, point, normal) {
+      if (!ascentDoor || ascentDoor.isDestroyed) return;
+      ascentDoor.hp -= amount;
+      sound.playBodyHit();
+      createBulletHoleDecal(point, normal);
+      showToast(`도어 피격! 남은 내구도: ${Math.max(0, Math.floor(ascentDoor.hp))}/500`);
+
+      if (ascentDoor.hp <= 0) {
+        ascentDoor.isDestroyed = true;
+        sound.playDoorBreak();
+        scene.remove(ascentDoor.mesh);
+        colliders = colliders.filter(c => c.mesh !== ascentDoor.mesh);
+        showToast('[어센트 B] 셔터 도어가 완전히 파괴되었습니다!');
+        radioVoice.speak('Door destroyed!');
+      }
+    }
+
+    function interactDoorOrObject() {
+      if (!ascentDoor || ascentDoor.isDestroyed) return;
+      const dist = camera.position.distanceTo(ascentDoor.switchPos);
+      if (dist < 4.0) {
+        sound.playSwitchClick();
+        sound.playDoorSlide();
+        ascentDoor.isOpen = !ascentDoor.isOpen;
+        ascentDoor.targetY = ascentDoor.isOpen ? 9.8 : 3.4;
+        ascentDoor.swMat.color.setHex(ascentDoor.isOpen ? 0xff4655 : 0x00ff88);
+        ascentDoor.swMat.emissive.setHex(ascentDoor.isOpen ? 0xff4655 : 0x00ff88);
+
+        if (ascentDoor.isOpen) {
+          colliders = colliders.filter(c => c.mesh !== ascentDoor.mesh);
+          showToast('셔터 도어 개방 (OPEN)');
+        } else {
+          colliders.push({ box: new THREE.Box3().setFromObject(ascentDoor.mesh), mesh: ascentDoor.mesh });
+          showToast('셔터 도어 폐쇄 (CLOSED)');
+        }
+      }
+    }
+
+    function renderCombatReport(tab = 'dealt') {
+      const content = document.getElementById('cr-content');
+      if (!content) return;
+      content.innerHTML = '';
+
+      document.querySelectorAll('.cr-tab').forEach(b => b.classList.remove('active'));
+      const activeTabBtn = document.getElementById(`cr-tab-${tab}`);
+      if (activeTabBtn) activeTabBtn.classList.add('active');
+
+      const dataMap = roundCombatData[tab] || {};
+      const list = Object.values(dataMap);
+
+      if (list.length === 0) {
+        content.innerHTML = `
+          <div style="color:#8899a6; font-size:12px; text-align:center; padding:24px 0;">
+            ${tab === 'dealt' ? '이번 라운드에 적에게 가한 피해가 없습니다.' : '이번 라운드에 피격당하지 않았습니다.'}
+          </div>
+        `;
+        return;
+      }
+
+      list.forEach(item => {
+        const card = document.createElement('div');
+        card.className = `cr-card ${item.killed ? 'cr-dead' : ''}`;
+        card.innerHTML = `
+          <div class="cr-agent-info">
+            <div class="cr-agent-avatar">${AGENT_EMOJIS[item.agent] || '👤'}</div>
+            <div>
+              <div class="cr-agent-name">${item.name}</div>
+              <div class="cr-sub">${item.agent} ${item.killed ? '<span style="color:var(--val-red); font-weight:800;">[처치됨]</span>' : ''}</div>
+            </div>
+          </div>
+          <div class="cr-hits-breakdown">
+            <span class="cr-hit-chip cr-hit-head">🎯 ${item.head}</span>
+            <span class="cr-hit-chip cr-hit-body">👕 ${item.body}</span>
+            <span class="cr-hit-chip cr-hit-leg">🦵 ${item.leg}</span>
+          </div>
+          <div class="cr-dmg-total">${item.totalDmg}</div>
+        `;
+        content.appendChild(card);
+      });
+    }
+
+    function toggleCombatReport() {
+      const panel = document.getElementById('combat-report-panel');
+      if (!panel) return;
+      if (panel.style.display === 'flex') {
+        panel.style.display = 'none';
+      } else {
+        panel.style.display = 'flex';
+        renderCombatReport('dealt');
+      }
+    }
+
+    document.getElementById('cr-tab-dealt').addEventListener('click', () => renderCombatReport('dealt'));
+    document.getElementById('cr-tab-taken').addEventListener('click', () => renderCombatReport('taken'));
+
     function showHitmarker(isHeadshot) {
       const hm = document.getElementById('hit-marker');
       hm.querySelectorAll('.hit-mark').forEach(el => el.style.background = isHeadshot ? '#ff4655' : '#ffffff');
@@ -2964,10 +3764,20 @@
     function triggerKillBanner(isHeadshot, streak) {
       const banner = document.getElementById('kill-banner');
       const text = document.getElementById('kill-banner-text');
+      const streakTag = document.getElementById('kill-banner-streak');
       const labels = ['ELIMINATED', 'DOUBLE KILL', 'TRIPLE KILL', 'QUADRA KILL', 'ACE // ENEMY TEAM WIPED'];
+      
+      banner.classList.remove('tier-ace');
+      if (streak >= 5) {
+        banner.classList.add('tier-ace');
+        sound.playAceSound();
+        radioVoice.speak('ACE! Magnificent work!');
+      }
+
+      if (streakTag) streakTag.innerText = `KILL ${streak}`;
       text.innerText = (isHeadshot ? 'HEADSHOT // ' : '') + (labels[streak - 1] || 'ELIMINATED');
       banner.classList.add('active');
-      setTimeout(() => banner.classList.remove('active'), 1600);
+      setTimeout(() => banner.classList.remove('active'), 2000);
     }
 
     function addKillFeedEntry(killer, victim, isHeadshot) {
@@ -3253,13 +4063,63 @@
     }
 
     function plantSpikeProp(x, y, z) {
-      const geo = new THREE.BoxGeometry(0.6, 1.2, 0.6);
-      const mat = new THREE.MeshStandardMaterial({
-        color: 0x111111, emissive: 0xff0044, emissiveIntensity: 0.8, roughness: 0.3
+      const spikeGroup = new THREE.Group();
+
+      const bodyGeo = new THREE.BoxGeometry(0.7, 1.3, 0.7);
+      const bodyMat = new THREE.MeshStandardMaterial({ color: 0x11161d, roughness: 0.3, metalness: 0.8 });
+      const bodyMesh = new THREE.Mesh(bodyGeo, bodyMat);
+      bodyMesh.position.y = 0.65;
+      spikeGroup.add(bodyMesh);
+
+      const coreGeo = new THREE.CylinderGeometry(0.22, 0.22, 1.1, 16);
+      const coreMat = new THREE.MeshStandardMaterial({
+        color: 0xff0044, emissive: 0xff0044, emissiveIntensity: 1.2, roughness: 0.2
       });
-      spikeState.mesh = new THREE.Mesh(geo, mat);
-      spikeState.mesh.position.set(x, 0.6, z);
-      scene.add(spikeState.mesh);
+      const coreMesh = new THREE.Mesh(coreGeo, coreMat);
+      coreMesh.position.y = 0.65;
+      spikeGroup.add(coreMesh);
+
+      const ringGeo = new THREE.TorusGeometry(0.42, 0.03, 8, 24);
+      const ringMat = new THREE.MeshStandardMaterial({ color: 0x223344, metalness: 0.9, roughness: 0.2 });
+      const ring1 = new THREE.Mesh(ringGeo, ringMat);
+      ring1.rotation.x = Math.PI / 2;
+      ring1.position.y = 0.5;
+      spikeGroup.add(ring1);
+      const ring2 = new THREE.Mesh(ringGeo, ringMat);
+      ring2.rotation.x = Math.PI / 2;
+      ring2.position.y = 0.8;
+      spikeGroup.add(ring2);
+
+      const floorRingGeo = new THREE.RingGeometry(0.6, 0.8, 32);
+      const floorRingMat = new THREE.MeshBasicMaterial({ color: 0xff0044, side: THREE.DoubleSide, transparent: true, opacity: 0.85 });
+      const floorRing = new THREE.Mesh(floorRingGeo, floorRingMat);
+      floorRing.rotation.x = Math.PI / 2;
+      floorRing.position.y = 0.02;
+      spikeGroup.add(floorRing);
+
+      spikeGroup.position.set(x, 0, z);
+      scene.add(spikeGroup);
+      spikeState.mesh = spikeGroup;
+      spikeState.ring1 = ring1;
+      spikeState.ring2 = ring2;
+      spikeState.coreMesh = coreMesh;
+    }
+
+    function updateSpikeTether(isTethering, targetPos, color = 0x00f0ff) {
+      if (isTethering && targetPos) {
+        if (!spikeTetherLine) {
+          const geo = new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(), new THREE.Vector3()]);
+          const mat = new THREE.LineBasicMaterial({ color, linewidth: 3, transparent: true, opacity: 0.9 });
+          spikeTetherLine = new THREE.Line(geo, mat);
+          scene.add(spikeTetherLine);
+        }
+        const origin = camera.position.clone().add(new THREE.Vector3(0.2, -0.3, -0.4).applyQuaternion(camera.quaternion));
+        spikeTetherLine.geometry.setFromPoints([origin, targetPos]);
+        spikeTetherLine.material.color.setHex(color);
+        spikeTetherLine.visible = true;
+      } else if (spikeTetherLine) {
+        spikeTetherLine.visible = false;
+      }
     }
 
     function showToast(msg) {
@@ -3281,7 +4141,7 @@
     }
 
     /* ==========================================================
-       9. RADAR MINIMAP
+       9. RADAR MINIMAP WITH VISION CONE
        ========================================================== */
     const miniCanvas = document.getElementById('minimap-canvas');
     const miniCtx = miniCanvas.getContext('2d');
@@ -3326,9 +4186,21 @@
         }
       });
 
+      // Player Arrow & Vision Cone
       miniCtx.save();
       miniCtx.translate(cx, cy);
       miniCtx.rotate(-yaw);
+
+      // Translucent Vision Cone
+      miniCtx.fillStyle = 'rgba(0, 240, 255, 0.15)';
+      miniCtx.beginPath();
+      miniCtx.moveTo(0, 0);
+      miniCtx.lineTo(-24, -55);
+      miniCtx.lineTo(24, -55);
+      miniCtx.closePath();
+      miniCtx.fill();
+
+      // Cyan Player Arrow
       miniCtx.fillStyle = '#00f0ff';
       miniCtx.beginPath();
       miniCtx.moveTo(0, -7);
@@ -3349,12 +4221,12 @@
       document.getElementById('custom-lobby').style.display = 'none';
       build5v5Map(MAP_LIST[currentMapIndex]);
       updatePlayerColors();
+      applyCrosshairSettings();
       canvas.requestPointerLock();
     });
 
     let lastTime = performance.now();
     let enemyShotTimer = 0;
-    let botAiTimer = 0;
 
     function animate() {
       requestAnimationFrame(animate);
@@ -3473,40 +4345,62 @@
           gunGroup.position.lerp(targetGunPos, 0.16);
         }
 
-        // Enemy AI Fire
+        // Enemy AI Tactical Fire & Crouching Burst
         if (roundState === 'IN_ROUND' && now - enemyShotTimer > 1.8) {
           enemyShotTimer = now;
           const aliveEnemies = enemiesList.filter(e => !e.isDead);
           if (aliveEnemies.length > 0) {
             const shooter = aliveEnemies[Math.floor(Math.random() * aliveEnemies.length)];
-            const toPlayer = new THREE.Vector3().subVectors(camera.position, shooter.mesh.position).normalize();
-            createBulletTracer(shooter.mesh.position, toPlayer);
-            sound.playGunshot('vandal');
+            shooter.mesh.lookAt(camera.position.x, shooter.mesh.position.y, camera.position.z);
+            shooter.mesh.position.y = -0.2; // Crouch slightly during burst
 
-            if (camera.position.distanceTo(shooter.mesh.position) < 45 && Math.random() < 0.45) {
-              if (!cheats.godMode) {
-                if (player.shield > 0) {
-                  player.shield -= 15;
-                  if (player.shield < 0) {
-                    player.hp += player.shield;
-                    player.shield = 0;
+            setTimeout(() => { shooter.mesh.position.y = 0; }, 600);
+
+            // 3-Round Burst
+            for (let b = 0; b < 3; b++) {
+              setTimeout(() => {
+                if (shooter.isDead) return;
+                const toPlayer = new THREE.Vector3().subVectors(camera.position, shooter.mesh.position).normalize();
+                createBulletTracer(shooter.mesh.position, toPlayer);
+                sound.playGunshot('vandal');
+
+                if (camera.position.distanceTo(shooter.mesh.position) < 45 && Math.random() < 0.38) {
+                  if (!cheats.godMode) {
+                    const dealtToShield = Math.min(player.shield, 12);
+                    player.shield -= dealtToShield;
+                    const remainder = 18 - dealtToShield;
+                    player.hp -= remainder;
+
+                    if (!roundCombatData.taken[shooter.id]) {
+                      roundCombatData.taken[shooter.id] = {
+                        id: shooter.id,
+                        name: shooter.name,
+                        agent: shooter.agent,
+                        head: 0,
+                        body: 0,
+                        leg: 0,
+                        totalDmg: 0,
+                        weapon: 'VANDAL'
+                      };
+                    }
+                    const cTaken = roundCombatData.taken[shooter.id];
+                    cTaken.totalDmg += (dealtToShield + remainder);
+                    cTaken.body++;
+
+                    sound.playBodyHit();
+                    showDamageIndicator();
+                    showToast('피격 경고! 적 점사 피격');
+                    updateHUD();
+                    if (player.hp <= 0) onPlayerDeath();
                   }
-                } else {
-                  player.hp -= 24;
                 }
-                sound.playBodyHit();
-                showDamageIndicator();
-                showToast('피격 경고! 적 사격 피격');
-                updateHUD();
-                if (player.hp <= 0) onPlayerDeath();
-              }
+              }, b * 110);
             }
           }
         }
 
         // AI Tactical Navigation & Autonomous Spike Planting
         if (roundState === 'IN_ROUND') {
-          // If player is Defender and spike not planted, let an attacker bot plant it on site!
           if (myTeam === 'def' && !spikeState.isPlanted && enemiesList.length > 0) {
             const carrierBot = enemiesList.find(e => !e.isDead);
             if (carrierBot && spikeSiteAreas.length > 0) {
@@ -3517,7 +4411,6 @@
                 dirToSite.normalize();
                 carrierBot.mesh.position.addScaledVector(dirToSite, 2.5 * dt);
               } else {
-                // Plant!
                 spikeState.isPlanted = true;
                 plantSpikeProp(carrierBot.mesh.position.x, 0, carrierBot.mesh.position.z);
                 sound.playSpikeBeep(1);
@@ -3539,6 +4432,54 @@
             t.mesh.position.x += t.patrolDir * 1.8 * dt;
             if (Math.abs(t.mesh.position.x) > 25) t.patrolDir *= -1;
           });
+        }
+
+        // Ascent B Shutter Door Update
+        if (ascentDoor && !ascentDoor.isDestroyed && ascentDoor.mesh) {
+          if (Math.abs(ascentDoor.mesh.position.y - ascentDoor.targetY) > 0.05) {
+            ascentDoor.mesh.position.y += (ascentDoor.targetY - ascentDoor.mesh.position.y) * 4.5 * dt;
+            const cEntry = colliders.find(c => c.mesh === ascentDoor.mesh);
+            if (cEntry) cEntry.box.setFromObject(ascentDoor.mesh);
+          }
+
+          const distToSwitch = camera.position.distanceTo(ascentDoor.switchPos);
+          const dp = document.getElementById('door-prompt');
+          if (dp) {
+            if (distToSwitch < 4.0 && !ascentDoor.isDestroyed) {
+              dp.style.display = 'flex';
+              document.getElementById('door-prompt-text').innerText = 
+                ascentDoor.isOpen ? '셔터 도어 스위치 [F] (닫기)' : '셔터 도어 스위치 [F] (열기)';
+              document.getElementById('door-hp-text').innerText = `HP: ${Math.max(0, Math.floor(ascentDoor.hp))}/500`;
+            } else {
+              dp.style.display = 'none';
+            }
+          }
+        }
+
+        // Spike Animation & Tether Beam
+        if (spikeState.isPlanted && spikeState.mesh) {
+          if (spikeState.ring1) spikeState.ring1.rotation.z += 2.2 * dt;
+          if (spikeState.ring2) spikeState.ring2.rotation.z -= 2.2 * dt;
+          if (spikeState.coreMesh) {
+            const pulse = 1.0 + Math.sin(now * 0.01) * 0.45;
+            spikeState.coreMesh.material.emissiveIntensity = pulse;
+          }
+        }
+
+        const isPlanting = (!spikeState.isPlanted && myTeam === 'atk' && keys['Digit4'] && spikeSiteAreas.some(site => 
+          camera.position.x >= site.minX && camera.position.x <= site.maxX &&
+          camera.position.z >= site.minZ && camera.position.z <= site.maxZ
+        ));
+
+        const distToSpike = spikeState.mesh ? camera.position.distanceTo(spikeState.mesh.position) : 999;
+        const isDefusing = (spikeState.isPlanted && myTeam === 'def' && keys['Digit4'] && distToSpike < 4);
+
+        if (isPlanting) {
+          updateSpikeTether(true, new THREE.Vector3(camera.position.x, 0.1, camera.position.z), 0xffc83b);
+        } else if (isDefusing && spikeState.mesh) {
+          updateSpikeTether(true, spikeState.mesh.position.clone().setY(0.6), 0x00f0ff);
+        } else {
+          updateSpikeTether(false);
         }
 
         checkTeleporters();
@@ -3567,6 +4508,7 @@
     });
 
     renderLobbySlots();
+    applyCrosshairSettings();
     animate();
   </script>
 </body>
