@@ -742,6 +742,105 @@
       margin-right: 3px;
     }
 
+    /* Weapon Skin Buttons */
+    .skin-btn {
+      background: rgba(20, 32, 45, 0.8);
+      border: 1px solid var(--val-border);
+      color: #8899a6;
+      font-family: var(--font-hud);
+      font-size: 11px;
+      font-weight: 700;
+      padding: 5px 12px;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .skin-btn:hover { border-color: #fff; color: #fff; }
+    .skin-btn.active {
+      border-color: var(--val-cyan) !important;
+      background: rgba(0, 240, 255, 0.2);
+      color: #fff !important;
+      box-shadow: 0 0 10px rgba(0, 240, 255, 0.4);
+    }
+
+    /* Spectator Follower Bar (On Death) */
+    #spectator-bar {
+      position: absolute;
+      top: 75px; left: 50%;
+      transform: translateX(-50%);
+      background: rgba(10, 16, 24, 0.94);
+      border: 1px solid var(--val-cyan);
+      box-shadow: 0 0 25px rgba(0, 240, 255, 0.5);
+      padding: 8px 30px;
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      z-index: 34;
+      pointer-events: none;
+      backdrop-filter: blur(8px);
+    }
+
+    /* Tactical Radio Wheel Modal ([Z]) */
+    #radio-wheel-modal {
+      position: absolute;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(4, 8, 12, 0.7);
+      z-index: 44;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      backdrop-filter: blur(8px);
+    }
+    .radio-wheel-box {
+      background: rgba(14, 22, 30, 0.96);
+      border: 1px solid var(--val-border);
+      border-top: 3px solid var(--val-gold);
+      padding: 22px 28px;
+      width: 440px;
+    }
+    .radio-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+    .radio-cmd-btn {
+      background: rgba(20, 32, 45, 0.85);
+      border: 1px solid var(--val-border);
+      padding: 12px 10px;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      transition: all 0.15s;
+    }
+    .radio-cmd-btn:hover {
+      border-color: var(--val-cyan);
+      background: rgba(0, 240, 255, 0.15);
+      transform: scale(1.03);
+    }
+    .rc-icon { font-size: 24px; }
+    .rc-title { font-family: var(--font-hud); font-weight: 800; font-size: 14px; color: #fff; }
+    .rc-sub { font-size: 10px; color: #8899a6; font-family: var(--font-mono); }
+
+    /* Map Zone Callout Tag */
+    #zone-callout-tag {
+      position: absolute;
+      top: 222px; left: 25px;
+      width: 190px;
+      text-align: center;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 1.5px;
+      color: var(--val-cyan);
+      background: rgba(10, 16, 24, 0.8);
+      border: 1px solid rgba(0, 240, 255, 0.3);
+      padding: 2px 0;
+      pointer-events: none;
+    }
+
+
 
     /* Round Victory / Defeat Ceremony Banner */
     #round-ceremony-banner {
@@ -1277,6 +1376,18 @@
     <input type="text" id="chat-input" placeholder="전술 메시지 입력... (Enter 전송 / ESC 취소)" maxlength="80">
   </div>
 
+  <!-- SPECTATOR BAR & FOLLOWER HUD (ON DEATH) -->
+  <div id="spectator-bar" class="val-clip">
+    <div style="display:flex; align-items:center; gap:14px;">
+      <div style="font-family:var(--font-mono); font-size:12px; background:var(--val-red); color:#fff; padding:2px 8px; font-weight:800; border-radius:2px;">SPECTATING</div>
+      <div id="spec-agent-name" style="font-family:var(--font-title); font-size:26px; color:#fff; line-height:1;">관전 중: AI Sova (Sova)</div>
+      <div id="spec-agent-hp" style="font-family:var(--font-mono); font-size:15px; color:var(--val-cyan); font-weight:700;">HP: 100</div>
+    </div>
+    <div style="font-size:12px; color:#8899a6; font-weight:600;">
+      [좌클릭] 이전 요원 | [우클릭] 다음 요원 | [SPACE] 이 요원 몸으로 빙의
+    </div>
+  </div>
+
   <!-- AI BOT TAKEOVER PROMPT (ON DEATH) -->
   <div id="takeover-prompt" class="val-clip">
     <div class="to-key">[SPACE] 아군 AI 요원 몸으로 빙의</div>
@@ -1328,12 +1439,54 @@
           <div style="font-size:11px; color:#b0bec5; margin-top:4px;">기본 권총 / 우클릭 3점사<br>12발 탄창 / 가벼운 기동성</div>
         </div>
       </div>
+      <!-- Weapon Skin Selection Bar -->
+      <div style="margin-top: 14px; padding: 10px 14px; background: rgba(8, 12, 16, 0.6); border: 1px solid rgba(255,255,255,0.08); display: flex; align-items: center; justify-content: space-between;">
+        <span style="font-size: 12px; color: var(--val-gold); font-weight: 700;">무기 테마 스킨 // WEAPON SKIN THEME</span>
+        <div style="display: flex; gap: 8px;" id="skin-buttons-container">
+          <button class="skin-btn active" data-skin="default">STANDARD</button>
+          <button class="skin-btn" data-skin="prime" style="border-color:#d4af37; color:#ffd700;">PRIME (프라임)</button>
+          <button class="skin-btn" data-skin="reaver" style="border-color:#9c27b0; color:#ce93d8;">REAVER (약탈자)</button>
+          <button class="skin-btn" data-skin="glitchpop" style="border-color:#ff007f; color:#ff80bf;">GLITCHPOP (글리치팝)</button>
+        </div>
+      </div>
       <div style="margin-top: 20px; display: flex; justify-content: space-between; align-items: center;">
         <div style="display:flex; gap:10px;">
           <button class="map-select-btn val-clip" style="font-size: 15px; padding: 6px 16px;" id="btn-buy-shield-light">경형 실드 (+25) // 400 ¤</button>
           <button class="map-select-btn val-clip" style="font-size: 15px; padding: 6px 16px;" id="btn-buy-shield-heavy">중형 실드 (+50) // 1,000 ¤</button>
         </div>
         <button class="map-select-btn val-clip" style="width: 180px; font-size: 18px;" id="btn-close-buy">구매 완료 [B]</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tactical Radio Wheel Modal ([Z]) -->
+  <div id="radio-wheel-modal">
+    <div class="radio-wheel-box val-clip-tl-br">
+      <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid rgba(255,255,255,0.1); padding-bottom:8px; margin-bottom:12px;">
+        <span style="font-family:var(--font-title); font-size:26px; color:#fff; letter-spacing:2px;">TACTICAL RADIO // 무전 명령</span>
+        <span style="font-family:var(--font-mono); font-size:11px; color:var(--val-cyan);">[Z] 닫기</span>
+      </div>
+      <div class="radio-grid">
+        <button class="radio-cmd-btn val-clip" data-cmd="rush">
+          <span class="rc-icon">⚔️</span>
+          <span class="rc-title">[1] 지점 진격!</span>
+          <span class="rc-sub">RUSH SITE NOW</span>
+        </button>
+        <button class="radio-cmd-btn val-clip" data-cmd="backup">
+          <span class="rc-icon">🛡️</span>
+          <span class="rc-title">[2] 지원 요청!</span>
+          <span class="rc-sub">NEED ASSISTANCE</span>
+        </button>
+        <button class="radio-cmd-btn val-clip" data-cmd="spotted">
+          <span class="rc-icon">👁️</span>
+          <span class="rc-title">[3] 적 발견!</span>
+          <span class="rc-sub">HOSTILES SPOTTED</span>
+        </button>
+        <button class="radio-cmd-btn val-clip" data-cmd="quiet">
+          <span class="rc-icon">🤫</span>
+          <span class="rc-title">[4] 조용히 이동!</span>
+          <span class="rc-sub">HOLD FIRE / WALK</span>
+        </button>
       </div>
     </div>
   </div>
@@ -1461,6 +1614,7 @@
       <canvas id="minimap-canvas" width="190" height="190"></canvas>
       <div id="map-name-tag">RADAR // ACTIVE</div>
     </div>
+    <div id="zone-callout-tag">SPAWN AREA</div>
 
     <div id="kill-feed"></div>
 
@@ -1571,14 +1725,28 @@
     </div>
   </div>
 
-  <!-- Cheat Console ([F1]) -->
+  <!-- Admin / Cheats Console ([F1] or [`], Password: 1101) -->
   <div id="cheats-panel" class="val-clip-tl-br">
-    <div style="font-family: var(--font-title); font-size: 22px; color: var(--val-gold); border-bottom: 1px solid var(--val-border); padding-bottom: 4px;">치트 & 훈련 콘솔 (CHEATS)</div>
-    <button class="cheat-btn" id="btn-cheat-ammo">무한 탄약: OFF</button>
-    <button class="cheat-btn" id="btn-cheat-cd">스킬 노쿨다운: OFF</button>
-    <button class="cheat-btn" id="btn-cheat-god">무적 모드 (GOD): OFF</button>
-    <button class="cheat-btn" id="btn-cheat-creds">크레딧 최대치 (+9,000¤)</button>
-    <button class="cheat-btn" id="btn-cheat-respawn">모든 봇 부활 & 재배치</button>
+    <div style="font-family: var(--font-title); font-size: 22px; color: var(--val-gold); border-bottom: 1px solid var(--val-border); padding-bottom: 4px; display:flex; justify-content:space-between; align-items:center;">
+      <span>관리자 / 훈련 콘솔 (ADMIN)</span>
+      <span style="font-size:14px; color:#aaa;">[F1 / `]</span>
+    </div>
+    <div id="admin-auth-box" style="display:flex; gap:6px; margin: 4px 0;">
+      <input type="password" id="admin-pin-input" placeholder="비밀번호 (1101)" style="background:rgba(0,0,0,0.6); border:1px solid var(--val-border); color:#fff; padding:4px 8px; font-family:var(--font-hud); font-size:14px; width:130px; outline:none;" />
+      <button class="cheat-btn" id="btn-admin-auth" style="padding:4px 10px; font-size:13px; margin:0;">인증</button>
+    </div>
+    <div id="admin-controls" style="display:none; flex-direction:column; gap:6px;">
+      <button class="cheat-btn" id="btn-cheat-ammo">무한 탄약: OFF</button>
+      <button class="cheat-btn" id="btn-cheat-cd">스킬 노쿨다운: OFF</button>
+      <button class="cheat-btn" id="btn-cheat-god">무적 모드 (GOD): OFF</button>
+      <button class="cheat-btn" id="btn-cheat-oneshot">한 방 처치 (ONE SHOT): OFF</button>
+      <button class="cheat-btn" id="btn-cheat-freezecpu">봇 정지 (FREEZE AI): OFF</button>
+      <button class="cheat-btn" id="btn-cheat-freefly">자유 비행 (FREE FLY [F9]): OFF</button>
+      <button class="cheat-btn" id="btn-cheat-creds">크레딧 최대치 (+9,000¤)</button>
+      <button class="cheat-btn" id="btn-cheat-respawn">모든 봇 부활 & 재배치</button>
+      <div style="font-size:13px; color:#aaa; margin-top:4px;">이동 속도 조절:</div>
+      <input type="range" id="slider-speed" min="4" max="22" value="9" style="accent-color:var(--val-cyan); width:100%;" />
+    </div>
   </div>
 
   <!-- 5V5 CUSTOM GAME LOBBY -->
@@ -2522,6 +2690,13 @@
     gunGroup.position.copy(DEFAULT_GUN_POS);
     weaponRig.add(gunGroup);
 
+    // Procedural weapon recoil impulse & sway inertia (No arm-rotation spinning!)
+    let gunRecoilKickZ = 0;
+    let gunRecoilRotX = 0;
+    let gunSwayYaw = 0;
+    let gunSwayPitch = 0;
+    let freeFlyMode = false;
+
     function updatePlayerColors() {
       const slot = lobbySlots[myTeam][mySlotIdx];
       const color = AGENT_COLORS[slot.agent] || '#00f0ff';
@@ -2578,6 +2753,160 @@
     const matBarrier = new THREE.MeshStandardMaterial({
       color: 0x00f0ff, emissive: 0x00aacc, emissiveIntensity: 0.5, transparent: true, opacity: 0.4, wireframe: false
     });
+    const matTrimStone = new THREE.MeshStandardMaterial({ color: 0x929ba5, roughness: 0.7 });
+    const matDarkTile = new THREE.MeshStandardMaterial({ color: 0x22262c, roughness: 0.4 });
+    const matCrimsonPillar = new THREE.MeshStandardMaterial({ color: 0x8b1e1e, roughness: 0.5 });
+    const matBronzeGong = new THREE.MeshStandardMaterial({ color: 0xd4a02c, roughness: 0.3, metalness: 0.85 });
+    const matSandbags = new THREE.MeshStandardMaterial({ color: 0x8f7d63, roughness: 0.9 });
+    const matRailing = new THREE.MeshStandardMaterial({ color: 0x181e24, roughness: 0.4, metalness: 0.8 });
+
+    const walkableSurfaces = []; // Dynamic stair & platform traversal bounds { minX, maxX, minZ, maxZ, topY }
+
+    function groundAt(x, z, curFootY = 0) {
+      let highestY = 0;
+      for (let i = 0; i < walkableSurfaces.length; i++) {
+        const s = walkableSurfaces[i];
+        if (x >= s.minX && x <= s.maxX && z >= s.minZ && z <= s.maxZ) {
+          if (s.topY <= curFootY + 0.65 && s.topY > highestY) {
+            highestY = s.topY;
+          }
+        }
+      }
+      return highestY;
+    }
+
+    function collideXZ(oldPos, deltaX, deltaZ) {
+      const pRad = 0.4;
+      let newX = oldPos.x + deltaX;
+      let newZ = oldPos.z + deltaZ;
+
+      const pBoxX = new THREE.Box3(
+        new THREE.Vector3(newX - pRad, oldPos.y - 1.6, oldPos.z - pRad),
+        new THREE.Vector3(newX + pRad, oldPos.y + 0.2, oldPos.z + pRad)
+      );
+      for (let i = 0; i < colliders.length; i++) {
+        const c = colliders[i];
+        if (c.mesh && c.mesh.visible !== false && pBoxX.intersectsBox(c.box)) {
+          newX = oldPos.x;
+          break;
+        }
+      }
+
+      const pBoxZ = new THREE.Box3(
+        new THREE.Vector3(newX - pRad, oldPos.y - 1.6, newZ - pRad),
+        new THREE.Vector3(newX + pRad, oldPos.y + 0.2, newZ + pRad)
+      );
+      for (let i = 0; i < colliders.length; i++) {
+        const c = colliders[i];
+        if (c.mesh && c.mesh.visible !== false && pBoxZ.intersectsBox(c.box)) {
+          newZ = oldPos.z;
+          break;
+        }
+      }
+
+      return { x: newX, z: newZ };
+    }
+
+    function addPillar(x, y, z, radius, height, mat = matWallStone) {
+      const geo = new THREE.CylinderGeometry(radius, radius, height, 16);
+      const mesh = new THREE.Mesh(geo, mat);
+      mesh.position.set(x, y + height / 2, z);
+      mesh.castShadow = true; mesh.receiveShadow = true;
+      scene.add(mesh);
+      mapObjects.push(mesh);
+      colliders.push({ box: new THREE.Box3().setFromObject(mesh), mesh });
+      return mesh;
+    }
+
+    function addArch(x, y, z, width, height, depth, mat = matWallStone) {
+      const postW = 1.0;
+      addBox(x - width / 2 + postW / 2, y + height / 2, z, postW, height, depth, mat, true);
+      addBox(x + width / 2 - postW / 2, y + height / 2, z, postW, height, depth, mat, true);
+      addBox(x, y + height + 0.5, z, width + 0.4, 1.0, depth + 0.2, matTrimStone, true);
+    }
+
+    function addStairs(startX, startZ, startY, width, totalHeight, totalLength, stepsCount, dir = 'z+') {
+      const stepH = totalHeight / stepsCount;
+      const stepL = totalLength / stepsCount;
+      for (let i = 0; i < stepsCount; i++) {
+        const curH = startY + (i + 1) * stepH;
+        let stepX = startX;
+        let stepZ = startZ;
+        let w = width;
+        let d = stepL;
+
+        if (dir === 'z+') {
+          stepZ = startZ + i * stepL + stepL / 2;
+        } else if (dir === 'z-') {
+          stepZ = startZ - (i * stepL + stepL / 2);
+        } else if (dir === 'x+') {
+          stepX = startX + i * stepL + stepL / 2;
+          w = stepL;
+          d = width;
+        } else if (dir === 'x-') {
+          stepX = startX - (i * stepL + stepL / 2);
+          w = stepL;
+          d = width;
+        }
+
+        const mesh = addBox(stepX, curH / 2, stepZ, w, curH, d, matWallStone, true);
+        walkableSurfaces.push({
+          minX: stepX - w / 2, maxX: stepX + w / 2,
+          minZ: stepZ - d / 2, maxZ: stepZ + d / 2,
+          topY: curH
+        });
+      }
+    }
+
+    function addPlatform(x, y, z, w, h, d, mat = matWallStone, collidable = true) {
+      const mesh = addBox(x, y + h / 2, z, w, h, d, mat, collidable);
+      walkableSurfaces.push({
+        minX: x - w / 2, maxX: x + w / 2,
+        minZ: z - d / 2, maxZ: z + d / 2,
+        topY: y + h
+      });
+      return mesh;
+    }
+
+    function addLantern(x, y, z, color = 0xffc83b) {
+      const post = addBox(x, y + 1.2, z, 0.2, 2.4, 0.2, matRailing, false);
+      const lanternGeo = new THREE.BoxGeometry(0.45, 0.55, 0.45);
+      const lanternMat = new THREE.MeshBasicMaterial({ color: color });
+      const lanternMesh = new THREE.Mesh(lanternGeo, lanternMat);
+      lanternMesh.position.set(x, y + 2.5, z);
+      scene.add(lanternMesh);
+      mapObjects.push(lanternMesh);
+
+      const pLight = new THREE.PointLight(color, 0.7, 14);
+      pLight.position.set(x, y + 2.5, z);
+      scene.add(pLight);
+      mapObjects.push(pLight);
+    }
+
+    function addRailing(x, y, z, length, dir = 'x') {
+      const railH = 0.95;
+      const railThick = 0.12;
+      const w = (dir === 'x') ? length : railThick;
+      const d = (dir === 'x') ? railThick : length;
+      addBox(x, y + railH / 2, z, w, railH, d, matRailing, true);
+    }
+
+    function addCrateStack(x, z, size = 2.4) {
+      addBox(x, size / 2, z, size, size, size, matRadianiteBox, true);
+      addBox(x + 0.25, size + size / 2, z - 0.2, size * 0.9, size, size * 0.9, matRadianiteBox, true);
+      walkableSurfaces.push({ minX: x - size / 2, maxX: x + size / 2, minZ: z - size / 2, maxZ: z + size / 2, topY: size });
+      walkableSurfaces.push({ minX: x - size / 2, maxX: x + size / 2, minZ: z - size / 2, maxZ: z + size / 2, topY: size * 2 });
+    }
+
+    function addEave(x, y, z, w, d, mat = matDarkTile) {
+      const geo = new THREE.ConeGeometry(Math.max(w, d) * 0.62, 1.2, 4);
+      const mesh = new THREE.Mesh(geo, mat);
+      mesh.rotation.y = Math.PI / 4;
+      mesh.position.set(x, y + 0.6, z);
+      mesh.scale.set(w / (Math.max(w, d) * 0.88), 1, d / (Math.max(w, d) * 0.88));
+      scene.add(mesh);
+      mapObjects.push(mesh);
+    }
 
     function addBox(x, y, z, w, h, d, mat, collidable = true) {
       const geo = new THREE.BoxGeometry(w, h, d);
@@ -2683,6 +3012,7 @@
       mapObjects.forEach(obj => scene.remove(obj));
       mapObjects = [];
       colliders = [];
+      walkableSurfaces.length = 0;
       teammatesList.forEach(t => scene.remove(t.mesh));
       teammatesList = [];
       enemiesList.forEach(e => scene.remove(e.mesh));
@@ -2731,38 +3061,78 @@
       roundTimer = 10;
       document.getElementById('round-state-text').innerText = 'BUY PHASE';
 
-      // 1. ASCENT (어센트)
+      // ==========================================================
+      // 1. ASCENT (어센트) - ARCHES, HEAVEN 2F, STAIRS, MID CATWALK & BOATHOUSE
+      // ==========================================================
       if (mapKey === 'ascent') {
+        // Outer Venetian Perimeter Walls & Floor
         addBox(0, -0.5, 0, 110, 1, 110, matConcrete);
         addBox(0, 7, -55, 110, 14, 2, matWallStone);
         addBox(0, 7, 55, 110, 14, 2, matWallStone);
         addBox(-55, 7, 0, 2, 14, 110, matWallStone);
         addBox(55, 7, 0, 2, 14, 110, matWallStone);
 
-        // Mid Courtyard & Catwalk
-        addBox(0, 4, 0, 14, 8, 4, matBrick);
-        addBox(-8, 3, 10, 8, 6, 2, matWallStone);
-        addBox(8, 3, 10, 8, 6, 2, matWallStone);
-
-        // A Site (Courtyard & Heaven Balcony)
-        addBox(28, 0.05, -24, 20, 0.05, 20, matSiteFloor, false);
+        // --- A SITE ---
+        addBox(28, 0.05, -24, 22, 0.05, 22, matSiteFloor, false);
         addTextBillboard(28, 0.2, -24, 'A SITE', 1.8);
-        spikeSiteAreas.push({ minX: 18, maxX: 38, minZ: -34, maxZ: -14, name: 'A SITE' });
+        spikeSiteAreas.push({ minX: 17, maxX: 39, minZ: -35, maxZ: -13, name: 'A SITE' });
 
-        // Radianite Crates on A
-        addBox(26, 1.25, -22, 2.5, 2.5, 2.5, matRadianiteBox);
-        addBox(30, 1.25, -26, 2.5, 2.5, 2.5, matRadianiteBox);
-        addBox(26, 3.75, -22, 2.5, 2.5, 2.5, matRadianiteBox);
-        // Heaven 2F
-        addBox(34, 4.5, -34, 10, 1, 8, matWallStone);
+        // A Heaven 2F Balcony (y = 4.2)
+        addPlatform(34, 0, -34, 14, 4.2, 10, matWallStone);
+        addRailing(27, 4.2, -34, 10, 'z');
+        addRailing(34, 4.2, -29, 14, 'x');
+        addArch(34, 4.2, -38.5, 4, 3.2, 1.0, matTrimStone);
 
-        // B Site (Boathouse & Pillar)
-        addBox(-28, 0.05, -24, 20, 0.05, 20, matSiteFloor, false);
+        // A Heaven Staircase leading up from ground (z = -12) to Heaven (z = -29)
+        addStairs(34, -14, 0, 3.6, 4.2, 15, 14, 'z-');
+
+        // A Main Arched Gateway Entrance
+        addArch(26, 0, 8, 6.5, 5.5, 2.2, matWallStone);
+
+        // A Site Green Generator Unit & Radianite Cover Stack
+        addBox(22, 2.0, -22, 3.6, 4.0, 3.6, matConcrete);
+        addCrateStack(30, -22, 2.4);
+        addBox(24, 1.2, -30, 3, 2.4, 3, matRadianiteBox); // Wine nook cover
+
+        // --- MID COURTYARD & CATWALK ---
+        // Triple Archway across Mid
+        addArch(0, 0, 0, 8, 6.5, 2.6, matWallStone);
+        addArch(-10, 0, 0, 6, 5.5, 2.2, matWallStone);
+        addArch(10, 0, 0, 6, 5.5, 2.2, matWallStone);
+
+        // Mid Catwalk (Elevated walkway at y = 3.0)
+        addPlatform(12, 0, -8, 4.2, 3.0, 16, matWallStone);
+        addRailing(9.9, 3.0, -8, 16, 'z');
+        addStairs(12, 4, 0, 3.8, 3.0, 8, 10, 'z-'); // Catwalk stairs
+
+        // Mid Market Building & Interior Counter
+        addBox(-12, 2.5, -4, 10, 5, 8, matBrick);
+        addBox(-7.2, 0.7, -4, 1.2, 1.4, 6, matWoodPagoda); // Market counter table
+        addEave(-12, 5.0, -4, 11, 9, matDarkTile); // Overhanging roof eave
+
+        // Courtyard Street Lanterns
+        addLantern(6, 0, 6);
+        addLantern(-6, 0, 6);
+        addLantern(0, 0, -14);
+
+        // --- B SITE ---
+        addBox(-28, 0.05, -24, 22, 0.05, 22, matSiteFloor, false);
         addTextBillboard(-28, 0.2, -24, 'B SITE', 1.8);
-        spikeSiteAreas.push({ minX: -38, maxX: -18, minZ: -34, maxZ: -14, name: 'B SITE' });
+        spikeSiteAreas.push({ minX: -39, maxX: -17, minZ: -35, maxZ: -13, name: 'B SITE' });
 
-        addBox(-28, 3, -24, 4, 6, 4, matBrick);
-        addBox(-32, 1.25, -22, 2.5, 2.5, 2.5, matRadianiteBox);
+        // B Pillar (Thick brick cover column)
+        addBox(-28, 3.5, -24, 4.5, 7.0, 4.5, matBrick);
+
+        // B Boathouse (Back-site covered shelter)
+        addBox(-38, 2.5, -30, 8, 5, 10, matWallStone);
+        addBox(-34, 1.2, -30, 2.4, 2.4, 2.4, matRadianiteBox);
+
+        // B Site Elevated Platform & Crates
+        addPlatform(-36, 0, -18, 8, 1.2, 8, matConcrete);
+        addCrateStack(-22, -24, 2.4);
+
+        // B Main Tunnel Entrance
+        addArch(-26, 0, 6, 5.5, 5.0, 2.2, matWallStone);
 
         // Ascent B Connector Shutter Door & Switch (Interactive [F] + 500 HP destructible)
         addBox(-23, 3.5, -14, 6, 7, 1.2, matWallStone);
@@ -2802,26 +3172,62 @@
           switchPos: new THREE.Vector3(-15.8, 1.6, -13.3)
         };
       }
-      // 2. BIND (바인드 - WITH 2 WORKING TELEPORTERS!)
+      // ==========================================================
+      // 2. BIND (바인드) - HOOKAH WINDOW 2F, SHOWERS, TRUCK & TELEPORTERS
+      // ==========================================================
       else if (mapKey === 'bind') {
+        // Sandstone Outer Fortress Walls
         addBox(0, -0.5, 0, 110, 1, 110, matSandstone);
         addBox(0, 7, -55, 110, 14, 2, matSandstone);
         addBox(0, 7, 55, 110, 14, 2, matSandstone);
         addBox(-55, 7, 0, 2, 14, 110, matSandstone);
         addBox(55, 7, 0, 2, 14, 110, matSandstone);
 
-        // A Site (Truck)
-        addBox(26, 0.05, -22, 20, 0.05, 20, matSiteFloor, false);
+        // --- A SITE ---
+        addBox(26, 0.05, -22, 22, 0.05, 22, matSiteFloor, false);
         addTextBillboard(26, 0.2, -22, 'A SITE', 1.8);
-        spikeSiteAreas.push({ minX: 16, maxX: 36, minZ: -32, maxZ: -12, name: 'A SITE' });
-        addBox(26, 1.5, -22, 4, 3, 7, matRadianiteBox); // A Truck
+        spikeSiteAreas.push({ minX: 15, maxX: 37, minZ: -33, maxZ: -11, name: 'A SITE' });
 
-        // B Site (Hookah & Fountain)
-        addBox(-26, 0.05, -22, 20, 0.05, 20, matSiteFloor, false);
+        // A Site Radianite Military Truck (Flatbed + Cab + Radianite Containers)
+        addBox(26, 0.8, -22, 4.6, 1.6, 9.2, matConcrete); // Chassis
+        addBox(26, 2.1, -18.2, 4.4, 2.6, 2.8, matReceiver); // Truck Cab
+        addBox(26, 2.5, -24.2, 3.6, 2.0, 4.4, matRadianiteBox); // Cargo crates
+
+        // A Bath / Showers Corridor (Arched indoor corridor on flank)
+        addArch(40, 0, 10, 4.2, 4.8, 1.6, matSandstone);
+        addArch(40, 0, -2, 4.2, 4.8, 1.6, matSandstone);
+        addArch(40, 0, -14, 4.2, 4.8, 1.6, matSandstone);
+        addBox(43, 3.2, -2, 1.4, 6.4, 28, matSandstone); // Outer corridor wall
+
+        // U-Hall / Lamps (Defensive elbow bunker connecting site to spawn)
+        addPlatform(32, 0, -32, 8, 4.2, 10, matSandstone);
+        addArch(32, 0, -27, 3.2, 3.6, 1.2, matSandstone); // Front door
+        addArch(32, 0, -37, 3.2, 3.6, 1.2, matSandstone); // Back door
+
+        // A Tower (Heaven sniper perch)
+        addPlatform(18, 0, -34, 6.5, 3.2, 8, matSandstone);
+        addStairs(18, -26, 0, 3.2, 3.2, 8, 10, 'z-');
+
+        // --- B SITE ---
+        addBox(-26, 0.05, -22, 22, 0.05, 22, matSiteFloor, false);
         addTextBillboard(-26, 0.2, -22, 'B SITE', 1.8);
-        spikeSiteAreas.push({ minX: -36, maxX: -16, minZ: -32, maxZ: -12, name: 'B SITE' });
-        addBox(-26, 1.5, -22, 5, 3, 5, matWallStone); // B Octagon
+        spikeSiteAreas.push({ minX: -37, maxX: -15, minZ: -33, maxZ: -11, name: 'B SITE' });
 
+        // Hookah / B Window 2F (Elevated room at y = 3.2 with jump-out window)
+        addPlatform(-24, 0, 8, 10, 3.2, 10, matSandstone);
+        addArch(-24, 3.2, 3, 4.4, 3.2, 1.0, matSandstone); // Jump-in window
+        addRailing(-24, 3.2, 3.2, 4.4, 'x'); // Window sill
+        addStairs(-24, 18, 0, 3.6, 3.2, 9, 10, 'z-'); // Stairs from B Short into Hookah
+
+        // B Octagon (Central metallic tower on site)
+        addBox(-26, 2.8, -22, 5.2, 5.6, 5.2, matReceiver);
+        addCrateStack(-21, -22, 2.4);
+
+        // B Garden Corridor & Arch
+        addArch(-24, 0, -10, 4.6, 4.6, 1.6, matSandstone);
+        addCrateStack(-32, -26, 2.2);
+
+        // --- TELEPORTERS (WORKING HIGH-TECH DOORS & ENERGY GATES) ---
         // TELEPORTER 1: A Short (18, 0, 5) -> B Short Exit (-16, 0, -10)
         const tp1Mesh = addBox(18, 2, 5, 3, 4, 3, new THREE.MeshStandardMaterial({
           color: 0x00f0ff, emissive: 0x00f0ff, emissiveIntensity: 0.9, transparent: true, opacity: 0.55
@@ -2844,39 +3250,104 @@
           name: 'B-TO-A TP'
         });
       }
-      // 3. HAVEN (헤이븐 - 3 SITES: A, B, C)
+      // ==========================================================
+      // 3. HAVEN (헤이븐) - 3 FULL SITES, CENTRAL GONG PAGODA, TOWER & GARAGE
+      // ==========================================================
       else if (mapKey === 'haven') {
+        // Asian Pagoda Temple Grounds
         addBox(0, -0.5, 0, 120, 1, 110, matWoodPagoda);
         addBox(0, 7, -55, 120, 14, 2, matWallStone);
         addBox(0, 7, 55, 120, 14, 2, matWallStone);
         addBox(-60, 7, 0, 2, 14, 110, matWallStone);
         addBox(60, 7, 0, 2, 14, 110, matWallStone);
 
-        // A Site
-        addBox(34, 0.05, -24, 18, 0.05, 18, matSiteFloor, false);
+        // --- A SITE ---
+        addBox(34, 0.05, -24, 20, 0.05, 20, matSiteFloor, false);
         addTextBillboard(34, 0.2, -24, 'A SITE', 1.6);
-        spikeSiteAreas.push({ minX: 25, maxX: 43, minZ: -33, maxZ: -15, name: 'A SITE' });
-        addBox(34, 1.5, -24, 3, 3, 3, matRadianiteBox);
+        spikeSiteAreas.push({ minX: 24, maxX: 44, minZ: -34, maxZ: -14, name: 'A SITE' });
 
-        // B Site (Central Gong Pavilion)
-        addBox(0, 0.05, -24, 18, 0.05, 18, matSiteFloor, false);
-        addTextBillboard(0, 0.2, -24, 'B SITE (MID)', 1.6);
-        spikeSiteAreas.push({ minX: -9, maxX: 9, minZ: -33, maxZ: -15, name: 'B SITE' });
-        addBox(0, 2, -24, 4, 4, 4, matBrick);
+        // A Tower / Heaven (Traditional 2F Watchtower at y = 4.2)
+        addPlatform(34, 0, -34, 12, 4.2, 10, matWoodPagoda);
+        addPillar(29, 4.2, -30, 0.3, 3.5, matCrimsonPillar);
+        addPillar(39, 4.2, -30, 0.3, 3.5, matCrimsonPillar);
+        addPillar(29, 4.2, -38, 0.3, 3.5, matCrimsonPillar);
+        addPillar(39, 4.2, -38, 0.3, 3.5, matCrimsonPillar);
+        addEave(34, 7.7, -34, 14, 12, matDarkTile);
+        addRailing(34, 4.2, -29, 12, 'x');
+        addStairs(34, -20, 0, 3.4, 4.2, 11, 12, 'z-'); // Stairs up to A Tower
 
-        // C Site
-        addBox(-34, 0.05, -24, 18, 0.05, 18, matSiteFloor, false);
+        // A Long Approach & Crates
+        addBox(34, 1.5, -22, 3.2, 3.0, 3.2, matRadianiteBox);
+        addCrateStack(40, -18, 2.2);
+
+        // --- B SITE (CENTRAL GONG PAGODA PAVILION) ---
+        addBox(0, 0.05, -24, 20, 0.05, 20, matSiteFloor, false);
+        addTextBillboard(0, 0.2, -24, 'B SITE (MID GONG)', 1.6);
+        spikeSiteAreas.push({ minX: -10, maxX: 10, minZ: -34, maxZ: -14, name: 'B SITE' });
+
+        // Elevated Stone Deck for Pagoda (y = 0.8)
+        addPlatform(0, 0, -24, 16, 0.8, 16, matWallStone);
+        addStairs(0, -14, 0, 5.0, 0.8, 2.5, 4, 'z-'); // Front stairs to Pagoda
+        addStairs(0, -34, 0, 5.0, 0.8, 2.5, 4, 'z+'); // Back stairs
+
+        // 4 Grand Crimson Lacquered Pillars
+        addPillar(-6, 0.8, -18, 0.45, 6.0, matCrimsonPillar);
+        addPillar(6, 0.8, -18, 0.45, 6.0, matCrimsonPillar);
+        addPillar(-6, 0.8, -30, 0.45, 6.0, matCrimsonPillar);
+        addPillar(6, 0.8, -30, 0.45, 6.0, matCrimsonPillar);
+
+        // Majestic Curved Pagoda Eaves
+        addEave(0, 6.8, -24, 18, 18, matDarkTile);
+
+        // Ceremonial Brass Bell / Gong
+        const gongGeo = new THREE.CylinderGeometry(1.6, 1.6, 0.25, 24);
+        const gongMesh = new THREE.Mesh(gongGeo, matBronzeGong);
+        gongMesh.rotation.x = Math.PI / 2;
+        gongMesh.position.set(0, 3.6, -24);
+        scene.add(gongMesh);
+        mapObjects.push(gongMesh);
+
+        // --- C SITE & C GARAGE ---
+        addBox(-34, 0.05, -24, 20, 0.05, 20, matSiteFloor, false);
         addTextBillboard(-34, 0.2, -24, 'C SITE', 1.6);
-        spikeSiteAreas.push({ minX: -43, maxX: -25, minZ: -33, maxZ: -15, name: 'C SITE' });
-        addBox(-34, 1.5, -24, 3, 3, 3, matRadianiteBox);
+        spikeSiteAreas.push({ minX: -44, maxX: -24, minZ: -34, maxZ: -14, name: 'C SITE' });
+
+        // C Garage Connector (Middle building linking Mid to C Site)
+        addPlatform(-16, 0, -8, 8, 4.5, 14, matWoodPagoda);
+        addArch(-16, 0, -1, 3.6, 3.8, 1.2, matWoodPagoda); // Front door
+        addArch(-16, 0, -15, 3.6, 3.8, 1.2, matWoodPagoda); // Back door
+
+        // C Long Sniper Lane & Sandbag Ramparts
+        addBox(-38, 0.6, 6, 1.2, 1.2, 4.5, matSandbags);
+        addBox(-38, 0.6, -8, 1.2, 1.2, 4.5, matSandbags);
+
+        // C Site Elevated Wooden Defense Deck (y = 1.8)
+        addPlatform(-34, 0, -28, 10, 1.8, 10, matWoodPagoda);
+        addStairs(-34, -21, 0, 3.5, 1.8, 4.5, 6, 'z-');
+        addCrateStack(-30, -26, 2.2);
       }
-      // 4. THE RANGE (사격장 - PRACTICE BOT DRILLS & DISTANCE YARD LINES)
+      // ==========================================================
+      // 4. THE RANGE (사격장) - SHOOTING STALLS, LED SCOREBOARD & YARD LINES
+      // ==========================================================
       else if (mapKey === 'range') {
         addBox(0, -0.5, 0, 60, 1, 120, matConcrete);
         addBox(0, 7, -60, 60, 14, 2, matWallStone);
         addBox(0, 7, 60, 60, 14, 2, matWallStone);
         addBox(-30, 7, 0, 2, 14, 120, matWallStone);
         addBox(30, 7, 0, 2, 14, 120, matWallStone);
+
+        // Overhead High-Tech LED Scoreboard
+        addTextBillboard(0, 9.5, -20, 'VALORANT PROTOCOL // TARGET PRACTICE RANGE', 3.0, '#ff4655');
+        addTextBillboard(0, 7.2, -20, 'STATION 01-04  |  DISTANCE: 10M - 50M  |  HEADSHOT CALIBRATION', 1.8, '#00f0ff');
+
+        // 4 High-Tech Shooting Stalls with Partitions
+        [-9, -3, 3, 9].forEach(stallX => {
+          addBox(stallX, 1.5, 14, 0.2, 3.0, 4.0, matRailing);
+          addLantern(stallX, 0, 12, 0x00f0ff);
+        });
+
+        // Yellow Hazard Line on Floor
+        addBox(0, 0.03, 12, 24, 0.02, 0.4, matSiteFloor, false);
 
         // Ground Distance Markers (10m, 20m, 30m, 50m)
         const distances = [
@@ -2886,14 +3357,14 @@
           { z: -50, label: '--- 50 METERS ---' }
         ];
         distances.forEach(d => {
-          addBox(0, 0.02, d.z, 30, 0.04, 0.6, matSiteFloor, false);
-          addTextBillboard(0, 0.2, d.z, d.label, 1.4, '#00f0ff');
+          addPlatform(0, 0, d.z, 28, 0.2, 2.0, matConcrete, true);
+          addTextBillboard(0, 0.4, d.z, d.label, 1.4, '#00f0ff');
         });
 
         // Spawn 4 Practice Targets that respawn instantly when eliminated
         [-10, -20, -30, -50].forEach((zPos, idx) => {
           const m = createAgentModel(false, 'Omen');
-          m.mesh.position.set((idx % 2 === 0 ? 4 : -4), 0, zPos);
+          m.mesh.position.set((idx % 2 === 0 ? 4 : -4), 0.2, zPos);
           scene.add(m.mesh);
           practiceBots.push({
             mesh: m.mesh, head: m.head, body: m.body, legs: m.legs,
@@ -3090,7 +3561,8 @@
       if (e.code === 'KeyE') castSkillE();
       if (e.code === 'KeyX') castSkillX();
       if (e.code === 'KeyT') triggerPing();
-      if (e.code === 'F1') toggleCheats();
+      if (e.code === 'F1' || e.code === 'Backquote') toggleCheats();
+      if (e.code === 'F9') enterFly();
       if (e.code === 'Tab') showScoreboard(true);
       if (e.code === 'Digit1') switchWeapon('vandal');
       if (e.code === 'Digit2') switchWeapon('classic');
@@ -3179,10 +3651,20 @@
 
     window.addEventListener('mousemove', (e) => {
       if (!isPointerLocked) return;
+      if (freeFlyMode) {
+        yaw -= e.movementX * mouseSensitivity;
+        pitch -= e.movementY * mouseSensitivity;
+        pitch = Math.max(-Math.PI / 2.05, Math.min(Math.PI / 2.05, pitch));
+        return;
+      }
       const sens = player.isADS ? mouseSensitivity * 0.5 : mouseSensitivity;
       yaw -= e.movementX * sens;
       pitch -= e.movementY * sens;
       pitch = Math.max(-Math.PI / 2.1, Math.min(Math.PI / 2.1, pitch));
+
+      // Procedural weapon sway inertia
+      gunSwayYaw = THREE.MathUtils.clamp(gunSwayYaw - e.movementX * 0.0006, -0.06, 0.06);
+      gunSwayPitch = THREE.MathUtils.clamp(gunSwayPitch - e.movementY * 0.0006, -0.05, 0.05);
     });
 
     window.addEventListener('mousedown', (e) => {
@@ -3332,6 +3814,43 @@
       const cp = document.getElementById('cheats-panel');
       cp.style.display = cp.style.display === 'flex' ? 'none' : 'flex';
     }
+
+    function enterFly() {
+      freeFlyMode = !freeFlyMode;
+      showToast(`자유 비행 모드 (FREE FLY): ${freeFlyMode ? 'ON' : 'OFF'}`);
+      const btn = document.getElementById('btn-cheat-freefly');
+      if (btn) btn.innerText = `자유 비행 (FREE FLY [F9]): ${freeFlyMode ? 'ON' : 'OFF'}`;
+    }
+
+    document.getElementById('btn-admin-auth').addEventListener('click', () => {
+      const pin = document.getElementById('admin-pin-input').value.trim();
+      if (pin === '1101' || pin === 'admin') {
+        document.getElementById('admin-auth-box').style.display = 'none';
+        document.getElementById('admin-controls').style.display = 'flex';
+        showToast('관리자 인증 완료 (1101) - 전 개발자 기능 활성화!');
+      } else {
+        showToast('비밀번호가 올바르지 않습니다! (힌트: 1101)');
+      }
+    });
+
+    document.getElementById('btn-cheat-oneshot').addEventListener('click', (e) => {
+      cheats.oneShot = !cheats.oneShot;
+      e.target.innerText = `한 방 처치 (ONE SHOT): ${cheats.oneShot ? 'ON' : 'OFF'}`;
+      showToast(`한 방 처치: ${cheats.oneShot ? 'ON' : 'OFF'}`);
+    });
+
+    document.getElementById('btn-cheat-freezecpu').addEventListener('click', (e) => {
+      cheats.freezeAI = !cheats.freezeAI;
+      e.target.innerText = `봇 정지 (FREEZE AI): ${cheats.freezeAI ? 'ON' : 'OFF'}`;
+      showToast(`봇 정지: ${cheats.freezeAI ? 'ON' : 'OFF'}`);
+    });
+
+    document.getElementById('btn-cheat-freefly').addEventListener('click', enterFly);
+
+    document.getElementById('slider-speed').addEventListener('input', (e) => {
+      player.speed = parseFloat(e.target.value);
+      showToast(`이동 속도 변경: ${player.speed} m/s`);
+    });
     document.getElementById('btn-cheat-ammo').addEventListener('click', (e) => {
       cheats.infiniteAmmo = !cheats.infiniteAmmo;
       e.target.innerText = `무한 탄약: ${cheats.infiniteAmmo ? 'ON' : 'OFF'}`;
@@ -3472,8 +3991,9 @@
       flashMat.opacity = 1;
       setTimeout(() => { flashMat.opacity = 0; }, 40);
 
-      gunGroup.position.z += 0.05;
-      gunGroup.rotation.x += 0.08;
+      // Punchy recoil impulse with zero accumulated arm rotation
+      gunRecoilKickZ = Math.min(gunRecoilKickZ + 0.045, 0.12);
+      gunRecoilRotX = Math.max(gunRecoilRotX - 0.045, -0.14);
 
       let spread = currentWeapon.spreadBase;
       if (player.isCrouching) spread *= 0.5;
@@ -3589,6 +4109,7 @@
     }
 
     function damageEnemy(enemy, amount, hitPart = 'body') {
+      if (cheats.oneShot) amount = 9999;
       const isHeadshot = (hitPart === true || hitPart === 'head');
       const isLeg = (hitPart === 'leg');
 
@@ -4279,42 +4800,66 @@
         if (player.isWalking) moveSpeed = 4.8;
         if (player.isCrouching) moveSpeed = 3.2;
 
-        const moveDir = new THREE.Vector3();
-        if (keys['KeyW']) moveDir.z -= 1;
-        if (keys['KeyS']) moveDir.z += 1;
-        if (keys['KeyA']) moveDir.x -= 1;
-        if (keys['KeyD']) moveDir.x += 1;
-
-        if (moveDir.lengthSq() > 0) {
-          moveDir.normalize().applyAxisAngle(new THREE.Vector3(0, 1, 0), yaw);
-          player.velocity.x = moveDir.x * moveSpeed;
-          player.velocity.z = moveDir.z * moveSpeed;
-
-          if (!player.isWalking && player.isGrounded && (now - sound.lastStepTime > 320)) {
-            sound.lastStepTime = now;
-            sound.playFootstep();
+        if (freeFlyMode) {
+          const flySpeed = (keys['ControlLeft'] || keys['ControlRight']) ? 36 : 16;
+          const flyDir = new THREE.Vector3();
+          if (keys['KeyW']) flyDir.z -= 1;
+          if (keys['KeyS']) flyDir.z += 1;
+          if (keys['KeyA']) flyDir.x -= 1;
+          if (keys['KeyD']) flyDir.x += 1;
+          if (keys['Space']) flyDir.y += 1;
+          if (keys['ShiftLeft']) flyDir.y -= 1;
+          if (flyDir.lengthSq() > 0) {
+            flyDir.normalize().applyQuaternion(camera.quaternion);
+            camera.position.addScaledVector(flyDir, flySpeed * dt);
           }
-        } else {
-          player.velocity.x *= 0.8;
-          player.velocity.z *= 0.8;
-        }
-
-        if (keys['Space'] && player.isGrounded) {
-          player.velocity.y = 8.5;
-          player.isGrounded = false;
-        }
-        player.velocity.y -= 24 * dt;
-
-        const oldPos = camera.position.clone();
-        const nextPos = oldPos.clone().addScaledVector(player.velocity, dt);
-
-        const targetEyeY = player.isCrouching ? 1.0 : 1.7;
-        if (nextPos.y <= targetEyeY) {
-          nextPos.y = targetEyeY;
-          player.velocity.y = 0;
+          player.velocity.set(0, 0, 0);
           player.isGrounded = true;
+        } else {
+          const moveDir = new THREE.Vector3();
+          if (keys['KeyW']) moveDir.z -= 1;
+          if (keys['KeyS']) moveDir.z += 1;
+          if (keys['KeyA']) moveDir.x -= 1;
+          if (keys['KeyD']) moveDir.x += 1;
+
+          if (moveDir.lengthSq() > 0) {
+            moveDir.normalize().applyAxisAngle(new THREE.Vector3(0, 1, 0), yaw);
+            player.velocity.x = moveDir.x * moveSpeed;
+            player.velocity.z = moveDir.z * moveSpeed;
+
+            if (!player.isWalking && player.isGrounded && (now - sound.lastStepTime > 320)) {
+              sound.lastStepTime = now;
+              sound.playFootstep();
+            }
+          } else {
+            player.velocity.x *= 0.78;
+            player.velocity.z *= 0.78;
+          }
+
+          if (keys['Space'] && player.isGrounded) {
+            player.velocity.y = 8.2;
+            player.isGrounded = false;
+          }
+          player.velocity.y -= 24 * dt;
+
+          // Wall Sliding Collision along X and Z
+          const nextXZ = collideXZ(camera.position, player.velocity.x * dt, player.velocity.z * dt);
+          camera.position.x = nextXZ.x;
+          camera.position.z = nextXZ.z;
+
+          // Vertical ground height detection for stairs and elevated platforms (Heaven)
+          const targetEyeH = player.isCrouching ? 1.0 : 1.7;
+          let nextY = camera.position.y + player.velocity.y * dt;
+          const curFloorY = groundAt(camera.position.x, camera.position.z, nextY - targetEyeH);
+          const minEyeY = curFloorY + targetEyeH;
+
+          if (nextY <= minEyeY) {
+            nextY = minEyeY;
+            player.velocity.y = 0;
+            player.isGrounded = true;
+          }
+          camera.position.y = nextY;
         }
-        camera.position.copy(nextPos);
 
         const speedRatio = Math.min(player.velocity.length() / player.speed, 1.2);
         const spreadOffset = Math.floor(speedRatio * 14 + (player.isCrouching ? -2 : 0));
@@ -4323,30 +4868,44 @@
         document.getElementById('ch-l').style.transform = `translateX(${-spreadOffset}px)`;
         document.getElementById('ch-r').style.transform = `translateX(${spreadOffset}px)`;
 
+        // Smooth per-frame recoil impulse & weapon sway recovery (Damps back to 0)
+        gunRecoilKickZ = THREE.MathUtils.lerp(gunRecoilKickZ, 0, Math.min(1, 20 * dt));
+        gunRecoilRotX = THREE.MathUtils.lerp(gunRecoilRotX, 0, Math.min(1, 18 * dt));
+        gunSwayYaw = THREE.MathUtils.lerp(gunSwayYaw, 0, Math.min(1, 14 * dt));
+        gunSwayPitch = THREE.MathUtils.lerp(gunSwayPitch, 0, Math.min(1, 14 * dt));
+
         // Inspect Weapon Motion
         if (isInspecting) {
           const progress = (now - inspectTimer) / 1000;
           if (progress < 2.0) {
-            gunGroup.rotation.y = Math.sin(progress * Math.PI) * 0.65;
-            gunGroup.rotation.z = Math.sin(progress * Math.PI) * 0.45;
+            gunGroup.rotation.set(0, Math.sin(progress * Math.PI) * 0.65, Math.sin(progress * Math.PI) * 0.45);
             gunGroup.position.x = DEFAULT_GUN_POS.x - Math.sin(progress * Math.PI) * 0.12;
           } else {
             isInspecting = false;
           }
         } else {
           const isMoving = (moveDir.lengthSq() > 0 && player.isGrounded);
-          const bobAmount = player.isWalking ? 0.005 : 0.012;
+          const bobAmount = player.isWalking ? 0.004 : 0.010;
           const time = now * 0.005;
-          const targetGunPos = player.isADS ? ADS_GUN_POS.clone() : DEFAULT_GUN_POS.clone();
+          const baseGunPos = player.isADS ? ADS_GUN_POS.clone() : DEFAULT_GUN_POS.clone();
           if (isMoving && !player.isADS) {
-            targetGunPos.x += Math.cos(time * 10) * bobAmount;
-            targetGunPos.y += Math.sin(time * 20) * bobAmount;
+            baseGunPos.x += Math.cos(time * 10) * bobAmount;
+            baseGunPos.y += Math.sin(time * 20) * bobAmount;
           }
-          gunGroup.position.lerp(targetGunPos, 0.16);
+          // Composite weapon position (Kickback Z + Sway X/Y)
+          baseGunPos.x += gunSwayYaw * 0.25;
+          baseGunPos.y += -gunSwayPitch * 0.25;
+          baseGunPos.z += gunRecoilKickZ;
+          gunGroup.position.lerp(baseGunPos, 0.35);
+
+          // Composite weapon rotation: muzzle rise from recoil + sway pitch/yaw (Always returns to 0!)
+          gunGroup.rotation.x = gunRecoilRotX + gunSwayPitch;
+          gunGroup.rotation.y = gunSwayYaw;
+          gunGroup.rotation.z = gunSwayYaw * 0.35;
         }
 
         // Enemy AI Tactical Fire & Crouching Burst
-        if (roundState === 'IN_ROUND' && now - enemyShotTimer > 1.8) {
+        if (roundState === 'IN_ROUND' && !cheats.freezeAI && now - enemyShotTimer > 1.8) {
           enemyShotTimer = now;
           const aliveEnemies = enemiesList.filter(e => !e.isDead);
           if (aliveEnemies.length > 0) {
@@ -4421,16 +4980,28 @@
             }
           }
 
-          // Patrol movements
+          // Sweep Mode: When player is dead, accelerate bots to clash quickly without stalling
+          const isSweep = player.isDead;
+          const botSpeedMult = isSweep ? 2.2 : 1.0;
+
+          // Patrol & Tactical sweep movements
           enemiesList.forEach(e => {
             if (e.isDead) return;
-            e.mesh.position.x += e.patrolDir * 2.2 * dt;
+            e.mesh.position.x += e.patrolDir * 2.2 * botSpeedMult * dt;
             if (Math.abs(e.mesh.position.x) > 30) e.patrolDir *= -1;
+            if (isSweep) {
+              const zDir = (e.mesh.position.z > 0) ? -1 : 1;
+              e.mesh.position.z += zDir * 1.5 * botSpeedMult * dt;
+            }
           });
           teammatesList.forEach(t => {
             if (t.isDead) return;
-            t.mesh.position.x += t.patrolDir * 1.8 * dt;
+            t.mesh.position.x += t.patrolDir * 1.8 * botSpeedMult * dt;
             if (Math.abs(t.mesh.position.x) > 25) t.patrolDir *= -1;
+            if (isSweep) {
+              const zDir = (t.mesh.position.z > 0) ? -1 : 1;
+              t.mesh.position.z += zDir * 1.5 * botSpeedMult * dt;
+            }
           });
         }
 
