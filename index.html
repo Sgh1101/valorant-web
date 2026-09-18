@@ -1552,6 +1552,12 @@
     <div class="ceremony-sub" id="ceremony-sub-text">ENEMY TEAM ELIMINATED // +3,000 ¤ CREDITS</div>
   </div>
 
+  <!-- Ultimate Activation Screen Banner -->
+  <div id="ult-activation-banner" style="position:fixed; top:28%; left:50%; transform:translateX(-50%); display:none; flex-direction:column; align-items:center; z-index:45; pointer-events:none; text-align:center;">
+    <div id="ult-banner-agent" style="font-family:var(--font-mono); font-size:12px; letter-spacing:4px; color:var(--val-gold); text-shadow:0 0 10px var(--val-gold);">// ULTIMATE ACTIVATED //</div>
+    <div id="ult-banner-name" style="font-family:var(--font-title); font-size:42px; font-weight:900; color:#fff; letter-spacing:3px; text-shadow:0 0 25px rgba(255,200,59,0.8);">BLADESTORM</div>
+  </div>
+
   <!-- In-game Chat Box ([ENTER]) -->
   <div id="chat-wrapper">
     <div id="chat-log"></div>
@@ -2230,6 +2236,38 @@
         if (this.masterGain) {
           this.masterGain.gain.setValueAtTime(Math.max(0, Math.min(1, val)), this.ctx.currentTime);
         }
+      }
+
+      playTick() {
+        if (!this.ctx) return;
+        const now = this.ctx.currentTime;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(1200, now);
+        osc.frequency.exponentialRampToValueAtTime(600, now + 0.04);
+        gain.gain.setValueAtTime(0.22, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.04);
+        osc.connect(gain);
+        gain.connect(this.dest);
+        osc.start(now);
+        osc.stop(now + 0.05);
+      }
+
+      playOmenWoosh() {
+        if (!this.ctx) return;
+        const now = this.ctx.currentTime;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(160, now);
+        osc.frequency.exponentialRampToValueAtTime(45, now + 1.2);
+        gain.gain.setValueAtTime(0.45, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 1.2);
+        osc.connect(gain);
+        gain.connect(this.dest);
+        osc.start(now);
+        osc.stop(now + 1.25);
       }
 
       playGunshot(weaponKey = 'vandal') {
@@ -3417,9 +3455,31 @@
       Omen: { c: '어둠의 발자국 (C)', q: '피해망상 (Q)', e: '어둠의 장막 (E)', x: '그림자 습격 (X)' }
     };
 
-    function cyclePlayableAgent() {
-      currentAgentIdx = (currentAgentIdx + 1) % PLAYABLE_AGENTS.length;
-      const agentName = PLAYABLE_AGENTS[currentAgentIdx];
+    let spectatorTargetIndex = 0;
+
+    function triggerUltBanner(agentName, ultName) {
+      const banner = document.getElementById('ult-activation-banner');
+      const aEl = document.getElementById('ult-banner-agent');
+      const nEl = document.getElementById('ult-banner-name');
+      if (!banner || !aEl || !nEl) return;
+      aEl.innerText = `// ${agentName.toUpperCase()} ULTIMATE ACTIVATED //`;
+      nEl.innerText = ultName.toUpperCase();
+      banner.style.display = 'flex';
+      banner.style.opacity = '1';
+      banner.style.transform = 'translateX(-50%) scale(1.1)';
+      banner.style.transition = 'all 0.3s cubic-bezier(0.18, 0.89, 0.32, 1.28)';
+      setTimeout(() => {
+        banner.style.transform = 'translateX(-50%) scale(1.0)';
+      }, 50);
+      setTimeout(() => {
+        banner.style.opacity = '0';
+        setTimeout(() => { banner.style.display = 'none'; }, 300);
+      }, 1600);
+    }
+
+    function setPlayerAgent(agentName) {
+      const agentIdx = PLAYABLE_AGENTS.indexOf(agentName);
+      if (agentIdx !== -1) currentAgentIdx = agentIdx;
       lobbySlots[myTeam][mySlotIdx].agent = agentName;
 
       updatePlayerColors();
@@ -3435,6 +3495,12 @@
       if (slotQ && labels) slotQ.querySelector('.skill-name').innerText = labels.q;
       if (slotE && labels) slotE.querySelector('.skill-name').innerText = labels.e;
       if (slotX && labels) slotX.querySelector('.skill-name').innerText = labels.x;
+    }
+
+    function cyclePlayableAgent() {
+      currentAgentIdx = (currentAgentIdx + 1) % PLAYABLE_AGENTS.length;
+      const agentName = PLAYABLE_AGENTS[currentAgentIdx];
+      setPlayerAgent(agentName);
 
       sound.playSwitchClick();
       if (agentName === 'Phoenix') radioVoice.speak('Get ready!');
@@ -4850,6 +4916,18 @@
       if (e.code === 'Digit5') switchWeapon('spectre');
       if (e.code === 'Digit6') switchWeapon('sheriff');
       if (e.code === 'Space' && player.isDead) executeTakeover();
+      if (player.isDead && roundState === 'IN_ROUND') {
+        const aliveAllies = teammatesList.filter(t => !t.isDead);
+        if (aliveAllies.length > 1) {
+          if (e.code === 'KeyA' || e.code === 'ArrowLeft') {
+            spectatorTargetIndex = (spectatorTargetIndex - 1 + aliveAllies.length) % aliveAllies.length;
+            sound.playTick();
+          } else if (e.code === 'KeyD' || e.code === 'ArrowRight') {
+            spectatorTargetIndex = (spectatorTargetIndex + 1) % aliveAllies.length;
+            sound.playTick();
+          }
+        }
+      }
       if (e.code === 'ShiftLeft' || e.code === 'ShiftRight') player.isWalking = true;
       if (e.code === 'ControlLeft' || e.code === 'ControlRight') player.isCrouching = true;
     });
@@ -5413,9 +5491,10 @@
         return;
       }
 
-      const targetAlly = aliveAllies[0];
+      if (spectatorTargetIndex >= aliveAllies.length) spectatorTargetIndex = 0;
+      const targetAlly = aliveAllies[spectatorTargetIndex];
       sound.playTakeoverWarp();
-      showToast(`[빙의 완료] ${targetAlly.name} 요원 제어 시작!`);
+      showToast(`[빙의 완료] ${targetAlly.name} (${targetAlly.agent}) 요원 제어 시작!`);
 
       camera.position.copy(targetAlly.mesh.position);
       camera.position.y = 1.7;
@@ -5423,10 +5502,18 @@
       player.shield = 50;
       player.isDead = false;
 
+      // Dynamically assume spectated ally's agent abilities & appearance
+      setPlayerAgent(targetAlly.agent);
+
       scene.remove(targetAlly.mesh);
       targetAlly.isDead = true;
 
       document.getElementById('takeover-prompt').style.display = 'none';
+      const specBar = document.getElementById('spectator-bar');
+      if (specBar) specBar.style.display = 'none';
+      const crPanel = document.getElementById('combat-report-panel');
+      if (crPanel) crPanel.style.display = 'none';
+
       gunGroup.visible = true;
       renderTopAgentsBar();
       updateHUD();
@@ -5440,6 +5527,7 @@
 
       player.isDead = true;
       player.hp = 0;
+      spectatorTargetIndex = 0;
       updateHUD();
       gunGroup.visible = false;
       kunaiRig.visible = false;
@@ -5451,11 +5539,21 @@
         dropSpikeAt(camera.position.x, camera.position.z);
       }
 
+      // Auto-show Combat Report Panel on Death (Taken Tab)
+      const crPanel = document.getElementById('combat-report-panel');
+      if (crPanel) {
+        crPanel.style.display = 'flex';
+        renderCombatReport('taken');
+      }
+
       const aliveCount = teammatesList.filter(t => !t.isDead).length;
       if (aliveCount > 0) {
+        const firstAlly = teammatesList.filter(t => !t.isDead)[0];
         document.getElementById('takeover-count').innerText = 
           `생존 아군 ${aliveCount}명 // 스페이스바를 눌러 즉시 전투 이어하기`;
         document.getElementById('takeover-prompt').style.display = 'flex';
+        const specBar = document.getElementById('spectator-bar');
+        if (specBar) specBar.style.display = 'flex';
       } else {
         triggerRoundCeremony(false, 'TEAM ELIMINATED // ROUND LOST');
       }
@@ -5464,6 +5562,11 @@
     function triggerRoundCeremony(won, subtitle) {
       if (roundState === 'ROUND_ENDED') return;
       roundState = 'ROUND_ENDED';
+
+      const specBar = document.getElementById('spectator-bar');
+      if (specBar) specBar.style.display = 'none';
+      const toPrompt = document.getElementById('takeover-prompt');
+      if (toPrompt) toPrompt.style.display = 'none';
 
       const banner = document.getElementById('round-ceremony-banner');
       const text = document.getElementById('ceremony-text');
@@ -6311,23 +6414,50 @@
 
     function castPhoenixFlash() {
       showToast('⚡ [피닉스] 커브볼 섬광! (CURVEBALL)');
-      radioVoice.speak('Careful!');
-      sound.playFlash();
+      radioVoice.speak('Watch your eyes!');
+      sound.playFlame();
 
-      const flashOverlay = document.getElementById('tp-flash-overlay');
-      if (flashOverlay) {
-        flashOverlay.style.background = '#ffcc00';
-        flashOverlay.style.opacity = '0.9';
-        setTimeout(() => { flashOverlay.style.opacity = '0'; flashOverlay.style.background = '#00f0ff'; }, 500);
-      }
+      // 3D Curving Fireball Projectile
+      const fireOrb = new THREE.Mesh(
+        new THREE.SphereGeometry(0.28, 16, 16),
+        new THREE.MeshStandardMaterial({ color: 0xff3300, emissive: 0xffaa00, emissiveIntensity: 2.5 })
+      );
+      fireOrb.position.copy(camera.position).add(new THREE.Vector3(0.2, -0.2, -0.8).applyQuaternion(camera.quaternion));
+      scene.add(fireOrb);
 
-      // Blind nearby enemy bots
-      enemiesList.forEach(e => {
-        if (!e.isDead && camera.position.distanceTo(e.mesh.position) < 35) {
-          e.isBlinded = true;
-          setTimeout(() => { e.isBlinded = false; }, 2500);
+      const fwd = new THREE.Vector3(0, 0, -1).applyQuaternion(camera.quaternion);
+      const right = new THREE.Vector3().crossVectors(fwd, new THREE.Vector3(0, 1, 0)).normalize();
+      let step = 0;
+      const flashCurveInterval = setInterval(() => {
+        step++;
+        fireOrb.position.addScaledVector(fwd, 0.55);
+        fireOrb.position.addScaledVector(right, 0.38);
+
+        const p = new THREE.Mesh(new THREE.BoxGeometry(0.06, 0.06, 0.06), new THREE.MeshBasicMaterial({ color: 0xff6600 }));
+        p.position.copy(fireOrb.position);
+        scene.add(p);
+        activeParticles.push({ mesh: p, vel: new THREE.Vector3(0, 0.1, 0), life: 0.3, maxLife: 0.3 });
+
+        if (step >= 18) {
+          clearInterval(flashCurveInterval);
+          scene.remove(fireOrb);
+          sound.playFlash();
+
+          const flashOverlay = document.getElementById('tp-flash-overlay');
+          if (flashOverlay) {
+            flashOverlay.style.background = '#ffdd44';
+            flashOverlay.style.opacity = '0.92';
+            setTimeout(() => { flashOverlay.style.opacity = '0'; flashOverlay.style.background = '#00f0ff'; }, 600);
+          }
+
+          enemiesList.forEach(e => {
+            if (!e.isDead && fireOrb.position.distanceTo(e.mesh.position) < 32) {
+              e.isBlinded = true;
+              setTimeout(() => { e.isBlinded = false; }, 2800);
+            }
+          });
         }
-      });
+      }, 20);
     }
 
     function castPhoenixHotHands() {
@@ -6519,16 +6649,60 @@
 
     function castOmenParanoia() {
       showToast('🌑 [오멘] 피해망상 암흑 파동 발사! (PARANOIA)');
-      radioVoice.speak('Scatter!');
-      sound.playFlash();
+      radioVoice.speak('Blind them!');
+      sound.playOmenWoosh();
 
-      // Blind all enemies
-      enemiesList.forEach(e => {
-        if (!e.isDead) {
-          e.isBlinded = true;
-          setTimeout(() => { e.isBlinded = false; }, 3200);
-        }
+      // 3D Moving Shadow Wave Projectile
+      const waveGrp = new THREE.Group();
+      const waveGeo = new THREE.TorusGeometry(2.4, 0.25, 8, 24, Math.PI);
+      const waveMat = new THREE.MeshStandardMaterial({
+        color: 0x1a0033, emissive: 0x6a0dad, emissiveIntensity: 2.2,
+        transparent: true, opacity: 0.85, side: THREE.DoubleSide
       });
+      const waveMesh = new THREE.Mesh(waveGeo, waveMat);
+      waveMesh.rotation.x = Math.PI / 2;
+      waveGrp.add(waveMesh);
+
+      const coreOrb = new THREE.Mesh(
+        new THREE.SphereGeometry(0.8, 16, 16),
+        new THREE.MeshBasicMaterial({ color: 0x220044, transparent: true, opacity: 0.75 })
+      );
+      waveGrp.add(coreOrb);
+
+      waveGrp.position.copy(camera.position);
+      waveGrp.quaternion.copy(camera.quaternion);
+      scene.add(waveGrp);
+
+      const fwd = new THREE.Vector3(0, 0, -1).applyQuaternion(camera.quaternion);
+      const startTime = performance.now() / 1000;
+      const waveInterval = setInterval(() => {
+        const curTime = performance.now() / 1000;
+        if (curTime - startTime > 1.6) {
+          clearInterval(waveInterval);
+          scene.remove(waveGrp);
+          return;
+        }
+        waveGrp.position.addScaledVector(fwd, 0.45);
+        waveGrp.scale.multiplyScalar(1.015);
+
+        const spark = new THREE.Mesh(
+          new THREE.BoxGeometry(0.08, 0.08, 0.08),
+          new THREE.MeshBasicMaterial({ color: 0x9900ff })
+        );
+        spark.position.copy(waveGrp.position).add(new THREE.Vector3((Math.random()-0.5)*1.5, (Math.random()-0.5)*1.5, (Math.random()-0.5)*1.5));
+        scene.add(spark);
+        activeParticles.push({ mesh: spark, vel: new THREE.Vector3(0, 0.2, 0), life: 0.6, maxLife: 0.6 });
+
+        enemiesList.forEach(e => {
+          if (!e.isDead && e.mesh.position.distanceTo(waveGrp.position) < 3.8 && !e.isParanoiaHit) {
+            e.isParanoiaHit = true;
+            e.isBlinded = true;
+            sound.playHitmarker(false);
+            showToast(`⚡ [오멘 피해망상] ${e.name} 실명 및 청각 차단!`);
+            setTimeout(() => { e.isBlinded = false; e.isParanoiaHit = false; }, 3600);
+          }
+        });
+      }, 20);
     }
 
     function castOmenShadowTeleport() {
@@ -6688,10 +6862,23 @@
 
     function castSkillX() {
       const agent = lobbySlots[myTeam][mySlotIdx].agent;
-      if (agent === 'Phoenix') { castPhoenixRunItBack(); radioVoice.speak("Jokes over, you're dead!"); }
-      else if (agent === 'Reyna') { castReynaEmpress(); radioVoice.speak('They will cower!'); }
-      else if (agent === 'Omen') { castOmenShadowTeleport(); radioVoice.speak('Scatter!'); }
-      else { castJettBladestorm(); radioVoice.speak('Watch this!'); }
+      if (agent === 'Phoenix') {
+        triggerUltBanner('Phoenix', 'Run It Back');
+        castPhoenixRunItBack();
+        radioVoice.speak("Jokes over, you're dead!");
+      } else if (agent === 'Reyna') {
+        triggerUltBanner('Reyna', 'Empress');
+        castReynaEmpress();
+        radioVoice.speak('They will cower!');
+      } else if (agent === 'Omen') {
+        triggerUltBanner('Omen', 'From the Shadows');
+        castOmenShadowTeleport();
+        radioVoice.speak('Scatter!');
+      } else {
+        triggerUltBanner('Jett', 'Blade Storm');
+        castJettBladestorm();
+        radioVoice.speak('Watch this!');
+      }
     }
 
 
@@ -7166,6 +7353,30 @@
         document.getElementById('round-timer').innerText = `${mins}:${secs < 10 ? '0' : ''}${secs}`;
         if (roundTimer <= 0 && !spikeState.isPlanted) {
           triggerRoundCeremony(myTeam === 'def', 'TIME EXPIRED // DEFENDERS WIN');
+        }
+      }
+
+      // Smooth Esports Spectator Camera Chase
+      if (player.isDead && roundState === 'IN_ROUND') {
+        const aliveAllies = teammatesList.filter(t => !t.isDead);
+        if (aliveAllies.length > 0) {
+          if (spectatorTargetIndex >= aliveAllies.length) spectatorTargetIndex = 0;
+          const targetAlly = aliveAllies[spectatorTargetIndex];
+          if (targetAlly && targetAlly.mesh) {
+            const behindOffset = new THREE.Vector3(0, 1.8, 3.4).applyQuaternion(targetAlly.mesh.quaternion);
+            camera.position.lerp(targetAlly.mesh.position.clone().add(behindOffset), 0.12);
+            camera.lookAt(targetAlly.mesh.position.x, targetAlly.mesh.position.y + 1.4, targetAlly.mesh.position.z);
+
+            const nameEl = document.getElementById('spec-agent-name');
+            const hpEl = document.getElementById('spec-agent-hp');
+            if (nameEl) nameEl.innerText = `관전 중: ${targetAlly.name} (${targetAlly.agent})`;
+            if (hpEl) hpEl.innerText = `HP: ${targetAlly.hp}`;
+
+            const toSub = document.getElementById('takeover-count');
+            if (toSub) {
+              toSub.innerHTML = `관전 중: <strong style="color:var(--val-cyan); font-size:16px;">${targetAlly.agent} (${targetAlly.name})</strong> &bull; HP: ${targetAlly.hp}/100<br><span style="color:#8899a6; font-size:12px;">생존 아군 ${aliveAllies.length}명 // [SPACE] 이 요원 몸으로 빙의 &bull; [A / D] 아군 전환</span>`;
+            }
+          }
         }
       }
 
