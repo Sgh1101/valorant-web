@@ -4590,6 +4590,17 @@
        ========================================================== */
     const activeParticles = [];
     const activeCasings = [];
+    
+    /* ==========================================================
+       DYNAMIC CAMERA TRAUMA & IMPACT SMOKE WISPS
+       ========================================================== */
+    let cameraTrauma = 0;
+    let roundKillsThisRound = 0;
+
+    function addCameraTrauma(amt) {
+      cameraTrauma = Math.min(1.0, cameraTrauma + amt);
+    }
+
     let reloadStartTime = 0;
     let reloadDuration = 2.0;
     let lastHeartbeatTime = 0;
@@ -4611,6 +4622,21 @@
         ).normalize().multiplyScalar(4 + Math.random() * 7);
 
         scene.add(p);
+        
+      // Bullet Impact Smoke Wisp
+      const sGeo = new THREE.SphereGeometry(0.06, 6, 6);
+      const sMat = new THREE.MeshBasicMaterial({ color: 0x999999, transparent: true, opacity: 0.65 });
+      const smokeP = new THREE.Mesh(sGeo, sMat);
+      smokeP.position.copy(pos);
+      scene.add(smokeP);
+      activeParticles.push({
+        mesh: smokeP,
+        vel: new THREE.Vector3(normal.x * 0.3, 0.7, normal.z * 0.3),
+        life: 0.75,
+        maxLife: 0.75,
+        isSmoke: true
+      });
+  
         activeParticles.push({
           mesh: p,
           vel: vel,
@@ -4766,6 +4792,7 @@
         enemy.isDead = true;
         enemy.mesh.visible = false;
         player.kills++;
+        roundKillsThisRound++;
         player.credits += 200;
         if (isHeadshot) player.headshots++;
 
@@ -5233,6 +5260,7 @@
 
         if (spikeState.timer <= 0) {
           sound.playSpikeDetonate();
+          addCameraTrauma(0.9);
           triggerRoundCeremony(myTeam === 'atk', 'SPIKE DETONATED // SITE DESTROYED');
         }
       }
@@ -5451,6 +5479,16 @@
         camera.rotation.y = yaw;
         camera.rotation.x = pitch;
 
+        // Camera Trauma Shake Decay
+        if (cameraTrauma > 0.001) {
+          const shake = cameraTrauma * cameraTrauma;
+          camera.rotation.z += (Math.random() - 0.5) * shake * 0.055;
+          camera.rotation.x += (Math.random() - 0.5) * shake * 0.045;
+          camera.position.y += (Math.random() - 0.5) * shake * 0.045;
+          cameraTrauma = THREE.MathUtils.lerp(cameraTrauma, 0, Math.min(1, 9 * dt));
+        }
+
+
         let moveSpeed = player.speed;
         if (player.isWalking) moveSpeed = 4.8;
         if (player.isCrouching) moveSpeed = 3.2;
@@ -5616,6 +5654,7 @@
 
                     sound.playBodyHit();
                     showDamageIndicator();
+                    addCameraTrauma(0.42);
                     showToast('피격 경고! 적 점사 피격');
                     updateHUD();
                     if (player.hp <= 0) onPlayerDeath();
