@@ -977,6 +977,24 @@
       padding: 1px 6px;
       border-radius: 3px;
     }
+    .dmg-popup.dmg-wb {
+      border: 1px solid #00f0ff !important;
+      box-shadow: 0 0 16px rgba(0, 240, 255, 0.7) !important;
+    }
+    .dmg-wb-badge {
+      font-size: 13px;
+      color: #00f0ff;
+      background: rgba(0, 240, 255, 0.2);
+      border: 1px solid #00f0ff;
+      padding: 1px 6px;
+      border-radius: 2px;
+      margin-left: 6px;
+      letter-spacing: 1px;
+    }
+    @keyframes flashFade {
+      0% { opacity: 0.9; }
+      100% { opacity: 0; }
+    }
     @keyframes dmgFloat3D {
       0% {
         transform: translate(-50%, -20%) scale(1.45);
@@ -2981,7 +2999,15 @@
     const matReceiver = new THREE.MeshStandardMaterial({ color: 0x14161a, roughness: 0.3, metalness: 0.75 });
     const matBarrel = new THREE.MeshStandardMaterial({ color: 0x22262c, roughness: 0.2, metalness: 0.85 });
     const matCarbonTrim = new THREE.MeshStandardMaterial({ color: 0x0a0c0e, roughness: 0.4, metalness: 0.3 });
-    const matGlove = new THREE.MeshStandardMaterial({ color: 0x181e24, roughness: 0.7 });
+    const matGlove = new THREE.MeshStandardMaterial({ color: 0x14181e, roughness: 0.65 });
+    const matKnucklePlate = new THREE.MeshStandardMaterial({ color: 0x080a0d, roughness: 0.2, metalness: 0.9 });
+    const matWristBand = new THREE.MeshStandardMaterial({ color: 0x1a222c, roughness: 0.3, metalness: 0.85 });
+    const matWristGem = new THREE.MeshStandardMaterial({
+      color: 0x00f0ff,
+      emissive: 0x00f0ff,
+      emissiveIntensity: 1.4,
+      roughness: 0.2
+    });
     const matSleeve = new THREE.MeshStandardMaterial({ color: 0x00f0ff, roughness: 0.8 });
 
     // Floating Kunai Rig for Blade Storm (X)
@@ -3017,7 +3043,7 @@
     flashMesh.position.set(0, 0.02, -0.8);
     gunGroup.add(flashMesh);
 
-    // Hands
+    // Upgraded Tactical Hands & Carbon Knuckle Protectors
     const rightArm = new THREE.Mesh(new THREE.CylinderGeometry(0.055, 0.065, 0.4, 8), matSleeve);
     rightArm.position.set(0.06, -0.22, 0.16);
     rightArm.rotation.set(-0.6, 0.2, 0.2);
@@ -3025,15 +3051,35 @@
 
     const rightHand = new THREE.Mesh(new THREE.SphereGeometry(0.05, 8, 8), matGlove);
     rightHand.position.set(0.02, -0.09, 0.07);
+    // Carbon Knuckle Protector Plate
+    const rKnuckle = new THREE.Mesh(new THREE.BoxGeometry(0.046, 0.016, 0.052), matKnucklePlate);
+    rKnuckle.position.set(0.01, 0.022, 0.01);
+    rightHand.add(rKnuckle);
+    // Curled Trigger Finger
+    const rFinger = new THREE.Mesh(new THREE.CylinderGeometry(0.012, 0.012, 0.048, 6), matGlove);
+    rFinger.position.set(-0.018, -0.02, -0.035);
+    rFinger.rotation.set(0.7, 0.2, 0);
+    rightHand.add(rFinger);
     gunGroup.add(rightHand);
 
     const leftArm = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.06, 0.45, 8), matSleeve);
     leftArm.position.set(-0.16, -0.24, -0.18);
     leftArm.rotation.set(0.4, 0.6, -0.8);
+    // Agent Forearm Tactical Communicator Cuff
+    const wristRing = new THREE.Mesh(new THREE.TorusGeometry(0.058, 0.014, 8, 16), matWristBand);
+    wristRing.position.set(0, 0.08, 0);
+    wristRing.rotation.x = Math.PI / 2;
+    leftArm.add(wristRing);
+    const wristGem = new THREE.Mesh(new THREE.BoxGeometry(0.032, 0.018, 0.028), matWristGem);
+    wristGem.position.set(0, 0.08, 0.055);
+    leftArm.add(wristGem);
     gunGroup.add(leftArm);
 
     const leftHand = new THREE.Mesh(new THREE.SphereGeometry(0.048, 8, 8), matGlove);
     leftHand.position.set(-0.04, -0.06, -0.28);
+    const lKnuckle = new THREE.Mesh(new THREE.BoxGeometry(0.044, 0.015, 0.048), matKnucklePlate);
+    lKnuckle.position.set(-0.01, 0.022, -0.01);
+    leftHand.add(lKnuckle);
     gunGroup.add(leftHand);
 
     let weaponSubMesh = null;
@@ -3265,6 +3311,10 @@
       const slot = lobbySlots[myTeam][mySlotIdx];
       const color = AGENT_COLORS[slot.agent] || '#00f0ff';
       matSleeve.color.set(color);
+      if (typeof matWristGem !== 'undefined' && matWristGem) {
+        matWristGem.color.set(color);
+        matWristGem.emissive.set(color);
+      }
     }
 
     /* ==========================================================
@@ -3279,6 +3329,13 @@
     let barriersList = [];
     let activeSmokes = [];
     let spikeSiteAreas = [];
+
+    let droppedSpikeMesh = null;
+    let droppedSpikeBeacon = null;
+    let finisherObjects = [];
+    let gameTimeScale = 1.0;
+    let landingDip = 0;
+    let lastKilledEnemyPos = null;
 
     const spikeState = {
       isPlanted: false,
@@ -3634,6 +3691,127 @@
       return { mesh: grp, head, body, legs: [legL, legR] };
     }
 
+    function dropSpikeAt(x, z) {
+      if (spikeState.isPlanted) return;
+      spikeState.carrierId = -1;
+      if (!droppedSpikeMesh) {
+        const grp = new THREE.Group();
+        const bGeo = new THREE.BoxGeometry(0.55, 0.3, 0.75);
+        const bMat = new THREE.MeshStandardMaterial({ color: 0x141a22, roughness: 0.35, metalness: 0.8 });
+        const bMesh = new THREE.Mesh(bGeo, bMat);
+        bMesh.position.y = 0.15;
+        grp.add(bMesh);
+
+        const cGeo = new THREE.CylinderGeometry(0.14, 0.14, 0.6, 16);
+        const cMat = new THREE.MeshBasicMaterial({ color: 0xffaa00 });
+        const cMesh = new THREE.Mesh(cGeo, cMat);
+        cMesh.rotation.z = Math.PI / 2;
+        cMesh.position.y = 0.16;
+        grp.add(cMesh);
+
+        // 18m Sky Beacon Beam
+        const beaconGeo = new THREE.CylinderGeometry(0.2, 0.65, 18, 16, 1, true);
+        const beaconMat = new THREE.MeshBasicMaterial({
+          color: 0xffaa00,
+          transparent: true,
+          opacity: 0.45,
+          side: THREE.DoubleSide
+        });
+        const beacon = new THREE.Mesh(beaconGeo, beaconMat);
+        beacon.position.y = 9;
+        grp.add(beacon);
+
+        droppedSpikeMesh = grp;
+        droppedSpikeBeacon = beacon;
+        scene.add(grp);
+      }
+      droppedSpikeMesh.position.set(x, 0, z);
+      droppedSpikeMesh.visible = true;
+      showToast('⚠️ 스파이크를 떨어뜨렸습니다! (SPIKE DROPPED)');
+    }
+
+    function triggerAceFinisher(pos) {
+      if (!pos) pos = camera.position.clone().add(camera.getWorldDirection(new THREE.Vector3()).multiplyScalar(6));
+
+      // Bullet Time Slow Motion
+      gameTimeScale = 0.28;
+      setTimeout(() => {
+        const rampUp = setInterval(() => {
+          gameTimeScale = Math.min(1.0, gameTimeScale + 0.08);
+          if (gameTimeScale >= 1.0) clearInterval(rampUp);
+        }, 50);
+      }, 1300);
+
+      addCameraTrauma(0.85);
+
+      const finGroup = new THREE.Group();
+      finGroup.position.copy(pos);
+      finGroup.position.y = 0;
+
+      const beamColor = currentSkinKey === 'reaver' ? 0x9900ff : (currentSkinKey === 'glitchpop' ? 0xff0088 : 0xffd700);
+
+      // Celestial Sky Beam (35m tall)
+      const beamGeo = new THREE.CylinderGeometry(0.65, 1.3, 35, 24, 1, true);
+      const beamMat = new THREE.MeshBasicMaterial({
+        color: beamColor,
+        side: THREE.DoubleSide,
+        transparent: true,
+        opacity: 0.85
+      });
+      const beam = new THREE.Mesh(beamGeo, beamMat);
+      beam.position.y = 17.5;
+      finGroup.add(beam);
+
+      // Expanding Concentric Rings
+      for (let r = 0; r < 3; r++) {
+        const ringGeo = new THREE.RingGeometry(1.2 + r * 1.5, 1.5 + r * 1.5, 32);
+        const ringMat = new THREE.MeshBasicMaterial({
+          color: beamColor,
+          side: THREE.DoubleSide,
+          transparent: true,
+          opacity: 0.9
+        });
+        const ring = new THREE.Mesh(ringGeo, ringMat);
+        ring.rotation.x = Math.PI / 2;
+        ring.position.y = 0.05 + r * 0.12;
+        finGroup.add(ring);
+      }
+
+      // Orbiting Celestial Orbs
+      for (let o = 0; o < 4; o++) {
+        const angle = (o / 4) * Math.PI * 2;
+        const orbGeo = new THREE.SphereGeometry(0.28, 12, 12);
+        const orbMat = new THREE.MeshStandardMaterial({
+          color: beamColor,
+          emissive: beamColor,
+          emissiveIntensity: 1.5
+        });
+        const orb = new THREE.Mesh(orbGeo, orbMat);
+        orb.position.set(Math.cos(angle) * 2.8, 0.5, Math.sin(angle) * 2.8);
+        finGroup.add(orb);
+      }
+
+      scene.add(finGroup);
+      finisherObjects.push(finGroup);
+
+      // Full-screen Flash Overlay
+      const flash = document.createElement('div');
+      flash.style.position = 'absolute';
+      flash.style.top = '0'; flash.style.left = '0';
+      flash.style.width = '100vw'; flash.style.height = '100vh';
+      flash.style.background = currentSkinKey === 'reaver' ? 'radial-gradient(circle, rgba(153,0,255,0.65) 0%, transparent 80%)' : 'radial-gradient(circle, rgba(255,215,0,0.65) 0%, transparent 80%)';
+      flash.style.pointerEvents = 'none';
+      flash.style.zIndex = '99';
+      flash.style.animation = 'flashFade 1.6s ease-out forwards';
+      document.body.appendChild(flash);
+      setTimeout(() => flash.remove(), 1600);
+
+      setTimeout(() => {
+        scene.remove(finGroup);
+        finisherObjects = finisherObjects.filter(f => f !== finGroup);
+      }, 8500);
+    }
+
     function clearMap() {
       mapObjects.forEach(obj => scene.remove(obj));
       mapObjects = [];
@@ -3659,6 +3837,15 @@
       spikeState.ring2 = null;
       spikeState.coreMesh = null;
       spikeSiteAreas = [];
+
+      finisherObjects.forEach(f => scene.remove(f));
+      finisherObjects = [];
+      if (droppedSpikeMesh) {
+        scene.remove(droppedSpikeMesh);
+        droppedSpikeMesh = null;
+        droppedSpikeBeacon = null;
+      }
+      spikeState.carrierId = 0;
 
       if (ascentDoor && ascentDoor.mesh) {
         scene.remove(ascentDoor.mesh);
@@ -4947,6 +5134,11 @@
       document.exitPointerLock();
       renderTopAgentsBar();
 
+      // Drop Spike if carrier dies
+      if (myTeam === 'atk' && spikeState.carrierId === mySlotIdx && !spikeState.isPlanted) {
+        dropSpikeAt(camera.position.x, camera.position.z);
+      }
+
       const aliveCount = teammatesList.filter(t => !t.isDead).length;
       if (aliveCount > 0) {
         document.getElementById('takeover-count').innerText = 
@@ -5132,23 +5324,27 @@
         }
       }
 
-      // Check Enemies
+      // 1. Gather all potential enemy hits along ray
+      let closestTarget = null;
       for (let enemy of enemiesList) {
         if (enemy.isDead) continue;
         const headHits = raycaster.intersectObject(enemy.head);
         if (headHits.length > 0) {
-          damageEnemy(enemy, currentWeapon.dmgHead, 'head');
-          return;
+          if (!closestTarget || headHits[0].distance < closestTarget.dist) {
+            closestTarget = { enemy, dist: headHits[0].distance, part: 'head', point: headHits[0].point, dmg: currentWeapon.dmgHead };
+          }
         }
         const bodyHits = raycaster.intersectObject(enemy.body);
         if (bodyHits.length > 0) {
-          damageEnemy(enemy, currentWeapon.dmgBody, 'body');
-          return;
+          if (!closestTarget || bodyHits[0].distance < closestTarget.dist) {
+            closestTarget = { enemy, dist: bodyHits[0].distance, part: 'body', point: bodyHits[0].point, dmg: currentWeapon.dmgBody };
+          }
         }
         const legHits = raycaster.intersectObjects(enemy.legs);
         if (legHits.length > 0) {
-          damageEnemy(enemy, currentWeapon.dmgLeg, 'leg');
-          return;
+          if (!closestTarget || legHits[0].distance < closestTarget.dist) {
+            closestTarget = { enemy, dist: legHits[0].distance, part: 'leg', point: legHits[0].point, dmg: currentWeapon.dmgLeg };
+          }
         }
       }
 
@@ -5157,11 +5353,16 @@
         const doorHits = raycaster.intersectObject(ascentDoor.mesh);
         if (doorHits.length > 0) {
           damageAscentDoor(currentWeapon.dmgBody, doorHits[0].point, doorHits[0].face.normal);
+          // Door penetration check (Wallbang through shutter!)
+          if (closestTarget && closestTarget.dist > doorHits[0].distance && (closestTarget.dist - doorHits[0].distance < 3.2)) {
+            const wbDmg = Math.floor(closestTarget.dmg * 0.6);
+            damageEnemy(closestTarget.enemy, wbDmg, closestTarget.part, true);
+          }
           return;
         }
       }
 
-      // Check Wall Impact Decal
+      // Check Wall & Obstacle Colliders
       const collMeshList = colliders.map(c => c.mesh);
       
       // Check Haven Sacred Gong Hit
@@ -5174,10 +5375,34 @@
       }
   
       const wallHits = raycaster.intersectObjects(collMeshList);
-      if (wallHits.length > 0) {
-        const hit = wallHits[0];
-        createBulletHoleDecal(hit.point, hit.face.normal);
-        spawnImpactSparks(hit.point, hit.face.normal, false);
+      const firstWall = (wallHits.length > 0) ? wallHits[0] : null;
+
+      // Resolution between Target and Wall Obstacle (Wallbang System)
+      if (closestTarget) {
+        if (!firstWall || closestTarget.dist < firstWall.distance) {
+          // Direct unobstructed hit!
+          damageEnemy(closestTarget.enemy, closestTarget.dmg, closestTarget.part, false);
+          return;
+        } else {
+          // Obstacle between player and target: check penetration depth!
+          const penDepth = closestTarget.dist - firstWall.distance;
+          if (penDepth < 2.5) {
+            // Penetrates obstacle!
+            createBulletHoleDecal(firstWall.point, firstWall.face.normal);
+            spawnImpactSparks(firstWall.point, firstWall.face.normal, false);
+            spawnImpactSparks(closestTarget.point, rayDir, true);
+
+            const wbDmg = Math.floor(closestTarget.dmg * 0.55);
+            damageEnemy(closestTarget.enemy, wbDmg, closestTarget.part, true);
+            return;
+          }
+        }
+      }
+
+      // If stopped by wall or no enemy behind wall
+      if (firstWall) {
+        createBulletHoleDecal(firstWall.point, firstWall.face.normal);
+        spawnImpactSparks(firstWall.point, firstWall.face.normal, false);
       }
     }
 
@@ -5389,7 +5614,7 @@
       }
     }
 
-    function damageEnemy(enemy, amount, hitPart = 'body') {
+    function damageEnemy(enemy, amount, hitPart = 'body', isWallbang = false) {
       if (cheats.oneShot) amount = 9999;
       const isHeadshot = (hitPart === true || hitPart === 'head');
       const isLeg = (hitPart === 'leg');
@@ -5416,12 +5641,13 @@
       showHitmarker(isHeadshot);
       const hitWorldPos = enemy.mesh ? enemy.mesh.position.clone() : camera.position.clone();
       hitWorldPos.y += isHeadshot ? 1.4 : 0.8;
-      showDamagePopup(amount, isHeadshot, hitWorldPos, hitPart);
+      showDamagePopup(amount, isHeadshot, hitWorldPos, hitPart, isWallbang);
 
       if (isHeadshot) sound.playHeadshot();
       else sound.playBodyHit();
 
       if (enemy.hp <= 0 && !enemy.isDead) {
+        lastKilledEnemyPos = enemy.mesh.position.clone();
         cDealt.killed = true;
         enemy.isDead = true;
         enemy.mesh.visible = false;
@@ -5441,8 +5667,12 @@
 
         const streak = sound.playKillSound();
         triggerKillBanner(isHeadshot, streak);
-        addKillFeedEntry('YOU', enemy.name, isHeadshot);
+        addKillFeedEntry('YOU', enemy.name, isHeadshot, isWallbang);
         renderTopAgentsBar();
+
+        if (isWallbang) {
+          showToast('⚡ 관통 사격 처치! (WALLBANG ELIMINATION)');
+        }
 
         const remainingEnemies = enemiesList.filter(e => !e.isDead).length;
         if (remainingEnemies === 1) {
@@ -5555,28 +5785,29 @@
       setTimeout(() => hm.style.opacity = '0', 90);
     }
 
-    function showDamagePopup(dmg, isHeadshot, worldPos = null, hitPart = 'body') {
+    function showDamagePopup(dmg, isHeadshot, worldPos = null, hitPart = 'body', isWallbang = false) {
       let screenX = window.innerWidth / 2;
       let screenY = window.innerHeight / 2 - 40;
 
       if (worldPos) {
         const p = worldPos.clone();
         p.project(camera);
-        if (p.z < 1) { // In front of player's camera
+        if (p.z < 1) {
           screenX = (p.x * 0.5 + 0.5) * window.innerWidth;
           screenY = (-(p.y * 0.5) + 0.5) * window.innerHeight;
         }
       }
 
-      // Add slight jitter so burst hits cascade naturally
       screenX += (Math.random() - 0.5) * 36;
       screenY += (Math.random() - 0.5) * 24;
 
       const pop = document.createElement('div');
       const partClass = isHeadshot ? 'dmg-head' : (hitPart === 'leg' ? 'dmg-leg' : 'dmg-body');
-      pop.className = `dmg-popup ${partClass}`;
+      pop.className = `dmg-popup ${partClass} ${isWallbang ? 'dmg-wb' : ''}`;
       if (isHeadshot) {
-        pop.innerHTML = `<span class="dmg-crit-skull">💀</span> -${dmg} <span class="dmg-crit-text">CRIT!</span>`;
+        pop.innerHTML = `<span class="dmg-crit-skull">💀</span> -${dmg} <span class="dmg-crit-text">CRIT!</span>${isWallbang ? '<span class="dmg-wb-badge">⚡ WALLBANG</span>' : ''}`;
+      } else if (isWallbang) {
+        pop.innerHTML = `<span style="color:#00f0ff; font-weight:800;">⚡</span> -${dmg} <span style="font-size:12px; color:#00f0ff; letter-spacing:1px; font-weight:800;">WB</span>`;
       } else {
         pop.innerHTML = `-${dmg}`;
       }
@@ -5638,6 +5869,7 @@
         sound.playAceSound();
         spawnAceCelebrationConfetti();
         radioVoice.speak('ACE! Magnificent work!');
+        triggerAceFinisher(lastKilledEnemyPos);
       }
 
       if (streakTag) streakTag.innerText = isHeadshot ? '💀 HEADSHOT // ONE TAP' : `KILL ${streak}`;
@@ -5655,11 +5887,11 @@
       setTimeout(() => banner.classList.remove('active'), 2100);
     }
 
-    function addKillFeedEntry(killer, victim, isHeadshot) {
+    function addKillFeedEntry(killer, victim, isHeadshot, isWallbang = false) {
       const feed = document.getElementById('kill-feed');
       const item = document.createElement('div');
       item.className = 'feed-item';
-      item.innerHTML = `<span>${killer}</span> <span style="color:#778899;">[${currentWeapon.name.split(' ')[0]}]</span> <span>${victim}</span> ${isHeadshot ? '<span class="feed-hs">🎯 HS</span>' : ''}`;
+      item.innerHTML = `<span>${killer}</span> <span style="color:#778899;">[${currentWeapon.name.split(' ')[0]}]</span> <span>${victim}</span> ${isWallbang ? '<span style="color:#00f0ff; font-weight:800; margin-left:4px;">⚡ WB</span>' : ''} ${isHeadshot ? '<span class="feed-hs">🎯 HS</span>' : ''}`;
       feed.appendChild(item);
       setTimeout(() => item.remove(), 4000);
     }
@@ -6438,6 +6670,22 @@
         }
       });
 
+      // Draw Dropped Spike on Minimap
+      if (droppedSpikeMesh && droppedSpikeMesh.visible && !spikeState.isPlanted) {
+        const sx = cx + (droppedSpikeMesh.position.x - camera.position.x) * scale;
+        const sz = cy + (droppedSpikeMesh.position.z - camera.position.z) * scale;
+        if (sx > 4 && sx < 186 && sz > 4 && sz < 186) {
+          miniCtx.fillStyle = '#ffaa00';
+          miniCtx.fillRect(sx - 5, sz - 5, 10, 10);
+          miniCtx.strokeStyle = '#ffffff';
+          miniCtx.lineWidth = 1.5;
+          miniCtx.strokeRect(sx - 5, sz - 5, 10, 10);
+          miniCtx.font = 'bold 7px sans-serif';
+          miniCtx.fillStyle = '#070b10';
+          miniCtx.fillText('S', sx, sz);
+        }
+      }
+
       teammatesList.forEach(t => {
         if (t.isDead) return;
         const bx = cx + (t.mesh.position.x - camera.position.x) * scale;
@@ -6508,8 +6756,30 @@
       requestAnimationFrame(animate);
 
       const now = performance.now();
-      const dt = Math.min((now - lastTime) / 1000, 0.1);
+      const rawDt = Math.min((now - lastTime) / 1000, 0.1);
+      const dt = rawDt * gameTimeScale;
       lastTime = now;
+
+      // Animate Active 3D Finisher Monuments
+      finisherObjects.forEach(f => {
+        f.rotation.y += 0.8 * dt;
+        if (f.children[0]) {
+          f.children[0].material.opacity = Math.max(0.3, Math.sin(now * 0.005) * 0.35 + 0.55);
+        }
+      });
+
+      // Check Proximity Spike Pickup
+      if (droppedSpikeMesh && droppedSpikeMesh.visible && !spikeState.isPlanted && myTeam === 'atk') {
+        if (droppedSpikeBeacon) droppedSpikeBeacon.rotation.y += 1.8 * dt;
+        const distToSpike = camera.position.distanceTo(droppedSpikeMesh.position);
+        if (distToSpike < 2.2) {
+          droppedSpikeMesh.visible = false;
+          spikeState.carrierId = mySlotIdx;
+          sound.playSwitchClick();
+          showToast('📦 [SPIKE] 스파이크를 회수했습니다!');
+          radioVoice.speak('I have the Spike!');
+        }
+      }
 
       // Smooth Recoil Recovery
       if (recoilOffset > 0 && !keys['Mouse0']) {
@@ -6628,10 +6898,23 @@
 
           if (nextY <= minEyeY) {
             nextY = minEyeY;
+            if (!player.isGrounded && player.velocity.y < -3.2) {
+              landingDip = Math.min(0.12, Math.abs(player.velocity.y) * 0.015);
+              sound.playFootstep('stone');
+            }
             player.velocity.y = 0;
             player.isGrounded = true;
           }
-          camera.position.y = nextY;
+          camera.position.y = nextY - landingDip;
+          if (landingDip > 0) {
+            landingDip = THREE.MathUtils.lerp(landingDip, 0, Math.min(1, 16 * dt));
+          }
+          // Subtle tactical head-bob while walking/sprinting
+          if (moveDir.lengthSq() > 0 && player.isGrounded) {
+            const bobFreq = player.isWalking ? 7.5 : 12;
+            const bobAmp = player.isWalking ? 0.008 : 0.016;
+            camera.position.y += Math.sin(now * 0.001 * bobFreq) * bobAmp;
+          }
         }
 
         const speedRatio = Math.min(player.velocity.length() / player.speed, 1.2);
