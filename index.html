@@ -928,18 +928,85 @@
     .hm-3 { bottom: 3px; left: 3px; transform: rotate(-45deg); }
     .hm-4 { bottom: 3px; right: 3px; transform: rotate(45deg); }
 
-    /* Damage Popup */
+    /* Enhanced 3D In-World Combat Damage Popups */
     .dmg-popup {
       position: absolute;
       font-family: var(--font-title);
-      font-size: 28px; font-weight: 800;
+      font-weight: 800;
       pointer-events: none;
-      animation: dmgFloat 0.65s ease-out forwards;
-      text-shadow: 0 2px 6px #000;
+      z-index: 60;
+      user-select: none;
+      transform: translate(-50%, -50%);
+      animation: dmgFloat3D 0.75s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+      white-space: nowrap;
     }
-    @keyframes dmgFloat {
-      0% { transform: translate(-50%, -50%) scale(1.4); opacity: 1; }
-      100% { transform: translate(-50%, -90px) scale(0.85); opacity: 0; }
+    .dmg-popup.dmg-head {
+      font-size: 34px;
+      color: #fff;
+      text-shadow: 0 0 16px rgba(255, 215, 0, 0.9), 0 2px 6px #000, 0 0 28px rgba(255, 70, 85, 0.8);
+      border: 1px solid rgba(255, 215, 0, 0.7);
+      background: rgba(14, 20, 28, 0.88);
+      padding: 2px 12px;
+      border-radius: 4px;
+      box-shadow: 0 0 20px rgba(255, 215, 0, 0.4);
+    }
+    .dmg-popup.dmg-head .dmg-crit-skull {
+      color: #ffd700;
+      filter: drop-shadow(0 0 8px #ffd700);
+    }
+    .dmg-popup.dmg-head .dmg-crit-text {
+      font-size: 15px;
+      color: #ff4655;
+      letter-spacing: 1.5px;
+      font-weight: 800;
+    }
+    .dmg-popup.dmg-body {
+      font-size: 26px;
+      color: #ffc83b;
+      text-shadow: 0 2px 8px #000, 0 0 12px rgba(255, 200, 59, 0.7);
+      background: rgba(14, 20, 28, 0.65);
+      padding: 2px 8px;
+      border-radius: 3px;
+      border: 1px solid rgba(255, 200, 59, 0.35);
+    }
+    .dmg-popup.dmg-leg {
+      font-size: 22px;
+      color: #d1d8e0;
+      text-shadow: 0 2px 6px #000;
+      background: rgba(14, 20, 28, 0.5);
+      padding: 1px 6px;
+      border-radius: 3px;
+    }
+    @keyframes dmgFloat3D {
+      0% {
+        transform: translate(-50%, -20%) scale(1.45);
+        opacity: 1;
+      }
+      22% {
+        transform: translate(-50%, -50%) scale(1.08);
+        opacity: 1;
+      }
+      100% {
+        transform: translate(-50%, -130px) scale(0.82);
+        opacity: 0;
+      }
+    }
+
+    /* Multi-Kill Banner Tiers (Double, Triple, Quadra, Ace) */
+    #kill-banner.tier-double {
+      background: linear-gradient(90deg, transparent 0%, rgba(14, 20, 28, 0.95) 20%, rgba(255, 170, 0, 0.92) 50%, rgba(14, 20, 28, 0.95) 80%, transparent 100%);
+      border-color: #ffaa00;
+      box-shadow: 0 0 50px rgba(255, 170, 0, 0.8);
+    }
+    #kill-banner.tier-triple {
+      background: linear-gradient(90deg, transparent 0%, rgba(14, 20, 28, 0.95) 20%, rgba(0, 240, 255, 0.92) 50%, rgba(14, 20, 28, 0.95) 80%, transparent 100%);
+      border-color: #00f0ff;
+      box-shadow: 0 0 55px rgba(0, 240, 255, 0.85);
+    }
+    #kill-banner.tier-quadra {
+      background: linear-gradient(90deg, transparent 0%, rgba(14, 20, 28, 0.95) 20%, rgba(255, 0, 85, 0.94) 50%, rgba(14, 20, 28, 0.95) 80%, transparent 100%);
+      border-color: #ff0055;
+      box-shadow: 0 0 65px rgba(255, 0, 85, 0.9);
     }
 
     #toast-msg {
@@ -1609,7 +1676,7 @@
       <div style="display: flex; justify-content: space-between; align-items: flex-end; border-bottom: 2px solid var(--val-border); padding-bottom: 10px; margin-bottom: 14px;">
         <div>
           <h3 style="font-family: var(--font-title); font-size: 34px; letter-spacing: 2px; color: #fff; line-height: 1;">TACTICAL SCOREBOARD // 5V5 MATCH</h3>
-          <div style="font-size: 12px; color: #8899a6;">PRESS [TAB] TO TOGGLE | [G] TO CYCLE WEAPON SKINS | [M] TO CYCLE MAPS</div>
+          <div style="font-size: 12px; color: #8899a6;">PRESS [TAB] TO TOGGLE | [Y] INSPECT SKIN | [G] CYCLE SKINS | [H] AGENTS | [M] MAPS</div>
         </div>
         <div style="display: flex; gap: 16px; font-family: var(--font-title); font-size: 28px;">
           <span style="color: var(--val-cyan);">ATK <span id="sb-score-atk">0</span></span>
@@ -1872,6 +1939,11 @@
       constructor() {
         this.ctx = null;
         this.masterGain = null;
+        this.ambientGain = null;
+        this.ambientSource = null;
+        this.ambientFilter = null;
+        this.ambientTimer = null;
+        this.currentAmbientMap = null;
         this.killStreak = 0;
         this.lastKillTime = 0;
         this.lastStepTime = 0;
@@ -1883,8 +1955,157 @@
           this.masterGain = this.ctx.createGain();
           this.masterGain.gain.setValueAtTime(0.8, this.ctx.currentTime);
           this.masterGain.connect(this.ctx.destination);
+
+          this.ambientGain = this.ctx.createGain();
+          this.ambientGain.gain.setValueAtTime(0.065, this.ctx.currentTime);
+          this.ambientGain.connect(this.dest);
         }
         if (this.ctx.state === 'suspended') this.ctx.resume();
+      }
+
+      startAmbient(mapKey = 'ascent') {
+        if (!this.ctx) this.init();
+        if (!this.ctx || !this.ambientGain) return;
+        this.currentAmbientMap = mapKey;
+
+        if (this.ambientSource) {
+          try { this.ambientSource.stop(); } catch (e) {}
+          this.ambientSource.disconnect();
+          this.ambientSource = null;
+        }
+        if (this.ambientTimer) {
+          clearInterval(this.ambientTimer);
+          this.ambientTimer = null;
+        }
+
+        // Procedural 4-second seamless filtered brownian noise buffer
+        const bufferSize = this.ctx.sampleRate * 4;
+        const buffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
+        const data = buffer.getChannelData(0);
+        let last = 0.0;
+        for (let i = 0; i < bufferSize; i++) {
+          const white = Math.random() * 2 - 1;
+          last = (last + (0.02 * white)) / 1.02;
+          data[i] = last * 3.2;
+        }
+
+        this.ambientSource = this.ctx.createBufferSource();
+        this.ambientSource.buffer = buffer;
+        this.ambientSource.loop = true;
+
+        if (this.ambientFilter) {
+          try { this.ambientFilter.disconnect(); } catch (e) {}
+        }
+        this.ambientFilter = this.ctx.createBiquadFilter();
+
+        if (mapKey === 'ascent') {
+          // Venetian canal breeze lowpass
+          this.ambientFilter.type = 'lowpass';
+          this.ambientFilter.frequency.setValueAtTime(220, this.ctx.currentTime);
+          // Distant Cathedral Bell toll every 28 seconds
+          this.ambientTimer = setInterval(() => {
+            if (this.currentAmbientMap === 'ascent') this.playCathedralBell();
+          }, 28000);
+        } else if (mapKey === 'bind') {
+          // Sandstone canyon whistling desert wind
+          this.ambientFilter.type = 'bandpass';
+          this.ambientFilter.frequency.setValueAtTime(520, this.ctx.currentTime);
+          this.ambientFilter.Q.setValueAtTime(1.8, this.ctx.currentTime);
+        } else if (mapKey === 'haven') {
+          // High mountain temple crisp breeze
+          this.ambientFilter.type = 'bandpass';
+          this.ambientFilter.frequency.setValueAtTime(820, this.ctx.currentTime);
+          this.ambientFilter.Q.setValueAtTime(1.2, this.ctx.currentTime);
+          // Gentle sacred wind chimes every 16 seconds
+          this.ambientTimer = setInterval(() => {
+            if (this.currentAmbientMap === 'haven') this.playPagodaChime();
+          }, 16000);
+        } else {
+          this.ambientFilter.type = 'lowpass';
+          this.ambientFilter.frequency.setValueAtTime(280, this.ctx.currentTime);
+        }
+
+        this.ambientSource.connect(this.ambientFilter);
+        this.ambientFilter.connect(this.ambientGain);
+        this.ambientSource.start(0);
+      }
+
+      playCathedralBell() {
+        if (!this.ctx || !this.ambientGain) return;
+        const now = this.ctx.currentTime;
+        const harmonics = [349.23, 698.46, 1047.69]; // F4 bell harmonics
+        const gains = [0.07, 0.035, 0.015];
+        harmonics.forEach((freq, idx) => {
+          const osc = this.ctx.createOscillator();
+          const g = this.ctx.createGain();
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(freq, now);
+          g.gain.setValueAtTime(gains[idx], now);
+          g.gain.exponentialRampToValueAtTime(0.0001, now + 3.8);
+          osc.connect(g);
+          g.connect(this.ambientGain);
+          osc.start(now);
+          osc.stop(now + 4.0);
+        });
+      }
+
+      playPagodaChime() {
+        if (!this.ctx || !this.ambientGain) return;
+        const now = this.ctx.currentTime;
+        const notes = [587.33, 659.25, 783.99, 880.0, 1046.5];
+        const freq = notes[Math.floor(Math.random() * notes.length)];
+        const osc = this.ctx.createOscillator();
+        const g = this.ctx.createGain();
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(freq, now);
+        g.gain.setValueAtTime(0.05, now);
+        g.gain.exponentialRampToValueAtTime(0.0001, now + 2.5);
+        osc.connect(g);
+        g.connect(this.ambientGain);
+        osc.start(now);
+        osc.stop(now + 2.6);
+      }
+
+      playInspect() {
+        if (!this.ctx) return;
+        const now = this.ctx.currentTime;
+        // Mechanical weapon bolt & slide click
+        const osc1 = this.ctx.createOscillator();
+        const gain1 = this.ctx.createGain();
+        osc1.type = 'triangle';
+        osc1.frequency.setValueAtTime(540, now);
+        osc1.frequency.exponentialRampToValueAtTime(140, now + 0.1);
+        gain1.gain.setValueAtTime(0.18, now);
+        gain1.gain.exponentialRampToValueAtTime(0.001, now + 0.1);
+        osc1.connect(gain1);
+        gain1.connect(this.dest);
+        osc1.start(now);
+        osc1.stop(now + 0.11);
+
+        // Slide return click
+        const osc2 = this.ctx.createOscillator();
+        const gain2 = this.ctx.createGain();
+        osc2.type = 'sine';
+        osc2.frequency.setValueAtTime(840, now + 0.16);
+        osc2.frequency.exponentialRampToValueAtTime(310, now + 0.26);
+        gain2.gain.setValueAtTime(0.12, now + 0.16);
+        gain2.gain.exponentialRampToValueAtTime(0.001, now + 0.26);
+        osc2.connect(gain2);
+        gain2.connect(this.dest);
+        osc2.start(now + 0.16);
+        osc2.stop(now + 0.27);
+
+        // Metallic sheen resonance
+        const osc3 = this.ctx.createOscillator();
+        const gain3 = this.ctx.createGain();
+        osc3.type = 'sine';
+        osc3.frequency.setValueAtTime(1320, now + 0.32);
+        gain3.gain.setValueAtTime(0.04, now + 0.32);
+        gain3.gain.exponentialRampToValueAtTime(0.001, now + 0.85);
+        osc3.connect(gain3);
+        gain3.connect(this.dest);
+        osc3.start(now + 0.32);
+        osc3.stop(now + 0.9);
       }
       get dest() {
         return this.masterGain || (this.ctx ? this.ctx.destination : null);
@@ -3622,6 +3843,7 @@
 
       // 1. Dynamic Atmosphere (Sky, Fog, Lighting)
       setMapAtmosphere(mapKey);
+      sound.startAmbient(mapKey);
 
       // ==========================================================
       // MAP 1: ASCENT (어센트) - 이탈리아 베네치아 요새 & 전동 셔터 도어
@@ -4341,6 +4563,9 @@
 
     function switchWeapon(key) {
       if (!WEAPONS[key] || currentWeaponKey === key) return;
+      isInspecting = false;
+      gunGroup.rotation.set(0, 0, 0);
+      gunGroup.position.copy(DEFAULT_GUN_POS);
       currentWeaponKey = key;
       currentWeapon = WEAPONS[key];
       rebuildWeaponModel(key);
@@ -4468,10 +4693,12 @@
     }
 
     function startInspect() {
-      if (isInspecting || currentWeapon.isReloading) return;
+      if (isInspecting || currentWeapon.isReloading || player.isADS) return;
       isInspecting = true;
       inspectTimer = performance.now();
-      showToast('무기 조사 // INSPECTING WEAPON');
+      sound.init();
+      sound.playInspect();
+      showToast('🔍 무기 점검 // INSPECTING ' + currentWeapon.name.toUpperCase());
     }
 
     function updateADS() {
@@ -4829,6 +5056,11 @@
       }
 
       if (player.isDead || roundState === 'BUY_PHASE') return;
+      if (isInspecting) {
+        isInspecting = false;
+        gunGroup.rotation.set(0, 0, 0);
+        gunGroup.position.copy(DEFAULT_GUN_POS);
+      }
       const now = performance.now() / 1000;
       if (currentWeapon.isReloading || (!cheats.infiniteAmmo && currentWeapon.ammo <= 0)) {
         if (currentWeapon.ammo <= 0) reloadWeapon();
@@ -5136,8 +5368,10 @@
       pBot.hp -= amount;
       showHitmarker(isHeadshot);
       sound.playHitmarker(isHeadshot);
-      spawnImpactSparks(camera.position.clone().add(rayDir.clone().multiplyScalar(4)), new THREE.Vector3(0, 1, 0), true);
-      showDamagePopup(amount, isHeadshot);
+      const hitWorldPos = pBot.mesh ? pBot.mesh.position.clone() : camera.position.clone();
+      hitWorldPos.y += isHeadshot ? 1.5 : 0.9;
+      spawnImpactSparks(hitWorldPos, new THREE.Vector3(0, 1, 0), true);
+      showDamagePopup(amount, isHeadshot, hitWorldPos, isHeadshot ? 'head' : 'body');
       if (isHeadshot) sound.playHeadshot();
       else sound.playBodyHit();
 
@@ -5180,7 +5414,9 @@
 
       enemy.hp -= amount;
       showHitmarker(isHeadshot);
-      showDamagePopup(amount, isHeadshot);
+      const hitWorldPos = enemy.mesh ? enemy.mesh.position.clone() : camera.position.clone();
+      hitWorldPos.y += isHeadshot ? 1.4 : 0.8;
+      showDamagePopup(amount, isHeadshot, hitWorldPos, hitPart);
 
       if (isHeadshot) sound.playHeadshot();
       else sound.playBodyHit();
@@ -5319,15 +5555,35 @@
       setTimeout(() => hm.style.opacity = '0', 90);
     }
 
-    function showDamagePopup(dmg, isHeadshot) {
+    function showDamagePopup(dmg, isHeadshot, worldPos = null, hitPart = 'body') {
+      let screenX = window.innerWidth / 2;
+      let screenY = window.innerHeight / 2 - 40;
+
+      if (worldPos) {
+        const p = worldPos.clone();
+        p.project(camera);
+        if (p.z < 1) { // In front of player's camera
+          screenX = (p.x * 0.5 + 0.5) * window.innerWidth;
+          screenY = (-(p.y * 0.5) + 0.5) * window.innerHeight;
+        }
+      }
+
+      // Add slight jitter so burst hits cascade naturally
+      screenX += (Math.random() - 0.5) * 36;
+      screenY += (Math.random() - 0.5) * 24;
+
       const pop = document.createElement('div');
-      pop.className = 'dmg-popup';
-      pop.innerText = '-' + dmg;
-      pop.style.left = (window.innerWidth / 2 + (Math.random() - 0.5) * 80) + 'px';
-      pop.style.top = (window.innerHeight / 2 - 40 + (Math.random() - 0.5) * 40) + 'px';
-      pop.style.color = isHeadshot ? '#ff4655' : '#ffc83b';
+      const partClass = isHeadshot ? 'dmg-head' : (hitPart === 'leg' ? 'dmg-leg' : 'dmg-body');
+      pop.className = `dmg-popup ${partClass}`;
+      if (isHeadshot) {
+        pop.innerHTML = `<span class="dmg-crit-skull">💀</span> -${dmg} <span class="dmg-crit-text">CRIT!</span>`;
+      } else {
+        pop.innerHTML = `-${dmg}`;
+      }
+      pop.style.left = `${screenX}px`;
+      pop.style.top = `${screenY}px`;
       document.body.appendChild(pop);
-      setTimeout(() => pop.remove(), 650);
+      setTimeout(() => pop.remove(), 750);
     }
 
     
@@ -5367,8 +5623,17 @@
       const streakTag = document.getElementById('kill-banner-streak');
       const labels = ['ELIMINATED', 'DOUBLE KILL', 'TRIPLE KILL', 'QUADRA KILL', 'ACE // ENEMY TEAM WIPED'];
 
-      banner.classList.remove('tier-ace');
-      if (streak >= 5) {
+      banner.classList.remove('tier-double', 'tier-triple', 'tier-quadra', 'tier-ace');
+      if (streak === 2) {
+        banner.classList.add('tier-double');
+        radioVoice.speak('Double Kill!');
+      } else if (streak === 3) {
+        banner.classList.add('tier-triple');
+        radioVoice.speak('Triple Kill!');
+      } else if (streak === 4) {
+        banner.classList.add('tier-quadra');
+        radioVoice.speak('Quadra Kill!');
+      } else if (streak >= 5) {
         banner.classList.add('tier-ace');
         sound.playAceSound();
         spawnAceCelebrationConfetti();
@@ -5380,10 +5645,10 @@
 
       if (isHeadshot) {
         banner.style.borderColor = '#ffd700';
-        banner.style.boxShadow = '0 0 30px rgba(255, 215, 0, 0.7)';
+        banner.style.boxShadow = '0 0 32px rgba(255, 215, 0, 0.75)';
       } else {
-        banner.style.borderColor = 'var(--val-red)';
-        banner.style.boxShadow = '0 0 25px var(--val-red)';
+        banner.style.borderColor = '';
+        banner.style.boxShadow = '';
       }
 
       banner.classList.add('active');
@@ -6089,10 +6354,51 @@
     }
 
     /* ==========================================================
-       9. RADAR MINIMAP WITH VISION CONE
+       9. RADAR MINIMAP WITH VISION CONE & TACTICAL CALLOUTS
        ========================================================== */
     const miniCanvas = document.getElementById('minimap-canvas');
     const miniCtx = miniCanvas.getContext('2d');
+
+    const MAP_CALLOUTS = {
+      ascent: [
+        { label: 'A SITE', x: 28, z: -24, color: '#00f0ff' },
+        { label: 'A HEAVEN', x: 34, z: -34, color: '#88a0b8' },
+        { label: 'MID ARCH', x: 0, z: 0, color: '#ffc83b' },
+        { label: 'CATWALK', x: 12, z: -8, color: '#88a0b8' },
+        { label: 'MARKET', x: -12, z: -4, color: '#88a0b8' },
+        { label: 'B SITE', x: -28, z: -24, color: '#00f0ff' },
+        { label: 'B SHUTTER', x: -18, z: -14, color: '#ff4655' },
+        { label: 'DEF SPAWN', x: 0, z: -48, color: '#00ffaa' },
+        { label: 'ATK SPAWN', x: 0, z: 46, color: '#ff4655' }
+      ],
+      bind: [
+        { label: 'A SITE', x: 26, z: -22, color: '#00f0ff' },
+        { label: 'A TRUCK', x: 26, z: -18, color: '#88a0b8' },
+        { label: 'A BATHS', x: 40, z: -2, color: '#88a0b8' },
+        { label: 'U-HALL', x: 32, z: -32, color: '#88a0b8' },
+        { label: 'B SITE', x: -26, z: -22, color: '#00f0ff' },
+        { label: 'HOOKAH', x: -24, z: 8, color: '#ffc83b' },
+        { label: 'TP A→B', x: 18, z: 5, color: '#00f0ff' },
+        { label: 'TP B→A', x: -22, z: 18, color: '#00f0ff' },
+        { label: 'DEF SPAWN', x: 0, z: -48, color: '#00ffaa' },
+        { label: 'ATK SPAWN', x: 0, z: 46, color: '#ff4655' }
+      ],
+      haven: [
+        { label: 'A SITE', x: 34, z: -24, color: '#00f0ff' },
+        { label: 'A TOWER', x: 34, z: -34, color: '#88a0b8' },
+        { label: 'B GONG', x: 0, z: -24, color: '#ffd700' },
+        { label: 'MID DOORS', x: 0, z: 0, color: '#ffc83b' },
+        { label: 'C SITE', x: -34, z: -24, color: '#00f0ff' },
+        { label: 'C GARAGE', x: -18, z: -12, color: '#88a0b8' },
+        { label: 'DEF SPAWN', x: 0, z: -48, color: '#00ffaa' },
+        { label: 'ATK SPAWN', x: 0, z: 46, color: '#ff4655' }
+      ],
+      range: [
+        { label: 'TARGETS', x: 0, z: -22, color: '#00f0ff' },
+        { label: 'BENCH', x: 0, z: 0, color: '#ffc83b' },
+        { label: 'DEFUSE', x: 0, z: 22, color: '#00ffaa' }
+      ]
+    };
 
     function drawMinimap() {
       miniCtx.clearRect(0, 0, 190, 190);
@@ -6108,6 +6414,28 @@
         const maxX = c.box.max.x - camera.position.x;
         const maxZ = c.box.max.z - camera.position.z;
         miniCtx.fillRect(cx + minX * scale, cy + minZ * scale, (maxX - minX) * scale, (maxZ - minZ) * scale);
+      });
+
+      // Draw Tactical Radar Callouts
+      const currentMapKey = MAP_LIST[currentMapIndex] || 'ascent';
+      const callouts = MAP_CALLOUTS[currentMapKey] || [];
+      miniCtx.font = 'bold 7px "Segoe UI", sans-serif';
+      miniCtx.textAlign = 'center';
+      miniCtx.textBaseline = 'middle';
+      callouts.forEach(c => {
+        const bx = cx + (c.x - camera.position.x) * scale;
+        const bz = cy + (c.z - camera.position.z) * scale;
+        const distSq = (bx - cx) * (bx - cx) + (bz - cy) * (bz - cy);
+        if (distSq < 7400) {
+          const txtWidth = miniCtx.measureText(c.label).width;
+          miniCtx.fillStyle = 'rgba(10, 16, 24, 0.82)';
+          miniCtx.fillRect(bx - (txtWidth + 6) / 2, bz - 5, txtWidth + 6, 10);
+          miniCtx.strokeStyle = c.color;
+          miniCtx.lineWidth = 1;
+          miniCtx.strokeRect(bx - (txtWidth + 6) / 2, bz - 5, txtWidth + 6, 10);
+          miniCtx.fillStyle = c.color;
+          miniCtx.fillText(c.label, bx, bz);
+        }
       });
 
       teammatesList.forEach(t => {
@@ -6319,14 +6647,43 @@
         gunSwayYaw = THREE.MathUtils.lerp(gunSwayYaw, 0, Math.min(1, 14 * dt));
         gunSwayPitch = THREE.MathUtils.lerp(gunSwayPitch, 0, Math.min(1, 14 * dt));
 
-        // Inspect Weapon Motion
+        // Inspect Weapon Motion (Multi-phase cinematic inspection)
         if (isInspecting) {
-          const progress = (now - inspectTimer) / 1000;
-          if (progress < 2.0) {
-            gunGroup.rotation.set(0, Math.sin(progress * Math.PI) * 0.65, Math.sin(progress * Math.PI) * 0.45);
-            gunGroup.position.x = DEFAULT_GUN_POS.x - Math.sin(progress * Math.PI) * 0.12;
+          const elapsed = (now - inspectTimer) / 1000;
+          const totalDuration = 2.4;
+          if (elapsed < totalDuration) {
+            const p = elapsed / totalDuration;
+            let rx = 0, ry = 0, rz = 0;
+            let px = DEFAULT_GUN_POS.x, py = DEFAULT_GUN_POS.y, pz = DEFAULT_GUN_POS.z;
+            if (p < 0.35) {
+              const t = Math.sin((p / 0.35) * (Math.PI / 2));
+              ry = THREE.MathUtils.lerp(0, 0.75, t);
+              rz = THREE.MathUtils.lerp(0, 0.45, t);
+              rx = THREE.MathUtils.lerp(0, -0.25, t);
+              px = THREE.MathUtils.lerp(DEFAULT_GUN_POS.x, DEFAULT_GUN_POS.x - 0.12, t);
+              py = THREE.MathUtils.lerp(DEFAULT_GUN_POS.y, DEFAULT_GUN_POS.y + 0.04, t);
+            } else if (p < 0.72) {
+              const t = (p - 0.35) / 0.37;
+              ry = THREE.MathUtils.lerp(0.75, -0.5, t);
+              rz = THREE.MathUtils.lerp(0.45, -0.25, t);
+              rx = THREE.MathUtils.lerp(-0.25, 0.18, t);
+              px = THREE.MathUtils.lerp(DEFAULT_GUN_POS.x - 0.12, DEFAULT_GUN_POS.x + 0.06, t);
+              py = THREE.MathUtils.lerp(DEFAULT_GUN_POS.y + 0.04, DEFAULT_GUN_POS.y - 0.02, t);
+            } else {
+              const t = (p - 0.72) / 0.28;
+              const ease = 1 - Math.pow(1 - t, 3);
+              ry = THREE.MathUtils.lerp(-0.5, 0, ease);
+              rz = THREE.MathUtils.lerp(-0.25, 0, ease);
+              rx = THREE.MathUtils.lerp(0.18, 0, ease);
+              px = THREE.MathUtils.lerp(DEFAULT_GUN_POS.x + 0.06, DEFAULT_GUN_POS.x, ease);
+              py = THREE.MathUtils.lerp(DEFAULT_GUN_POS.y - 0.02, DEFAULT_GUN_POS.y, ease);
+            }
+            gunGroup.rotation.set(rx, ry, rz);
+            gunGroup.position.set(px, py, pz);
           } else {
             isInspecting = false;
+            gunGroup.position.copy(DEFAULT_GUN_POS);
+            gunGroup.rotation.set(0, 0, 0);
           }
         } else {
           const isMoving = (moveDir.lengthSq() > 0 && player.isGrounded);
