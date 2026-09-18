@@ -5295,7 +5295,277 @@
 
     /* 3D SKILLS LOGIC */
     // C: Cloudburst (3D Smoke Sphere)
-    function castSkillC() {
+    
+    /* ==========================================================
+       AUTHENTIC 4-AGENT 3D FUNCTIONAL ABILITIES SYSTEM
+       JETT, PHOENIX, REYNA, OMEN
+       ========================================================== */
+
+    // --- PHOENIX ABILITIES ---
+    function castPhoenixBlaze() {
+      showToast('🔥 [피닉스] 화염 장벽 전개! (BLAZE)');
+      radioVoice.speak('Watch your eyes!');
+      sound.playFlame();
+
+      const fwd = new THREE.Vector3(0, 0, -1).applyQuaternion(camera.quaternion);
+      fwd.y = 0; fwd.normalize();
+      const right = new THREE.Vector3().crossVectors(new THREE.Vector3(0, 1, 0), fwd).normalize();
+
+      const wallGrp = new THREE.Group();
+      const fireMat = new THREE.MeshStandardMaterial({
+        color: 0xff4500, emissive: 0xff6600, emissiveIntensity: 1.2, transparent: true, opacity: 0.85
+      });
+
+      for (let i = 0; i < 7; i++) {
+        const fBox = new THREE.Mesh(new THREE.BoxGeometry(0.6, 4.5, 2.2), fireMat);
+        fBox.position.copy(camera.position).addScaledVector(fwd, 4 + i * 2.2);
+        fBox.position.y = 2.2;
+        wallGrp.add(fBox);
+      }
+      scene.add(wallGrp);
+      activeSmokes.push({ mesh: wallGrp, expire: (performance.now() / 1000) + 8 });
+
+      // Phoenix self-heal
+      player.hp = Math.min(100, player.hp + 25);
+      updateHUD();
+
+      setTimeout(() => scene.remove(wallGrp), 8000);
+    }
+
+    function castPhoenixFlash() {
+      showToast('⚡ [피닉스] 커브볼 섬광! (CURVEBALL)');
+      radioVoice.speak('Careful!');
+      sound.playFlash();
+
+      const flashOverlay = document.getElementById('tp-flash-overlay');
+      if (flashOverlay) {
+        flashOverlay.style.background = '#ffcc00';
+        flashOverlay.style.opacity = '0.9';
+        setTimeout(() => { flashOverlay.style.opacity = '0'; flashOverlay.style.background = '#00f0ff'; }, 500);
+      }
+
+      // Blind nearby enemy bots
+      enemiesList.forEach(e => {
+        if (!e.isDead && camera.position.distanceTo(e.mesh.position) < 35) {
+          e.isBlinded = true;
+          setTimeout(() => { e.isBlinded = false; }, 2500);
+        }
+      });
+    }
+
+    function castPhoenixHotHands() {
+      showToast('🔥 [피닉스] 뜨거운 손 투척! (HOT HANDS)');
+      radioVoice.speak('Hot hands!');
+      sound.playFlame();
+
+      const dropPos = camera.position.clone().add(new THREE.Vector3(0, 0, -12).applyQuaternion(camera.quaternion));
+      dropPos.y = 0.05;
+
+      const firePoolGeo = new THREE.RingGeometry(0.2, 4.5, 32);
+      const firePoolMat = new THREE.MeshBasicMaterial({ color: 0xff3300, side: THREE.DoubleSide, transparent: true, opacity: 0.85 });
+      const firePool = new THREE.Mesh(firePoolGeo, firePoolMat);
+      firePool.rotation.x = Math.PI / 2;
+      firePool.position.copy(dropPos);
+      scene.add(firePool);
+
+      // Spawn burning fire spark particles
+      for (let i = 0; i < 20; i++) {
+        const fp = new THREE.Mesh(new THREE.BoxGeometry(0.06, 0.06, 0.06), new THREE.MeshBasicMaterial({ color: 0xffaa00 }));
+        fp.position.copy(dropPos).add(new THREE.Vector3((Math.random() - 0.5) * 4, Math.random() * 0.5, (Math.random() - 0.5) * 4));
+        scene.add(fp);
+        activeParticles.push({
+          mesh: fp, vel: new THREE.Vector3(0, 1.5 + Math.random(), 0), life: 3.5, maxLife: 3.5
+        });
+      }
+
+      // Damage enemies in fire pool
+      setTimeout(() => {
+        enemiesList.forEach(e => {
+          if (!e.isDead && e.mesh.position.distanceTo(dropPos) < 4.8) {
+            e.hp -= 60;
+            spawnImpactSparks(e.mesh.position, new THREE.Vector3(0, 1, 0), true);
+            if (e.hp <= 0) {
+              e.isDead = true;
+              scene.remove(e.mesh);
+              sound.playKillSound();
+              addKillFeedEntry('YOU', e.name, false);
+            }
+          }
+        });
+      }, 800);
+
+      setTimeout(() => scene.remove(firePool), 5000);
+    }
+
+    function castPhoenixRunItBack() {
+      showToast('🔥 [피닉스] 역습 궁극기 가동! // COME ON, LET\'S GO!');
+      radioVoice.speak('Come on, let\'s go!');
+      sound.playAceSound();
+
+      const anchorPos = camera.position.clone();
+      const marker = new THREE.Mesh(new THREE.CylinderGeometry(0.6, 0.6, 0.1, 16), new THREE.MeshBasicMaterial({ color: 0xff5500 }));
+      marker.position.copy(anchorPos);
+      scene.add(marker);
+
+      showToast('10초간 불사 상태! 사망 시 표식 위치로 소환');
+      const prevGodMode = cheats.godMode;
+      cheats.godMode = true;
+
+      setTimeout(() => {
+        cheats.godMode = prevGodMode;
+        camera.position.copy(anchorPos);
+        player.hp = 100;
+        updateHUD();
+        scene.remove(marker);
+        sound.playTeleport();
+        showToast('🔥 [피닉스] 표식 위치로 부활 귀환!');
+      }, 10000);
+    }
+
+    // --- REYNA ABILITIES ---
+    function castReynaLeer() {
+      showToast('👁️ [레이나] 눈총 실명 전개! (LEER)');
+      radioVoice.speak('The eye watches!');
+      sound.playFlame();
+
+      const eyePos = camera.position.clone().add(new THREE.Vector3(0, 1.5, -9).applyQuaternion(camera.quaternion));
+      const eyeGeo = new THREE.SphereGeometry(0.55, 16, 16);
+      const eyeMat = new THREE.MeshStandardMaterial({
+        color: 0x4a0072, emissive: 0x9c27b0, emissiveIntensity: 1.5, roughness: 0.2
+      });
+      const eyeMesh = new THREE.Mesh(eyeGeo, eyeMat);
+      eyeMesh.position.copy(eyePos);
+
+      const eyeRing = new THREE.Mesh(new THREE.TorusGeometry(0.85, 0.04, 8, 24), new THREE.MeshBasicMaterial({ color: 0xba68c8 }));
+      eyeMesh.add(eyeRing);
+      scene.add(eyeMesh);
+
+      // Nearsight / Blind all enemy bots
+      enemiesList.forEach(e => {
+        if (!e.isDead) {
+          e.isBlinded = true;
+          setTimeout(() => { e.isBlinded = false; }, 4000);
+        }
+      });
+
+      setTimeout(() => scene.remove(eyeMesh), 4500);
+    }
+
+    function castReynaDismiss() {
+      showToast('👻 [레이나] 무시 무적 상태 돌입! (DISMISS)');
+      sound.playDash();
+
+      const prevGod = cheats.godMode;
+      cheats.godMode = true;
+      player.speed = 10.5;
+
+      const vig = document.getElementById('vignette');
+      if (vig) vig.style.boxShadow = 'inset 0 0 180px rgba(186, 104, 200, 0.85)';
+
+      setTimeout(() => {
+        cheats.godMode = prevGod;
+        player.speed = 7.0;
+        if (vig) vig.style.boxShadow = 'inset 0 0 200px rgba(0,0,0,0.95)';
+        sound.playDash();
+        showToast('👻 [레이나] 물질화 복귀!');
+      }, 2500);
+    }
+
+    function castReynaDevour() {
+      showToast('🩸 [레이나] 포식 체력 완전 회복! (DEVOUR)');
+      player.hp = 100;
+      player.shield = 50;
+      updateHUD();
+      sound.playDefuseHalf();
+      radioVoice.speak('Give me more!');
+    }
+
+    function castReynaEmpress() {
+      showToast('👑 [레이나] 여제 각성 모드! // THEY WILL COWER!');
+      radioVoice.speak('They will cower!');
+      sound.playAceSound();
+
+      const prevFireRate = currentWeapon.fireRate;
+      currentWeapon.fireRate *= 0.72; // +38% fire rate
+      player.speed = 8.5;
+
+      const vig = document.getElementById('vignette');
+      if (vig) vig.style.boxShadow = 'inset 0 0 160px rgba(255, 0, 128, 0.75)';
+
+      setTimeout(() => {
+        currentWeapon.fireRate = prevFireRate;
+        player.speed = 7.0;
+        if (vig) vig.style.boxShadow = 'inset 0 0 200px rgba(0,0,0,0.95)';
+        showToast('여제 모드 종료');
+      }, 15000);
+    }
+
+    // --- OMEN ABILITIES ---
+    function castOmenShroudedStep() {
+      showToast('🌑 [오멘] 어둠의 발자국! (SHROUDED STEP)');
+      sound.playTeleport();
+
+      const tpTarget = camera.position.clone().add(new THREE.Vector3(0, 0, -16).applyQuaternion(camera.quaternion));
+      tpTarget.y = 1.7;
+
+      const flash = document.getElementById('tp-flash-overlay');
+      if (flash) {
+        flash.style.background = '#1a0033';
+        flash.style.opacity = '1';
+        setTimeout(() => {
+          camera.position.copy(tpTarget);
+          flash.style.opacity = '0';
+          flash.style.background = '#00f0ff';
+        }, 350);
+      }
+    }
+
+    function castOmenDarkCover() {
+      showToast('🌑 [오멘] 어둠의 장막! (DARK COVER)');
+      radioVoice.speak('Darkness spreading.');
+      sound.playSmokePop();
+
+      const targetPos = camera.position.clone().add(new THREE.Vector3(0, 0, -18).applyQuaternion(camera.quaternion));
+      targetPos.y = 2.5;
+
+      const smokeGeo = new THREE.SphereGeometry(5.2, 24, 24);
+      const smokeMat = new THREE.MeshStandardMaterial({
+        color: 0x0a0c16, roughness: 0.95, transparent: true, opacity: 0.96, depthWrite: false
+      });
+      const smokeMesh = new THREE.Mesh(smokeGeo, smokeMat);
+      smokeMesh.position.copy(targetPos);
+      scene.add(smokeMesh);
+      activeSmokes.push({ mesh: smokeMesh, expire: (performance.now() / 1000) + 14 });
+
+      setTimeout(() => scene.remove(smokeMesh), 14000);
+    }
+
+    function castOmenParanoia() {
+      showToast('🌑 [오멘] 피해망상 암흑 파동 발사! (PARANOIA)');
+      radioVoice.speak('Scatter!');
+      sound.playFlash();
+
+      // Blind all enemies
+      enemiesList.forEach(e => {
+        if (!e.isDead) {
+          e.isBlinded = true;
+          setTimeout(() => { e.isBlinded = false; }, 3200);
+        }
+      });
+    }
+
+    function castOmenShadowTeleport() {
+      showToast('🌑 [오멘] 그림자 습격 // SCATTER!');
+      radioVoice.speak('Scatter!');
+      sound.playAceSound();
+
+      // Teleport to enemy side of map
+      const enemySpawnZ = (myTeam === 'atk') ? -35 : 35;
+      camera.position.set((Math.random() - 0.5) * 30, 1.7, enemySpawnZ);
+      sound.playTeleport();
+    }
+
+    function castJettCloudburst() {
       const now = performance.now() / 1000;
       if (!cheats.noCooldowns && now - abilities.c.lastUsed < abilities.c.cd) return;
       abilities.c.lastUsed = now;
@@ -5320,7 +5590,7 @@
     }
 
     // Q: Updraft (High leap + wind ring)
-    function castSkillQ() {
+    function castJettUpdraft() {
       const now = performance.now() / 1000;
       if (!cheats.noCooldowns && now - abilities.q.lastUsed < abilities.q.cd) return;
       abilities.q.lastUsed = now;
@@ -5340,7 +5610,7 @@
     }
 
     // E: Tailwind Dash (Instant movement-directional burst + speedlines)
-    function castSkillE() {
+    function castJettTailwind() {
       const now = performance.now() / 1000;
       if (!cheats.noCooldowns && now - abilities.e.lastUsed < abilities.e.cd) return;
       abilities.e.lastUsed = now;
@@ -5387,7 +5657,7 @@
     }
 
     // X: Blade Storm (5 Floating glowing daggers)
-    function castSkillX() {
+    function castJettBladestorm() {
       abilities.x.active = true;
       abilities.x.knives = 5;
       sound.playBladeStorm();
@@ -5398,6 +5668,55 @@
       renderBladePips();
       showToast('칼날 폭풍 전개! // WATCH THIS!');
     }
+
+    
+    function castSkillC() {
+      const now = performance.now() / 1000;
+      if (!cheats.noCooldowns && now - abilities.c.lastUsed < abilities.c.cd) return;
+      abilities.c.lastUsed = now;
+
+      const agent = lobbySlots[myTeam][mySlotIdx].agent;
+      if (agent === 'Phoenix') castPhoenixBlaze();
+      else if (agent === 'Reyna') castReynaLeer();
+      else if (agent === 'Omen') castOmenShroudedStep();
+      else castJettCloudburst();
+    }
+
+
+    function castSkillQ() {
+      const now = performance.now() / 1000;
+      if (!cheats.noCooldowns && now - abilities.q.lastUsed < abilities.q.cd) return;
+      abilities.q.lastUsed = now;
+
+      const agent = lobbySlots[myTeam][mySlotIdx].agent;
+      if (agent === 'Phoenix') castPhoenixFlash();
+      else if (agent === 'Reyna') castReynaDevour();
+      else if (agent === 'Omen') castOmenParanoia();
+      else castJettUpdraft();
+    }
+
+
+    function castSkillE() {
+      const now = performance.now() / 1000;
+      if (!cheats.noCooldowns && now - abilities.e.lastUsed < abilities.e.cd) return;
+      abilities.e.lastUsed = now;
+
+      const agent = lobbySlots[myTeam][mySlotIdx].agent;
+      if (agent === 'Phoenix') castPhoenixHotHands();
+      else if (agent === 'Reyna') castReynaDismiss();
+      else if (agent === 'Omen') castOmenDarkCover();
+      else castJettTailwind();
+    }
+
+
+    function castSkillX() {
+      const agent = lobbySlots[myTeam][mySlotIdx].agent;
+      if (agent === 'Phoenix') castPhoenixRunItBack();
+      else if (agent === 'Reyna') castReynaEmpress();
+      else if (agent === 'Omen') castOmenShadowTeleport();
+      else castJettBladestorm();
+    }
+
 
     function renderBladePips() {
       for (let i = 0; i < 5; i++) {
