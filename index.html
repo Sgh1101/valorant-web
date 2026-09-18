@@ -2734,6 +2734,71 @@
     gunGroup.add(leftHand);
 
     let weaponSubMesh = null;
+    
+    /* ==========================================================
+       LEGENDARY WEAPON SKINS SYSTEM ([G] KEY TO CYCLE)
+       ========================================================== */
+    const WEAPON_SKINS = {
+      default: {
+        name: 'DEFAULT // 택티컬 매트 블랙',
+        receiverColor: 0x14161a,
+        barrelColor: 0x22262c,
+        trimColor: 0x0a0c0e,
+        emissiveColor: 0x000000,
+        metalness: 0.75,
+        roughness: 0.3
+      },
+      prime: {
+        name: 'PRIME // 프라임 (골드 & 퓨어 화이트 & 네온)',
+        receiverColor: 0xf2f4f8,
+        barrelColor: 0xffd700,
+        trimColor: 0x1a1a24,
+        emissiveColor: 0x00f0ff,
+        metalness: 0.88,
+        roughness: 0.15
+      },
+      reaver: {
+        name: 'REAVER // 약탈자 (네크로틱 고딕 바이올렛)',
+        receiverColor: 0x1c1028,
+        barrelColor: 0x6a1b9a,
+        trimColor: 0x38004d,
+        emissiveColor: 0xab47bc,
+        metalness: 0.92,
+        roughness: 0.18
+      },
+      glitchpop: {
+        name: 'GLITCHPOP // 글리치팝 (사이버펑크 네온 마젠타)',
+        receiverColor: 0xff0066,
+        barrelColor: 0x00f0ff,
+        trimColor: 0xffe600,
+        emissiveColor: 0x00f0ff,
+        metalness: 0.65,
+        roughness: 0.22
+      }
+    };
+    const SKIN_KEYS = ['default', 'prime', 'reaver', 'glitchpop'];
+    let currentSkinIdx = 0;
+    let currentSkin = WEAPON_SKINS['default'];
+
+    function cycleWeaponSkin() {
+      currentSkinIdx = (currentSkinIdx + 1) % SKIN_KEYS.length;
+      currentSkin = WEAPON_SKINS[SKIN_KEYS[currentSkinIdx]];
+
+      matReceiver.color.setHex(currentSkin.receiverColor);
+      matReceiver.metalness = currentSkin.metalness;
+      matReceiver.roughness = currentSkin.roughness;
+
+      matBarrel.color.setHex(currentSkin.barrelColor);
+      matBarrel.emissive.setHex(currentSkin.emissiveColor);
+      matBarrel.emissiveIntensity = (currentSkin.emissiveColor === 0) ? 0 : 0.65;
+
+      matCarbonTrim.color.setHex(currentSkin.trimColor);
+
+      sound.playSwitchClick();
+      showToast('🎨 무기 스킨 장착: ' + currentSkin.name);
+      rebuildWeaponModel(currentWeaponKey);
+    }
+
     function rebuildWeaponModel(wpnKey) {
       if (weaponSubMesh) gunGroup.remove(weaponSubMesh);
       weaponSubMesh = new THREE.Group();
@@ -3902,6 +3967,7 @@
       if (e.code === 'KeyR') reloadWeapon();
       if (e.code === 'KeyB') toggleBuyMenu();
       if (e.code === 'KeyM') cycleMapInGame();
+      if (e.code === 'KeyG') cycleWeaponSkin();
       if (e.code === 'KeyY') startInspect();
       if (e.code === 'KeyN') toggleCombatReport();
       if (e.code === 'KeyF') interactDoorOrObject();
@@ -4527,6 +4593,7 @@
     let reloadStartTime = 0;
     let reloadDuration = 2.0;
     let lastHeartbeatTime = 0;
+    let lastBotFootstepTime = 0;
 
     function spawnImpactSparks(pos, normal, isFlesh = false) {
       const count = isFlesh ? 12 : 8;
@@ -4838,6 +4905,37 @@
       setTimeout(() => pop.remove(), 650);
     }
 
+    
+    function spawnAceCelebrationConfetti() {
+      const colors = [0xff4655, 0x00f0ff, 0xffc83b, 0x00ff88, 0xffffff];
+      const pGeo = new THREE.PlaneGeometry(0.08, 0.08);
+
+      for (let i = 0; i < 40; i++) {
+        const mat = new THREE.MeshBasicMaterial({
+          color: colors[i % colors.length],
+          side: THREE.DoubleSide
+        });
+        const mesh = new THREE.Mesh(pGeo, mat);
+        mesh.position.copy(camera.position).add(
+          new THREE.Vector3((Math.random() - 0.5) * 3, Math.random() * 1.5 + 0.5, (Math.random() - 0.5) * 3)
+        );
+
+        const vel = new THREE.Vector3(
+          (Math.random() - 0.5) * 6,
+          Math.random() * 8 + 4,
+          (Math.random() - 0.5) * 6
+        );
+
+        scene.add(mesh);
+        activeParticles.push({
+          mesh: mesh,
+          vel: vel,
+          life: 2.2 + Math.random() * 0.8,
+          maxLife: 3.0
+        });
+      }
+    }
+
     function triggerKillBanner(isHeadshot, streak) {
       const banner = document.getElementById('kill-banner');
       const text = document.getElementById('kill-banner-text');
@@ -4848,6 +4946,7 @@
       if (streak >= 5) {
         banner.classList.add('tier-ace');
         sound.playAceSound();
+        spawnAceCelebrationConfetti();
         radioVoice.speak('ACE! Magnificent work!');
       }
 
@@ -5625,6 +5724,19 @@
         checkTeleporters();
 
         updateParticlesAndCasings(dt);
+
+        // Bot Footstep Spatial Audio
+        if (now - lastBotFootstepTime > 0.45) {
+          lastBotFootstepTime = now;
+          enemiesList.forEach(e => {
+            if (e.isDead) return;
+            const dist = camera.position.distanceTo(e.mesh.position);
+            if (dist < 20) {
+              sound.playFootstep();
+            }
+          });
+        }
+
 
         // Low HP Warning Heartbeat & Screen Pulse
         if (player.hp < 30 && !player.isDead) {
