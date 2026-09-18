@@ -1603,27 +1603,44 @@
   </div>
 
   <!-- Scoreboard Overlay ([TAB]) -->
+  <!-- In-Game 10-Player Tactical Scoreboard -->
   <div id="scoreboard-overlay">
-    <div class="score-table-card val-clip-tl-br">
-      <h3 style="font-family: var(--font-title); font-size: 32px; letter-spacing: 2px; color: #fff; margin-bottom: 12px;">TACTICAL SCOREBOARD // 5V5 STANDINGS</h3>
+    <div class="score-table-card val-clip-tl-br" style="width: 920px; max-height: 85vh; overflow-y: auto;">
+      <div style="display: flex; justify-content: space-between; align-items: flex-end; border-bottom: 2px solid var(--val-border); padding-bottom: 10px; margin-bottom: 14px;">
+        <div>
+          <h3 style="font-family: var(--font-title); font-size: 34px; letter-spacing: 2px; color: #fff; line-height: 1;">TACTICAL SCOREBOARD // 5V5 MATCH</h3>
+          <div style="font-size: 12px; color: #8899a6;">PRESS [TAB] TO TOGGLE | [G] TO CYCLE WEAPON SKINS | [M] TO CYCLE MAPS</div>
+        </div>
+        <div style="display: flex; gap: 16px; font-family: var(--font-title); font-size: 28px;">
+          <span style="color: var(--val-cyan);">ATK <span id="sb-score-atk">0</span></span>
+          <span style="color: #8899a6;">:</span>
+          <span style="color: var(--val-red);">DEF <span id="sb-score-def">0</span></span>
+        </div>
+      </div>
+
+      <!-- Attackers Team Table -->
+      <div style="font-size: 13px; font-weight: 800; color: var(--val-cyan); letter-spacing: 1.5px; margin-bottom: 4px;">ATTACKERS (공격팀)</div>
       <div class="sb-row header">
         <span>PLAYER (AGENT)</span>
         <span>KILLS</span>
         <span>DEATHS</span>
         <span>HEADSHOTS</span>
+        <span>CREDITS</span>
         <span>PING</span>
       </div>
-      <div class="sb-row self" id="sb-self-row">
-        <span id="sb-self-name">YOU (JETT)</span>
-        <span id="sb-self-k">0</span>
-        <span>0</span>
-        <span id="sb-self-hs">0</span>
-        <span style="color:#00ff88;">12ms</span>
+      <div id="sb-team-atk"></div>
+
+      <!-- Defenders Team Table -->
+      <div style="font-size: 13px; font-weight: 800; color: var(--val-red); letter-spacing: 1.5px; margin: 16px 0 4px 0;">DEFENDERS (수비팀)</div>
+      <div class="sb-row header">
+        <span>PLAYER (AGENT)</span>
+        <span>KILLS</span>
+        <span>DEATHS</span>
+        <span>HEADSHOTS</span>
+        <span>CREDITS</span>
+        <span>PING</span>
       </div>
-      <div class="sb-row"><span>AI Sova</span><span>1</span><span>0</span><span>1</span><span>1ms</span></div>
-      <div class="sb-row"><span>AI Sage</span><span>0</span><span>0</span><span>0</span><span>1ms</span></div>
-      <div class="sb-row"><span>AI Omen</span><span>2</span><span>1</span><span>1</span><span>1ms</span></div>
-      <div class="sb-row"><span>AI Phoenix</span><span>0</span><span>1</span><span>0</span><span>1ms</span></div>
+      <div id="sb-team-def"></div>
     </div>
   </div>
 
@@ -4224,12 +4241,70 @@
     function showScoreboard(visible) {
       const sb = document.getElementById('scoreboard-overlay');
       sb.style.display = visible ? 'flex' : 'none';
-      if (visible) {
-        const slot = lobbySlots[myTeam][mySlotIdx];
-        document.getElementById('sb-self-name').innerText = `YOU (${slot.agent})`;
-        document.getElementById('sb-self-k').innerText = player.kills;
-        document.getElementById('sb-self-hs').innerText = player.headshots;
-      }
+      if (!visible) return;
+
+      const scoreAtk = document.getElementById('score-atk');
+      const scoreDef = document.getElementById('score-def');
+      const sbAtk = document.getElementById('sb-score-atk');
+      const sbDef = document.getElementById('sb-score-def');
+      if (sbAtk && scoreAtk) sbAtk.innerText = scoreAtk.innerText;
+      if (sbDef && scoreDef) sbDef.innerText = scoreDef.innerText;
+
+      const atkContainer = document.getElementById('sb-team-atk');
+      const defContainer = document.getElementById('sb-team-def');
+      if (!atkContainer || !defContainer) return;
+
+      atkContainer.innerHTML = '';
+      defContainer.innerHTML = '';
+
+      // Render Attackers
+      lobbySlots.atk.forEach((slot, idx) => {
+        const isSelf = (myTeam === 'atk' && mySlotIdx === idx);
+        const k = isSelf ? player.kills : (teammatesList[idx < mySlotIdx ? idx : idx - 1]?.kills || Math.floor(idx * 1.5));
+        const d = isSelf ? (player.isDead ? 1 : 0) : (teammatesList[idx < mySlotIdx ? idx : idx - 1]?.isDead ? 1 : 0);
+        const hs = isSelf ? player.headshots : Math.floor(k * 0.4);
+        const creds = isSelf ? player.credits : 3000;
+        const ping = isSelf ? '12ms' : '1ms';
+
+        const row = document.createElement('div');
+        row.className = `sb-row ${isSelf ? 'self' : ''}`;
+        row.style.gridTemplateColumns = '2fr 1fr 1fr 1fr 1fr 1fr';
+        if (isSelf) row.style.background = 'rgba(0, 240, 255, 0.12)';
+        row.innerHTML = `
+          <span>${AGENT_EMOJIS[slot.agent] || '👤'} ${isSelf ? 'YOU' : slot.name} (${slot.agent})</span>
+          <span style="color:#fff;">${k}</span>
+          <span style="color:#8899a6;">${d}</span>
+          <span style="color:#ffc83b;">${hs}</span>
+          <span style="color:#00ff88;">${creds}¤</span>
+          <span style="color:#8899a6;">${ping}</span>
+        `;
+        atkContainer.appendChild(row);
+      });
+
+      // Render Defenders
+      lobbySlots.def.forEach((slot, idx) => {
+        const isSelf = (myTeam === 'def' && mySlotIdx === idx);
+        const enemyObj = enemiesList[idx];
+        const k = isSelf ? player.kills : Math.floor((idx + 1) * 1.2);
+        const d = isSelf ? (player.isDead ? 1 : 0) : (enemyObj?.isDead ? 1 : 0);
+        const hs = isSelf ? player.headshots : Math.floor(k * 0.35);
+        const creds = isSelf ? player.credits : 2900;
+        const ping = isSelf ? '12ms' : '1ms';
+
+        const row = document.createElement('div');
+        row.className = `sb-row ${isSelf ? 'self' : ''}`;
+        row.style.gridTemplateColumns = '2fr 1fr 1fr 1fr 1fr 1fr';
+        if (isSelf) row.style.background = 'rgba(255, 70, 85, 0.12)';
+        row.innerHTML = `
+          <span>${AGENT_EMOJIS[slot.agent] || '👤'} ${isSelf ? 'YOU' : slot.name} (${slot.agent})</span>
+          <span style="color:#fff;">${k}</span>
+          <span style="color:#8899a6;">${d}</span>
+          <span style="color:#ffc83b;">${hs}</span>
+          <span style="color:#00ff88;">${creds}¤</span>
+          <span style="color:#8899a6;">${ping}</span>
+        `;
+        defContainer.appendChild(row);
+      });
     }
 
     function startInspect() {
@@ -4507,6 +4582,21 @@
       else if (keys['KeyW'] || keys['KeyS'] || keys['KeyA'] || keys['KeyD']) spread += 0.045;
 
       // Dynamic Recoil Gain with tracked offset
+      
+      // Continuous Spray Pattern: Vertical climb -> Right sway -> Left sway
+      continuousShots++;
+      lastShotTimestamp = now;
+
+      let horizSpray = 0;
+      if (continuousShots > 3 && continuousShots <= 8) {
+        horizSpray = -0.004 * (continuousShots - 3);
+      } else if (continuousShots > 8 && continuousShots <= 15) {
+        horizSpray = 0.005 * (continuousShots - 8);
+      } else if (continuousShots > 15) {
+        horizSpray = ((continuousShots % 4 < 2) ? -0.006 : 0.006);
+      }
+      yaw += horizSpray;
+
       pitch += currentWeapon.recoilGain;
       pitch = Math.max(-Math.PI / 2.1, Math.min(Math.PI / 2.1, pitch));
       recoilOffset += currentWeapon.recoilGain;
@@ -4596,6 +4686,13 @@
        ========================================================== */
     let cameraTrauma = 0;
     let roundKillsThisRound = 0;
+
+    /* ==========================================================
+       AUTHENTIC TACTICAL SPRAY PATTERN SYSTEM (SPRAY CONTROL)
+       ========================================================== */
+    let continuousShots = 0;
+    let lastShotTimestamp = 0;
+
 
     function addCameraTrauma(amt) {
       cameraTrauma = Math.min(1.0, cameraTrauma + amt);
@@ -5081,6 +5178,24 @@
 
       player.velocity.x += dashDir.x * 45;
       player.velocity.z += dashDir.z * 45;
+
+      // Wind Trail Burst Particles
+      const windGeo = new THREE.BoxGeometry(0.08, 0.08, 0.35);
+      const windMat = new THREE.MeshBasicMaterial({ color: 0x00f0ff, transparent: true, opacity: 0.75 });
+      for (let i = 0; i < 12; i++) {
+        const wp = new THREE.Mesh(windGeo, windMat);
+        wp.position.copy(camera.position).add(
+          new THREE.Vector3((Math.random() - 0.5) * 2, (Math.random() - 0.5) * 1.5, (Math.random() - 0.5) * 2)
+        );
+        scene.add(wp);
+        activeParticles.push({
+          mesh: wp,
+          vel: dashDir.clone().multiplyScalar(-10).add(new THREE.Vector3((Math.random() - 0.5) * 4, Math.random() * 3, (Math.random() - 0.5) * 4)),
+          life: 0.45,
+          maxLife: 0.45
+        });
+      }
+
       showToast('순풍 대시 (TAILWIND)');
 
       const sl = document.getElementById('speed-lines-overlay');
@@ -5763,6 +5878,12 @@
         checkTeleporters();
 
         updateParticlesAndCasings(dt);
+
+        // Reset spray counter when not shooting
+        if (performance.now() / 1000 - lastShotTimestamp > 0.32) {
+          continuousShots = Math.max(0, continuousShots - Math.floor(dt * 30));
+        }
+
 
         // Bot Footstep Spatial Audio
         if (now - lastBotFootstepTime > 0.45) {
