@@ -1238,6 +1238,135 @@
       justify-content: center;
       backdrop-filter: blur(14px);
     }
+
+    /* Match End Showcase Modal */
+    #match-end-modal {
+      position: absolute;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(4, 7, 10, 0.95);
+      z-index: 52;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      backdrop-filter: blur(16px);
+    }
+    .match-end-container {
+      background: rgba(14, 20, 28, 0.98);
+      border: 1px solid var(--val-border);
+      border-top: 4px solid var(--val-cyan);
+      box-shadow: 0 0 50px rgba(0, 0, 0, 0.8), 0 0 30px rgba(0, 240, 255, 0.2);
+      padding: 26px 40px;
+      max-width: 860px;
+      width: 92%;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    .match-end-header {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      border-bottom: 1px solid var(--val-border);
+      padding-bottom: 12px;
+    }
+    .match-badge-won {
+      font-family: var(--font-title);
+      font-size: 32px;
+      font-weight: 900;
+      color: var(--val-green);
+      letter-spacing: 4px;
+      text-shadow: 0 0 20px rgba(0, 255, 170, 0.6);
+    }
+    .match-badge-lost {
+      font-family: var(--font-title);
+      font-size: 32px;
+      font-weight: 900;
+      color: var(--val-red);
+      letter-spacing: 4px;
+      text-shadow: 0 0 20px rgba(255, 70, 85, 0.6);
+    }
+    .match-score-text {
+      font-family: var(--font-title);
+      font-size: 44px;
+      color: #fff;
+      font-weight: 900;
+      line-height: 1;
+    }
+    .match-map-sub {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: #8899a6;
+      letter-spacing: 2px;
+    }
+    .match-mvp-box {
+      background: rgba(255, 200, 59, 0.08);
+      border: 1px solid var(--val-gold);
+      box-shadow: 0 0 20px rgba(255, 200, 59, 0.25);
+      padding: 10px 20px;
+      display: flex;
+      align-items: center;
+      gap: 18px;
+    }
+    .mvp-tag {
+      font-family: var(--font-mono);
+      font-size: 12px;
+      font-weight: 900;
+      color: var(--val-gold);
+      letter-spacing: 2px;
+      text-shadow: 0 0 10px var(--val-gold);
+      white-space: nowrap;
+    }
+    .mvp-profile {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex: 1;
+    }
+    .mvp-avatar-emoji {
+      font-size: 34px;
+      line-height: 1;
+    }
+    .mvp-name-text {
+      font-family: var(--font-title);
+      font-size: 22px;
+      color: #fff;
+    }
+    .mvp-stats-text {
+      font-family: var(--font-mono);
+      font-size: 12px;
+      color: var(--val-cyan);
+    }
+    .match-roster-table {
+      max-height: 200px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+    .match-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 6px 12px;
+      background: rgba(255, 255, 255, 0.03);
+      border-left: 3px solid transparent;
+      font-family: var(--font-mono);
+      font-size: 12px;
+    }
+    .match-row.self {
+      background: rgba(0, 240, 255, 0.1);
+      border-left-color: var(--val-cyan);
+    }
+    .match-row.atk { border-left-color: var(--val-green); }
+    .match-row.def { border-left-color: var(--val-red); }
+    .match-end-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 12px;
+      border-top: 1px solid var(--val-border);
+      padding-top: 12px;
+    }
     .settings-container {
       background: rgba(14, 22, 30, 0.98);
       border: 1px solid var(--val-border);
@@ -1675,6 +1804,35 @@
           <span class="rc-title">[4] 조용히 이동!</span>
           <span class="rc-sub">HOLD FIRE / WALK</span>
         </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Match End Showcase Modal (Esports Victory / MVP Presentation) -->
+  <div id="match-end-modal">
+    <div class="match-end-container val-clip-tl-br">
+      <div class="match-end-header">
+        <div id="match-end-badge" class="match-badge-won">VICTORY</div>
+        <div id="match-end-score" class="match-score-text">13 - 9</div>
+        <div id="match-end-map-sub" class="match-map-sub">ASCENT // REGULATION MATCH COMPLETE</div>
+      </div>
+
+      <div id="match-mvp-card" class="match-mvp-box val-clip">
+        <div class="mvp-tag">⭐ MATCH MVP</div>
+        <div class="mvp-profile">
+          <div id="mvp-avatar" class="mvp-avatar-emoji">🥷</div>
+          <div class="mvp-details">
+            <div id="mvp-name" class="mvp-name-text">YOU (JETT)</div>
+            <div id="mvp-stats" class="mvp-stats-text">K/D/A: 26 / 8 / 4 &bull; ACS: 342 &bull; HS%: 64%</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="match-roster-table" id="match-roster-content"></div>
+
+      <div class="match-end-actions">
+        <button class="val-btn primary" id="btn-match-play-again">한 판 더 하기 // PLAY AGAIN</button>
+        <button class="val-btn" id="btn-match-lobby">로비로 이동 // LOBBY</button>
       </div>
     </div>
   </div>
@@ -2252,6 +2410,52 @@
         gain.connect(this.dest);
         osc.start(now);
         osc.stop(now + 0.05);
+      }
+
+      playEmptyClick() {
+        if (!this.ctx) return;
+        const now = this.ctx.currentTime;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(1800, now);
+        osc.frequency.exponentialRampToValueAtTime(450, now + 0.035);
+        gain.gain.setValueAtTime(0.25, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.035);
+        osc.connect(gain);
+        gain.connect(this.dest);
+        osc.start(now);
+        osc.stop(now + 0.04);
+      }
+
+      playShieldBreak() {
+        if (!this.ctx) return;
+        const now = this.ctx.currentTime;
+        // High crystalline fracture
+        const osc1 = this.ctx.createOscillator();
+        const gain1 = this.ctx.createGain();
+        osc1.type = 'triangle';
+        osc1.frequency.setValueAtTime(3400, now);
+        osc1.frequency.exponentialRampToValueAtTime(750, now + 0.14);
+        gain1.gain.setValueAtTime(0.5, now);
+        gain1.gain.exponentialRampToValueAtTime(0.001, now + 0.15);
+        osc1.connect(gain1);
+        gain1.connect(this.dest);
+        osc1.start(now);
+        osc1.stop(now + 0.16);
+
+        // Low resonant impact crunch
+        const osc2 = this.ctx.createOscillator();
+        const gain2 = this.ctx.createGain();
+        osc2.type = 'sawtooth';
+        osc2.frequency.setValueAtTime(160, now);
+        osc2.frequency.exponentialRampToValueAtTime(30, now + 0.24);
+        gain2.gain.setValueAtTime(0.55, now);
+        gain2.gain.exponentialRampToValueAtTime(0.001, now + 0.24);
+        osc2.connect(gain2);
+        gain2.connect(this.dest);
+        osc2.start(now);
+        osc2.stop(now + 0.25);
       }
 
       playOmenWoosh() {
@@ -5607,13 +5811,8 @@
         const didWinMatch = (myTeam === 'atk' && curScoreAtk >= targetRounds) || (myTeam === 'def' && curScoreDef >= targetRounds);
         setTimeout(() => {
           banner.classList.remove('active');
-          showToast(didWinMatch ? 'MATCH VICTORY // 최종 승리!' : 'MATCH DEFEAT // 경기 종료');
-          radioVoice.speak(didWinMatch ? 'Victory! Outstanding match.' : 'Defeat. Well fought.');
-          document.getElementById('settings-modal').style.display = 'none';
-          document.getElementById('hud').style.display = 'none';
-          document.getElementById('custom-lobby').style.display = 'flex';
-          clearMap();
-        }, 5000);
+          showMatchEndModal(didWinMatch, curScoreAtk, curScoreDef);
+        }, 3200);
         return;
       }
 
@@ -5670,7 +5869,10 @@
       }
       const now = performance.now() / 1000;
       if (currentWeapon.isReloading || (!cheats.infiniteAmmo && currentWeapon.ammo <= 0)) {
-        if (currentWeapon.ammo <= 0) reloadWeapon();
+        if (currentWeapon.ammo <= 0) {
+          sound.playEmptyClick();
+          reloadWeapon();
+        }
         return;
       }
       if (now - currentWeapon.lastShotTime < currentWeapon.fireRate) return;
@@ -5864,6 +6066,33 @@
     let reloadDuration = 2.0;
     let lastHeartbeatTime = 0;
     let lastBotFootstepTime = 0;
+
+    function spawnShieldBreakParticles(pos) {
+      const pGeo = new THREE.BoxGeometry(0.06, 0.06, 0.06);
+      const pMat = new THREE.MeshStandardMaterial({
+        color: 0x00f0ff,
+        emissive: 0x00ffff,
+        emissiveIntensity: 2.0,
+        transparent: true,
+        opacity: 0.95
+      });
+      for (let i = 0; i < 18; i++) {
+        const p = new THREE.Mesh(pGeo, pMat);
+        p.position.copy(pos);
+        const vel = new THREE.Vector3(
+          (Math.random() - 0.5) * 2,
+          Math.random() * 2 + 0.5,
+          (Math.random() - 0.5) * 2
+        ).normalize().multiplyScalar(5 + Math.random() * 6);
+        scene.add(p);
+        activeParticles.push({
+          mesh: p,
+          vel: vel,
+          life: 0.5 + Math.random() * 0.35,
+          maxLife: 0.85
+        });
+      }
+    }
 
     function spawnImpactSparks(pos, normal, isFlesh = false) {
       const count = isFlesh ? 12 : 8;
@@ -6061,10 +6290,27 @@
       else if (isLeg) cDealt.leg++;
       else cDealt.body++;
 
-      enemy.hp -= amount;
-      showHitmarker(isHeadshot);
       const hitWorldPos = enemy.mesh ? enemy.mesh.position.clone() : camera.position.clone();
       hitWorldPos.y += isHeadshot ? 1.4 : 0.8;
+
+      if (enemy.shield === undefined) enemy.shield = 50;
+      const prevEnemyShield = enemy.shield;
+      if (prevEnemyShield > 0) {
+        const absorb = Math.min(prevEnemyShield, Math.floor(amount * 0.66));
+        enemy.shield -= absorb;
+        const remainder = amount - absorb;
+        enemy.hp -= remainder;
+
+        if (prevEnemyShield > 0 && enemy.shield === 0) {
+          sound.playShieldBreak();
+          spawnShieldBreakParticles(hitWorldPos);
+          showToast(`🛡️ ${enemy.name} 실드 파괴! (SHIELD BROKEN)`);
+        }
+      } else {
+        enemy.hp -= amount;
+      }
+
+      showHitmarker(isHeadshot);
       showDamagePopup(amount, isHeadshot, hitWorldPos, hitPart, isWallbang);
 
       if (isHeadshot) sound.playHeadshot();
@@ -7279,6 +7525,102 @@
     /* ==========================================================
        10. START MATCH & ANIMATION TICK
        ========================================================== */
+    function showMatchEndModal(didWinMatch, scoreAtk, scoreDef) {
+      const modal = document.getElementById('match-end-modal');
+      const badge = document.getElementById('match-end-badge');
+      const scoreEl = document.getElementById('match-end-score');
+      const subEl = document.getElementById('match-end-map-sub');
+      const mapName = MAP_LIST[currentMapIndex].toUpperCase();
+
+      badge.className = didWinMatch ? 'match-badge-won' : 'match-badge-lost';
+      badge.innerText = didWinMatch ? 'MATCH VICTORY // 최종 승리' : 'MATCH DEFEAT // 패배';
+      scoreEl.innerText = `${scoreAtk} - ${scoreDef}`;
+      subEl.innerText = `${mapName} // REGULATION MATCH COMPLETE`;
+
+      let mvp = {
+        name: 'YOU',
+        agent: lobbySlots[myTeam][mySlotIdx].agent,
+        kills: player.kills,
+        score: player.kills * 150 + player.headshots * 50
+      };
+
+      teammatesList.forEach(t => {
+        const tKills = t.kills || Math.floor(Math.random() * 8 + 4);
+        const tScore = tKills * 150;
+        if (tScore > mvp.score) {
+          mvp = { name: t.name, agent: t.agent, kills: tKills, score: tScore };
+        }
+      });
+      enemiesList.forEach(e => {
+        const eKills = e.kills || Math.floor(Math.random() * 8 + 3);
+        const eScore = eKills * 150;
+        if (eScore > mvp.score) {
+          mvp = { name: e.name, agent: e.agent, kills: eKills, score: eScore };
+        }
+      });
+
+      document.getElementById('mvp-avatar').innerText = AGENT_EMOJIS[mvp.agent] || '👤';
+      document.getElementById('mvp-name').innerText = `${mvp.name} (${mvp.agent})`;
+      const hsPct = player.kills > 0 ? Math.round((player.headshots / player.kills) * 100) : 50;
+      document.getElementById('mvp-stats').innerHTML = `처치: <strong style="color:#fff;">${mvp.kills}</strong> | 총점: <strong style="color:var(--val-gold); font-size:15px;">${mvp.score}</strong> | 헤드샷률: <strong style="color:var(--val-green);">${hsPct}%</strong>`;
+
+      const container = document.getElementById('match-roster-content');
+      container.innerHTML = '';
+
+      const myRow = document.createElement('div');
+      myRow.className = 'match-row self';
+      myRow.innerHTML = `<span>⭐ YOU (${lobbySlots[myTeam][mySlotIdx].agent})</span><span>K: ${player.kills} / HS: ${player.headshots}</span><span>SCORE: ${player.kills * 150 + player.headshots * 50}</span>`;
+      container.appendChild(myRow);
+
+      teammatesList.forEach((t, i) => {
+        const r = document.createElement('div');
+        r.className = 'match-row atk';
+        const k = t.kills || (5 + i);
+        r.innerHTML = `<span>${t.name} (${t.agent})</span><span>K: ${k}</span><span>SCORE: ${k * 140}</span>`;
+        container.appendChild(r);
+      });
+
+      enemiesList.forEach((e, i) => {
+        const r = document.createElement('div');
+        r.className = 'match-row def';
+        const k = e.kills || (4 + i);
+        r.innerHTML = `<span>${e.name} (${e.agent})</span><span>K: ${k}</span><span>SCORE: ${k * 135}</span>`;
+        container.appendChild(r);
+      });
+
+      document.exitPointerLock();
+      document.getElementById('hud').style.display = 'none';
+      document.getElementById('settings-modal').style.display = 'none';
+      modal.style.display = 'flex';
+      sound.playVictoryHorn();
+      radioVoice.speak(didWinMatch ? 'Victory! Outstanding match.' : 'Defeat. Well fought.');
+    }
+
+    document.getElementById('btn-match-play-again').addEventListener('click', () => {
+      document.getElementById('match-end-modal').style.display = 'none';
+      document.getElementById('score-atk').innerText = '0';
+      document.getElementById('score-def').innerText = '0';
+      player.hp = 100;
+      player.shield = 50;
+      player.kills = 0;
+      player.headshots = 0;
+      player.isDead = false;
+      player.credits = 800;
+      roundState = 'BUY_PHASE';
+      build5v5Map(MAP_LIST[currentMapIndex]);
+      document.getElementById('hud').style.display = 'block';
+      updateHUD();
+      canvas.requestPointerLock();
+      showToast('새 경기 시작! 건투를 빕니다.');
+      radioVoice.speak('Let us do this!');
+    });
+
+    document.getElementById('btn-match-lobby').addEventListener('click', () => {
+      document.getElementById('match-end-modal').style.display = 'none';
+      document.getElementById('custom-lobby').style.display = 'flex';
+      clearMap();
+    });
+
     document.getElementById('btn-start-game').addEventListener('click', () => {
       sound.init();
       sound.playDash();
@@ -7603,10 +7945,17 @@
                   if (!cheats.godMode) {
                     const isEnemyHeadshot = (Math.random() < 0.16);
                     const baseIncoming = isEnemyHeadshot ? 55 : 18;
+                    const prevPlayerShield = player.shield;
                     const dealtToShield = Math.min(player.shield, isEnemyHeadshot ? 25 : 12);
                     player.shield -= dealtToShield;
                     const remainder = baseIncoming - dealtToShield;
                     player.hp -= remainder;
+
+                    if (prevPlayerShield > 0 && player.shield === 0) {
+                      sound.playShieldBreak();
+                      spawnShieldBreakParticles(camera.position);
+                      showToast('⚠️ 실드 파괴됨! (SHIELD BROKEN)');
+                    }
 
                     if (!roundCombatData.taken[shooter.id]) {
                       roundCombatData.taken[shooter.id] = {
