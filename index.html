@@ -2149,20 +2149,59 @@
         osc.stop(now + 0.47);
       }
 
-      playFootstep() {
+      playFootstep(surface = 'stone') {
         if (!this.ctx) return;
         const now = this.ctx.currentTime;
         const osc = this.ctx.createOscillator();
         const gain = this.ctx.createGain();
-        osc.type = 'sine';
-        osc.frequency.setValueAtTime(95, now);
-        osc.frequency.exponentialRampToValueAtTime(30, now + 0.06);
-        gain.gain.setValueAtTime(0.12, now);
-        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.06);
+
+        if (surface === 'sand') {
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(65, now);
+          osc.frequency.exponentialRampToValueAtTime(25, now + 0.08);
+          gain.gain.setValueAtTime(0.08, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.08);
+        } else if (surface === 'wood') {
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(140, now);
+          osc.frequency.exponentialRampToValueAtTime(50, now + 0.07);
+          gain.gain.setValueAtTime(0.16, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.07);
+        } else if (surface === 'metal') {
+          osc.type = 'square';
+          osc.frequency.setValueAtTime(320, now);
+          osc.frequency.exponentialRampToValueAtTime(120, now + 0.06);
+          gain.gain.setValueAtTime(0.06, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.06);
+        } else {
+          // Stone / Concrete default
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(110, now);
+          osc.frequency.exponentialRampToValueAtTime(35, now + 0.05);
+          gain.gain.setValueAtTime(0.13, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.05);
+        }
+
         osc.connect(gain);
         gain.connect(this.dest);
         osc.start(now);
-        osc.stop(now + 0.07);
+        osc.stop(now + 0.09);
+      }
+
+      playBulletWhiz() {
+        if (!this.ctx) return;
+        const now = this.ctx.currentTime;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(2400 + Math.random() * 800, now);
+        osc.frequency.exponentialRampToValueAtTime(400, now + 0.07);
+        gain.gain.setValueAtTime(0.22, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.07);
+        osc.connect(gain);
+        gain.connect(this.masterGain);
+        osc.start(now);
+        osc.stop(now + 0.08);
       }
 
       playReload() {
@@ -2910,6 +2949,48 @@
     let gunSwayYaw = 0;
     let gunSwayPitch = 0;
     let freeFlyMode = false;
+
+    
+    /* ==========================================================
+       DYNAMIC AGENT SWITCHING SYSTEM ([H] KEY TO CYCLE AGENT)
+       ========================================================== */
+    const PLAYABLE_AGENTS = ['Jett', 'Phoenix', 'Reyna', 'Omen'];
+    let currentAgentIdx = 0;
+
+    const AGENT_SKILL_LABELS = {
+      Jett: { c: '연막 폭발 (C)', q: '상승기류 (Q)', e: '순풍 대시 (E)', x: '칼날 폭풍 (X)' },
+      Phoenix: { c: '화염 장벽 (C)', q: '커브볼 섬광 (Q)', e: '뜨거운 손 (E)', x: '역습 궁극기 (X)' },
+      Reyna: { c: '눈총 실명 (C)', q: '포식 회복 (Q)', e: '무시 무적 (E)', x: '여제 각성 (X)' },
+      Omen: { c: '어둠의 발자국 (C)', q: '피해망상 (Q)', e: '어둠의 장막 (E)', x: '그림자 습격 (X)' }
+    };
+
+    function cyclePlayableAgent() {
+      currentAgentIdx = (currentAgentIdx + 1) % PLAYABLE_AGENTS.length;
+      const agentName = PLAYABLE_AGENTS[currentAgentIdx];
+      lobbySlots[myTeam][mySlotIdx].agent = agentName;
+
+      updatePlayerColors();
+      renderTopAgentsBar();
+
+      // Update HUD Skill labels
+      const labels = AGENT_SKILL_LABELS[agentName];
+      const slotC = document.getElementById('skill-slot-c');
+      const slotQ = document.getElementById('skill-slot-q');
+      const slotE = document.getElementById('skill-slot-e');
+      const slotX = document.getElementById('skill-slot-x');
+      if (slotC && labels) slotC.querySelector('.skill-name').innerText = labels.c;
+      if (slotQ && labels) slotQ.querySelector('.skill-name').innerText = labels.q;
+      if (slotE && labels) slotE.querySelector('.skill-name').innerText = labels.e;
+      if (slotX && labels) slotX.querySelector('.skill-name').innerText = labels.x;
+
+      sound.playSwitchClick();
+      if (agentName === 'Phoenix') radioVoice.speak('Get ready!');
+      else if (agentName === 'Reyna') radioVoice.speak('They will cower!');
+      else if (agentName === 'Omen') radioVoice.speak('Scatter!');
+      else radioVoice.speak('Watch this!');
+
+      showToast(`⚡ 요원 변경: [${agentName.toUpperCase()}] ${AGENT_EMOJIS[agentName]} (스킬 세트 교체 완료)`);
+    }
 
     function updatePlayerColors() {
       const slot = lobbySlots[myTeam][mySlotIdx];
@@ -4013,6 +4094,7 @@
       if (e.code === 'KeyB') toggleBuyMenu();
       if (e.code === 'KeyM') cycleMapInGame();
       if (e.code === 'KeyG') cycleWeaponSkin();
+      if (e.code === 'KeyH') cyclePlayableAgent();
       if (e.code === 'KeyY') startInspect();
       if (e.code === 'KeyN') toggleCombatReport();
       if (e.code === 'KeyF') interactDoorOrObject();
@@ -5740,7 +5822,12 @@
 
             if (!player.isWalking && player.isGrounded && (now - sound.lastStepTime > 320)) {
               sound.lastStepTime = now;
-              sound.playFootstep();
+              const currentMapKey = MAP_LIST[currentMapIndex];
+              let stepSurface = 'stone';
+              if (currentMapKey === 'bind') stepSurface = 'sand';
+              else if (currentMapKey === 'haven') stepSurface = 'wood';
+              if (curFloorY > 0.3) stepSurface = 'metal';
+              sound.playFootstep(stepSurface);
             }
           } else {
             player.velocity.x *= 0.78;
@@ -5846,6 +5933,11 @@
                 const toPlayer = new THREE.Vector3().subVectors(camera.position, shooter.mesh.position).normalize();
                 createBulletTracer(shooter.mesh.position, toPlayer);
                 sound.playGunshot('vandal');
+
+                const distToPlayer = camera.position.distanceTo(shooter.mesh.position);
+                if (distToPlayer < 35) {
+                  setTimeout(() => sound.playBulletWhiz(), 35 + Math.random() * 40);
+                }
 
                 if (camera.position.distanceTo(shooter.mesh.position) < 45 && Math.random() < 0.38) {
                   if (!cheats.godMode) {
