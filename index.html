@@ -1325,6 +1325,36 @@
       text-align: left;
     }
     .cheat-btn:hover { border-color: var(--val-cyan); }
+  
+    #vignette {
+      position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+      box-shadow: inset 0 0 200px rgba(0,0,0,0.95);
+      pointer-events: none; z-index: 2;
+    }
+    body::after {
+      content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+      background: repeating-linear-gradient(0deg, rgba(0,0,0,0.1), rgba(0,0,0,0.1) 1px, transparent 1px, transparent 2px);
+      pointer-events: none; z-index: 100; opacity: 0.5;
+    }
+    #hud-top-bar, #buy-menu, #settings-modal, #custom-lobby, #combat-report {
+      backdrop-filter: blur(16px);
+      background: rgba(10, 15, 20, 0.75) !important;
+      border: 1px solid rgba(255, 255, 255, 0.15) !important;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.8);
+    }
+    .val-btn, .color-swatch, .weapon-card {
+      transition: all 0.2s cubic-bezier(0.25, 0.8, 0.25, 1);
+    }
+    .val-btn:hover {
+      box-shadow: 0 0 15px var(--val-red);
+      transform: translateY(-2px);
+    }
+    .weapon-card:hover {
+      box-shadow: 0 0 20px rgba(0, 240, 255, 0.4);
+      transform: scale(1.02);
+      border-color: var(--val-cyan);
+    }
+
   </style>
 </head>
 <body>
@@ -2151,6 +2181,23 @@
         osc.stop(now + 0.33);
       }
 
+      
+      playGong() {
+        if (!this.ctx) return;
+        const now = this.ctx.currentTime;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(140, now);
+        osc.frequency.exponentialRampToValueAtTime(110, now + 1.8);
+        gain.gain.setValueAtTime(0.85, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 2.2);
+        osc.connect(gain);
+        gain.connect(this.masterGain);
+        osc.start(now);
+        osc.stop(now + 2.2);
+      }
+  
       playTeleport() {
         if (!this.ctx) return;
         const now = this.ctx.currentTime;
@@ -2361,7 +2408,10 @@
 
     const MAP_LIST = ['ascent', 'bind', 'haven', 'range'];
     const MAP_NAMES = {
-      ascent: 'ASCENT (어센트)', bind: 'BIND (바인드)', haven: 'HAVEN (헤이븐)', range: 'THE RANGE (사격장)'
+      ascent: 'ASCENT (어센트) - 베네치아 요새 & 전동 셔터 도어 [F]',
+      bind: 'BIND (바인드) - 모로코 사막 & 차원 이동 텔레포터',
+      haven: 'HAVEN (헤이븐) - 부탄 수도원 & 3대 폭파 지점(A/B/C) + 중앙 범종',
+      range: 'THE RANGE (사격장) - 사격 훈련장 & 봇 연습'
     };
     let currentMapIndex = 0;
 
@@ -2757,10 +2807,70 @@
     let lastTpTime = 0;
     let mouseSensitivity = 0.0022;
 
-    const matConcrete = new THREE.MeshStandardMaterial({ color: 0x505760, roughness: 0.8 });
-    const matWallStone = new THREE.MeshStandardMaterial({ color: 0xc8ced4, roughness: 0.65 });
+    
+    function createGridTexture(colorStr, lineStr, size, dash=false) {
+      const cvs = document.createElement('canvas');
+      cvs.width = 512; cvs.height = 512;
+      const ctx = cvs.getContext('2d');
+      ctx.fillStyle = colorStr;
+      ctx.fillRect(0, 0, 512, 512);
+      ctx.strokeStyle = lineStr;
+      ctx.lineWidth = 4;
+      if (dash) ctx.setLineDash([20, 20]);
+      ctx.strokeRect(0, 0, 512, 512);
+      ctx.beginPath();
+      ctx.moveTo(256, 0); ctx.lineTo(256, 512);
+      ctx.moveTo(0, 256); ctx.lineTo(512, 256);
+      ctx.stroke();
+      const tex = new THREE.CanvasTexture(cvs);
+      tex.wrapS = THREE.RepeatWrapping;
+      tex.wrapT = THREE.RepeatWrapping;
+      return tex;
+    }
+
+    function createBrickTexture(color1, color2) {
+      const cvs = document.createElement('canvas');
+      cvs.width = 512; cvs.height = 512;
+      const ctx = cvs.getContext('2d');
+      ctx.fillStyle = color1;
+      ctx.fillRect(0, 0, 512, 512);
+      ctx.fillStyle = color2;
+      for(let y=0; y<512; y+=64) {
+        let offsetX = (y % 128 === 0) ? 0 : 64;
+        for(let x=-64; x<512; x+=128) {
+          ctx.fillRect(x + offsetX + 4, y + 4, 120, 56);
+        }
+      }
+      const tex = new THREE.CanvasTexture(cvs);
+      tex.wrapS = THREE.RepeatWrapping;
+      tex.wrapT = THREE.RepeatWrapping;
+      return tex;
+    }
+    
+    function createGradientSky() {
+      const cvs = document.createElement('canvas');
+      cvs.width = 2; cvs.height = 512;
+      const ctx = cvs.getContext('2d');
+      const grad = ctx.createLinearGradient(0, 0, 0, 512);
+      grad.addColorStop(0, '#0a101a'); // Zenith
+      grad.addColorStop(0.5, '#1e2d42'); // Horizon top
+      grad.addColorStop(0.55, '#ff7055'); // Sunset horizon
+      grad.addColorStop(1, '#080c10'); // Ground
+      ctx.fillStyle = grad;
+      ctx.fillRect(0, 0, 2, 512);
+      const tex = new THREE.CanvasTexture(cvs);
+      scene.background = tex;
+    }
+
+
+    const texConcrete = createGridTexture("#40454d", "#30343a", 512);
+    const texWall = createBrickTexture("#9fa6ac", "#c8ced4");
+    const texSandstone = createBrickTexture("#c39e70", "#d9b382");
+
+    const matConcrete = new THREE.MeshStandardMaterial({ color: 0xffffff, map: texConcrete, roughness: 0.8 });
+    const matWallStone = new THREE.MeshStandardMaterial({ color: 0xffffff, map: texWall, roughness: 0.65 });
     const matBrick = new THREE.MeshStandardMaterial({ color: 0x826759, roughness: 0.85 });
-    const matSandstone = new THREE.MeshStandardMaterial({ color: 0xd9b382, roughness: 0.75 });
+    const matSandstone = new THREE.MeshStandardMaterial({ color: 0xffffff, map: texSandstone, roughness: 0.75 });
     const matWoodPagoda = new THREE.MeshStandardMaterial({ color: 0x5c3a21, roughness: 0.7 });
     const matRadianiteBox = new THREE.MeshStandardMaterial({
       color: 0x145a47, emissive: 0x00e599, emissiveIntensity: 0.4, roughness: 0.3, metalness: 0.6
@@ -3069,24 +3179,181 @@
       if (cr && roundState !== 'ROUND_ENDED') cr.style.display = 'none';
     }
 
+    
+    
+    /* ==========================================================
+       MAP PROCEDURAL TEXTURES & THEMATIC ATMOSPHERE
+       ========================================================== */
+    function createPiazzaTexture() {
+      const cvs = document.createElement('canvas');
+      cvs.width = 512; cvs.height = 512;
+      const ctx = cvs.getContext('2d');
+      ctx.fillStyle = '#6b7280';
+      ctx.fillRect(0, 0, 512, 512);
+      ctx.strokeStyle = '#4b5563';
+      ctx.lineWidth = 4;
+      for (let y = 0; y < 512; y += 64) {
+        for (let x = 0; x < 512; x += 64) {
+          ctx.fillStyle = ((x / 64 + y / 64) % 2 === 0) ? '#79818e' : '#68707c';
+          ctx.fillRect(x + 2, y + 2, 60, 60);
+          ctx.strokeRect(x, y, 64, 64);
+        }
+      }
+      const tex = new THREE.CanvasTexture(cvs);
+      tex.wrapS = THREE.RepeatWrapping; tex.wrapT = THREE.RepeatWrapping;
+      tex.repeat.set(6, 6);
+      return tex;
+    }
+
+    function createSandDuneTexture() {
+      const cvs = document.createElement('canvas');
+      cvs.width = 512; cvs.height = 512;
+      const ctx = cvs.getContext('2d');
+      ctx.fillStyle = '#d4a373';
+      ctx.fillRect(0, 0, 512, 512);
+      ctx.strokeStyle = '#c49262';
+      ctx.lineWidth = 6;
+      for (let y = 16; y < 512; y += 48) {
+        ctx.beginPath();
+        ctx.moveTo(0, y);
+        ctx.bezierCurveTo(128, y - 12, 256, y + 12, 512, y);
+        ctx.stroke();
+      }
+      const tex = new THREE.CanvasTexture(cvs);
+      tex.wrapS = THREE.RepeatWrapping; tex.wrapT = THREE.RepeatWrapping;
+      tex.repeat.set(8, 8);
+      return tex;
+    }
+
+    function createPagodaWoodTexture() {
+      const cvs = document.createElement('canvas');
+      cvs.width = 512; cvs.height = 512;
+      const ctx = cvs.getContext('2d');
+      ctx.fillStyle = '#4a2c17';
+      ctx.fillRect(0, 0, 512, 512);
+      ctx.strokeStyle = '#2b170a';
+      ctx.lineWidth = 4;
+      for (let y = 0; y < 512; y += 32) {
+        ctx.strokeRect(0, y, 512, 32);
+        for (let x = 30; x < 512; x += 120) {
+          ctx.beginPath();
+          ctx.moveTo(x + (y % 64), y);
+          ctx.lineTo(x + (y % 64), y + 32);
+          ctx.stroke();
+        }
+      }
+      const tex = new THREE.CanvasTexture(cvs);
+      tex.wrapS = THREE.RepeatWrapping; tex.wrapT = THREE.RepeatWrapping;
+      tex.repeat.set(6, 6);
+      return tex;
+    }
+
+    const texAscentPiazza = createPiazzaTexture();
+    const texDesertSand = createSandDuneTexture();
+    const texWoodPagodaPlanks = createPagodaWoodTexture();
+
+    // Themed Materials
+    const matAscentFloor = new THREE.MeshStandardMaterial({ map: texAscentPiazza, roughness: 0.75, metalness: 0.1 });
+    const matAscentWall = new THREE.MeshStandardMaterial({ color: 0xd8dde4, roughness: 0.6 });
+    const matDesertFloor = new THREE.MeshStandardMaterial({ map: texDesertSand, roughness: 0.95 });
+    const matSandstoneWall = new THREE.MeshStandardMaterial({ color: 0xcd9f6c, roughness: 0.85 });
+    const matPagodaFloor = new THREE.MeshStandardMaterial({ map: texWoodPagodaPlanks, roughness: 0.6 });
+    const matPagodaWall = new THREE.MeshStandardMaterial({ color: 0x8a705e, roughness: 0.7 });
+
+    let havenGongMesh = null;
+
+    function setMapAtmosphere(mapKey) {
+      const cvs = document.createElement('canvas');
+      cvs.width = 2; cvs.height = 512;
+      const ctx = cvs.getContext('2d');
+      const grad = ctx.createLinearGradient(0, 0, 0, 512);
+
+      if (mapKey === 'ascent') {
+        // Venetian Mediterranean Daylight
+        grad.addColorStop(0, '#063d6b');
+        grad.addColorStop(0.5, '#6bb7f0');
+        grad.addColorStop(0.7, '#e3f3ff');
+        grad.addColorStop(1, '#1b2836');
+        ambientLight.color.setHex(0xd0e8ff);
+        ambientLight.intensity = 0.9;
+        sunLight.color.setHex(0xfffaee);
+        sunLight.intensity = 1.35;
+        sunLight.position.set(45, 90, 55);
+        scene.fog.color.setHex(0xbadcf5);
+        scene.fog.density = 0.007;
+      } else if (mapKey === 'bind') {
+        // Scorching Moroccan Sunset Twilight
+        grad.addColorStop(0, '#2d0b0e');
+        grad.addColorStop(0.45, '#d35400');
+        grad.addColorStop(0.7, '#f39c12');
+        grad.addColorStop(1, '#3b1b12');
+        ambientLight.color.setHex(0xffaa77);
+        ambientLight.intensity = 0.8;
+        sunLight.color.setHex(0xff8833);
+        sunLight.intensity = 1.45;
+        sunLight.position.set(65, 50, 35);
+        scene.fog.color.setHex(0xc86c32);
+        scene.fog.density = 0.009;
+      } else if (mapKey === 'haven') {
+        // Mystical Himalayan Dawn / Cherry Blossom Twilight
+        grad.addColorStop(0, '#0d091b');
+        grad.addColorStop(0.5, '#451d41');
+        grad.addColorStop(0.75, '#b8637e');
+        grad.addColorStop(1, '#1a1020');
+        ambientLight.color.setHex(0xcca2cc);
+        ambientLight.intensity = 0.85;
+        sunLight.color.setHex(0xf9cad9);
+        sunLight.intensity = 1.25;
+        sunLight.position.set(-35, 80, 50);
+        scene.fog.color.setHex(0x452342);
+        scene.fog.density = 0.008;
+      } else {
+        // Range: High-tech military hangar
+        grad.addColorStop(0, '#080c10');
+        grad.addColorStop(0.5, '#111b24');
+        grad.addColorStop(0.8, '#00f0ff');
+        grad.addColorStop(1, '#080c10');
+        ambientLight.color.setHex(0x90c5e8);
+        ambientLight.intensity = 0.9;
+        sunLight.color.setHex(0xd0f5ff);
+        sunLight.intensity = 1.2;
+        sunLight.position.set(0, 85, 0);
+        scene.fog.color.setHex(0x0f1923);
+        scene.fog.density = 0.008;
+      }
+
+      ctx.fillStyle = grad;
+      ctx.fillRect(0, 0, 2, 512);
+      scene.background = new THREE.CanvasTexture(cvs);
+    }
+
+
+
+    /* ==========================================================
+       AUTHENTIC 3 DISTINCT MAPS BUILDER: ASCENT, BIND, HAVEN, RANGE
+       ========================================================== */
     function build5v5Map(mapKey) {
       clearMap();
+      havenGongMesh = null;
       document.getElementById('hud-map-badge').innerText = mapKey.toUpperCase();
 
       roundState = 'BUY_PHASE';
       roundTimer = 10;
       document.getElementById('round-state-text').innerText = 'BUY PHASE';
 
+      // 1. Dynamic Atmosphere (Sky, Fog, Lighting)
+      setMapAtmosphere(mapKey);
+
       // ==========================================================
-      // 1. ASCENT (어센트) - ARCHES, HEAVEN 2F, STAIRS, MID CATWALK & BOATHOUSE
+      // MAP 1: ASCENT (어센트) - 이탈리아 베네치아 요새 & 전동 셔터 도어
       // ==========================================================
       if (mapKey === 'ascent') {
         // Outer Venetian Perimeter Walls & Floor
-        addBox(0, -0.5, 0, 110, 1, 110, matConcrete);
-        addBox(0, 7, -55, 110, 14, 2, matWallStone);
-        addBox(0, 7, 55, 110, 14, 2, matWallStone);
-        addBox(-55, 7, 0, 2, 14, 110, matWallStone);
-        addBox(55, 7, 0, 2, 14, 110, matWallStone);
+        addBox(0, -0.5, 0, 110, 1, 110, matAscentFloor);
+        addBox(0, 7, -55, 110, 14, 2, matAscentWall);
+        addBox(0, 7, 55, 110, 14, 2, matAscentWall);
+        addBox(-55, 7, 0, 2, 14, 110, matAscentWall);
+        addBox(55, 7, 0, 2, 14, 110, matAscentWall);
 
         // --- A SITE ---
         addBox(28, 0.05, -24, 22, 0.05, 22, matSiteFloor, false);
@@ -3094,16 +3361,16 @@
         spikeSiteAreas.push({ minX: 17, maxX: 39, minZ: -35, maxZ: -13, name: 'A SITE' });
 
         // A Heaven 2F Balcony (y = 4.2)
-        addPlatform(34, 0, -34, 14, 4.2, 10, matWallStone);
+        addPlatform(34, 0, -34, 14, 4.2, 10, matAscentWall);
         addRailing(27, 4.2, -34, 10, 'z');
         addRailing(34, 4.2, -29, 14, 'x');
         addArch(34, 4.2, -38.5, 4, 3.2, 1.0, matTrimStone);
 
-        // A Heaven Staircase leading up from ground (z = -12) to Heaven (z = -29)
+        // A Heaven Staircase leading up from ground to 2F
         addStairs(34, -14, 0, 3.6, 4.2, 15, 14, 'z-');
 
         // A Main Arched Gateway Entrance
-        addArch(26, 0, 8, 6.5, 5.5, 2.2, matWallStone);
+        addArch(26, 0, 8, 6.5, 5.5, 2.2, matAscentWall);
 
         // A Site Green Generator Unit & Radianite Cover Stack
         addBox(22, 2.0, -22, 3.6, 4.0, 3.6, matConcrete);
@@ -3112,19 +3379,19 @@
 
         // --- MID COURTYARD & CATWALK ---
         // Triple Archway across Mid
-        addArch(0, 0, 0, 8, 6.5, 2.6, matWallStone);
-        addArch(-10, 0, 0, 6, 5.5, 2.2, matWallStone);
-        addArch(10, 0, 0, 6, 5.5, 2.2, matWallStone);
+        addArch(0, 0, 0, 8, 6.5, 2.6, matAscentWall);
+        addArch(-10, 0, 0, 6, 5.5, 2.2, matAscentWall);
+        addArch(10, 0, 0, 6, 5.5, 2.2, matAscentWall);
 
         // Mid Catwalk (Elevated walkway at y = 3.0)
-        addPlatform(12, 0, -8, 4.2, 3.0, 16, matWallStone);
+        addPlatform(12, 0, -8, 4.2, 3.0, 16, matAscentWall);
         addRailing(9.9, 3.0, -8, 16, 'z');
         addStairs(12, 4, 0, 3.8, 3.0, 8, 10, 'z-'); // Catwalk stairs
 
         // Mid Market Building & Interior Counter
         addBox(-12, 2.5, -4, 10, 5, 8, matBrick);
         addBox(-7.2, 0.7, -4, 1.2, 1.4, 6, matWoodPagoda); // Market counter table
-        addEave(-12, 5.0, -4, 11, 9, matDarkTile); // Overhanging roof eave
+        addEave(-12, 5.0, -4, 11, 9, matDarkTile); // Roof eave
 
         // Courtyard Street Lanterns
         addLantern(6, 0, 6);
@@ -3140,7 +3407,7 @@
         addBox(-28, 3.5, -24, 4.5, 7.0, 4.5, matBrick);
 
         // B Boathouse (Back-site covered shelter)
-        addBox(-38, 2.5, -30, 8, 5, 10, matWallStone);
+        addBox(-38, 2.5, -30, 8, 5, 10, matAscentWall);
         addBox(-34, 1.2, -30, 2.4, 2.4, 2.4, matRadianiteBox);
 
         // B Site Elevated Platform & Crates
@@ -3148,11 +3415,11 @@
         addCrateStack(-22, -24, 2.4);
 
         // B Main Tunnel Entrance
-        addArch(-26, 0, 6, 5.5, 5.0, 2.2, matWallStone);
+        addArch(-26, 0, 6, 5.5, 5.0, 2.2, matAscentWall);
 
         // Ascent B Connector Shutter Door & Switch (Interactive [F] + 500 HP destructible)
-        addBox(-23, 3.5, -14, 6, 7, 1.2, matWallStone);
-        addBox(-13, 3.5, -14, 6, 7, 1.2, matWallStone);
+        addBox(-23, 3.5, -14, 6, 7, 1.2, matAscentWall);
+        addBox(-13, 3.5, -14, 6, 7, 1.2, matAscentWall);
         addBox(-18, 7.5, -14, 4, 1.2, 1.2, matConcrete);
 
         const doorGeo = new THREE.BoxGeometry(4, 6.8, 0.35);
@@ -3189,15 +3456,18 @@
         };
       }
       // ==========================================================
-      // 2. BIND (바인드) - HOOKAH WINDOW 2F, SHOWERS, TRUCK & TELEPORTERS
+      // MAP 2: BIND (바인드) - 사막 연구소, 노미드(NO MID), 일방통행 텔레포터
       // ==========================================================
       else if (mapKey === 'bind') {
-        // Sandstone Outer Fortress Walls
-        addBox(0, -0.5, 0, 110, 1, 110, matSandstone);
-        addBox(0, 7, -55, 110, 14, 2, matSandstone);
-        addBox(0, 7, 55, 110, 14, 2, matSandstone);
-        addBox(-55, 7, 0, 2, 14, 110, matSandstone);
-        addBox(55, 7, 0, 2, 14, 110, matSandstone);
+        // Sandstone Outer Fortress Walls & Desert Floor
+        addBox(0, -0.5, 0, 110, 1, 110, matDesertFloor);
+        addBox(0, 7, -55, 110, 14, 2, matSandstoneWall);
+        addBox(0, 7, 55, 110, 14, 2, matSandstoneWall);
+        addBox(-55, 7, 0, 2, 14, 110, matSandstoneWall);
+        addBox(55, 7, 0, 2, 14, 110, matSandstoneWall);
+
+        // CENTRAL DIVIDER (NO MID LANE - Strict Dual Flank Layout)
+        addBox(0, 7, -5, 26, 14, 80, matSandstoneWall);
 
         // --- A SITE ---
         addBox(26, 0.05, -22, 22, 0.05, 22, matSiteFloor, false);
@@ -3209,19 +3479,19 @@
         addBox(26, 2.1, -18.2, 4.4, 2.6, 2.8, matReceiver); // Truck Cab
         addBox(26, 2.5, -24.2, 3.6, 2.0, 4.4, matRadianiteBox); // Cargo crates
 
-        // A Bath / Showers Corridor (Arched indoor corridor on flank)
-        addArch(40, 0, 10, 4.2, 4.8, 1.6, matSandstone);
-        addArch(40, 0, -2, 4.2, 4.8, 1.6, matSandstone);
-        addArch(40, 0, -14, 4.2, 4.8, 1.6, matSandstone);
-        addBox(43, 3.2, -2, 1.4, 6.4, 28, matSandstone); // Outer corridor wall
+        // A Bath / Showers Corridor (Arched indoor corridor on right flank)
+        addArch(40, 0, 10, 4.2, 4.8, 1.6, matSandstoneWall);
+        addArch(40, 0, -2, 4.2, 4.8, 1.6, matSandstoneWall);
+        addArch(40, 0, -14, 4.2, 4.8, 1.6, matSandstoneWall);
+        addBox(43, 3.2, -2, 1.4, 6.4, 28, matSandstoneWall); // Outer corridor wall
 
         // U-Hall / Lamps (Defensive elbow bunker connecting site to spawn)
-        addPlatform(32, 0, -32, 8, 4.2, 10, matSandstone);
-        addArch(32, 0, -27, 3.2, 3.6, 1.2, matSandstone); // Front door
-        addArch(32, 0, -37, 3.2, 3.6, 1.2, matSandstone); // Back door
+        addPlatform(32, 0, -32, 8, 4.2, 10, matSandstoneWall);
+        addArch(32, 0, -27, 3.2, 3.6, 1.2, matSandstoneWall); // Front door
+        addArch(32, 0, -37, 3.2, 3.6, 1.2, matSandstoneWall); // Back door
 
         // A Tower (Heaven sniper perch)
-        addPlatform(18, 0, -34, 6.5, 3.2, 8, matSandstone);
+        addPlatform(18, 0, -34, 6.5, 3.2, 8, matSandstoneWall);
         addStairs(18, -26, 0, 3.2, 3.2, 8, 10, 'z-');
 
         // --- B SITE ---
@@ -3230,8 +3500,8 @@
         spikeSiteAreas.push({ minX: -37, maxX: -15, minZ: -33, maxZ: -11, name: 'B SITE' });
 
         // Hookah / B Window 2F (Elevated room at y = 3.2 with jump-out window)
-        addPlatform(-24, 0, 8, 10, 3.2, 10, matSandstone);
-        addArch(-24, 3.2, 3, 4.4, 3.2, 1.0, matSandstone); // Jump-in window
+        addPlatform(-24, 0, 8, 10, 3.2, 10, matSandstoneWall);
+        addArch(-24, 3.2, 3, 4.4, 3.2, 1.0, matSandstoneWall); // Jump-in window
         addRailing(-24, 3.2, 3.2, 4.4, 'x'); // Window sill
         addStairs(-24, 18, 0, 3.6, 3.2, 9, 10, 'z-'); // Stairs from B Short into Hookah
 
@@ -3240,15 +3510,15 @@
         addCrateStack(-21, -22, 2.4);
 
         // B Garden Corridor & Arch
-        addArch(-24, 0, -10, 4.6, 4.6, 1.6, matSandstone);
+        addArch(-24, 0, -10, 4.6, 4.6, 1.6, matSandstoneWall);
         addCrateStack(-32, -26, 2.2);
 
-        // --- TELEPORTERS (WORKING HIGH-TECH DOORS & ENERGY GATES) ---
+        // --- WORKING ONE-WAY HIGH-TECH TELEPORTERS ---
         // TELEPORTER 1: A Short (18, 0, 5) -> B Short Exit (-16, 0, -10)
-        const tp1Mesh = addBox(18, 2, 5, 3, 4, 3, new THREE.MeshStandardMaterial({
+        addBox(18, 2, 5, 3, 4, 3, new THREE.MeshStandardMaterial({
           color: 0x00f0ff, emissive: 0x00f0ff, emissiveIntensity: 0.9, transparent: true, opacity: 0.55
         }), false);
-        addTextBillboard(18, 4.5, 5, 'TP: TO B SHORT', 1.0, '#00f0ff');
+        addTextBillboard(18, 4.5, 5, 'TP: TO B SHORT', 1.2, '#00f0ff');
         teleporters.push({
           pos: new THREE.Vector3(18, 1.7, 5),
           dest: new THREE.Vector3(-16, 1.7, -10),
@@ -3256,10 +3526,10 @@
         });
 
         // TELEPORTER 2: B Long (-22, 0, 18) -> A Lobby Exit (14, 0, 26)
-        const tp2Mesh = addBox(-22, 2, 18, 3, 4, 3, new THREE.MeshStandardMaterial({
+        addBox(-22, 2, 18, 3, 4, 3, new THREE.MeshStandardMaterial({
           color: 0x00f0ff, emissive: 0x00f0ff, emissiveIntensity: 0.9, transparent: true, opacity: 0.55
         }), false);
-        addTextBillboard(-22, 4.5, 18, 'TP: TO A LOBBY', 1.0, '#00f0ff');
+        addTextBillboard(-22, 4.5, 18, 'TP: TO A LOBBY', 1.2, '#00f0ff');
         teleporters.push({
           pos: new THREE.Vector3(-22, 1.7, 18),
           dest: new THREE.Vector3(14, 1.7, 26),
@@ -3267,15 +3537,15 @@
         });
       }
       // ==========================================================
-      // 3. HAVEN (헤이븐) - 3 FULL SITES, CENTRAL GONG PAGODA, TOWER & GARAGE
+      // MAP 3: HAVEN (헤이븐) - 3대 사이트(A/B/C) & 중앙 사원 대범종
       // ==========================================================
       else if (mapKey === 'haven') {
-        // Asian Pagoda Temple Grounds
-        addBox(0, -0.5, 0, 120, 1, 110, matWoodPagoda);
-        addBox(0, 7, -55, 120, 14, 2, matWallStone);
-        addBox(0, 7, 55, 120, 14, 2, matWallStone);
-        addBox(-60, 7, 0, 2, 14, 110, matWallStone);
-        addBox(60, 7, 0, 2, 14, 110, matWallStone);
+        // Asian Pagoda Temple Grounds & Dark Wood Planks
+        addBox(0, -0.5, 0, 120, 1, 110, matPagodaFloor);
+        addBox(0, 7, -55, 120, 14, 2, matPagodaWall);
+        addBox(0, 7, 55, 120, 14, 2, matPagodaWall);
+        addBox(-60, 7, 0, 2, 14, 110, matPagodaWall);
+        addBox(60, 7, 0, 2, 14, 110, matPagodaWall);
 
         // --- A SITE ---
         addBox(34, 0.05, -24, 20, 0.05, 20, matSiteFloor, false);
@@ -3283,7 +3553,7 @@
         spikeSiteAreas.push({ minX: 24, maxX: 44, minZ: -34, maxZ: -14, name: 'A SITE' });
 
         // A Tower / Heaven (Traditional 2F Watchtower at y = 4.2)
-        addPlatform(34, 0, -34, 12, 4.2, 10, matWoodPagoda);
+        addPlatform(34, 0, -34, 12, 4.2, 10, matPagodaWall);
         addPillar(29, 4.2, -30, 0.3, 3.5, matCrimsonPillar);
         addPillar(39, 4.2, -30, 0.3, 3.5, matCrimsonPillar);
         addPillar(29, 4.2, -38, 0.3, 3.5, matCrimsonPillar);
@@ -3298,11 +3568,11 @@
 
         // --- B SITE (CENTRAL GONG PAGODA PAVILION) ---
         addBox(0, 0.05, -24, 20, 0.05, 20, matSiteFloor, false);
-        addTextBillboard(0, 0.2, -24, 'B SITE (MID GONG)', 1.6);
+        addTextBillboard(0, 0.2, -24, 'B SITE (중앙 범종)', 1.6);
         spikeSiteAreas.push({ minX: -10, maxX: 10, minZ: -34, maxZ: -14, name: 'B SITE' });
 
         // Elevated Stone Deck for Pagoda (y = 0.8)
-        addPlatform(0, 0, -24, 16, 0.8, 16, matWallStone);
+        addPlatform(0, 0, -24, 16, 0.8, 16, matPagodaWall);
         addStairs(0, -14, 0, 5.0, 0.8, 2.5, 4, 'z-'); // Front stairs to Pagoda
         addStairs(0, -34, 0, 5.0, 0.8, 2.5, 4, 'z+'); // Back stairs
 
@@ -3315,13 +3585,15 @@
         // Majestic Curved Pagoda Eaves
         addEave(0, 6.8, -24, 18, 18, matDarkTile);
 
-        // Ceremonial Brass Bell / Gong
+        // Ceremonial Brass Bell / Gong (Interactive Sound on Hit)
         const gongGeo = new THREE.CylinderGeometry(1.6, 1.6, 0.25, 24);
         const gongMesh = new THREE.Mesh(gongGeo, matBronzeGong);
         gongMesh.rotation.x = Math.PI / 2;
         gongMesh.position.set(0, 3.6, -24);
         scene.add(gongMesh);
         mapObjects.push(gongMesh);
+        colliders.push({ box: new THREE.Box3().setFromObject(gongMesh), mesh: gongMesh });
+        havenGongMesh = gongMesh;
 
         // --- C SITE & C GARAGE ---
         addBox(-34, 0.05, -24, 20, 0.05, 20, matSiteFloor, false);
@@ -3329,9 +3601,9 @@
         spikeSiteAreas.push({ minX: -44, maxX: -24, minZ: -34, maxZ: -14, name: 'C SITE' });
 
         // C Garage Connector (Middle building linking Mid to C Site)
-        addPlatform(-16, 0, -8, 8, 4.5, 14, matWoodPagoda);
-        addArch(-16, 0, -1, 3.6, 3.8, 1.2, matWoodPagoda); // Front door
-        addArch(-16, 0, -15, 3.6, 3.8, 1.2, matWoodPagoda); // Back door
+        addPlatform(-16, 0, -8, 8, 4.5, 14, matPagodaWall);
+        addArch(-16, 0, -1, 3.6, 3.8, 1.2, matPagodaWall); // Front door
+        addArch(-16, 0, -15, 3.6, 3.8, 1.2, matPagodaWall); // Back door
 
         // C Long Sniper Lane & Sandbag Ramparts
         addBox(-38, 0.6, 6, 1.2, 1.2, 4.5, matSandbags);
@@ -3343,7 +3615,7 @@
         addCrateStack(-30, -26, 2.2);
       }
       // ==========================================================
-      // 4. THE RANGE (사격장) - SHOOTING STALLS, LED SCOREBOARD & YARD LINES
+      // MAP 4: THE RANGE (사격장) - 사격 훈련장, 거리별 표적 및 LED 전광판
       // ==========================================================
       else if (mapKey === 'range') {
         addBox(0, -0.5, 0, 60, 1, 120, matConcrete);
@@ -3352,20 +3624,14 @@
         addBox(-30, 7, 0, 2, 14, 120, matWallStone);
         addBox(30, 7, 0, 2, 14, 120, matWallStone);
 
-        // Overhead High-Tech LED Scoreboard
         addTextBillboard(0, 9.5, -20, 'VALORANT PROTOCOL // TARGET PRACTICE RANGE', 3.0, '#ff4655');
-        addTextBillboard(0, 7.2, -20, 'STATION 01-04  |  DISTANCE: 10M - 50M  |  HEADSHOT CALIBRATION', 1.8, '#00f0ff');
+        addTextBillboard(0, 7.2, -20, 'STATION 01-04  |  DISTANCE: 10M - 50M', 1.8, '#00f0ff');
 
-        // 4 High-Tech Shooting Stalls with Partitions
         [-9, -3, 3, 9].forEach(stallX => {
           addBox(stallX, 1.5, 14, 0.2, 3.0, 4.0, matRailing);
           addLantern(stallX, 0, 12, 0x00f0ff);
         });
 
-        // Yellow Hazard Line on Floor
-        addBox(0, 0.03, 12, 24, 0.02, 0.4, matSiteFloor, false);
-
-        // Ground Distance Markers (10m, 20m, 30m, 50m)
         const distances = [
           { z: -10, label: '--- 10 METERS ---' },
           { z: -20, label: '--- 20 METERS ---' },
@@ -3377,28 +3643,27 @@
           addTextBillboard(0, 0.4, d.z, d.label, 1.4, '#00f0ff');
         });
 
-        // Spawn 4 Practice Targets that respawn instantly when eliminated
         [-10, -20, -30, -50].forEach((zPos, idx) => {
           const m = createAgentModel(false, 'Omen');
           m.mesh.position.set((idx % 2 === 0 ? 4 : -4), 0.2, zPos);
           scene.add(m.mesh);
           practiceBots.push({
             mesh: m.mesh, head: m.head, body: m.body, legs: m.legs,
-            hp: 100, isDead: false, targetZ: zPos, distName: `${Math.abs(zPos)}m`
+            hp: 100, isDead: false, targetZ: zPos, distName: Math.abs(zPos) + 'm'
           });
         });
       }
 
       // SPAWN BUY PHASE BARRIERS (Blocks player until round starts)
       if (mapKey !== 'range') {
-        const bMesh = addBox(0, 4, 15, 80, 8, 1, matBarrier, true);
+        const bMesh = addBox(0, 4, 15, 90, 8, 1, matBarrier, true);
         barriersList.push(bMesh);
       }
 
       // PLAYER & AGENTS SPAWN
       const playerIsAtk = (myTeam === 'atk');
-      const mySpawnZ = (mapKey === 'range') ? 15 : (playerIsAtk ? 36 : -25);
-      const enemySpawnZ = playerIsAtk ? -25 : 36;
+      const mySpawnZ = (mapKey === 'range') ? 15 : (playerIsAtk ? 38 : -25);
+      const enemySpawnZ = playerIsAtk ? -25 : 38;
 
       camera.position.set(0, 1.7, mySpawnZ);
       camera.rotation.set(0, 0, 0);
@@ -3420,7 +3685,7 @@
             hp: 100, maxHp: 100,
             mesh: m.mesh, head: m.head, body: m.body, legs: m.legs,
             isDead: false, patrolDir: 1,
-            targetSite: (i % 2 === 0 ? 'A' : 'B')
+            targetSite: (mapKey === 'haven') ? (i % 3 === 0 ? 'A' : (i % 3 === 1 ? 'B' : 'C')) : (i % 2 === 0 ? 'A' : 'B')
           });
         }
 
@@ -3440,13 +3705,14 @@
             hp: 100, maxHp: 100,
             mesh: m.mesh, head: m.head, body: m.body, legs: m.legs,
             isDead: false, patrolDir: -1,
-            targetSite: (i % 2 === 0 ? 'A' : 'B')
+            targetSite: (mapKey === 'haven') ? (i % 3 === 0 ? 'A' : (i % 3 === 1 ? 'B' : 'C')) : (i % 2 === 0 ? 'A' : 'B')
           });
         }
       }
 
       renderTopAgentsBar();
     }
+
 
     function renderTopAgentsBar() {
       const atkRoster = document.getElementById('top-roster-atk');
@@ -3569,6 +3835,7 @@
 
       if (e.code === 'KeyR') reloadWeapon();
       if (e.code === 'KeyB') toggleBuyMenu();
+      if (e.code === 'KeyM') cycleMapInGame();
       if (e.code === 'KeyY') startInspect();
       if (e.code === 'KeyN') toggleCombatReport();
       if (e.code === 'KeyF') interactDoorOrObject();
@@ -3751,6 +4018,17 @@
     });
     window.addEventListener('mouseup', (e) => { if (e.button === 0) keys['Mouse0'] = false; });
     window.addEventListener('contextmenu', e => e.preventDefault());
+
+    
+    function cycleMapInGame() {
+      currentMapIndex = (currentMapIndex + 1) % MAP_LIST.length;
+      const mapKey = MAP_LIST[currentMapIndex];
+      build5v5Map(mapKey);
+      const title = MAP_NAMES[mapKey] || mapKey.toUpperCase();
+      showToast('🗺️ 맵 즉시 변경: ' + title);
+      const badge = document.getElementById('hud-map-badge');
+      if (badge) badge.innerText = mapKey.toUpperCase();
+    }
 
     function switchWeapon(key) {
       if (!WEAPONS[key] || currentWeaponKey === key) return;
@@ -4098,6 +4376,7 @@
 
       // Dynamic Recoil Gain with tracked offset
       pitch += currentWeapon.recoilGain;
+      pitch = Math.max(-Math.PI / 2.1, Math.min(Math.PI / 2.1, pitch));
       recoilOffset += currentWeapon.recoilGain;
 
       const rayDir = new THREE.Vector3(
@@ -4155,6 +4434,16 @@
 
       // Check Wall Impact Decal
       const collMeshList = colliders.map(c => c.mesh);
+      
+      // Check Haven Sacred Gong Hit
+      if (havenGongMesh) {
+        const gongHits = raycaster.intersectObject(havenGongMesh);
+        if (gongHits.length > 0) {
+          sound.playGong();
+          showToast('🔔 [HAVEN] 신성한 대범종이 울립니다!');
+        }
+      }
+  
       const wallHits = raycaster.intersectObjects(collMeshList);
       if (wallHits.length > 0) {
         const hit = wallHits[0];
