@@ -2512,6 +2512,14 @@
         fireRate: 0.25, dmgHead: 145, dmgBody: 55, dmgLeg: 46,
         recoilGain: 0.016, spreadBase: 0.0015, isSniper: false, isPistol: true
       },
+      
+      knife: {
+        name: 'TACTICAL BLADE // 근접 전술 단검', cost: 0,
+        ammo: 1, maxAmmo: 1, reserve: 0,
+        fireRate: 0.38, dmgHead: 150, dmgBody: 75, dmgLeg: 50,
+        recoilGain: 0, spreadBase: 0, isSniper: false, isPistol: false, isKnife: true
+      },
+
       classic: {
         name: 'CLASSIC // SEMI-AUTO', cost: 0,
         ammo: 12, maxAmmo: 12, reserve: 36,
@@ -2923,6 +2931,28 @@
         const barrel = new THREE.Mesh(new THREE.BoxGeometry(0.035, 0.05, 0.2), matBarrel);
         barrel.position.set(0, 0.025, -0.22);
         weaponSubMesh.add(barrel);
+      
+      } else if (wpnKey === 'knife') {
+        const handle = new THREE.Mesh(new THREE.BoxGeometry(0.035, 0.045, 0.16), matCarbonTrim);
+        handle.position.set(0, -0.04, 0.05);
+        weaponSubMesh.add(handle);
+
+        const guard = new THREE.Mesh(new THREE.BoxGeometry(0.04, 0.08, 0.02), matReceiver);
+        guard.position.set(0, -0.02, -0.04);
+        weaponSubMesh.add(guard);
+
+        const bladeGeo = new THREE.BoxGeometry(0.015, 0.065, 0.26);
+        const bladeMat = new THREE.MeshStandardMaterial({
+          color: currentSkin.barrelColor || 0x00f0ff,
+          emissive: currentSkin.emissiveColor || 0x00f0ff,
+          emissiveIntensity: 0.8,
+          metalness: 0.95,
+          roughness: 0.15
+        });
+        const blade = new THREE.Mesh(bladeGeo, bladeMat);
+        blade.position.set(0, 0.01, -0.16);
+        weaponSubMesh.add(blade);
+
       } else if (wpnKey === 'classic') {
         const slide = new THREE.Mesh(new THREE.BoxGeometry(0.046, 0.06, 0.22), matBarrel);
         slide.position.set(0, 0.02, -0.08);
@@ -4108,7 +4138,8 @@
       if (e.code === 'Tab') showScoreboard(true);
       if (e.code === 'Digit1') switchWeapon('vandal');
       if (e.code === 'Digit2') switchWeapon('classic');
-      if (e.code === 'Digit3') switchWeapon('phantom');
+      if (e.code === 'Digit3') switchWeapon('knife');
+      if (e.code === 'Digit4') switchWeapon('phantom');
       if (e.code === 'Digit5') switchWeapon('spectre');
       if (e.code === 'Digit6') switchWeapon('sheriff');
       if (e.code === 'Space' && player.isDead) executeTakeover();
@@ -4721,6 +4752,29 @@
        8. SHOOTING, BULLET DECALS & ABILITIES INTERACTION
        ========================================================== */
     function shootWeapon() {
+
+      if (currentWeapon.isKnife) {
+        sound.playKnifeSlash();
+        // Knife Slash Motion
+        gunGroup.rotation.z += 0.8;
+        gunGroup.rotation.y += 0.6;
+        gunGroup.position.x -= 0.1;
+        setTimeout(() => {
+          gunGroup.rotation.set(0, 0, 0);
+          gunGroup.position.copy(DEFAULT_GUN_POS);
+        }, 180);
+
+        // Melee hit check (3.2 meters)
+        enemiesList.forEach(e => {
+          if (!e.isDead && camera.position.distanceTo(e.mesh.position) < 3.2) {
+            damageEnemy(e, 75, 'body');
+            sound.playBodyHit();
+            showHitmarker(false);
+          }
+        });
+        return;
+      }
+
       if (player.isDead || roundState === 'BUY_PHASE') return;
       const now = performance.now() / 1000;
       if (currentWeapon.isReloading || (!cheats.infiniteAmmo && currentWeapon.ammo <= 0)) {
@@ -6111,6 +6165,7 @@
         let moveSpeed = player.speed;
         if (player.isWalking) moveSpeed = 4.8;
         if (player.isCrouching) moveSpeed = 3.2;
+        if (currentWeapon.isKnife) moveSpeed *= 1.20;
 
         if (freeFlyMode) {
           const flySpeed = (keys['ControlLeft'] || keys['ControlRight']) ? 36 : 16;
@@ -6392,6 +6447,18 @@
         checkTeleporters();
 
         updateParticlesAndCasings(dt);
+
+        // Update Collapsing Bodies
+        enemiesList.forEach(e => {
+          if (e.isCollapsing) {
+            e.collapseTimer = (e.collapseTimer || 0) + dt;
+            if (e.collapseTimer < 0.45) {
+              e.mesh.rotation.x = -Math.PI / 2 * (e.collapseTimer / 0.45);
+              e.mesh.position.y = Math.max(0.18, 1.0 - (e.collapseTimer / 0.45) * 0.82);
+            }
+          }
+        });
+
         updateWorldPings(dt);
         updateDynamicCrosshair();
 
