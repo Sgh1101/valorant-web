@@ -2428,6 +2428,22 @@
         osc.stop(now + 0.04);
       }
 
+      playLandingThud() {
+        if (!this.ctx) return;
+        const now = this.ctx.currentTime;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(120, now);
+        osc.frequency.exponentialRampToValueAtTime(28, now + 0.12);
+        gain.gain.setValueAtTime(0.48, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.12);
+        osc.connect(gain);
+        gain.connect(this.dest);
+        osc.start(now);
+        osc.stop(now + 0.13);
+      }
+
       playShieldBreak() {
         if (!this.ctx) return;
         const now = this.ctx.currentTime;
@@ -5109,7 +5125,14 @@
       if (e.code === 'KeyE') castSkillE();
       if (e.code === 'KeyX') castSkillX();
       if (e.code === 'KeyT') triggerWorldPing();
-      if (e.code === 'KeyZ') triggerQuickRadio();
+      if (document.getElementById('radio-wheel-modal')?.style.display === 'flex') {
+        if (e.code === 'Digit1') { sendRadioCommand('rush'); return; }
+        if (e.code === 'Digit2') { sendRadioCommand('backup'); return; }
+        if (e.code === 'Digit3') { sendRadioCommand('spotted'); return; }
+        if (e.code === 'Digit4') { sendRadioCommand('quiet'); return; }
+        if (e.code === 'KeyZ' || e.code === 'Escape') { toggleRadioWheel(); return; }
+      }
+      if (e.code === 'KeyZ') toggleRadioWheel();
       if (e.code === 'F1' || e.code === 'Backquote') toggleCheats();
       if (e.code === 'F9') enterFly();
       if (e.code === 'Tab') showScoreboard(true);
@@ -5326,7 +5349,7 @@
           updateADS();
         }
       }
-      if (e.button === 1) triggerPing();
+      if (e.button === 1) triggerWorldPing();
     });
     window.addEventListener('mouseup', (e) => { if (e.button === 0) keys['Mouse0'] = false; });
     window.addEventListener('contextmenu', e => e.preventDefault());
@@ -5528,28 +5551,78 @@
       '💣 "스파이크 설치한다, 엄호해줘!" (Cover me, Planting Spike!)',
       '🛡️ "클러치 집중하자, 침착해!" (Stay Calm, We Got This!)'
     ];
-    let radioCallIdx = 0;
-
-    function triggerQuickRadio() {
-      const msg = RADIO_CALLS[radioCallIdx];
-      radioCallIdx = (radioCallIdx + 1) % RADIO_CALLS.length;
-
-      sound.playPing();
-      showToast(msg);
-
-      if (radioCallIdx === 1) radioVoice.speak('Going A site!');
-      else if (radioCallIdx === 2) radioVoice.speak('Need backup at B!');
-      else if (radioCallIdx === 3) radioVoice.speak('Enemy spotted!');
-      else if (radioCallIdx === 4) radioVoice.speak('Cover me!');
-      else radioVoice.speak('Stay calm!');
-
-      // Bot Teammate affirmative response after 700ms
-      setTimeout(() => {
-        const replies = ['"라저 (Copy that!)"', '"확인했다 (Affirmative!)"', '"엄호 대기 중 (On my way!)"'];
-        const reply = replies[Math.floor(Math.random() * replies.length)];
-        showToast(`🤖 [팀원 AI] ${reply}`);
-      }, 700);
+    function toggleRadioWheel() {
+      const modal = document.getElementById('radio-wheel-modal');
+      if (!modal) return;
+      if (modal.style.display === 'flex') {
+        modal.style.display = 'none';
+        canvas.requestPointerLock();
+      } else {
+        document.exitPointerLock();
+        modal.style.display = 'flex';
+        sound.playSwitchClick();
+      }
     }
+
+    function sendRadioCommand(cmd) {
+      const modal = document.getElementById('radio-wheel-modal');
+      if (modal) modal.style.display = 'none';
+      canvas.requestPointerLock();
+      sound.playPing();
+
+      const myAgent = lobbySlots[myTeam][mySlotIdx].agent;
+      let textKr = '';
+      let textVoice = '';
+      let replyBot = '';
+
+      if (cmd === 'rush') {
+        textKr = '⚔️ 지점 돌파! 즉시 진격! (RUSH SITE NOW)';
+        textVoice = "Rush now, don't stop!";
+        replyBot = '🤖 [아군 봇]: "라저! 전방 연막 치고 돌진한다!"';
+      } else if (cmd === 'backup') {
+        textKr = '🛡️ 지원 요청! 백업 부탁한다! (NEED ASSISTANCE)';
+        textVoice = 'Need backup here!';
+        replyBot = '🤖 [아군 봇]: "지금 지원하러 이동 중!"';
+      } else if (cmd === 'spotted') {
+        textKr = '👁️ 적군 발견! 조심하라! (HOSTILES SPOTTED)';
+        textVoice = 'Enemy spotted!';
+        replyBot = '🤖 [아군 봇]: "확인했다. 앵글 쪼개며 대기하겠다."';
+      } else {
+        textKr = '🤫 조용히 이동! 사격 대기! (HOLD FIRE / WALK)';
+        textVoice = 'Quiet now, stay low.';
+        replyBot = '🤖 [아군 봇]: "발소리 죽이고 천천히 접근하겠다."';
+      }
+
+      showToast(textKr);
+      radioVoice.speak(textVoice);
+
+      const log = document.getElementById('chat-log');
+      if (log) {
+        const item = document.createElement('div');
+        item.style.marginBottom = '4px';
+        item.innerHTML = `<strong style="color:var(--val-cyan);">[전술 무전] YOU (${myAgent}):</strong> ${textKr}`;
+        log.appendChild(item);
+        log.scrollTop = log.scrollHeight;
+      }
+
+      setTimeout(() => {
+        showToast(replyBot);
+        if (log) {
+          const item = document.createElement('div');
+          item.style.marginBottom = '4px';
+          item.innerHTML = `<strong style="color:var(--val-green);">${replyBot}</strong>`;
+          log.appendChild(item);
+          log.scrollTop = log.scrollHeight;
+        }
+      }, 750);
+    }
+
+    document.querySelectorAll('.radio-cmd-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const cmd = btn.getAttribute('data-cmd');
+        sendRadioCommand(cmd);
+      });
+    });
 
     function triggerWorldPing() {
       sound.playPing();
@@ -5728,6 +5801,10 @@
 
     function onPlayerDeath() {
       if (cheats.godMode) return;
+      if (phoenixRunItBack.active) {
+        triggerPhoenixResurrect();
+        return;
+      }
 
       player.isDead = true;
       player.hp = 0;
@@ -6328,12 +6405,21 @@
         if (isHeadshot) player.headshots++;
 
         // Refresh Blade Storm knives on kill!
-        if (abilities.x.active) {
+        if (abilities.x.active && lobbySlots[myTeam][mySlotIdx].agent === 'Jett') {
           abilities.x.knives = 5;
           sound.playBladeStorm();
           radioVoice.speak('Watch this!');
           showToast('비수 재충전! (KNIVES RESTORED)');
           renderBladePips();
+        }
+
+        // Empress Auto-Devour & Soul Feast on kill!
+        if (abilities.x.active && lobbySlots[myTeam][mySlotIdx].agent === 'Reyna') {
+          player.hp = 100;
+          player.shield = 50;
+          updateHUD();
+          sound.playDefuseHalf();
+          showToast('👑 [여제 포식] 영혼 흡수! (체력 & 실드 완전 회복)');
         }
 
         const streak = sound.playKillSound();
@@ -6750,28 +6836,78 @@
       setTimeout(() => scene.remove(firePool), 5000);
     }
 
+    let phoenixRunItBack = {
+      active: false,
+      anchorPos: null,
+      marker: null,
+      timerId: null
+    };
+
+    function triggerPhoenixResurrect() {
+      if (!phoenixRunItBack.active) return;
+      phoenixRunItBack.active = false;
+      if (phoenixRunItBack.timerId) clearTimeout(phoenixRunItBack.timerId);
+
+      if (phoenixRunItBack.marker) {
+        scene.remove(phoenixRunItBack.marker);
+        phoenixRunItBack.marker = null;
+      }
+
+      camera.position.copy(phoenixRunItBack.anchorPos);
+      player.hp = 100;
+      player.shield = 50;
+      player.isDead = false;
+
+      const flash = document.getElementById('tp-flash-overlay');
+      if (flash) {
+        flash.style.background = '#ff5500';
+        flash.style.opacity = '0.95';
+        setTimeout(() => {
+          flash.style.opacity = '0';
+          flash.style.background = '#00f0ff';
+        }, 550);
+      }
+
+      sound.playTeleport();
+      sound.playFlame();
+      radioVoice.speak('Back in the game!');
+      showToast('🔥 [피닉스 역습] 치명상 회피! 표식 위치로 부활 귀환!');
+      updateHUD();
+    }
+
     function castPhoenixRunItBack() {
       showToast('🔥 [피닉스] 역습 궁극기 가동! // COME ON, LET\'S GO!');
       radioVoice.speak('Come on, let\'s go!');
       sound.playAceSound();
 
+      if (phoenixRunItBack.active && phoenixRunItBack.marker) {
+        scene.remove(phoenixRunItBack.marker);
+      }
+
       const anchorPos = camera.position.clone();
-      const marker = new THREE.Mesh(new THREE.CylinderGeometry(0.6, 0.6, 0.1, 16), new THREE.MeshBasicMaterial({ color: 0xff5500 }));
+      const marker = new THREE.Group();
+      const ring = new THREE.Mesh(new THREE.RingGeometry(0.3, 1.2, 24), new THREE.MeshBasicMaterial({ color: 0xff4400, side: THREE.DoubleSide }));
+      ring.rotation.x = Math.PI / 2;
+      ring.position.y = 0.05;
+      marker.add(ring);
+
+      const pillar = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.4, 2.2, 16), new THREE.MeshBasicMaterial({ color: 0xff8800, transparent: true, opacity: 0.65 }));
+      pillar.position.y = 1.1;
+      marker.add(pillar);
+
       marker.position.copy(anchorPos);
       scene.add(marker);
 
-      showToast('10초간 불사 상태! 사망 시 표식 위치로 소환');
-      const prevGodMode = cheats.godMode;
-      cheats.godMode = true;
+      phoenixRunItBack.active = true;
+      phoenixRunItBack.anchorPos = anchorPos;
+      phoenixRunItBack.marker = marker;
 
-      setTimeout(() => {
-        cheats.godMode = prevGodMode;
-        camera.position.copy(anchorPos);
-        player.hp = 100;
-        updateHUD();
-        scene.remove(marker);
-        sound.playTeleport();
-        showToast('🔥 [피닉스] 표식 위치로 부활 귀환!');
+      showToast('10초간 불사 상태! 치명상 피격 시 표식 위치로 부활 귀환');
+
+      phoenixRunItBack.timerId = setTimeout(() => {
+        if (phoenixRunItBack.active) {
+          triggerPhoenixResurrect();
+        }
       }, 10000);
     }
 
@@ -6810,14 +6946,16 @@
 
       const prevGod = cheats.godMode;
       cheats.godMode = true;
-      player.speed = 10.5;
+      player.speed = 11.5;
+      gunGroup.visible = false;
 
       const vig = document.getElementById('vignette');
-      if (vig) vig.style.boxShadow = 'inset 0 0 180px rgba(186, 104, 200, 0.85)';
+      if (vig) vig.style.boxShadow = 'inset 0 0 220px rgba(186, 104, 200, 0.92)';
 
       setTimeout(() => {
         cheats.godMode = prevGod;
         player.speed = 7.0;
+        if (!player.isDead) gunGroup.visible = true;
         if (vig) vig.style.boxShadow = 'inset 0 0 200px rgba(0,0,0,0.95)';
         sound.playDash();
         showToast('👻 [레이나] 물질화 복귀!');
@@ -7771,7 +7909,7 @@
             player.velocity.x = moveDir.x * moveSpeed;
             player.velocity.z = moveDir.z * moveSpeed;
 
-            if (!player.isWalking && player.isGrounded && (now - sound.lastStepTime > 320)) {
+            if (!player.isWalking && !player.isCrouching && player.isGrounded && (now - sound.lastStepTime > 340)) {
               sound.lastStepTime = now;
               const currentMapKey = MAP_LIST[currentMapIndex];
               let stepSurface = 'stone';
@@ -7806,7 +7944,7 @@
             nextY = minEyeY;
             if (!player.isGrounded && player.velocity.y < -3.2) {
               landingDip = Math.min(0.12, Math.abs(player.velocity.y) * 0.015);
-              sound.playFootstep('stone');
+              sound.playLandingThud();
             }
             player.velocity.y = 0;
             player.isGrounded = true;
