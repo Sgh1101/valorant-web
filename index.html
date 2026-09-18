@@ -2002,22 +2002,40 @@
         if (Date.now() - this.lastKillTime > 8000) this.killStreak = 0;
         this.killStreak = Math.min(this.killStreak + 1, 5);
         this.lastKillTime = Date.now();
-        const notes = [
-          [261.63, 392.00], [329.63, 493.88], [392.00, 587.33, 783.99],
-          [493.88, 659.25, 987.77], [523.25, 659.25, 783.99, 1046.5]
+
+        // 5-Tone Musical Chord Progression: C -> E -> G -> B -> High C (ACE)
+        const chords = [
+          [261.63, 523.25],                  // Kill 1: C4 + C5
+          [329.63, 659.25],                  // Kill 2: E4 + E5
+          [392.00, 783.99, 1174.66],         // Kill 3: G4 + G5 + D6
+          [493.88, 987.77, 1234.71],         // Kill 4: B4 + B5 + D#6
+          [523.25, 659.25, 783.99, 1046.5, 1318.5] // Kill 5 (ACE): Full Angelic Major Chord
         ];
-        (notes[this.killStreak - 1] || notes[0]).forEach(freq => {
+
+        // Deep impact sub-bass thump
+        const bassOsc = this.ctx.createOscillator();
+        const bassGain = this.ctx.createGain();
+        bassOsc.type = 'triangle';
+        bassOsc.frequency.setValueAtTime(90, now);
+        bassOsc.frequency.exponentialRampToValueAtTime(30, now + 0.22);
+        bassGain.gain.setValueAtTime(0.65, now);
+        bassGain.gain.exponentialRampToValueAtTime(0.001, now + 0.22);
+        bassOsc.connect(bassGain); bassGain.connect(this.masterGain);
+        bassOsc.start(now); bassOsc.stop(now + 0.24);
+
+        // Resonant Chord Tones
+        const currentChord = chords[this.killStreak - 1] || chords[0];
+        currentChord.forEach(freq => {
           const osc = this.ctx.createOscillator();
           const gain = this.ctx.createGain();
-          osc.type = 'sine';
+          osc.type = (this.killStreak >= 4) ? 'sawtooth' : 'sine';
           osc.frequency.setValueAtTime(freq, now);
-          gain.gain.setValueAtTime(0.28, now);
-          gain.gain.exponentialRampToValueAtTime(0.001, now + (this.killStreak === 5 ? 1.4 : 0.6));
-          osc.connect(gain);
-          gain.connect(this.dest);
-          osc.start(now);
-          osc.stop(now + (this.killStreak === 5 ? 1.5 : 0.7));
+          gain.gain.setValueAtTime(0.24, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + (this.killStreak === 5 ? 1.6 : 0.7));
+          osc.connect(gain); gain.connect(this.masterGain);
+          osc.start(now); osc.stop(now + (this.killStreak === 5 ? 1.7 : 0.8));
         });
+
         return this.killStreak;
       }
 
@@ -4132,7 +4150,8 @@
       if (e.code === 'KeyQ') castSkillQ();
       if (e.code === 'KeyE') castSkillE();
       if (e.code === 'KeyX') castSkillX();
-      if (e.code === 'KeyT' || e.code === 'KeyZ') triggerWorldPing();
+      if (e.code === 'KeyT') triggerWorldPing();
+      if (e.code === 'KeyZ') triggerQuickRadio();
       if (e.code === 'F1' || e.code === 'Backquote') toggleCheats();
       if (e.code === 'F9') enterFly();
       if (e.code === 'Tab') showScoreboard(true);
@@ -4489,6 +4508,40 @@
        3D HOLOGRAPHIC WORLD PING BEACON SYSTEM ([T] / [Z])
        ========================================================== */
     const activePings = [];
+
+    
+    /* ==========================================================
+       TACTICAL QUICK RADIO CALLOUTS ([Z] KEY)
+       ========================================================== */
+    const RADIO_CALLS = [
+      '📍 "A 사이트 진입 중!" (Going A Site!)',
+      '📍 "B 사이트 지원 요청!" (Need Backup at B!)',
+      '⚠️ "적 발견! 주의하라!" (Enemy Spotted! Be Careful!)',
+      '💣 "스파이크 설치한다, 엄호해줘!" (Cover me, Planting Spike!)',
+      '🛡️ "클러치 집중하자, 침착해!" (Stay Calm, We Got This!)'
+    ];
+    let radioCallIdx = 0;
+
+    function triggerQuickRadio() {
+      const msg = RADIO_CALLS[radioCallIdx];
+      radioCallIdx = (radioCallIdx + 1) % RADIO_CALLS.length;
+
+      sound.playPing();
+      showToast(msg);
+
+      if (radioCallIdx === 1) radioVoice.speak('Going A site!');
+      else if (radioCallIdx === 2) radioVoice.speak('Need backup at B!');
+      else if (radioCallIdx === 3) radioVoice.speak('Enemy spotted!');
+      else if (radioCallIdx === 4) radioVoice.speak('Cover me!');
+      else radioVoice.speak('Stay calm!');
+
+      // Bot Teammate affirmative response after 700ms
+      setTimeout(() => {
+        const replies = ['"라저 (Copy that!)"', '"확인했다 (Affirmative!)"', '"엄호 대기 중 (On my way!)"'];
+        const reply = replies[Math.floor(Math.random() * replies.length)];
+        showToast(`🤖 [팀원 AI] ${reply}`);
+      }, 700);
+    }
 
     function triggerWorldPing() {
       sound.playPing();
@@ -5059,13 +5112,24 @@
     }
 
     function createBulletTracer(origin, direction) {
-      const geo = new THREE.BufferGeometry().setFromPoints([
-        new THREE.Vector3().copy(origin).add(new THREE.Vector3(0.2, -0.1, -0.4).applyQuaternion(camera.quaternion)),
-        new THREE.Vector3().copy(origin).addScaledVector(direction, 45)
-      ]);
-      const line = new THREE.Line(geo, new THREE.LineBasicMaterial({ color: 0xffee88, transparent: true, opacity: 0.85 }));
-      scene.add(line);
-      setTimeout(() => scene.remove(line), 45);
+      const tracerColor = (currentSkin && currentSkin.flashColor) ? currentSkin.flashColor : 0xffea00;
+      const tGeo = new THREE.CylinderGeometry(0.018, 0.018, 1.4, 6);
+      const tMat = new THREE.MeshBasicMaterial({
+        color: tracerColor, transparent: true, opacity: 0.95
+      });
+      const tracer = new THREE.Mesh(tGeo, tMat);
+      tracer.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), direction);
+
+      const spawnPos = origin.clone().add(new THREE.Vector3(0.2, -0.12, -0.45).applyQuaternion(camera.quaternion));
+      tracer.position.copy(spawnPos);
+      scene.add(tracer);
+
+      activeParticles.push({
+        mesh: tracer,
+        vel: direction.clone().multiplyScalar(110),
+        life: 0.22,
+        maxLife: 0.22
+      });
     }
 
     function damagePracticeBot(pBot, amount, isHeadshot) {
@@ -5302,7 +5366,7 @@
       const text = document.getElementById('kill-banner-text');
       const streakTag = document.getElementById('kill-banner-streak');
       const labels = ['ELIMINATED', 'DOUBLE KILL', 'TRIPLE KILL', 'QUADRA KILL', 'ACE // ENEMY TEAM WIPED'];
-      
+
       banner.classList.remove('tier-ace');
       if (streak >= 5) {
         banner.classList.add('tier-ace');
@@ -5311,10 +5375,19 @@
         radioVoice.speak('ACE! Magnificent work!');
       }
 
-      if (streakTag) streakTag.innerText = `KILL ${streak}`;
-      text.innerText = (isHeadshot ? 'HEADSHOT // ' : '') + (labels[streak - 1] || 'ELIMINATED');
+      if (streakTag) streakTag.innerText = isHeadshot ? '💀 HEADSHOT // ONE TAP' : `KILL ${streak}`;
+      text.innerText = (isHeadshot ? '★ HEADSHOT // ' : '') + (labels[streak - 1] || 'ELIMINATED');
+
+      if (isHeadshot) {
+        banner.style.borderColor = '#ffd700';
+        banner.style.boxShadow = '0 0 30px rgba(255, 215, 0, 0.7)';
+      } else {
+        banner.style.borderColor = 'var(--val-red)';
+        banner.style.boxShadow = '0 0 25px var(--val-red)';
+      }
+
       banner.classList.add('active');
-      setTimeout(() => banner.classList.remove('active'), 2000);
+      setTimeout(() => banner.classList.remove('active'), 2100);
     }
 
     function addKillFeedEntry(killer, victim, isHeadshot) {
