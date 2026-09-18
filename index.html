@@ -685,8 +685,8 @@
       text-align: right;
     }
 
-    /* Ascent B Door Interaction Prompt */
-    #door-prompt {
+    /* Interaction Prompts (Door & Dropped Weapon Swap) */
+    #door-prompt, #weapon-swap-prompt {
       position: absolute;
       top: 62%; left: 50%;
       transform: translate(-50%, -50%);
@@ -701,6 +701,15 @@
       pointer-events: none;
       font-family: var(--font-hud);
       font-weight: 700;
+    }
+    #weapon-swap-prompt {
+      top: 56%;
+      border-color: var(--val-gold);
+      box-shadow: 0 0 20px rgba(255, 200, 59, 0.4);
+    }
+    #weapon-swap-prompt .dp-key {
+      background: var(--val-gold);
+      color: #080c10;
     }
     .dp-key {
       font-family: var(--font-mono);
@@ -1615,6 +1624,16 @@
       </div>
 
       <!-- Crosshair Settings -->
+      <div style="margin-bottom: 12px; padding: 10px 14px; background: rgba(8, 12, 16, 0.6); border: 1px solid rgba(255,255,255,0.08);">
+        <div style="font-size: 12px; color: var(--val-gold); font-weight: 700; margin-bottom: 8px; letter-spacing: 1px;">프로 조준선 프리셋 // PRO CROSSHAIR PRESETS</div>
+        <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+          <button class="map-select-btn val-clip ch-preset-btn" data-preset="tenz" style="font-size: 12px; padding: 4px 12px;">TenZ (사이언)</button>
+          <button class="map-select-btn val-clip ch-preset-btn" data-preset="boaster" style="font-size: 12px; padding: 4px 12px;">Boaster (그린)</button>
+          <button class="map-select-btn val-clip ch-preset-btn" data-preset="aspas" style="font-size: 12px; padding: 4px 12px;">aspas (레드)</button>
+          <button class="map-select-btn val-clip ch-preset-btn" data-preset="demon1" style="font-size: 12px; padding: 4px 12px;">Demon1 (도트화이트)</button>
+          <button class="map-select-btn val-clip ch-preset-btn" data-preset="dot" style="font-size: 12px; padding: 4px 12px;">Dot Only (골드 점)</button>
+        </div>
+      </div>
       <div style="display:flex; gap:30px;">
         <div style="flex:1;">
           <div style="font-size: 13px; color: var(--val-gold); margin-bottom: 8px; letter-spacing: 1px;">조준선 색상 (CROSSHAIR COLOR)</div>
@@ -1796,6 +1815,12 @@
       <span class="dp-key">F</span>
       <span id="door-prompt-text">셔터 도어 스위치 조작</span>
       <span id="door-hp-text">HP: 500/500</span>
+    </div>
+
+    <!-- Dropped Weapon Swap Prompt -->
+    <div id="weapon-swap-prompt" class="val-clip">
+      <span class="dp-key">F</span>
+      <span id="weapon-swap-text">VANDAL 습득 [교체]</span>
     </div>
 
     <!-- Subtle Keybind HUD Bar -->
@@ -2082,6 +2107,21 @@
         g.connect(this.ambientGain);
         osc.start(now);
         osc.stop(now + 2.6);
+      }
+
+      playCasingBounce() {
+        if (!this.ctx) return;
+        const now = this.ctx.currentTime;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(1900 + Math.random() * 600, now);
+        gain.gain.setValueAtTime(0.035, now);
+        gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.07);
+        osc.connect(gain);
+        gain.connect(this.dest);
+        osc.start(now);
+        osc.stop(now + 0.08);
       }
 
       playInspect() {
@@ -3337,6 +3377,19 @@
     let landingDip = 0;
     let lastKilledEnemyPos = null;
 
+    let droppedWeapons = [];
+    let isClutchSituation = false;
+    let clutchInitialEnemies = 0;
+    let rangeAimTestConsolePos = null;
+    let rangeAimTestState = {
+      active: false,
+      timer: 30,
+      score: 0,
+      total: 30,
+      headshots: 0,
+      spawnInterval: null
+    };
+
     const spikeState = {
       isPlanted: false,
       plantProgress: 0,
@@ -3691,6 +3744,123 @@
       return { mesh: grp, head, body, legs: [legL, legR] };
     }
 
+    function spawnDroppedWeapon(pos, weaponKey) {
+      if (!WEAPONS[weaponKey] || weaponKey === 'knife') return;
+
+      const grp = new THREE.Group();
+      grp.position.set(pos.x, 0.12, pos.z);
+      grp.rotation.y = Math.random() * Math.PI * 2;
+
+      // 3D Gun Prop Mesh
+      const bodyGeo = new THREE.BoxGeometry(0.12, 0.16, 0.85);
+      const bodyMat = new THREE.MeshStandardMaterial({ color: 0x1a2028, roughness: 0.3, metalness: 0.8 });
+      const bodyMesh = new THREE.Mesh(bodyGeo, bodyMat);
+      bodyMesh.position.y = 0.08;
+      grp.add(bodyMesh);
+
+      const barGeo = new THREE.CylinderGeometry(0.025, 0.025, 0.4, 8);
+      const barMat = new THREE.MeshStandardMaterial({ color: 0x11161d, metalness: 0.9 });
+      const barMesh = new THREE.Mesh(barGeo, barMat);
+      barMesh.rotation.x = Math.PI / 2;
+      barMesh.position.set(0, 0.1, -0.45);
+      grp.add(barMesh);
+
+      const magGeo = new THREE.BoxGeometry(0.08, 0.22, 0.12);
+      const magMesh = new THREE.Mesh(magGeo, bodyMat);
+      magMesh.position.set(0, -0.02, 0.05);
+      magMesh.rotation.x = 0.3;
+      grp.add(magMesh);
+
+      scene.add(grp);
+
+      droppedWeapons.push({
+        weaponKey: weaponKey,
+        pos: pos.clone().setY(0.12),
+        mesh: grp
+      });
+    }
+
+    function pickupDroppedWeapon(index) {
+      if (index < 0 || index >= droppedWeapons.length) return;
+      const dw = droppedWeapons[index];
+      const oldWeaponKey = currentWeaponKey;
+
+      scene.remove(dw.mesh);
+      droppedWeapons.splice(index, 1);
+
+      if (oldWeaponKey !== 'knife' && oldWeaponKey !== 'classic') {
+        spawnDroppedWeapon(camera.position.clone(), oldWeaponKey);
+      }
+
+      switchWeapon(dw.weaponKey);
+      sound.playSwitchClick();
+      showToast(`🎒 무기 획득: [${WEAPONS[dw.weaponKey].name}]`);
+      radioVoice.speak(WEAPONS[dw.weaponKey].name.split(' ')[0]);
+    }
+
+    function startRangeAimChallenge() {
+      if (rangeAimTestState.active) return;
+      rangeAimTestState.active = true;
+      rangeAimTestState.timer = 30;
+      rangeAimTestState.score = 0;
+      rangeAimTestState.headshots = 0;
+
+      sound.playBarrierDown();
+      showToast('🎯 [사격장] 에임 스피드 테스트 시작! (30초 동안 봇을 처치하세요)');
+      radioVoice.speak('Starting speed aim test. Three, two, one, go!');
+
+      practiceBots.forEach(b => { if (b.mesh) b.mesh.visible = false; });
+
+      function spawnChallengeBot() {
+        if (!rangeAimTestState.active) return;
+        const zList = [-12, -18, -24, -30];
+        const randZ = zList[Math.floor(Math.random() * zList.length)];
+        const randX = (Math.random() - 0.5) * 20;
+
+        let bot = practiceBots[0];
+        if (bot && bot.mesh) {
+          bot.mesh.position.set(randX, 0.2, randZ);
+          bot.hp = 100;
+          bot.isDead = false;
+          bot.mesh.visible = true;
+        }
+      }
+
+      spawnChallengeBot();
+
+      rangeAimTestState.spawnInterval = setInterval(() => {
+        if (!rangeAimTestState.active) return;
+        rangeAimTestState.timer -= 1;
+
+        if (rangeAimTestState.timer % 2 === 0) {
+          spawnChallengeBot();
+        }
+
+        if (rangeAimTestState.timer <= 0) {
+          endRangeAimChallenge();
+        }
+      }, 1000);
+    }
+
+    function endRangeAimChallenge() {
+      rangeAimTestState.active = false;
+      if (rangeAimTestState.spawnInterval) clearInterval(rangeAimTestState.spawnInterval);
+
+      sound.playAceSound();
+      const hsPercent = rangeAimTestState.score > 0 ? Math.round((rangeAimTestState.headshots / rangeAimTestState.score) * 100) : 0;
+      showToast(`🏁 에임 테스트 종료! 기록: ${rangeAimTestState.score}/30 (헤드샷률 ${hsPercent}%)`);
+      radioVoice.speak(`Test complete. Final score: ${rangeAimTestState.score} out of thirty.`);
+
+      practiceBots.forEach((b, idx) => {
+        if (b.mesh) {
+          b.mesh.position.set((idx % 2 === 0 ? 4 : -4), 0.2, b.targetZ || -20);
+          b.hp = 100;
+          b.isDead = false;
+          b.mesh.visible = true;
+        }
+      });
+    }
+
     function dropSpikeAt(x, z) {
       if (spikeState.isPlanted) return;
       spikeState.carrierId = -1;
@@ -3846,6 +4016,12 @@
         droppedSpikeBeacon = null;
       }
       spikeState.carrierId = 0;
+
+      droppedWeapons.forEach(dw => scene.remove(dw.mesh));
+      droppedWeapons = [];
+      isClutchSituation = false;
+      if (rangeAimTestState.active) endRangeAimChallenge();
+      rangeAimTestConsolePos = null;
 
       if (ascentDoor && ascentDoor.mesh) {
         scene.remove(ascentDoor.mesh);
@@ -4320,6 +4496,11 @@
           addLantern(stallX, 0, 12, 0x00f0ff);
         });
 
+        // Aim Challenge Interactive Console at (0, 0.6, 6)
+        addBox(0, 0.6, 6, 2.2, 1.2, 0.6, matReceiver);
+        addTextBillboard(0, 1.6, 6, '[F] 에임 스피드 테스트 시작 (START)', 1.4, '#00ff88');
+        rangeAimTestConsolePos = new THREE.Vector3(0, 1.2, 6);
+
         const distances = [
           { z: -10, label: '--- 10 METERS ---' },
           { z: -20, label: '--- 20 METERS ---' },
@@ -4678,6 +4859,39 @@
         applyCrosshairSettings();
       });
     });
+    const PRO_CROSSHAIRS = {
+      tenz: { color: '#00f0ff', dot: false, length: 4, thickness: 2, gap: 2 },
+      boaster: { color: '#00ff88', dot: false, length: 6, thickness: 1, gap: 3 },
+      aspas: { color: '#ff4655', dot: false, length: 4, thickness: 2, gap: 1 },
+      demon1: { color: '#ffffff', dot: true, length: 3, thickness: 1, gap: 1 },
+      dot: { color: '#ffc83b', dot: true, length: 0, thickness: 3, gap: 0 }
+    };
+
+    document.querySelectorAll('.ch-preset-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const key = btn.getAttribute('data-preset');
+        const p = PRO_CROSSHAIRS[key];
+        if (!p) return;
+        crosshairSettings.color = p.color;
+        crosshairSettings.dot = p.dot;
+        crosshairSettings.length = p.length;
+        crosshairSettings.thickness = p.thickness;
+        crosshairSettings.gap = p.gap;
+
+        document.getElementById('cfg-dot').checked = p.dot;
+        document.getElementById('cfg-len').value = p.length;
+        document.getElementById('cfg-thick').value = p.thickness;
+        document.getElementById('cfg-gap').value = p.gap;
+
+        document.querySelectorAll('.color-swatch').forEach(s => {
+          s.classList.toggle('active-swatch', s.getAttribute('data-color') === p.color);
+        });
+
+        applyCrosshairSettings();
+        showToast(`조준선 프리셋 적용: [${btn.innerText.trim()}]`);
+      });
+    });
+
     document.getElementById('cfg-dot').addEventListener('change', (e) => {
       crosshairSettings.dot = e.target.checked;
       applyCrosshairSettings();
@@ -5545,6 +5759,9 @@
         // Bounce on floor
         if (cs.mesh.position.y <= 0.04) {
           cs.mesh.position.y = 0.04;
+          if (cs.vel.y < -1.1) {
+            sound.playCasingBounce();
+          }
           cs.vel.y = -cs.vel.y * 0.45;
           cs.vel.x *= 0.65;
           cs.vel.z *= 0.65;
@@ -5604,7 +5821,13 @@
         pBot.isDead = true;
         pBot.mesh.visible = false;
         sound.playKillSound();
-        showToast(`사격 성공! [${pBot.distName}] 타겟 명중`);
+        if (rangeAimTestState.active) {
+          rangeAimTestState.score++;
+          if (isHeadshot) rangeAimTestState.headshots++;
+          showToast(`🎯 타겟 처치! [${rangeAimTestState.score}/30] (남은 시간 ${rangeAimTestState.timer}s)`);
+        } else {
+          showToast(`사격 성공! [${pBot.distName}] 타겟 명중`);
+        }
         setTimeout(() => {
           pBot.hp = 100;
           pBot.isDead = false;
@@ -5652,6 +5875,7 @@
         enemy.isDead = true;
         enemy.mesh.visible = false;
         player.kills++;
+        spawnDroppedWeapon(enemy.mesh.position, enemy.weaponKey || 'vandal');
         roundKillsThisRound++;
         player.credits += 200;
         if (isHeadshot) player.headshots++;
@@ -5678,7 +5902,14 @@
         if (remainingEnemies === 1) {
           radioVoice.speak('One enemy remaining!');
         } else if (remainingEnemies === 0) {
-          triggerRoundCeremony(true, 'ENEMY TEAM WIPED // ALL HOSTILES DOWN');
+          if (isClutchSituation) {
+            player.credits += 1000;
+            radioVoice.speak('Clutch! Outstanding play!');
+            triggerRoundCeremony(true, `CLUTCH WON // 1v${clutchInitialEnemies} CLUTCH ACED (+1,000¤)`);
+            isClutchSituation = false;
+          } else {
+            triggerRoundCeremony(true, 'ENEMY TEAM WIPED // ALL HOSTILES DOWN');
+          }
         }
       }
     }
@@ -5701,6 +5932,28 @@
     }
 
     function interactDoorOrObject() {
+      // 1. Check Range Aim Challenge Console
+      if (rangeAimTestConsolePos && camera.position.distanceTo(rangeAimTestConsolePos) < 3.2) {
+        startRangeAimChallenge();
+        return;
+      }
+
+      // 2. Check nearby dropped weapons (pickup / swap)
+      let closestWeaponIdx = -1;
+      let closestDist = 3.0;
+      droppedWeapons.forEach((dw, idx) => {
+        const d = camera.position.distanceTo(dw.pos);
+        if (d < closestDist) {
+          closestDist = d;
+          closestWeaponIdx = idx;
+        }
+      });
+      if (closestWeaponIdx !== -1) {
+        pickupDroppedWeapon(closestWeaponIdx);
+        return;
+      }
+
+      // 3. Ascent B Shutter Door
       if (!ascentDoor || ascentDoor.isDestroyed) return;
       const dist = camera.position.distanceTo(ascentDoor.switchPos);
       if (dist < 4.0) {
@@ -7107,6 +7360,50 @@
               t.mesh.position.z += zDir * 1.5 * botSpeedMult * dt;
             }
           });
+        }
+
+        // Tactical Clutch 1vX Check
+        if (roundState === 'IN_ROUND' && !player.isDead) {
+          const aliveTeammates = teammatesList.filter(t => !t.isDead).length;
+          const aliveEnemies = enemiesList.filter(e => !e.isDead).length;
+          if (aliveTeammates === 0 && aliveEnemies >= 2 && !isClutchSituation) {
+            isClutchSituation = true;
+            clutchInitialEnemies = aliveEnemies;
+            radioVoice.speak('Last player standing.');
+            showToast(`⚡ [1v${aliveEnemies} 클러치] 마지막 생존자입니다!`);
+          }
+        }
+
+        // Check Range Aim Challenge Console Proximity
+        if (rangeAimTestConsolePos) {
+          const distConsole = camera.position.distanceTo(rangeAimTestConsolePos);
+          const cp = document.getElementById('door-prompt');
+          if (distConsole < 3.2 && !rangeAimTestState.active && cp) {
+            cp.style.display = 'flex';
+            document.getElementById('door-prompt-text').innerText = '에임 챌린지 시작 (START)';
+            document.getElementById('door-hp-text').innerText = '30초 스피드';
+          }
+        }
+
+        // Check Dropped Weapons Proximity
+        let nearestWeapon = null;
+        let nearestDist = 3.0;
+        droppedWeapons.forEach(dw => {
+          const d = camera.position.distanceTo(dw.pos);
+          if (d < nearestDist) {
+            nearestDist = d;
+            nearestWeapon = dw;
+          }
+        });
+        const wpPrompt = document.getElementById('weapon-swap-prompt');
+        if (wpPrompt) {
+          if (nearestWeapon && !player.isDead) {
+            wpPrompt.style.display = 'flex';
+            const wName = WEAPONS[nearestWeapon.weaponKey]?.name || 'WEAPON';
+            document.getElementById('weapon-swap-text').innerText = `${wName} 습득 [교체]`;
+          } else {
+            wpPrompt.style.display = 'none';
+          }
         }
 
         // Ascent B Shutter Door Update
