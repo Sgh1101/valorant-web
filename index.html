@@ -140,26 +140,73 @@
       box-shadow: 0 0 6px var(--val-green);
     }
 
-    /* Sniper Operator Scope */
+    /* Photorealistic Sniper Operator Scope */
     #op-scope-overlay {
       position: absolute;
       top: 0; left: 0; width: 100%; height: 100%;
       pointer-events: none;
       z-index: 14;
       display: none;
-      background: radial-gradient(circle at center, transparent 36%, #000 37%, #000 100%);
+      background: radial-gradient(circle at center, transparent 32%, rgba(0,0,0,0.85) 34%, #040608 36%, #000 100%);
     }
     .op-cross-h {
       position: absolute;
       top: 50%; left: 0; width: 100%; height: 1px;
-      background: rgba(255, 0, 50, 0.8);
-      box-shadow: 0 0 5px rgba(255, 0, 50, 0.6);
+      background: rgba(255, 20, 60, 0.85);
+      box-shadow: 0 0 6px rgba(255, 20, 60, 0.75);
     }
     .op-cross-v {
       position: absolute;
       top: 0; left: 50%; width: 1px; height: 100%;
-      background: rgba(255, 0, 50, 0.8);
-      box-shadow: 0 0 5px rgba(255, 0, 50, 0.6);
+      background: rgba(255, 20, 60, 0.85);
+      box-shadow: 0 0 6px rgba(255, 20, 60, 0.75);
+    }
+    .op-center-glow-dot {
+      position: absolute;
+      top: 50%; left: 50%; width: 5px; height: 5px;
+      background: #ff0044;
+      border-radius: 50%;
+      transform: translate(-50%, -50%);
+      box-shadow: 0 0 10px #ff0044, 0 0 20px #ff0044;
+    }
+    .op-mil-ticks {
+      position: absolute;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      width: 480px; height: 480px;
+      border: 1px solid rgba(0, 240, 255, 0.35);
+      border-radius: 50%;
+      pointer-events: none;
+    }
+    .op-hud-readout {
+      position: absolute;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--val-cyan);
+      letter-spacing: 2px;
+      opacity: 0.8;
+    }
+    .op-hud-tl { top: 22%; left: 24%; }
+    .op-hud-br { bottom: 22%; right: 24%; }
+
+    /* Holographic Red-Dot Lens for Assault Rifles (Vandal / Phantom ADS) */
+    .ads-holo-glass {
+      position: absolute;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      width: 140px; height: 140px;
+      border: 2px solid rgba(0, 240, 255, 0.6);
+      border-radius: 50%;
+      box-shadow: inset 0 0 25px rgba(0, 240, 255, 0.35), 0 0 15px rgba(0, 240, 255, 0.2);
+    }
+    .ads-holo-dot {
+      position: absolute;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      width: 4px; height: 4px;
+      background: #00f0ff;
+      border-radius: 50%;
+      box-shadow: 0 0 8px #00f0ff;
     }
 
     /* Speed Lines / Dash Effect */
@@ -1456,8 +1503,19 @@
   <canvas id="game-canvas"></canvas>
 
   <div id="damage-indicator-ring"><div class="dmg-arc" id="dmg-arc"></div></div>
-  <div id="ads-overlay"><div id="ads-reticle"></div></div>
-  <div id="op-scope-overlay"><div class="op-cross-h"></div><div class="op-cross-v"></div></div>
+  <div id="ads-overlay">
+    <div class="ads-holo-glass">
+      <div class="ads-holo-dot"></div>
+    </div>
+  </div>
+  <div id="op-scope-overlay">
+    <div class="op-cross-h"></div>
+    <div class="op-cross-v"></div>
+    <div class="op-center-glow-dot"></div>
+    <div class="op-mil-ticks"></div>
+    <div class="op-hud-readout op-hud-tl">OPTICAL 2.5X // HIGH RESOLUTION</div>
+    <div class="op-hud-readout op-hud-br">CALIBRATED // ELEV: 0.0°</div>
+  </div>
   <div id="speed-lines-overlay"></div>
   <div id="tp-flash-overlay"></div>
 
@@ -2499,6 +2557,46 @@
         gain.connect(this.masterGain);
         osc.start(now);
         osc.stop(now + 0.08);
+      }
+
+      playSpatialFootstep(worldPos, surface = 'stone') {
+        if (!this.ctx) return;
+        const now = this.ctx.currentTime;
+        const rel = worldPos.clone().sub(camera.position);
+        const dist = rel.length();
+        if (dist > 35 || dist < 0.5) return;
+
+        const camDir = new THREE.Vector3();
+        camera.getWorldDirection(camDir);
+        const rightDir = new THREE.Vector3().crossVectors(camDir, new THREE.Vector3(0, 1, 0)).normalize();
+        const panVal = Math.max(-1, Math.min(1, rel.clone().normalize().dot(rightDir)));
+        const vol = Math.max(0.03, (1 - (dist / 35)) * 0.28);
+
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        let panner = null;
+        if (this.ctx.createStereoPanner) {
+          panner = this.ctx.createStereoPanner();
+          panner.pan.setValueAtTime(panVal, now);
+        }
+
+        osc.type = surface === 'wood' ? 'triangle' : 'sine';
+        const baseFreq = surface === 'sand' ? 95 : (surface === 'wood' ? 140 : 110);
+        osc.frequency.setValueAtTime(baseFreq, now);
+        osc.frequency.exponentialRampToValueAtTime(30, now + 0.1);
+        gain.gain.setValueAtTime(vol, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.1);
+
+        if (panner) {
+          osc.connect(gain);
+          gain.connect(panner);
+          panner.connect(this.dest);
+        } else {
+          osc.connect(gain);
+          gain.connect(this.dest);
+        }
+        osc.start(now);
+        osc.stop(now + 0.11);
       }
 
       playReload() {
@@ -6151,8 +6249,10 @@
 
     function reloadWeapon() {
       if (currentWeapon.isReloading || currentWeapon.ammo === currentWeapon.maxAmmo || currentWeapon.reserve <= 0) return;
+      if (isInspecting) isInspecting = false;
       currentWeapon.isReloading = true;
       sound.playReload();
+      if (currentWeapon.ammo <= 3) radioVoice.speak('Reloading!');
       showToast('RELOADING...');
 
       gunGroup.position.y -= 0.16;
@@ -6553,10 +6653,10 @@
       abilities.c.lastUsed = now;
 
       const agent = lobbySlots[myTeam][mySlotIdx].agent;
-      if (agent === 'Phoenix') castPhoenixBlaze();
-      else if (agent === 'Reyna') castReynaLeer();
-      else if (agent === 'Omen') castOmenShroudedStep();
-      else castJettCloudburst();
+      if (agent === 'Phoenix') { castPhoenixBlaze(); radioVoice.speak('Blaze up!'); }
+      else if (agent === 'Reyna') { castReynaLeer(); radioVoice.speak('See nothing!'); }
+      else if (agent === 'Omen') { castOmenShroudedStep(); radioVoice.speak('Stepping through shadows.'); }
+      else { castJettCloudburst(); radioVoice.speak('Smoke!'); }
     }
 
 
@@ -6566,10 +6666,10 @@
       abilities.q.lastUsed = now;
 
       const agent = lobbySlots[myTeam][mySlotIdx].agent;
-      if (agent === 'Phoenix') castPhoenixFlash();
-      else if (agent === 'Reyna') castReynaDevour();
-      else if (agent === 'Omen') castOmenParanoia();
-      else castJettUpdraft();
+      if (agent === 'Phoenix') { castPhoenixFlash(); radioVoice.speak('Watch your eyes!'); }
+      else if (agent === 'Reyna') { castReynaDevour(); radioVoice.speak('Consumed!'); }
+      else if (agent === 'Omen') { castOmenParanoia(); radioVoice.speak('Blind them!'); }
+      else { castJettUpdraft(); radioVoice.speak('Up you go!'); }
     }
 
 
@@ -6579,19 +6679,19 @@
       abilities.e.lastUsed = now;
 
       const agent = lobbySlots[myTeam][mySlotIdx].agent;
-      if (agent === 'Phoenix') castPhoenixHotHands();
-      else if (agent === 'Reyna') castReynaDismiss();
-      else if (agent === 'Omen') castOmenDarkCover();
-      else castJettTailwind();
+      if (agent === 'Phoenix') { castPhoenixHotHands(); radioVoice.speak('Hot hands!'); }
+      else if (agent === 'Reyna') { castReynaDismiss(); radioVoice.speak('Out of your sight.'); }
+      else if (agent === 'Omen') { castOmenDarkCover(); radioVoice.speak('Cover going out.'); }
+      else { castJettTailwind(); radioVoice.speak('Wind!'); }
     }
 
 
     function castSkillX() {
       const agent = lobbySlots[myTeam][mySlotIdx].agent;
-      if (agent === 'Phoenix') castPhoenixRunItBack();
-      else if (agent === 'Reyna') castReynaEmpress();
-      else if (agent === 'Omen') castOmenShadowTeleport();
-      else castJettBladestorm();
+      if (agent === 'Phoenix') { castPhoenixRunItBack(); radioVoice.speak("Jokes over, you're dead!"); }
+      else if (agent === 'Reyna') { castReynaEmpress(); radioVoice.speak('They will cower!'); }
+      else if (agent === 'Omen') { castOmenShadowTeleport(); radioVoice.speak('Scatter!'); }
+      else { castJettBladestorm(); radioVoice.speak('Watch this!'); }
     }
 
 
@@ -7255,16 +7355,25 @@
           gunGroup.rotation.z = gunSwayYaw * 0.35;
         }
 
-        // Enemy AI Tactical Fire & Crouching Burst
-        if (roundState === 'IN_ROUND' && !cheats.freezeAI && now - enemyShotTimer > 1.8) {
+        // Enemy AI Tactical Fire, Jiggle Peeking & Headshots
+        if (roundState === 'IN_ROUND' && !cheats.freezeAI && now - enemyShotTimer > 1.7) {
           enemyShotTimer = now;
           const aliveEnemies = enemiesList.filter(e => !e.isDead);
           if (aliveEnemies.length > 0) {
             const shooter = aliveEnemies[Math.floor(Math.random() * aliveEnemies.length)];
             shooter.mesh.lookAt(camera.position.x, shooter.mesh.position.y, camera.position.z);
-            shooter.mesh.position.y = -0.2; // Crouch slightly during burst
 
-            setTimeout(() => { shooter.mesh.position.y = 0; }, 600);
+            // Tactical Jiggle Peek: strafe slightly before burst
+            const strafeDir = (Math.random() < 0.5 ? -1 : 1);
+            shooter.mesh.position.x += strafeDir * 0.45;
+            sound.playSpatialFootstep(shooter.mesh.position, 'stone');
+            setTimeout(() => {
+              if (!shooter.isDead && shooter.mesh) shooter.mesh.position.x -= strafeDir * 0.45;
+            }, 650);
+
+            // Tactical Crouch during spray
+            shooter.mesh.position.y = -0.2;
+            setTimeout(() => { if (shooter.mesh) shooter.mesh.position.y = 0; }, 600);
 
             // 3-Round Burst
             for (let b = 0; b < 3; b++) {
@@ -7281,9 +7390,11 @@
 
                 if (camera.position.distanceTo(shooter.mesh.position) < 45 && Math.random() < 0.38) {
                   if (!cheats.godMode) {
-                    const dealtToShield = Math.min(player.shield, 12);
+                    const isEnemyHeadshot = (Math.random() < 0.16);
+                    const baseIncoming = isEnemyHeadshot ? 55 : 18;
+                    const dealtToShield = Math.min(player.shield, isEnemyHeadshot ? 25 : 12);
                     player.shield -= dealtToShield;
-                    const remainder = 18 - dealtToShield;
+                    const remainder = baseIncoming - dealtToShield;
                     player.hp -= remainder;
 
                     if (!roundCombatData.taken[shooter.id]) {
@@ -7300,12 +7411,15 @@
                     }
                     const cTaken = roundCombatData.taken[shooter.id];
                     cTaken.totalDmg += (dealtToShield + remainder);
-                    cTaken.body++;
+                    if (isEnemyHeadshot) cTaken.head++;
+                    else cTaken.body++;
 
-                    sound.playBodyHit();
+                    if (isEnemyHeadshot) sound.playHeadshot();
+                    else sound.playBodyHit();
+
                     showDamageIndicator();
-                    addCameraTrauma(0.42);
-                    showToast('피격 경고! 적 점사 피격');
+                    addCameraTrauma(isEnemyHeadshot ? 0.75 : 0.42);
+                    showToast(isEnemyHeadshot ? '⚠️ 치명타 헤드샷 피격! (CRITICAL)' : '피격 경고! 적 점사 피격');
                     updateHUD();
                     if (player.hp <= 0) onPlayerDeath();
                   }
