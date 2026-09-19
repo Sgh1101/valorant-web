@@ -2101,7 +2101,7 @@
       <div style="display: flex; justify-content: space-between; align-items: flex-end; border-bottom: 2px solid var(--val-border); padding-bottom: 10px; margin-bottom: 14px;">
         <div>
           <h3 style="font-family: var(--font-title); font-size: 34px; letter-spacing: 2px; color: #fff; line-height: 1;">TACTICAL SCOREBOARD // 5V5 MATCH</h3>
-          <div style="font-size: 12px; color: #8899a6;">PRESS [TAB] TO TOGGLE | [Y] INSPECT SKIN | [G] CYCLE SKINS | [H] AGENTS | [M] MAPS</div>
+          <div style="font-size: 12px; color: #8899a6;">PRESS [TAB] TO TOGGLE | [Y] INSPECT | [G] SKINS | [H] AGENTS | [M] MAPS | [L] LASER | [J] FLASH | [U] CHARM | [3] MELEE | [F5] TURBO</div>
         </div>
         <div style="display: flex; gap: 16px; font-family: var(--font-title); font-size: 28px;">
           <span style="color: var(--val-cyan);">ATK <span id="sb-score-atk">0</span></span>
@@ -3196,6 +3196,22 @@
         });
       }
 
+      playKnifeSlash() {
+        if (!this.ctx) return;
+        const now = this.ctx.currentTime;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(1500, now);
+        osc.frequency.exponentialRampToValueAtTime(320, now + 0.12);
+        gain.gain.setValueAtTime(0.35, now);
+        gain.gain.exponentialRampToValueAtTime(0.005, now + 0.12);
+        osc.connect(gain);
+        gain.connect(this.dest);
+        osc.start(now);
+        osc.stop(now + 0.13);
+      }
+
       playKnifeThrow() {
         if (!this.ctx) return;
         const now = this.ctx.currentTime;
@@ -3355,6 +3371,39 @@
         gain.connect(this.dest);
         osc.start(now);
         osc.stop(now + 0.09);
+      }
+
+      playZipline() {
+        if (!this.ctx) return;
+        const now = this.ctx.currentTime;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(600, now);
+        osc.frequency.linearRampToValueAtTime(1200, now + 0.15);
+        osc.frequency.exponentialRampToValueAtTime(320, now + 0.6);
+        gain.gain.setValueAtTime(0.32, now);
+        gain.gain.exponentialRampToValueAtTime(0.005, now + 0.65);
+        osc.connect(gain);
+        gain.connect(this.dest);
+        osc.start(now);
+        osc.stop(now + 0.7);
+      }
+
+      playFlashlight() {
+        if (!this.ctx) return;
+        const now = this.ctx.currentTime;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(1400, now);
+        osc.frequency.setValueAtTime(1900, now + 0.03);
+        gain.gain.setValueAtTime(0.3, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.07);
+        osc.connect(gain);
+        gain.connect(this.dest);
+        osc.start(now);
+        osc.stop(now + 0.08);
       }
 
       playSteamVent() {
@@ -3545,7 +3594,7 @@
     const myClientId = 'user_' + Math.random().toString(36).substring(2, 8);
     const networkChannel = new BroadcastChannel('VALORANT_5V5_NET');
 
-    const MAP_LIST = ['ascent', 'bind', 'haven', 'icebox', 'split', 'lotus', 'breeze', 'sunset', 'pearl', 'range'];
+    const MAP_LIST = ['ascent', 'bind', 'haven', 'icebox', 'split', 'lotus', 'breeze', 'sunset', 'pearl', 'fracture', 'range'];
     const MAP_NAMES = {
       ascent: 'ASCENT (어센트) - 베네치아 요새 & 전동 셔터 도어 [F]',
       bind: 'BIND (바인드) - 모로코 사막 & 차원 이동 텔레포터',
@@ -3556,6 +3605,7 @@
       breeze: 'BREEZE (브리즈) - 버뮤다 카리브해 열대 섬 & A 듀얼 피라미드 & A 홀 낙하 슛 [CHUTE] & B 해적 요새 포대',
       sunset: 'SUNSET (선셋) - LA 도심 골든아워 & A 보바 카페 & B 마켓 전동 차단문 [F] & 타코 푸드트럭',
       pearl: 'PEARL (펄) - 리스본 심해 수중 돔 & B 롱 해저 파노라마 & 아줄레주 분수대 & 에어락 [F]',
+      fracture: 'FRACTURE (프랙처) - 산타페 기밀 연구소 & H자형 듀얼 스폰 & 협곡 고속 집라인 [F]',
       range: 'THE RANGE (사격장) - 사격 훈련장 & 봇 연습'
     };
     let currentMapIndex = 0;
@@ -3565,7 +3615,8 @@
       Killjoy: '🤖', Chamber: '👓', Viper: '🧪', Cypher: '🕵️', Neon: '⚡', Yoru: '👹',
       Fade: '🧿', Gekko: '🦎', Harbor: '🌊', Iso: '🔮',
       Deadlock: '🕸️', Clove: '🦋', Vyse: '🥀', 'KAY/O': '⚙️',
-      Tejo: '🦅'
+      Tejo: '🦅',
+      Astra: '🌌'
     };
     const AGENT_COLORS = {
       Jett: '#00f0ff', Phoenix: '#ff6600', Reyna: '#be00ff', Sova: '#2979ff',
@@ -3574,7 +3625,8 @@
       Neon: '#00e5ff', Yoru: '#3d5afe',
       Fade: '#5c6b73', Gekko: '#a3e635', Harbor: '#06b6d4', Iso: '#8b5cf6',
       Deadlock: '#cbd5e1', Clove: '#f472b6', Vyse: '#94a3b8', 'KAY/O': '#38bdf8',
-      Tejo: '#10b981'
+      Tejo: '#10b981',
+      Astra: '#9c27b0'
     };
     const AGENT_ROLES = {
       Jett: '타격대 (Duelist)', Phoenix: '타격대 (Duelist)', Reyna: '타격대 (Duelist)', Raze: '타격대 (Duelist)',
@@ -3582,7 +3634,8 @@
       Sova: '척후대 (Initiator)', Fade: '척후대 (Initiator)', Gekko: '척후대 (Initiator)', 'KAY/O': '척후대 (Initiator)',
       Omen: '전략가 (Controller)', Brimstone: '전략가 (Controller)', Viper: '전략가 (Controller)', Harbor: '전략가 (Controller)', Clove: '전략가 (Controller)',
       Sage: '감시대 (Sentinel)', Cypher: '감시대 (Sentinel)', Killjoy: '감시대 (Sentinel)', Chamber: '감시대 (Sentinel)', Deadlock: '감시대 (Sentinel)', Vyse: '감시대 (Sentinel)',
-      Tejo: '척후대 (Initiator)'
+      Tejo: '척후대 (Initiator)',
+      Astra: '전략가 (Controller)'
     };
 
     const lobbySlots = {
@@ -4395,7 +4448,7 @@
     /* ==========================================================
        DYNAMIC AGENT SWITCHING SYSTEM ([H] KEY TO CYCLE AGENT)
        ========================================================== */
-    const PLAYABLE_AGENTS = ['Jett', 'Phoenix', 'Reyna', 'Sova', 'Sage', 'Omen', 'Brimstone', 'Raze', 'Killjoy', 'Chamber', 'Viper', 'Cypher', 'Neon', 'Yoru', 'Fade', 'Gekko', 'Harbor', 'Iso', 'Deadlock', 'Clove', 'Vyse', 'KAY/O', 'Tejo'];
+    const PLAYABLE_AGENTS = ['Jett', 'Phoenix', 'Reyna', 'Sova', 'Sage', 'Omen', 'Brimstone', 'Raze', 'Killjoy', 'Chamber', 'Viper', 'Cypher', 'Neon', 'Yoru', 'Fade', 'Gekko', 'Harbor', 'Iso', 'Deadlock', 'Clove', 'Vyse', 'KAY/O', 'Tejo', 'Astra'];
     let currentAgentIdx = 0;
 
     const AGENT_SKILL_LABELS = {
@@ -4412,7 +4465,8 @@
       Fade: { c: '포획 (C)', q: '추적귀 (Q)', e: '귀체 정찰 (E)', x: '심야 궁극기 (X)' },
       Gekko: { c: '모쉬 핏 (C)', q: '윙맨 기동 (Q)', e: '디지 섬광 (E)', x: '요동 격돌 (X)' },
       Harbor: { c: '폭포 (C)', q: '만 (Q)', e: '간석지 장막 (E)', x: '심판 해일 (X)' },
-      Iso: { c: '응징 사격 (C)', q: '취약 사쇄 (Q)', e: '더블 탭 실드 (E)', x: '결투 영역 (X)' }
+      Iso: { c: '응징 사격 (C)', q: '취약 사쇄 (Q)', e: '더블 탭 실드 (E)', x: '결투 영역 (X)' },
+      Astra: { c: '중력 샘 (C)', q: '신경 파동 (Q)', e: '성운 연막 (E)', x: '우주 장벽 (X)' }
     };
 
     let spectatorTargetIndex = 0;
@@ -4578,6 +4632,11 @@
     let lotusDoor = null;
     let sunsetMarketDoor = null;
     let pearlAirlock = null;
+    let fractureZipline = null;
+    let isFlashlightActive = false;
+    let tacticalFlashlight = null;
+    let currentMeleeKey = 'knife';
+    let isTurboModeActive = false;
     let isLaserActive = false;
     let laserBeamMesh = null;
     let laserDotMesh = null;
@@ -5183,9 +5242,78 @@
         const shieldVest = new THREE.Mesh(new THREE.BoxGeometry(0.36, 0.35, 0.16), new THREE.MeshStandardMaterial({ color: 0x065f46, metalness: 0.8 }));
         shieldVest.position.set(0, 1.25, 0.08);
         grp.add(shieldVest);
+      } else if (agentName === 'Astra') {
+        // Radiant Cosmic Controller with golden gauntlet and starlight crown
+        const astralGauntlet = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.09, 0.38, 10), new THREE.MeshStandardMaterial({ color: 0xffd700, metalness: 0.95, roughness: 0.2, emissive: 0xb45309, emissiveIntensity: 0.5 }));
+        astralGauntlet.position.set(-0.28, 1.05, 0.06);
+        grp.add(astralGauntlet);
+        const cosmicCrown = new THREE.Mesh(new THREE.TorusGeometry(0.24, 0.03, 8, 16), new THREE.MeshStandardMaterial({ color: 0x9c27b0, emissive: 0xc084fc, emissiveIntensity: 0.9, transparent: true, opacity: 0.9 }));
+        cosmicCrown.rotation.x = Math.PI / 2.3;
+        cosmicCrown.position.set(0, 2.05, 0);
+        grp.add(cosmicCrown);
+        const astralCore = new THREE.Mesh(new THREE.OctahedronGeometry(0.1), new THREE.MeshStandardMaterial({ color: 0xa855f7, emissive: 0xe879f9, emissiveIntensity: 1.0 }));
+        astralCore.position.set(0, 1.28, 0.18);
+        grp.add(astralCore);
+        const cape = new THREE.Mesh(new THREE.BoxGeometry(0.38, 0.5, 0.03), new THREE.MeshStandardMaterial({ color: 0x4a044e, emissive: 0x581c87, emissiveIntensity: 0.4 }));
+        cape.position.set(0, 1.1, -0.16);
+        cape.rotation.x = 0.15;
+        grp.add(cape);
       }
 
+      // Distinct tactical role underfoot glowing aura ring
+      const roleName = AGENT_ROLES[agentName] || '';
+      let roleAuraColor = 0x00f0ff;
+      if (roleName.includes('Duelist')) roleAuraColor = 0xff4655;
+      else if (roleName.includes('Controller')) roleAuraColor = 0x9c27b0;
+      else if (roleName.includes('Initiator')) roleAuraColor = 0x10b981;
+      else if (roleName.includes('Sentinel')) roleAuraColor = 0x06b6d4;
+
+      const auraRing = new THREE.Mesh(
+        new THREE.RingGeometry(0.35, 0.44, 16),
+        new THREE.MeshBasicMaterial({ color: roleAuraColor, side: THREE.DoubleSide, transparent: true, opacity: 0.55 })
+      );
+      auraRing.rotation.x = -Math.PI / 2;
+      auraRing.position.set(0, 0.03, 0);
+      grp.add(auraRing);
+
       return { mesh: grp, head, body, legs: [legL, legR] };
+    }
+
+    function toggleTacticalFlashlight() {
+      isFlashlightActive = !isFlashlightActive;
+      sound.playFlashlight();
+      showToast(`🔦 [FLASHLIGHT] 택티컬 전술 LED 플래시라이트: [${isFlashlightActive ? 'ON' : 'OFF'}]`);
+
+      if (!tacticalFlashlight) {
+        tacticalFlashlight = new THREE.SpotLight(0xffffff, 4.2, 55, Math.PI / 6.5, 0.35, 1.1);
+        tacticalFlashlight.castShadow = false;
+        tacticalFlashlight.position.set(0.12, -0.06, -0.15);
+        tacticalFlashlight.target.position.set(0.12, -0.06, -15);
+        camera.add(tacticalFlashlight);
+        camera.add(tacticalFlashlight.target);
+      }
+      tacticalFlashlight.visible = isFlashlightActive;
+    }
+
+    function toggleGameTurboMode() {
+      isTurboModeActive = !isTurboModeActive;
+      sound.playSwitchClick();
+      const fpsSel = document.getElementById('cfg-fps-limit');
+      if (isTurboModeActive) {
+        if (fpsSel) fpsSel.value = '1000';
+        showToast('🚀 [TURBO] 게임 터보 모드 활성화! (1000 FPS / 서브 밀리초 초저지연)');
+      } else {
+        if (fpsSel) fpsSel.value = '144';
+        showToast('⚡ [TURBO] 표준 모드 복귀 (144 FPS)');
+      }
+    }
+
+    function startFractureZiplineRide() {
+      if (!fractureZipline) return;
+      fractureZipline.isRiding = true;
+      fractureZipline.targetZ = (camera.position.z > 0) ? -38 : 38;
+      sound.playZipline();
+      showToast('⚡ [FRACTURE] 고속 협곡 집라인에 탑승했습니다! [Space] 하차');
     }
 
     function toggleLaserSight() {
@@ -5495,6 +5623,11 @@
       }
       ascentDoor = null;
 
+      if (fractureZipline && fractureZipline.cables) {
+        fractureZipline.cables.forEach(c => scene.remove(c));
+      }
+      fractureZipline = null;
+
       if (lotusDoor && lotusDoor.mesh) {
         scene.remove(lotusDoor.mesh);
         scene.remove(lotusDoor.switchMesh);
@@ -5726,6 +5859,19 @@
         sunLight.position.set(0, 95, 0);
         scene.fog.color.setHex(0x003554);
         scene.fog.density = 0.0065;
+      } else if (mapKey === 'fracture') {
+        // Santa Fe Secret Radianite Research Facility / Split Dual Biome
+        grad.addColorStop(0, '#18181b');   // Dark basalt facility
+        grad.addColorStop(0.35, '#b45309'); // Golden hour canyon glow
+        grad.addColorStop(0.7, '#047857');  // Lush biosphere overgrown green
+        grad.addColorStop(1, '#0284c7');    // Alpine split sky
+        ambientLight.color.setHex(0xfef08a);
+        ambientLight.intensity = 0.95;
+        sunLight.color.setHex(0xfbbf24);
+        sunLight.intensity = 1.45;
+        sunLight.position.set(45, 75, -35);
+        scene.fog.color.setHex(0x27272a);
+        scene.fog.density = 0.0055;
       } else {
         // Range: High-tech military hangar
         grad.addColorStop(0, '#080c10');
@@ -6715,6 +6861,130 @@
           pos: new THREE.Vector3(0, 1.3, 8)
         };
       }
+      else if (mapKey === 'fracture') {
+        // ==========================================================
+        // MAP 10: FRACTURE (프랙처) - 산타페 기밀 연구소 & H자형 듀얼 스폰 & 협곡 고속 집라인 [F]
+        // ==========================================================
+        const matAlphaFloor = new THREE.MeshStandardMaterial({ color: 0x15803d, roughness: 0.8 }); // Lush botanical green
+        const matOmegaFloor = new THREE.MeshStandardMaterial({ color: 0xd97706, roughness: 0.85 }); // Arid desert sandstone
+        const matFacilityBasalt = new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.7 }); // High-tech lab concrete
+        const matFacilityTrim = new THREE.MeshStandardMaterial({ color: 0x475569, metalness: 0.8, roughness: 0.3 });
+        const matRadianiteReactor = new THREE.MeshStandardMaterial({ color: 0xeab308, emissive: 0xf59e0b, emissiveIntensity: 0.85 });
+        const matZiplineSteel = new THREE.MeshStandardMaterial({ color: 0x0284c7, emissive: 0x0369a1, emissiveIntensity: 0.5 });
+
+        // Outer Research Boundaries (120x120m)
+        addBox(30, -0.5, 0, 60, 1, 120, matAlphaFloor); // East Sector (Alpha Biosphere)
+        addBox(-30, -0.5, 0, 60, 1, 120, matOmegaFloor); // West Sector (Omega Desert)
+        addBox(0, 7, -60, 120, 14, 2, matFacilityBasalt);
+        addBox(0, 7, 60, 120, 14, 2, matFacilityBasalt);
+        addBox(-60, 7, 0, 2, 14, 120, matFacilityBasalt);
+        addBox(60, 7, 0, 2, 14, 120, matFacilityBasalt);
+
+        // --- CENTRAL RADIANITE REACTOR CORE & CHASM (x = 0, z = 0) ---
+        // Central Collider Ring
+        const coreRing = new THREE.Mesh(new THREE.TorusGeometry(5.5, 0.45, 8, 24), matRadianiteReactor);
+        coreRing.rotation.x = Math.PI / 2;
+        coreRing.position.set(0, 3.8, 0);
+        scene.add(coreRing);
+        mapObjects.push(coreRing);
+
+        const coreCrystal = new THREE.Mesh(new THREE.OctahedronGeometry(2.2), matRadianiteReactor);
+        coreCrystal.position.set(0, 3.8, 0);
+        scene.add(coreCrystal);
+        mapObjects.push(coreCrystal);
+        colliders.push({ box: new THREE.Box3().setFromObject(coreCrystal), mesh: coreCrystal });
+
+        // Central Divide Walls & Walkways
+        addBox(0, 3.0, 12, 3.5, 6.0, 16, matFacilityBasalt);
+        addBox(0, 3.0, -12, 3.5, 6.0, 16, matFacilityBasalt);
+
+        // --- A SITE: A DISH & A DROP & A HALL (x = 32, z = -20) ---
+        addBox(32, 0.05, -20, 24, 0.05, 24, matSiteFloor, false);
+        addTextBillboard(32, 0.2, -20, 'A SITE', 1.8);
+        spikeSiteAreas.push({ minX: 20, maxX: 44, minZ: -32, maxZ: -8, name: 'A SITE' });
+
+        // A Dish: Iconic Giant Satellite Radar Antenna
+        const dishBase = new THREE.Mesh(new THREE.CylinderGeometry(1.2, 1.6, 2.5, 12), matFacilityBasalt);
+        dishBase.position.set(38, 1.25, -20);
+        scene.add(dishBase);
+        mapObjects.push(dishBase);
+        colliders.push({ box: new THREE.Box3().setFromObject(dishBase), mesh: dishBase });
+
+        const dishAntenna = new THREE.Mesh(new THREE.CylinderGeometry(4.2, 0.6, 1.2, 16), matFacilityTrim);
+        dishAntenna.position.set(38, 4.2, -20);
+        dishAntenna.rotation.z = 0.55;
+        dishAntenna.rotation.y = 0.4;
+        scene.add(dishAntenna);
+        mapObjects.push(dishAntenna);
+
+        // A Hall & A Drop Platform (y = 4.0)
+        addPlatform(36, 0, -32, 12, 4.0, 10, matFacilityBasalt);
+        addRailing(29.9, 4.0, -32, 10, 'z');
+        addStairs(36, -14, 0, 3.8, 4.0, 12, 12, 'z-');
+        addCrateStack(26, -20, 2.4);
+
+        // --- B SITE: B CANTEEN & B ARCADE & B TOWER (x = -32, z = -20) ---
+        addBox(-32, 0.05, -20, 24, 0.05, 24, matSiteFloor, false);
+        addTextBillboard(-32, 0.2, -20, 'B SITE', 1.8);
+        spikeSiteAreas.push({ minX: -44, maxX: -20, minZ: -32, maxZ: -8, name: 'B SITE' });
+
+        // B Canteen 2F Balcony Terrace (y = 4.2)
+        addPlatform(-36, 0, -32, 12, 4.2, 10, matFacilityBasalt);
+        addRailing(-29.9, 4.2, -32, 10, 'z');
+        addStairs(-36, -14, 0, 3.8, 4.2, 12, 12, 'z-');
+        addCrateStack(-26, -20, 2.4);
+
+        // B Arcade Concrete Cover & Pillars
+        [-4, 4].forEach(ox => {
+          const p = new THREE.Mesh(new THREE.BoxGeometry(1.2, 6.0, 1.2), matFacilityBasalt);
+          p.position.set(-32 + ox, 3.0, -8);
+          scene.add(p);
+          mapObjects.push(p);
+          colliders.push({ box: new THREE.Box3().setFromObject(p), mesh: p });
+        });
+
+        // --- HIGH-SPEED CANYON DUAL ZIPLINE [F] (z = -38 to z = 38) ---
+        // North Terminal Platform & Pylon (z = -38)
+        const pylonN = new THREE.Mesh(new THREE.BoxGeometry(2.4, 6.0, 1.6), matFacilityBasalt);
+        pylonN.position.set(0, 3.0, -38);
+        scene.add(pylonN);
+        mapObjects.push(pylonN);
+        colliders.push({ box: new THREE.Box3().setFromObject(pylonN), mesh: pylonN });
+
+        // South Terminal Platform & Pylon (z = 38)
+        const pylonS = new THREE.Mesh(new THREE.BoxGeometry(2.4, 6.0, 1.6), matFacilityBasalt);
+        pylonS.position.set(0, 3.0, 38);
+        scene.add(pylonS);
+        mapObjects.push(pylonS);
+        colliders.push({ box: new THREE.Box3().setFromObject(pylonS), mesh: pylonS });
+
+        // Dual High-Tension Cables Spanning 76 Meters
+        const cableGeo = new THREE.CylinderGeometry(0.04, 0.04, 76, 8);
+        const cable1 = new THREE.Mesh(cableGeo, matZiplineSteel);
+        cable1.rotation.x = Math.PI / 2;
+        cable1.position.set(-0.8, 2.6, 0);
+        scene.add(cable1);
+        mapObjects.push(cable1);
+
+        const cable2 = new THREE.Mesh(cableGeo, matZiplineSteel);
+        cable2.rotation.x = Math.PI / 2;
+        cable2.position.set(0.8, 2.6, 0);
+        scene.add(cable2);
+        mapObjects.push(cable2);
+
+        // Interactive Terminal Prompts
+        addTextBillboard(0, 2.2, -36, '[F] 고속 협곡 집라인 탑승 (CANYON ZIPLINE)', 1.4, '#38bdf8');
+        addTextBillboard(0, 2.2, 36, '[F] 고속 협곡 집라인 탑승 (CANYON ZIPLINE)', 1.4, '#38bdf8');
+
+        fractureZipline = {
+          northPos: new THREE.Vector3(0, 1.2, -38),
+          southPos: new THREE.Vector3(0, 1.2, 38),
+          cables: [cable1, cable2],
+          isRiding: false,
+          targetZ: 0,
+          speed: 26.0
+        };
+      }
       else if (mapKey === 'range') {
         addBox(0, -0.5, 0, 60, 1, 120, matConcrete);
         addBox(0, 7, -60, 60, 14, 2, matWallStone);
@@ -7026,6 +7296,19 @@
         return;
       }
 
+      // [J] Key: Tactical Underbarrel LED Flashlight Toggle
+      if (e.code === 'KeyJ') {
+        toggleTacticalFlashlight();
+        return;
+      }
+
+      // [F5] Key: Game Turbo Mode Toggle
+      if (e.code === 'F5') {
+        e.preventDefault();
+        toggleGameTurboMode();
+        return;
+      }
+
       // [U] Key: Cycle 3D Gun Buddy (Weapon Charm)
       if (e.code === 'KeyU') {
         cycleGunBuddy();
@@ -7095,7 +7378,16 @@
       if (e.code === 'Tab') showScoreboard(true);
       if (e.code === 'Digit1') switchWeapon('vandal');
       if (e.code === 'Digit2') switchWeapon('classic');
-      if (e.code === 'Digit3') switchWeapon('knife');
+      if (e.code === 'Digit3') {
+        if (currentWeaponKey === 'knife') {
+          switchWeapon('karambit');
+        } else if (currentWeaponKey === 'karambit') {
+          switchWeapon('knife');
+        } else {
+          switchWeapon(currentMeleeKey || 'knife');
+        }
+        return;
+      }
       if (e.code === 'Digit4') switchWeapon('phantom');
       if (e.code === 'Digit5') switchWeapon('spectre');
       if (e.code === 'Digit6') switchWeapon('sheriff');
@@ -7390,7 +7682,9 @@
     }
 
     function switchWeapon(key) {
-      if (!WEAPONS[key] || currentWeaponKey === key) return;
+      if (!WEAPONS[key]) return;
+      if (key === 'knife' || key === 'karambit') currentMeleeKey = key;
+      if (currentWeaponKey === key) return;
       isInspecting = false;
       gunGroup.rotation.set(0, 0, 0);
       gunGroup.position.copy(DEFAULT_GUN_POS);
@@ -7401,6 +7695,10 @@
       updateADS();
       updateHUD();
       showToast(`무기 장착: ${currentWeapon.name}`);
+      if (key === 'karambit') {
+        gunGroup.rotation.y = Math.PI * 4;
+        sound.playKnifeSlash();
+      }
     }
 
     function toggleBuyMenu() {
@@ -8679,6 +8977,17 @@
         }
       }
 
+      // 6. Fracture Canyon High-Speed Zipline [F]
+      if (fractureZipline && !fractureZipline.isRiding) {
+        const pPos = camera.position;
+        const dNorth = pPos.distanceTo(fractureZipline.northPos);
+        const dSouth = pPos.distanceTo(fractureZipline.southPos);
+        if (dNorth < 5.5 || dSouth < 5.5 || (Math.abs(pPos.x) < 4.0 && Math.abs(pPos.z) <= 38)) {
+          startFractureZiplineRide();
+          return;
+        }
+      }
+
       // 4. Ascent B Shutter Door
       if (!ascentDoor || ascentDoor.isDestroyed) return;
       const dist = camera.position.distanceTo(ascentDoor.switchPos);
@@ -9779,6 +10088,43 @@
         { label: 'DEF SPAWN', x: 0, z: -48, color: '#00ffaa' },
         { label: 'ATK SPAWN', x: 0, z: 46, color: '#ff4655' }
       ],
+      breeze: [
+        { label: 'A SITE', x: 28, z: -24, color: '#00f0ff' },
+        { label: 'A PYRAMIDS', x: 28, z: -24, color: '#ffd700' },
+        { label: 'A CHUTE', x: 38, z: 0, color: '#00e5ff' },
+        { label: 'B SITE', x: -28, z: -24, color: '#00f0ff' },
+        { label: 'DEF SPAWN', x: 0, z: -48, color: '#00ffaa' },
+        { label: 'ATK SPAWN', x: 0, z: 46, color: '#ff4655' }
+      ],
+      sunset: [
+        { label: 'A SITE', x: 28, z: -24, color: '#00f0ff' },
+        { label: 'A BOBA', x: 34, z: -12, color: '#ffaa44' },
+        { label: 'B SITE', x: -28, z: -24, color: '#00f0ff' },
+        { label: 'B MARKET [F]', x: -18, z: -14, color: '#ff4655' },
+        { label: 'DEF SPAWN', x: 0, z: -48, color: '#00ffaa' },
+        { label: 'ATK SPAWN', x: 0, z: 46, color: '#ff4655' }
+      ],
+      pearl: [
+        { label: 'A SITE', x: 30, z: -24, color: '#00f0ff' },
+        { label: 'B SITE', x: -30, z: -24, color: '#00f0ff' },
+        { label: 'B LONG', x: -40, z: -10, color: '#00e5ff' },
+        { label: 'AIRLOCK [F]', x: 0, z: 8, color: '#00f0ff' },
+        { label: 'DEF SPAWN', x: 0, z: -48, color: '#00ffaa' },
+        { label: 'ATK SPAWN', x: 0, z: 46, color: '#ff4655' }
+      ],
+      fracture: [
+        { label: 'A SITE', x: 32, z: -20, color: '#00f0ff' },
+        { label: 'A DISH', x: 38, z: -20, color: '#ffd700' },
+        { label: 'A DROP', x: 36, z: -32, color: '#ff4655' },
+        { label: 'B SITE', x: -32, z: -20, color: '#00f0ff' },
+        { label: 'B CANTEEN', x: -36, z: -32, color: '#88a0b8' },
+        { label: 'ZIPLINE N [F]', x: 0, z: -38, color: '#38bdf8' },
+        { label: 'ZIPLINE S [F]', x: 0, z: 38, color: '#38bdf8' },
+        { label: 'REACTOR CORE', x: 0, z: 0, color: '#eab308' },
+        { label: 'DEF SPAWN', x: 0, z: -10, color: '#00ffaa' },
+        { label: 'ATK NORTH', x: 0, z: -45, color: '#ff4655' },
+        { label: 'ATK SOUTH', x: 0, z: 45, color: '#ff4655' }
+      ],
       range: [
         { label: 'TARGETS', x: 0, z: -22, color: '#00f0ff' },
         { label: 'BENCH', x: 0, z: 0, color: '#ffc83b' },
@@ -10702,6 +11048,22 @@
           if (lotusDoor.currentAngle >= lotusDoor.targetAngle) {
             lotusDoor.currentAngle = lotusDoor.targetAngle;
             lotusDoor.isRotating = false;
+          }
+        }
+
+        // Fracture Canyon High-Speed Zipline Motion Update
+        if (fractureZipline && fractureZipline.isRiding) {
+          const dz = fractureZipline.targetZ - camera.position.z;
+          const step = Math.sign(dz) * fractureZipline.speed * dt;
+          if (Math.abs(dz) <= Math.abs(step)) {
+            camera.position.z = fractureZipline.targetZ;
+            fractureZipline.isRiding = false;
+            sound.playFootstep();
+            showToast('🏁 [FRACTURE] 협곡 반대편 터미널에 도착했습니다!');
+          } else {
+            camera.position.z += step;
+            camera.position.x += (0 - camera.position.x) * 0.15;
+            camera.position.y = 2.0;
           }
         }
 
