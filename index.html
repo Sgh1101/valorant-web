@@ -2411,71 +2411,42 @@
         if (this.ctx.state === 'suspended') this.ctx.resume();
       }
 
-      startAmbient(mapKey = 'ascent') {
-        if (!this.ctx) this.init();
-        if (!this.ctx || !this.ambientGain) return;
-        this.currentAmbientMap = mapKey;
-
+      stopAmbient() {
         if (this.ambientSource) {
           try { this.ambientSource.stop(); } catch (e) {}
-          this.ambientSource.disconnect();
+          try { this.ambientSource.disconnect(); } catch (e) {}
           this.ambientSource = null;
+        }
+        if (this.ambientFilter) {
+          try { this.ambientFilter.disconnect(); } catch (e) {}
+          this.ambientFilter = null;
         }
         if (this.ambientTimer) {
           clearInterval(this.ambientTimer);
           this.ambientTimer = null;
         }
+        this.currentAmbientMap = null;
+      }
 
-        // Procedural 4-second seamless filtered brownian noise buffer
-        const bufferSize = this.ctx.sampleRate * 4;
-        const buffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
-        const data = buffer.getChannelData(0);
-        let last = 0.0;
-        for (let i = 0; i < bufferSize; i++) {
-          const white = Math.random() * 2 - 1;
-          last = (last + (0.02 * white)) / 1.02;
-          data[i] = last * 3.2;
-        }
+      startAmbient(mapKey = 'ascent') {
+        if (!this.ctx) this.init();
+        if (!this.ctx || !this.ambientGain) return;
+        this.stopAmbient();
+        this.currentAmbientMap = mapKey;
 
-        this.ambientSource = this.ctx.createBufferSource();
-        this.ambientSource.buffer = buffer;
-        this.ambientSource.loop = true;
-
-        if (this.ambientFilter) {
-          try { this.ambientFilter.disconnect(); } catch (e) {}
-        }
-        this.ambientFilter = this.ctx.createBiquadFilter();
-
+        // Clean eSports audio: completely eliminated continuous noise buffer loop that caused "지지직" static sound.
+        // Atmospheric environmental sound cues only:
         if (mapKey === 'ascent') {
-          // Venetian canal breeze lowpass
-          this.ambientFilter.type = 'lowpass';
-          this.ambientFilter.frequency.setValueAtTime(220, this.ctx.currentTime);
-          // Distant Cathedral Bell toll every 28 seconds
+          // Distant Cathedral Bell toll every 35 seconds
           this.ambientTimer = setInterval(() => {
             if (this.currentAmbientMap === 'ascent') this.playCathedralBell();
-          }, 28000);
-        } else if (mapKey === 'bind') {
-          // Sandstone canyon whistling desert wind
-          this.ambientFilter.type = 'bandpass';
-          this.ambientFilter.frequency.setValueAtTime(520, this.ctx.currentTime);
-          this.ambientFilter.Q.setValueAtTime(1.8, this.ctx.currentTime);
+          }, 35000);
         } else if (mapKey === 'haven') {
-          // High mountain temple crisp breeze
-          this.ambientFilter.type = 'bandpass';
-          this.ambientFilter.frequency.setValueAtTime(820, this.ctx.currentTime);
-          this.ambientFilter.Q.setValueAtTime(1.2, this.ctx.currentTime);
-          // Gentle sacred wind chimes every 16 seconds
+          // Gentle sacred wind chimes every 22 seconds
           this.ambientTimer = setInterval(() => {
             if (this.currentAmbientMap === 'haven') this.playPagodaChime();
-          }, 16000);
-        } else {
-          this.ambientFilter.type = 'lowpass';
-          this.ambientFilter.frequency.setValueAtTime(280, this.ctx.currentTime);
+          }, 22000);
         }
-
-        this.ambientSource.connect(this.ambientFilter);
-        this.ambientFilter.connect(this.ambientGain);
-        this.ambientSource.start(0);
       }
 
       playCathedralBell() {
@@ -5980,6 +5951,7 @@
     }
 
     function clearMap() {
+      if (sound && sound.stopAmbient) sound.stopAmbient();
       mapObjects.forEach(obj => scene.remove(obj));
       mapObjects = [];
       colliders = [];
@@ -12292,9 +12264,9 @@
 
       // Match Simulation (Runs as long as custom-lobby is closed)
       if (document.getElementById('custom-lobby').style.display === 'none') {
-        // Enemy AI Tactical Fire, Jiggle Peeking & Headshots
-        if (roundState === 'IN_ROUND' && !cheats.freezeAI && now - enemyShotTimer > 1.7) {
-          enemyShotTimer = now;
+        // Enemy AI Tactical Fire: Balanced, human-like reaction time & 50% reduced damage
+        if (roundState === 'IN_ROUND' && !cheats.freezeAI && now - enemyShotTimer > 2400) {
+          enemyShotTimer = now + (Math.random() * 800 - 400);
           const aliveEnemies = enemiesList.filter(e => !e.isDead);
           if (aliveEnemies.length > 0) {
             const shooter = aliveEnemies[Math.floor(Math.random() * aliveEnemies.length)];
@@ -12312,7 +12284,7 @@
             shooter.mesh.position.y = -0.2;
             setTimeout(() => { if (shooter.mesh) shooter.mesh.position.y = 0; }, 600);
 
-            // 3-Round Burst
+            // 3-Round Burst with relaxed timing
             for (let b = 0; b < 3; b++) {
               setTimeout(() => {
                 if (shooter.isDead) return;
@@ -12325,12 +12297,14 @@
                   setTimeout(() => sound.playBulletWhiz(), 35 + Math.random() * 40);
                 }
 
-                if (camera.position.distanceTo(shooter.mesh.position) < 45 && Math.random() < 0.38) {
+                // AI accuracy reduced: lower hit chance (0.18 instead of 0.38)
+                if (camera.position.distanceTo(shooter.mesh.position) < 45 && Math.random() < 0.18) {
                   if (!cheats.godMode) {
-                    const isEnemyHeadshot = (Math.random() < 0.16);
-                    const baseIncoming = isEnemyHeadshot ? 55 : 18;
+                    const isEnemyHeadshot = (Math.random() < 0.08); // Reduced headshot rate
+                    // AI Damage Reduced by 50%: Headshot 55 -> 27, Bodyshot 18 -> 9
+                    const baseIncoming = isEnemyHeadshot ? 27 : 9;
                     const prevPlayerShield = player.shield;
-                    const dealtToShield = Math.min(player.shield, isEnemyHeadshot ? 25 : 12);
+                    const dealtToShield = Math.min(player.shield, isEnemyHeadshot ? 12 : 6);
                     player.shield -= dealtToShield;
                     const remainder = baseIncoming - dealtToShield;
                     player.hp -= remainder;
@@ -12625,22 +12599,22 @@
         }
 
 
-        // Bot Footstep Spatial Audio
-        if (now - lastBotFootstepTime > 0.45) {
+        // Bot Footstep Spatial Audio (Gentle periodic footsteps, not frame-rate spam)
+        if (now - lastBotFootstepTime > 650) {
           lastBotFootstepTime = now;
           enemiesList.forEach(e => {
             if (e.isDead) return;
             const dist = camera.position.distanceTo(e.mesh.position);
-            if (dist < 20) {
+            if (dist < 18) {
               sound.playFootstep();
             }
           });
         }
 
 
-        // Low HP Warning Heartbeat & Screen Pulse
+        // Low HP Warning Heartbeat & Screen Pulse (Relaxed periodic pulse)
         if (player.hp < 30 && !player.isDead) {
-          if (now - lastHeartbeatTime > 0.85) {
+          if (now - lastHeartbeatTime > 950) {
             lastHeartbeatTime = now;
             sound.playHeartbeat();
             const vig = document.getElementById('vignette');
