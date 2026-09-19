@@ -2022,6 +2022,7 @@
         <div class="settings-row">
           <span>최대 프레임 레이트 (FPS Limit)</span>
           <select id="cfg-fps-limit" style="background:#070b10; border:1px solid var(--val-border); color:var(--val-cyan); font-family:var(--font-hud); font-size:14px; padding:3px 8px; outline:none; cursor:pointer;">
+            <option value="auto">스마트 자동 최적화 (144Hz 락)</option>
             <option value="0">무제한 (UNCAPPED)</option>
             <option value="30">30 FPS (절전 / 배터리 세이버)</option>
             <option value="60">60 FPS (표준 60Hz)</option>
@@ -2068,6 +2069,10 @@
         <div class="settings-row">
           <span>마스터 볼륨 (Master Volume)</span>
           <input type="range" id="cfg-vol" min="0" max="100" value="80" style="cursor: pointer;">
+        </div>
+        <div style="margin-top:14px; padding-top:10px; border-top:1px dashed rgba(255,255,255,0.12); display:flex; justify-content:space-between; align-items:center;">
+          <span style="font-size:12px; color:var(--val-gold); font-weight:700;">⚡ 프로 e스포츠 원클릭 최적화</span>
+          <button class="map-select-btn val-clip" id="btn-esports-optimize" style="font-size:11px; padding:4px 12px; background:rgba(0,240,255,0.15); border-color:var(--val-cyan);">원클릭 144Hz 락 적용</button>
         </div>
       </div>
 
@@ -3260,6 +3265,55 @@
         osc.start(now);
         osc.stop(now + 2.7);
       }
+
+      playCasingDrop() {
+        if (!this.ctx) return;
+        const now = this.ctx.currentTime;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(2600 + Math.random() * 800, now);
+        osc.frequency.exponentialRampToValueAtTime(1200, now + 0.05);
+        gain.gain.setValueAtTime(0.09, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.05);
+        osc.connect(gain);
+        gain.connect(this.dest);
+        osc.start(now);
+        osc.stop(now + 0.06);
+      }
+
+      playStoneGrind() {
+        if (!this.ctx) return;
+        const now = this.ctx.currentTime;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(75, now);
+        osc.frequency.linearRampToValueAtTime(90, now + 1.2);
+        osc.frequency.linearRampToValueAtTime(65, now + 2.5);
+        gain.gain.setValueAtTime(0.35, now);
+        gain.gain.exponentialRampToValueAtTime(0.01, now + 2.5);
+        osc.connect(gain);
+        gain.connect(this.dest);
+        osc.start(now);
+        osc.stop(now + 2.6);
+      }
+
+      playWallBreak() {
+        if (!this.ctx) return;
+        const now = this.ctx.currentTime;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(130, now);
+        osc.frequency.exponentialRampToValueAtTime(22, now + 0.55);
+        gain.gain.setValueAtTime(0.65, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.6);
+        osc.connect(gain);
+        gain.connect(this.dest);
+        osc.start(now);
+        osc.stop(now + 0.65);
+      }
     }
 
     const activeShellCasings = [];
@@ -3433,26 +3487,36 @@
     const myClientId = 'user_' + Math.random().toString(36).substring(2, 8);
     const networkChannel = new BroadcastChannel('VALORANT_5V5_NET');
 
-    const MAP_LIST = ['ascent', 'bind', 'haven', 'icebox', 'split', 'range'];
+    const MAP_LIST = ['ascent', 'bind', 'haven', 'icebox', 'split', 'lotus', 'range'];
     const MAP_NAMES = {
       ascent: 'ASCENT (어센트) - 베네치아 요새 & 전동 셔터 도어 [F]',
       bind: 'BIND (바인드) - 모로코 사막 & 차원 이동 텔레포터',
       haven: 'HAVEN (헤이븐) - 부탄 수도원 & 3대 폭파 지점(A/B/C) + 중앙 범종',
       icebox: 'ICEBOX (아이스박스) - 북극 비밀 연구 기지 & 선적 컨테이너 & 집라인',
       split: 'SPLIT (스플릿) - 도쿄 네오 신주쿠 & A/B 고지대 타워 & 환기구 벤트 & 지하철역',
+      lotus: 'LOTUS (로터스) - 인도 고대 유적 & 3대 폭파 지점(A/B/C) & 360° 회전 석문 [F]',
       range: 'THE RANGE (사격장) - 사격 훈련장 & 봇 연습'
     };
     let currentMapIndex = 0;
 
     const AGENT_EMOJIS = {
       Jett: '💨', Phoenix: '🔥', Reyna: '👁️', Sova: '🏹', Sage: '❄️', Omen: '🌑', Brimstone: '☄️', Raze: '💣',
-      Killjoy: '🤖', Chamber: '👓', Viper: '🧪', Cypher: '🕵️', Neon: '⚡', Yoru: '👹'
+      Killjoy: '🤖', Chamber: '👓', Viper: '🧪', Cypher: '🕵️', Neon: '⚡', Yoru: '👹',
+      Fade: '🧿', Gekko: '🦎', Harbor: '🌊', Iso: '🔮'
     };
     const AGENT_COLORS = {
       Jett: '#00f0ff', Phoenix: '#ff6600', Reyna: '#be00ff', Sova: '#2979ff',
       Sage: '#00e676', Omen: '#536dfe', Brimstone: '#ff9100', Raze: '#ffd600',
       Killjoy: '#ffeb3b', Chamber: '#e6c35c', Viper: '#00e676', Cypher: '#e0e0e0',
-      Neon: '#00e5ff', Yoru: '#3d5afe'
+      Neon: '#00e5ff', Yoru: '#3d5afe',
+      Fade: '#5c6b73', Gekko: '#a3e635', Harbor: '#06b6d4', Iso: '#8b5cf6'
+    };
+    const AGENT_ROLES = {
+      Jett: '타격대 (Duelist)', Phoenix: '타격대 (Duelist)', Reyna: '타격대 (Duelist)', Raze: '타격대 (Duelist)',
+      Yoru: '타격대 (Duelist)', Neon: '타격대 (Duelist)', Iso: '타격대 (Duelist)',
+      Sova: '척후대 (Initiator)', Fade: '척후대 (Initiator)', Gekko: '척후대 (Initiator)',
+      Omen: '전략가 (Controller)', Brimstone: '전략가 (Controller)', Viper: '전략가 (Controller)', Harbor: '전략가 (Controller)',
+      Sage: '감시대 (Sentinel)', Cypher: '감시대 (Sentinel)', Killjoy: '감시대 (Sentinel)', Chamber: '감시대 (Sentinel)'
     };
 
     const lobbySlots = {
@@ -4210,7 +4274,7 @@
     /* ==========================================================
        DYNAMIC AGENT SWITCHING SYSTEM ([H] KEY TO CYCLE AGENT)
        ========================================================== */
-    const PLAYABLE_AGENTS = ['Jett', 'Phoenix', 'Reyna', 'Omen', 'Viper', 'Cypher', 'Neon', 'Yoru', 'Chamber', 'Killjoy'];
+    const PLAYABLE_AGENTS = ['Jett', 'Phoenix', 'Reyna', 'Omen', 'Viper', 'Cypher', 'Neon', 'Yoru', 'Chamber', 'Killjoy', 'Fade', 'Gekko', 'Harbor', 'Iso'];
     let currentAgentIdx = 0;
 
     const AGENT_SKILL_LABELS = {
@@ -4223,7 +4287,11 @@
       Neon: { c: '릴레이 볼트 (C)', q: '고속도로 (Q)', e: '하이 기어 스프린트 (E)', x: '오버드라이브 (X)' },
       Yoru: { c: '기만 분신 (C)', q: '기습 섬광 (Q)', e: '차원 표류 구슬 (E)', x: '차원 이동 (X)' },
       Chamber: { c: '상표 트랩 (C)', q: '헤드헌터 권총 (Q)', e: '랑데부 앵커 (E)', x: '역작 저격총 (X)' },
-      Killjoy: { c: '나노스웜 (C)', q: '알람봇 (Q)', e: '포탑 배터리 (E)', x: '봉쇄 락다운 (X)' }
+      Killjoy: { c: '나노스웜 (C)', q: '알람봇 (Q)', e: '포탑 배터리 (E)', x: '봉쇄 락다운 (X)' },
+      Fade: { c: '포획 (C)', q: '추적귀 (Q)', e: '귀체 정찰 (E)', x: '심야 궁극기 (X)' },
+      Gekko: { c: '모쉬 핏 (C)', q: '윙맨 기동 (Q)', e: '디지 섬광 (E)', x: '요동 격돌 (X)' },
+      Harbor: { c: '폭포 (C)', q: '만 (Q)', e: '간석지 장막 (E)', x: '심판 해일 (X)' },
+      Iso: { c: '응징 사격 (C)', q: '취약 사쇄 (Q)', e: '더블 탭 실드 (E)', x: '결투 영역 (X)' }
     };
 
     let spectatorTargetIndex = 0;
@@ -4283,6 +4351,10 @@
       else if (agentName === 'Yoru') radioVoice.speak('I\'ll handle this.');
       else if (agentName === 'Chamber') radioVoice.speak('Custom tailored, just for you.');
       else if (agentName === 'Killjoy') radioVoice.speak('Relax, I have a plan.');
+      else if (agentName === 'Fade') radioVoice.speak('Face your fears.');
+      else if (agentName === 'Gekko') radioVoice.speak('Let us go, team!');
+      else if (agentName === 'Harbor') radioVoice.speak('The tide is turning.');
+      else if (agentName === 'Iso') radioVoice.speak('Target acquired.');
       else radioVoice.speak('Watch this!');
 
       showToast(`⚡ 요원 변경: [${agentName.toUpperCase()}] ${AGENT_EMOJIS[agentName]} (스킬 세트 교체 완료)`);
@@ -4345,6 +4417,8 @@
     };
 
     let ascentDoor = null;
+    let lotusDoor = null;
+    let lotusBreakableWall = null;
     let spikeTetherLine = null;
     const roundCombatData = {
       dealt: {},
@@ -4849,6 +4923,42 @@
         const riftGloves = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.12, 0.12), new THREE.MeshStandardMaterial({ color: 0x3d5afe, emissive: 0x2979ff, emissiveIntensity: 0.6 }));
         riftGloves.position.set(0.28, 0.95, 0.05);
         grp.add(riftGloves);
+      } else if (agentName === 'Fade') {
+        const ravenHair = new THREE.Mesh(new THREE.ConeGeometry(0.15, 0.28, 6), new THREE.MeshStandardMaterial({ color: 0x1c3144 }));
+        ravenHair.position.set(0, 1.96, -0.06);
+        grp.add(ravenHair);
+        const claws = new THREE.Mesh(new THREE.ConeGeometry(0.025, 0.14, 4), new THREE.MeshStandardMaterial({ color: 0x0d1b2a }));
+        claws.position.set(0.26, 0.95, 0.08);
+        claws.rotation.x = Math.PI / 2;
+        grp.add(claws);
+        const amulet = new THREE.Mesh(new THREE.CircleGeometry(0.04, 10), new THREE.MeshBasicMaterial({ color: 0x00f0ff }));
+        amulet.position.set(0, 1.45, 0.24);
+        grp.add(amulet);
+      } else if (agentName === 'Gekko') {
+        const limeHair = new THREE.Mesh(new THREE.ConeGeometry(0.14, 0.28, 6), new THREE.MeshStandardMaterial({ color: 0xa3e635 }));
+        limeHair.position.set(0, 2.02, -0.02);
+        grp.add(limeHair);
+        // Creature buddy Dizzy perched on left shoulder
+        const dizzy = new THREE.Mesh(new THREE.SphereGeometry(0.075, 10, 8), new THREE.MeshStandardMaterial({ color: 0x00f0ff, emissive: 0x00bbdd, emissiveIntensity: 0.5 }));
+        dizzy.position.set(-0.28, 1.58, 0);
+        grp.add(dizzy);
+      } else if (agentName === 'Harbor') {
+        const waveHair = new THREE.Mesh(new THREE.ConeGeometry(0.15, 0.26, 6), new THREE.MeshStandardMaterial({ color: 0x212529 }));
+        waveHair.position.set(0, 1.98, -0.04);
+        grp.add(waveHair);
+        // Relic water gauntlet bracelet
+        const waterBracelet = new THREE.Mesh(new THREE.TorusGeometry(0.08, 0.025, 8, 14), new THREE.MeshStandardMaterial({ color: 0x00b4d8, emissive: 0x00e5ff, emissiveIntensity: 0.7 }));
+        waterBracelet.rotation.x = Math.PI / 2;
+        waterBracelet.position.set(0.28, 1.0, 0.05);
+        grp.add(waterBracelet);
+      } else if (agentName === 'Iso') {
+        const spikeHair = new THREE.Mesh(new THREE.ConeGeometry(0.14, 0.32, 6), new THREE.MeshStandardMaterial({ color: 0x18181b }));
+        spikeHair.position.set(0, 2.04, -0.02);
+        grp.add(spikeHair);
+        // Floating energy shield prism
+        const prism = new THREE.Mesh(new THREE.OctahedronGeometry(0.065), new THREE.MeshStandardMaterial({ color: 0x8b5cf6, emissive: 0xa855f7, emissiveIntensity: 0.8 }));
+        prism.position.set(0, 2.12, -0.22);
+        grp.add(prism);
       }
 
       return { mesh: grp, head, body, legs: [legL, legR] };
@@ -5138,6 +5248,17 @@
         scene.remove(ascentDoor.switchMesh);
       }
       ascentDoor = null;
+
+      if (lotusDoor && lotusDoor.mesh) {
+        scene.remove(lotusDoor.mesh);
+        scene.remove(lotusDoor.switchMesh);
+      }
+      lotusDoor = null;
+
+      if (lotusBreakableWall && lotusBreakableWall.mesh) {
+        scene.remove(lotusBreakableWall.mesh);
+      }
+      lotusBreakableWall = null;
       const dp = document.getElementById('door-prompt');
       if (dp) dp.style.display = 'none';
 
@@ -5306,6 +5427,19 @@
         sunLight.position.set(40, 85, -30);
         scene.fog.color.setHex(0x180d2b);
         scene.fog.density = 0.009;
+      } else if (mapKey === 'lotus') {
+        // Indian Western Ghats Sacred Ruins / Dawn Sunlight & Mist
+        grad.addColorStop(0, '#0e1a14');
+        grad.addColorStop(0.4, '#1b382b');
+        grad.addColorStop(0.7, '#d4a373');
+        grad.addColorStop(1, '#ffeedb');
+        ambientLight.color.setHex(0xffe4b5);
+        ambientLight.intensity = 0.95;
+        sunLight.color.setHex(0xfff4d4);
+        sunLight.intensity = 1.4;
+        sunLight.position.set(-50, 80, 45);
+        scene.fog.color.setHex(0x3a4f41);
+        scene.fog.density = 0.007;
       } else {
         // Range: High-tech military hangar
         grad.addColorStop(0, '#080c10');
@@ -5799,6 +5933,155 @@
         addLantern(10, 0, 10, 0x00e5ff);
         addLantern(-10, 0, 10, 0xff007f);
         addLantern(0, 0, -18, 0xffea00);
+      }
+      // ==========================================================
+      // MAP 6: LOTUS (로터스) - 인도 고대 유적 & 3대 폭파 지점(A/B/C) & 360° 회전 석문 [F]
+      // ==========================================================
+      else if (mapKey === 'lotus') {
+        const matLotusStone = new THREE.MeshStandardMaterial({ color: 0xc49a6c, roughness: 0.82 });
+        const matLotusCarved = new THREE.MeshStandardMaterial({ color: 0x8b6540, roughness: 0.75 });
+        const matLotusGold = new THREE.MeshStandardMaterial({ color: 0xd4af37, metalness: 0.9, roughness: 0.2 });
+        const matLotusPool = new THREE.MeshStandardMaterial({ color: 0x00b4d8, roughness: 0.15, transparent: true, opacity: 0.8 });
+        const matLotusLeaf = new THREE.MeshStandardMaterial({ color: 0x2d6a4f, roughness: 0.6 });
+        const matLotusPetal = new THREE.MeshStandardMaterial({ color: 0xff758f, roughness: 0.5, emissive: 0xff758f, emissiveIntensity: 0.4 });
+
+        // Outer Ancient Fortress Enclosure Walls & Sandstone Floor
+        addBox(0, -0.5, 0, 120, 1, 120, matLotusStone);
+        addBox(0, 7, -60, 120, 14, 2, matLotusCarved);
+        addBox(0, 7, 60, 120, 14, 2, matLotusCarved);
+        addBox(-60, 7, 0, 2, 14, 120, matLotusCarved);
+        addBox(60, 7, 0, 2, 14, 120, matLotusCarved);
+
+        // --- A SITE: SACRED BANYAN TREE, A HUT & ELEVATED TERRACE ---
+        addBox(32, 0.05, -24, 22, 0.05, 22, matSiteFloor, false);
+        addTextBillboard(32, 0.2, -24, 'A SITE', 1.8);
+        spikeSiteAreas.push({ minX: 20, maxX: 44, minZ: -35, maxZ: -13, name: 'A SITE' });
+
+        // A Site Sacred Ancient Banyan Tree
+        const trunkGeo = new THREE.CylinderGeometry(0.35, 0.5, 5.0, 8);
+        const trunkMesh = new THREE.Mesh(trunkGeo, matLotusCarved);
+        trunkMesh.position.set(36, 2.5, -20);
+        scene.add(trunkMesh);
+        mapObjects.push(trunkMesh);
+        colliders.push({ box: new THREE.Box3().setFromObject(trunkMesh), mesh: trunkMesh });
+
+        const canopyGeo = new THREE.SphereGeometry(2.6, 10, 8);
+        const canopyMesh = new THREE.Mesh(canopyGeo, matLotusLeaf);
+        canopyMesh.position.set(36, 5.2, -20);
+        scene.add(canopyMesh);
+        mapObjects.push(canopyMesh);
+
+        // A Hut Elevated Stone Terrace (y = 4.5)
+        addPlatform(34, 0, -32, 12, 4.5, 10, matLotusStone);
+        addRailing(28, 4.5, -32, 10, 'z');
+        addRailing(34, 4.5, -27, 12, 'x');
+        addStairs(34, -14, 0, 3.6, 4.5, 15, 12, 'z-');
+
+        // A Site Cover Crates
+        addCrateStack(26, -26, 2.4);
+
+        // Interactive 360° Revolving Stone Door at A Link (x = 22, z = -10)
+        addBox(22, 3.5, -14, 6, 7, 1.2, matLotusCarved);
+        addBox(22, 3.5, -6, 6, 7, 1.2, matLotusCarved);
+        addBox(22, 7.5, -10, 1.2, 1.2, 4.5, matLotusCarved);
+
+        const rDoorGeo = new THREE.BoxGeometry(0.45, 6.6, 4.0);
+        const rDoorMat = new THREE.MeshStandardMaterial({ color: 0x5c4033, roughness: 0.85 });
+        const rDoorMesh = new THREE.Mesh(rDoorGeo, rDoorMat);
+        rDoorMesh.position.set(22, 3.3, -10);
+        scene.add(rDoorMesh);
+        mapObjects.push(rDoorMesh);
+        colliders.push({ box: new THREE.Box3().setFromObject(rDoorMesh), mesh: rDoorMesh });
+
+        const rSwGeo = new THREE.BoxGeometry(0.3, 0.4, 0.2);
+        const rSwMat = new THREE.MeshStandardMaterial({ color: 0xffd700, emissive: 0xffd700, emissiveIntensity: 0.8 });
+        const rSwitchMesh = new THREE.Mesh(rSwGeo, rSwMat);
+        rSwitchMesh.position.set(20.8, 1.6, -9.2);
+        scene.add(rSwitchMesh);
+        mapObjects.push(rSwitchMesh);
+
+        lotusDoor = {
+          mesh: rDoorMesh,
+          switchMesh: rSwitchMesh,
+          swMat: rSwMat,
+          isRotating: false,
+          currentAngle: 0,
+          targetAngle: 0,
+          switchPos: new THREE.Vector3(20.8, 1.6, -9.2)
+        };
+
+        // --- B SITE: SACRED STUPA & RADIANT LOTUS ALTAR ---
+        addBox(0, 0.05, -24, 22, 0.05, 22, matSiteFloor, false);
+        addTextBillboard(0, 0.2, -24, 'B SITE', 1.8);
+        spikeSiteAreas.push({ minX: -11, maxX: 11, minZ: -35, maxZ: -13, name: 'B SITE' });
+
+        // B Central Sacred Altar
+        const altarBase = new THREE.Mesh(new THREE.CylinderGeometry(2.0, 2.4, 1.2, 16), matLotusCarved);
+        altarBase.position.set(0, 0.6, -26);
+        scene.add(altarBase);
+        mapObjects.push(altarBase);
+        colliders.push({ box: new THREE.Box3().setFromObject(altarBase), mesh: altarBase });
+
+        // Glowing Radianite Lotus Flower Blossom on Altar
+        const lotusCore = new THREE.Mesh(new THREE.SphereGeometry(0.45, 12, 12), matLotusPetal);
+        lotusCore.position.set(0, 1.6, -26);
+        scene.add(lotusCore);
+        mapObjects.push(lotusCore);
+
+        // 4 Carved Relief Pillars supporting B Chamber
+        [-6, 6].forEach(px => {
+          [-30, -20].forEach(pz => {
+            addBox(px, 3.5, pz, 1.6, 7.0, 1.6, matLotusCarved);
+          });
+        });
+
+        // Breakable Stone/Wood Wall between A Link and B Site (300 HP)
+        const breakWallGeo = new THREE.BoxGeometry(4.0, 5.0, 0.4);
+        const breakWallMat = new THREE.MeshStandardMaterial({ color: 0x6d4c41, roughness: 0.8 });
+        const breakWallMesh = new THREE.Mesh(breakWallGeo, breakWallMat);
+        breakWallMesh.position.set(10, 2.5, -18);
+        scene.add(breakWallMesh);
+        mapObjects.push(breakWallMesh);
+        colliders.push({ box: new THREE.Box3().setFromObject(breakWallMesh), mesh: breakWallMesh });
+
+        lotusBreakableWall = {
+          mesh: breakWallMesh,
+          hp: 300,
+          maxHp: 300,
+          isDestroyed: false
+        };
+
+        // --- C SITE: C MOUND, WATERFALL & SACRED LOTUS POOL ---
+        addBox(-32, 0.05, -24, 22, 0.05, 22, matSiteFloor, false);
+        addTextBillboard(-32, 0.2, -24, 'C SITE', 1.8);
+        spikeSiteAreas.push({ minX: -44, maxX: -20, minZ: -35, maxZ: -13, name: 'C SITE' });
+
+        // C Mound Elevated Defense Step (y = 1.6)
+        addPlatform(-28, 0, -18, 8, 1.6, 8, matLotusStone);
+        addStairs(-28, -12, 0, 3.5, 1.6, 6, 6, 'z-');
+
+        // C Sacred Lotus Water Pool
+        const poolMesh = new THREE.Mesh(new THREE.BoxGeometry(8, 0.2, 8), matLotusPool);
+        poolMesh.position.set(-36, 0.1, -28);
+        scene.add(poolMesh);
+        mapObjects.push(poolMesh);
+
+        // Sacred Floating Lily Pads
+        for (let lp = 0; lp < 4; lp++) {
+          const pad = new THREE.Mesh(new THREE.CylinderGeometry(0.4, 0.4, 0.02, 8), matLotusLeaf);
+          pad.position.set(-36 + (lp % 2 ? 1.4 : -1.4), 0.22, -28 + (lp > 1 ? 1.4 : -1.4));
+          scene.add(pad);
+          mapObjects.push(pad);
+        }
+
+        // C Central Stone Obelisk
+        addBox(-32, 4.0, -24, 2.0, 8.0, 2.0, matLotusCarved);
+        addCrateStack(-24, -28, 2.4);
+
+        // Sacred Golden Bells in Mid Courtyard
+        addLantern(0, 0, 4, 0xffd700);
+        addLantern(-16, 0, 4, 0xffd700);
+        addLantern(16, 0, 4, 0xffd700);
       }
       else if (mapKey === 'range') {
         addBox(0, -0.5, 0, 60, 1, 120, matConcrete);
@@ -7202,6 +7485,23 @@
           showToast('🔔 [HAVEN] 신성한 대범종이 울립니다!');
         }
       }
+
+      // Check Lotus Breakable Wall Hit (300 HP)
+      if (lotusBreakableWall && !lotusBreakableWall.isDestroyed && lotusBreakableWall.mesh) {
+        const wallHits = raycaster.intersectObject(lotusBreakableWall.mesh);
+        if (wallHits.length > 0) {
+          lotusBreakableWall.hp -= currentWeapon.dmgBody;
+          showToast(`💥 [LOTUS] 파괴벽 피격! 잔여 내구도: ${Math.max(0, Math.floor(lotusBreakableWall.hp))}/300`);
+          if (lotusBreakableWall.hp <= 0) {
+            lotusBreakableWall.isDestroyed = true;
+            sound.playWallBreak();
+            scene.remove(lotusBreakableWall.mesh);
+            colliders = colliders.filter(c => c.mesh !== lotusBreakableWall.mesh);
+            showToast('💥 [LOTUS] 고대 파괴벽이 무너져 새로운 우회로가 열렸습니다! (PASSAGE OPENED)');
+          }
+          return;
+        }
+      }
   
       const wallHits = raycaster.intersectObjects(collMeshList);
       const firstWall = (wallHits.length > 0) ? wallHits[0] : null;
@@ -7622,7 +7922,19 @@
         return;
       }
 
-      // 3. Ascent B Shutter Door
+      // 3. Lotus Revolving Stone Door [F]
+      if (lotusDoor && lotusDoor.mesh && !lotusDoor.isRotating) {
+        const distToLotus = camera.position.distanceTo(lotusDoor.switchPos);
+        if (distToLotus < 4.2) {
+          sound.playStoneGrind();
+          lotusDoor.isRotating = true;
+          lotusDoor.targetAngle = lotusDoor.currentAngle + Math.PI;
+          showToast('🌀 [LOTUS] 고대 회전 석문이 180° 회전합니다! (REVOLVING DOOR)');
+          return;
+        }
+      }
+
+      // 4. Ascent B Shutter Door
       if (!ascentDoor || ascentDoor.isDestroyed) return;
       const dist = camera.position.distanceTo(ascentDoor.switchPos);
       if (dist < 4.0) {
@@ -8709,6 +9021,19 @@
         { label: 'DEF SPAWN', x: 0, z: -48, color: '#00ffaa' },
         { label: 'ATK SPAWN', x: 0, z: 46, color: '#ff4655' }
       ],
+      lotus: [
+        { label: 'A SITE', x: 32, z: -24, color: '#00f0ff' },
+        { label: 'A TREE', x: 36, z: -20, color: '#88a0b8' },
+        { label: 'A ROTATE DOOR', x: 22, z: -10, color: '#ffd700' },
+        { label: 'B SITE', x: 0, z: -24, color: '#00f0ff' },
+        { label: 'B ALTAR', x: 0, z: -28, color: '#ffd700' },
+        { label: 'BREAK WALL', x: 10, z: -18, color: '#ff4655' },
+        { label: 'C SITE', x: -32, z: -24, color: '#00f0ff' },
+        { label: 'C WATERFALL', x: -36, z: -30, color: '#00e5ff' },
+        { label: 'C MOUND', x: -28, z: -18, color: '#88a0b8' },
+        { label: 'DEF SPAWN', x: 0, z: -48, color: '#00ffaa' },
+        { label: 'ATK SPAWN', x: 0, z: 46, color: '#ff4655' }
+      ],
       range: [
         { label: 'TARGETS', x: 0, z: -22, color: '#00f0ff' },
         { label: 'BENCH', x: 0, z: 0, color: '#ffc83b' },
@@ -9161,6 +9486,7 @@
               else if (currentMapKey === 'haven') stepSurface = 'wood';
               else if (currentMapKey === 'icebox') stepSurface = 'stone';
               else if (currentMapKey === 'split') stepSurface = 'stone';
+              else if (currentMapKey === 'lotus') stepSurface = 'stone';
               if (curFloorY > 0.3) stepSurface = 'metal';
               sound.playFootstep(stepSurface);
             }
@@ -9217,6 +9543,7 @@
           c.mesh.rotateOnAxis(c.rotAxis, c.rotSpeed * dt);
           if (c.mesh.position.y <= 0.02) {
             c.mesh.position.y = 0.02;
+            if (Math.abs(c.vel.y) > 0.4 && sound.playCasingDrop) sound.playCasingDrop();
             c.vel.y = -c.vel.y * 0.35;
             c.vel.x *= 0.6;
             c.vel.z *= 0.6;
@@ -9266,6 +9593,41 @@
                 DEFAULT_GUN_POS.y + 0.06 * Math.sin(p * Math.PI),
                 DEFAULT_GUN_POS.z
               );
+            } else {
+              isInspecting = false;
+              gunGroup.position.copy(DEFAULT_GUN_POS);
+              gunGroup.rotation.set(0, 0, 0);
+            }
+          } else if (currentWeaponKey === 'sheriff') {
+            const totalDuration = 1.8;
+            if (elapsed < totalDuration) {
+              const p = elapsed / totalDuration;
+              const spinRot = Math.PI * 2 * Math.sin(p * Math.PI * 0.5);
+              gunGroup.rotation.set(spinRot, 0, Math.sin(p * Math.PI) * 0.35);
+              gunGroup.position.set(DEFAULT_GUN_POS.x, DEFAULT_GUN_POS.y + Math.sin(p * Math.PI) * 0.04, DEFAULT_GUN_POS.z);
+            } else {
+              isInspecting = false;
+              gunGroup.position.copy(DEFAULT_GUN_POS);
+              gunGroup.rotation.set(0, 0, 0);
+            }
+          } else if (currentWeaponKey === 'knife') {
+            const totalDuration = 1.6;
+            if (elapsed < totalDuration) {
+              const p = elapsed / totalDuration;
+              gunGroup.rotation.set(Math.PI * 2 * p, 0, Math.sin(p * Math.PI) * 0.4);
+              gunGroup.position.set(DEFAULT_GUN_POS.x, DEFAULT_GUN_POS.y + Math.sin(p * Math.PI) * 0.08, DEFAULT_GUN_POS.z);
+            } else {
+              isInspecting = false;
+              gunGroup.position.copy(DEFAULT_GUN_POS);
+              gunGroup.rotation.set(0, 0, 0);
+            }
+          } else if (currentWeaponKey === 'shorty') {
+            const totalDuration = 2.0;
+            if (elapsed < totalDuration) {
+              const p = elapsed / totalDuration;
+              const breakAngle = Math.sin(p * Math.PI) * 0.7;
+              gunGroup.rotation.set(breakAngle, 0, 0.2 * Math.sin(p * Math.PI));
+              gunGroup.position.set(DEFAULT_GUN_POS.x, DEFAULT_GUN_POS.y + 0.03 * Math.sin(p * Math.PI), DEFAULT_GUN_POS.z);
             } else {
               isInspecting = false;
               gunGroup.position.copy(DEFAULT_GUN_POS);
@@ -9456,6 +9818,13 @@
             if (e.isDead) return;
             e.mesh.position.x += e.patrolDir * 2.2 * botSpeedMult * dt;
             if (Math.abs(e.mesh.position.x) > 30) e.patrolDir *= -1;
+
+            // Realistic 3D Procedural Walking Leg/Arm Oscillation
+            if (e.legs && e.legs.length === 2) {
+              const walkCycle = Math.sin(now * 0.008 * 6);
+              e.legs[0].rotation.x = walkCycle * 0.4;
+              e.legs[1].rotation.x = -walkCycle * 0.4;
+            }
             if (isSweep) {
               const zDir = (e.mesh.position.z > 0) ? -1 : 1;
               e.mesh.position.z += zDir * 1.5 * botSpeedMult * dt;
@@ -9517,6 +9886,18 @@
         }
 
         // Ascent B Shutter Door Update
+        // Animate Lotus Revolving Stone Door
+        if (lotusDoor && lotusDoor.isRotating && lotusDoor.mesh) {
+          lotusDoor.currentAngle += dt * 1.8;
+          lotusDoor.mesh.rotation.y = lotusDoor.currentAngle;
+          const cEntry = colliders.find(c => c.mesh === lotusDoor.mesh);
+          if (cEntry) cEntry.box.setFromObject(lotusDoor.mesh);
+          if (lotusDoor.currentAngle >= lotusDoor.targetAngle) {
+            lotusDoor.currentAngle = lotusDoor.targetAngle;
+            lotusDoor.isRotating = false;
+          }
+        }
+
         if (ascentDoor && !ascentDoor.isDestroyed && ascentDoor.mesh) {
           if (Math.abs(ascentDoor.mesh.position.y - ascentDoor.targetY) > 0.05) {
             ascentDoor.mesh.position.y += (ascentDoor.targetY - ascentDoor.mesh.position.y) * 4.5 * dt;
@@ -9664,6 +10045,22 @@
         renderer.setPixelRatio((window.devicePixelRatio || 1) * scale);
         renderer.setSize(window.innerWidth, window.innerHeight);
         showToast(`⚡ 렌더링 스케일 적용: ${scale.toFixed(2)}x (${Math.round(window.innerWidth * scale)}x${Math.round(window.innerHeight * scale)})`);
+      });
+    }
+
+    // 1-Click eSports Optimizer Button Listener
+    const btnEsportsOpt = document.getElementById('btn-esports-optimize');
+    if (btnEsportsOpt) {
+      btnEsportsOpt.addEventListener('click', () => {
+        const fpsSel = document.getElementById('cfg-fps-limit');
+        if (fpsSel) fpsSel.value = '144';
+        const resSel = document.getElementById('cfg-render-scale');
+        if (resSel) resSel.value = '1.0';
+        const perfSel = document.getElementById('cfg-perf-hud');
+        if (perfSel) perfSel.value = 'full';
+        renderer.setPixelRatio(window.devicePixelRatio || 1);
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        showToast('⚡ e스포츠 프로 프리셋 최적화 완료 (144Hz Locked, 1.0x Res, Pro HUD)');
       });
     }
 
