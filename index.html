@@ -7856,6 +7856,108 @@
     /* ==========================================================
        AUTHENTIC 3 DISTINCT MAPS BUILDER: ASCENT, BIND, HAVEN, RANGE
        ========================================================== */
+    
+    /* ==========================================================
+       PHASE 34: PROCEDURAL TACTICAL MAP EXPANSION & DENSE STRUCTURES
+       Adds 40+ tactical covers, mid corridors, sniper nests, and flank routes per map
+       ========================================================== */
+    function injectExtendedStructures(mapKey) {
+      if (mapKey === 'range') return;
+
+      // Select theme materials based on map identity
+      let wallMat = matWallStone;
+      let coverMat = matConcrete;
+      let accentMat = matRadianiteBox;
+
+      if (['bind', 'kasbah', 'oasis', 'solarium', 'canyon', 'mirage', 'sanctum'].includes(mapKey)) {
+        wallMat = matSandstone;
+        coverMat = matSandstone;
+      } else if (['haven', 'zen', 'lotus', 'monsoon', 'shangrila'].includes(mapKey)) {
+        wallMat = matWoodPagoda;
+        coverMat = matTrimStone;
+      } else if (['icebox', 'subzero', 'aurora', 'bastion'].includes(mapKey)) {
+        wallMat = matConcrete;
+        coverMat = matTrimStone;
+      } else if (['district', 'drift', 'glitch', 'matrix', 'cyberia', 'nexus'].includes(mapKey)) {
+        wallMat = matDarkTile;
+        coverMat = matConcrete;
+        accentMat = matRadianiteBox;
+      } else if (['colosseum', 'olympus', 'atlantis'].includes(mapKey)) {
+        wallMat = matTrimStone;
+        coverMat = matSandstone;
+      } else {
+        wallMat = matWallStone;
+        coverMat = matConcrete;
+      }
+
+      // 1. Mid Lane Tactical Complex (Courtyard buildings & arches)
+      addBox(0, 3.5, 0, 14, 7, 10, wallMat);
+      addArch(0, 0, -6, 4.5, 5, 1.8, wallMat);
+      addArch(0, 0, 6, 4.5, 5, 1.8, wallMat);
+      addBox(11, 2.5, 2, 5, 5, 6, wallMat);
+      addBox(-11, 2.5, 2, 5, 5, 6, wallMat);
+      addArch(11, 0, -1.5, 3, 4, 1.2, wallMat);
+      addArch(-11, 0, -1.5, 3, 4, 1.2, wallMat);
+
+      // Mid Radianite peeking crates
+      addBox(5, 1.4, 12, 2.8, 2.8, 2.8, accentMat);
+      addBox(-5, 1.4, 12, 2.8, 2.8, 2.8, accentMat);
+      addBox(0, 1.2, -14, 5, 2.4, 2.4, coverMat);
+
+      // 2. East Flank Corridor (Lane cover & arches)
+      addBox(38, 3, 0, 2, 6, 36, wallMat);
+      addArch(38, 0, -12, 3.5, 4.5, 1.5, wallMat);
+      addArch(38, 0, 12, 3.5, 4.5, 1.5, wallMat);
+      addCrateStack(35, -4, 2.2);
+      addCrateStack(35, 16, 1.8);
+      addBox(34, 1.2, -22, 3, 2.4, 3, coverMat);
+
+      // 3. West Flank Corridor (Lane cover & arches)
+      addBox(-38, 3, 0, 2, 6, 36, wallMat);
+      addArch(-38, 0, -12, 3.5, 4.5, 1.5, wallMat);
+      addArch(-38, 0, 12, 3.5, 4.5, 1.5, wallMat);
+      addCrateStack(-35, -4, 2.2);
+      addCrateStack(-35, 16, 1.8);
+      addBox(-34, 1.2, -22, 3, 2.4, 3, coverMat);
+
+      // 4. Elevated Sniper Vantage Towers (East & West)
+      addPlatform(42, 0, -26, 8, 4.2, 8, wallMat);
+      addStairs(42, -15, 0, 3.2, 4.2, 11, 11, 'z-');
+      addRailing(37.9, 4.2, -26, 8, 'z');
+
+      addPlatform(-42, 0, -26, 8, 4.2, 8, wallMat);
+      addStairs(-42, -15, 0, 3.2, 4.2, 11, 11, 'z-');
+      addRailing(-37.9, 4.2, -26, 8, 'z');
+
+      // 5. Site Reinforcements (Tactical barricades & cover crates)
+      addBox(22, 1.5, -16, 3.2, 3, 3.2, coverMat);
+      addBox(34, 2, -10, 2, 4, 6, wallMat);
+      addCrateStack(26, -6, 2.0);
+      addBox(16, 1.2, -28, 4, 2.4, 2, accentMat);
+
+      addBox(-22, 1.5, -16, 3.2, 3, 3.2, coverMat);
+      addBox(-34, 2, -10, 2, 4, 6, wallMat);
+      addCrateStack(-26, -6, 2.0);
+      addBox(-16, 1.2, -28, 4, 2.4, 2, accentMat);
+
+      // 6. Spawn Staging Barricades
+      addBox(14, 1.5, 30, 4, 3, 2, coverMat);
+      addBox(-14, 1.5, 30, 4, 3, 2, coverMat);
+      addCrateStack(0, 34, 2.0);
+      addPlatform(0, 0, 42, 32, 0.4, 12, coverMat);
+
+      addBox(12, 1.5, -34, 4, 3, 2, coverMat);
+      addBox(-12, 1.5, -34, 4, 3, 2, coverMat);
+      addCrateStack(0, -36, 1.8);
+      addPlatform(0, 0, -42, 32, 0.4, 12, coverMat);
+
+      // 7. Tactical Pillars for Peeking
+      [18, -18].forEach(px => {
+        addBox(px, 3.5, 10, 1.6, 7, 1.6, wallMat);
+        addBox(px, 3.5, -10, 1.6, 7, 1.6, wallMat);
+      });
+    }
+
     function build5v5Map(mapKey) {
       clearMap();
       havenGongMesh = null;
@@ -11599,6 +11701,8 @@
           });
         });
       }
+
+      injectExtendedStructures(mapKey);
 
       // AUTOMATIC TACTICAL SITE DECALS & BOUNDARY LINES FOR ALL SITES
       if (spikeSiteAreas && spikeSiteAreas.length > 0) {
@@ -16865,7 +16969,7 @@
           enemiesList.forEach(e => {
             if (e.isDead) return;
             e.mesh.position.x += e.patrolDir * 2.2 * botSpeedMult * dt;
-            if (Math.abs(e.mesh.position.x) > 30) e.patrolDir *= -1;
+            if (Math.abs(e.mesh.position.x) > 45) e.patrolDir *= -1;
 
             // Organic Procedural Walking Leg/Arm Oscillation & Body Stride Bob
             const walkCycle = Math.sin(now * 0.008 * 6);
@@ -16906,7 +17010,7 @@
             const targetTeamSpeed = 1.8 * botSpeedMult;
             t.curSpeed = THREE.MathUtils.lerp(t.curSpeed, targetTeamSpeed, Math.min(1, 8 * dt));
             t.mesh.position.x += t.patrolDir * t.curSpeed * dt;
-            if (Math.abs(t.mesh.position.x) > 25) {
+            if (Math.abs(t.mesh.position.x) > 40) {
               t.patrolDir *= -1;
               t.curSpeed = 0;
             }
