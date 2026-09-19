@@ -6,10 +6,10 @@
   <title>VALORANT // 5V5 TACTICAL ESPORTS PROTOCOL - COMPLETE SUITE</title>
   <!-- Three.js r128 -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-  <!-- Google Fonts: Teko, Rajdhani, Chakra Petch -->
+  <!-- Google Fonts: Teko, Rajdhani, Chakra Petch, Noto Sans KR -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:ital,wght@0,500;0,700;1,700&family=Rajdhani:wght@600;700;800&family=Teko:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:ital,wght@0,500;0,700;1,700&family=Noto+Sans+KR:wght@500;700;900&family=Rajdhani:wght@600;700;800&family=Teko:wght@500;600;700;800&display=swap" rel="stylesheet">
   <style>
     :root {
       --val-red: #ff4655;
@@ -25,9 +25,9 @@
       --val-gold: #ffc83b;
       --val-gold-glow: rgba(255, 200, 59, 0.5);
       --val-border: rgba(255, 255, 255, 0.16);
-      --font-title: 'Teko', sans-serif;
-      --font-hud: 'Rajdhani', sans-serif;
-      --font-mono: 'Chakra Petch', monospace;
+      --font-title: 'Teko', 'Noto Sans KR', sans-serif;
+      --font-hud: 'Rajdhani', 'Noto Sans KR', sans-serif;
+      --font-mono: 'Chakra Petch', 'Noto Sans KR', monospace;
     }
 
     * {
@@ -35,6 +35,7 @@
       margin: 0; padding: 0;
       user-select: none;
       -webkit-user-select: none;
+      word-break: keep-all;
     }
 
     html, body {
@@ -283,7 +284,7 @@
       position: absolute;
       top: 0; left: 0; width: 100%; height: 100%;
       pointer-events: none;
-      z-index: 10;
+      z-index: 25;
       display: none;
     }
 
@@ -446,70 +447,90 @@
 
     #health-panel {
       position: absolute;
-      bottom: 28px; left: 35px;
+      bottom: 26px; left: 32px;
       display: flex;
       align-items: flex-end;
-      gap: 14px;
+      gap: 12px;
     }
     .stat-cluster {
-      background: rgba(12, 20, 28, 0.92);
-      border: 1px solid var(--val-border);
+      background: linear-gradient(135deg, rgba(14, 22, 32, 0.9) 0%, rgba(8, 12, 18, 0.96) 100%);
+      border: 1px solid rgba(255, 255, 255, 0.1);
       border-left: 4px solid var(--val-cyan);
-      padding: 8px 18px;
+      border-radius: 4px;
+      padding: 8px 20px;
       display: flex;
       flex-direction: column;
-      min-width: 130px;
-      backdrop-filter: blur(8px);
-      box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+      min-width: 135px;
+      backdrop-filter: blur(12px);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.06);
     }
-    .stat-cluster.shield-cluster { border-left-color: #3b82f6; }
-    .stat-label { font-size: 11px; font-weight: 700; color: #8899a6; letter-spacing: 1.5px; }
-    .stat-value { font-family: var(--font-title); font-size: 42px; font-weight: 800; color: #fff; line-height: 0.95; }
-    .stat-bar { width: 100%; height: 4px; background: rgba(255,255,255,0.08); margin-top: 6px; overflow: hidden; }
-    .stat-bar-fill { height: 100%; background: var(--val-cyan); transition: width 0.15s ease-out; }
-    .shield-fill { background: #3b82f6; }
+    .stat-cluster.shield-cluster { border-left-color: #38bdf8; }
+    .stat-label { font-size: 11px; font-weight: 800; color: #94a3b8; letter-spacing: 2px; }
+    .stat-value { font-family: var(--font-title); font-size: 46px; font-weight: 800; color: #fff; line-height: 0.92; text-shadow: 0 0 15px rgba(255,255,255,0.25); }
+    .stat-bar { width: 100%; height: 5px; background: rgba(255,255,255,0.08); margin-top: 6px; border-radius: 2px; overflow: hidden; }
+    .stat-bar-fill { height: 100%; background: linear-gradient(90deg, #00f0ff, #00d2df); box-shadow: 0 0 8px var(--val-cyan); transition: width 0.18s ease-out; }
+    .shield-fill { background: linear-gradient(90deg, #38bdf8, #2563eb); box-shadow: 0 0 8px #38bdf8; }
 
     #skills-panel {
       position: absolute;
-      bottom: 28px; left: 50%;
+      bottom: 42px; left: 50%;
       transform: translateX(-50%);
       display: flex;
       gap: 12px;
-      background: rgba(12, 20, 28, 0.88);
-      padding: 8px 16px;
-      border: 1px solid var(--val-border);
-      border-radius: 2px;
-      backdrop-filter: blur(10px);
-      box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+      background: linear-gradient(180deg, rgba(14, 22, 32, 0.88) 0%, rgba(8, 12, 18, 0.94) 100%);
+      padding: 8px 18px;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 4px;
+      backdrop-filter: blur(14px);
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.08);
     }
     .skill-slot {
-      width: 64px; height: 72px;
-      background: rgba(20, 32, 45, 0.7);
-      border: 1px solid var(--val-border);
+      width: 68px; height: 78px;
+      background: linear-gradient(135deg, rgba(20, 32, 46, 0.7) 0%, rgba(12, 20, 30, 0.85) 100%);
+      border: 1px solid rgba(255, 255, 255, 0.12);
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: space-between;
-      padding: 6px 3px;
+      padding: 6px 4px 5px;
       position: relative;
       overflow: hidden;
       cursor: pointer;
+      border-radius: 3px;
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
     }
-    .skill-slot.ready { border-color: rgba(255, 255, 255, 0.4); }
-    .skill-slot.ult { border-color: var(--val-gold); background: rgba(255, 200, 59, 0.12); }
-    .skill-slot.ult.active { box-shadow: 0 0 16px var(--val-gold); border-color: #fff; }
+    .skill-slot:hover {
+      border-color: rgba(255, 255, 255, 0.4);
+      transform: translateY(-2px);
+    }
+    .skill-slot.ready { border-color: rgba(255, 255, 255, 0.35); box-shadow: 0 0 10px rgba(255,255,255,0.08); }
+    .skill-slot.ult {
+      border-color: var(--val-gold);
+      background: linear-gradient(135deg, rgba(255, 200, 59, 0.15) 0%, rgba(18, 26, 38, 0.85) 100%);
+      box-shadow: 0 0 15px rgba(255, 200, 59, 0.25);
+    }
+    .skill-slot.ult.active {
+      box-shadow: 0 0 25px var(--val-gold);
+      border-color: #fff;
+      animation: ultPulse 1.2s infinite alternate ease-in-out;
+    }
+    @keyframes ultPulse {
+      from { box-shadow: 0 0 12px var(--val-gold); }
+      to { box-shadow: 0 0 28px rgba(255, 200, 59, 0.9), inset 0 0 12px rgba(255, 200, 59, 0.3); }
+    }
     .skill-key {
       font-family: var(--font-mono);
-      font-size: 11px; font-weight: 800; color: #bbb;
-      background: rgba(0,0,0,0.6);
-      padding: 1px 7px; border-radius: 2px;
+      font-size: 11px; font-weight: 800; color: #e2e8f0;
+      background: rgba(0,0,0,0.7);
+      padding: 2px 8px; border-radius: 3px;
+      border: 1px solid rgba(255,255,255,0.1);
     }
-    .skill-icon { font-size: 22px; margin: 1px 0; }
-    .skill-name { font-size: 10px; font-weight: 700; letter-spacing: 0.5px; color: #bbb; }
+    .skill-icon { font-size: 24px; margin: 1px 0; }
+    .skill-name { font-size: 10px; font-weight: 700; letter-spacing: 0.5px; color: #94a3b8; }
     .cooldown-overlay {
       position: absolute;
       top: 0; left: 0; width: 100%; height: 0%;
-      background: rgba(4, 6, 8, 0.85);
+      background: rgba(4, 6, 8, 0.88);
       display: flex;
       align-items: center;
       justify-content: center;
@@ -522,21 +543,22 @@
 
     #ammo-panel {
       position: absolute;
-      bottom: 28px; right: 35px;
-      background: rgba(12, 20, 28, 0.92);
-      border: 1px solid var(--val-border);
+      bottom: 26px; right: 32px;
+      background: linear-gradient(135deg, rgba(14, 22, 32, 0.9) 0%, rgba(8, 12, 18, 0.96) 100%);
+      border: 1px solid rgba(255, 255, 255, 0.1);
       border-right: 4px solid var(--val-red);
-      padding: 8px 22px;
+      border-radius: 4px;
+      padding: 8px 24px;
       display: flex;
       flex-direction: column;
       align-items: flex-end;
-      backdrop-filter: blur(8px);
-      box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+      backdrop-filter: blur(12px);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.06);
     }
-    .weapon-name { font-size: 13px; font-weight: 800; letter-spacing: 2px; color: var(--val-red); }
-    .ammo-numbers { font-family: var(--font-title); font-size: 44px; font-weight: 800; color: #fff; line-height: 0.9; }
-    .ammo-reserve { font-family: var(--font-title); font-size: 24px; color: #778899; }
-    .credits-tag { font-family: var(--font-mono); font-size: 13px; color: var(--val-gold); font-weight: 700; }
+    .weapon-name { font-size: 14px; font-weight: 800; letter-spacing: 2.5px; color: var(--val-red); text-shadow: 0 0 10px rgba(255,70,85,0.4); }
+    .ammo-numbers { font-family: var(--font-title); font-size: 48px; font-weight: 800; color: #fff; line-height: 0.88; text-shadow: 0 0 16px rgba(255,255,255,0.25); }
+    .ammo-reserve { font-family: var(--font-title); font-size: 26px; color: #94a3b8; }
+    .credits-tag { font-family: var(--font-mono); font-size: 13px; color: var(--val-gold); font-weight: 700; letter-spacing: 1px; }
 
     /* Enhanced Kill Banner with Valorant Skull & Multi-Kill Tiers */
     #kill-banner {
@@ -771,31 +793,42 @@
     /* HUD Keybinds Bar */
     #keybinds-bar {
       position: absolute;
-      bottom: 6px; left: 50%;
+      bottom: 8px; left: 50%;
       transform: translateX(-50%);
       display: flex;
-      gap: 14px;
-      background: rgba(8, 12, 16, 0.85);
-      padding: 3px 18px;
-      border-radius: 12px;
-      border: 1px solid rgba(255,255,255,0.08);
+      align-items: center;
+      gap: 16px;
+      background: linear-gradient(135deg, rgba(14, 22, 34, 0.92) 0%, rgba(8, 14, 20, 0.96) 100%);
+      padding: 5px 22px;
+      border-radius: 20px;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.6);
+      backdrop-filter: blur(10px);
       pointer-events: none;
       z-index: 10;
+      white-space: nowrap;
     }
     .kb-item {
-      font-size: 10px;
-      color: #8899a6;
+      font-size: 11px;
+      color: #94a3b8;
       font-weight: 700;
       letter-spacing: 0.5px;
+      display: inline-flex;
+      align-items: center;
+      white-space: nowrap;
+      gap: 4px;
     }
     .kb-item kbd {
-      background: rgba(255,255,255,0.12);
+      background: linear-gradient(180deg, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0.08) 100%);
       color: #fff;
-      padding: 1px 5px;
-      border-radius: 2px;
+      padding: 2px 7px;
+      border-radius: 3px;
       font-family: var(--font-mono);
-      font-size: 9px;
+      font-size: 10px;
+      font-weight: 800;
       margin-right: 3px;
+      border: 1px solid rgba(255, 255, 255, 0.25);
+      box-shadow: 0 1px 4px rgba(0,0,0,0.5);
     }
 
     /* Weapon Skin Buttons */
@@ -1410,55 +1443,73 @@
     .color-swatch:hover { transform: scale(1.15); }
     .color-swatch.active-swatch { border-color: #fff; box-shadow: 0 0 8px #fff; }
 
-    /* 5V5 CUSTOM GAME LOBBY */
+    /* 5V5 CUSTOM GAME LOBBY - HIGH-END ESPORTS PREMIER SUITE */
     #custom-lobby {
       position: absolute;
       top: 0; left: 0; width: 100%; height: 100%;
-      background: radial-gradient(circle at 50% 30%, #15222e 0%, #080c10 85%);
+      background: 
+        radial-gradient(circle at 15% 20%, rgba(0, 240, 255, 0.12) 0%, transparent 45%),
+        radial-gradient(circle at 85% 20%, rgba(255, 70, 85, 0.12) 0%, transparent 45%),
+        radial-gradient(circle at 50% 60%, rgba(18, 28, 42, 0.7) 0%, transparent 70%),
+        linear-gradient(180deg, #090e15 0%, #05080c 100%);
       z-index: 50;
       display: flex;
       flex-direction: column;
       justify-content: space-between;
-      padding: 24px 40px;
+      padding: 24px 44px;
+      overflow-y: auto;
+      overflow-x: hidden;
+      min-width: 1000px;
     }
     .lobby-top {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      border-bottom: 1px solid var(--val-border);
-      padding-bottom: 14px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+      padding-bottom: 16px;
+      white-space: nowrap;
     }
     .lobby-title {
       font-family: var(--font-title);
-      font-size: 44px;
+      font-size: 46px;
       letter-spacing: 4px;
       color: #fff;
-      line-height: 0.9;
+      line-height: 0.95;
+      text-transform: uppercase;
+      text-shadow: 0 2px 14px rgba(0, 0, 0, 0.6);
+      white-space: nowrap;
     }
-    .lobby-title span { color: var(--val-red); }
+    .lobby-title span { 
+      color: var(--val-red);
+      text-shadow: 0 0 20px var(--val-red-glow);
+    }
     .lobby-net-status {
       display: flex;
       align-items: center;
-      gap: 12px;
+      gap: 14px;
       font-family: var(--font-mono);
-      font-size: 12px;
-      color: #8899a6;
+      font-size: 13px;
+      color: #94a3b8;
+      white-space: nowrap;
     }
     .net-pill {
-      background: rgba(0, 255, 136, 0.15);
-      border: 1px solid var(--val-green);
+      background: linear-gradient(135deg, rgba(0, 255, 136, 0.16) 0%, rgba(0, 255, 136, 0.06) 100%);
+      border: 1px solid rgba(0, 255, 136, 0.45);
       color: var(--val-green);
-      padding: 2px 10px;
-      border-radius: 2px;
+      padding: 4px 14px;
+      border-radius: 4px;
+      letter-spacing: 0.5px;
+      box-shadow: 0 0 12px rgba(0, 255, 136, 0.2);
+      white-space: nowrap;
     }
 
     .rosters-wrap {
       display: flex;
       justify-content: space-between;
-      gap: 30px;
+      gap: 32px;
       width: 100%;
-      max-width: 1300px;
-      margin: 15px auto;
+      max-width: 1420px;
+      margin: 16px auto;
       flex-grow: 1;
       align-items: center;
     }
@@ -1466,111 +1517,233 @@
       flex: 1;
       display: flex;
       flex-direction: column;
-      gap: 8px;
+      gap: 12px;
+      min-width: 320px;
     }
     .team-header {
       font-family: var(--font-title);
       font-size: 28px;
       font-weight: 800;
-      letter-spacing: 2px;
+      letter-spacing: 2.5px;
       display: flex;
       justify-content: space-between;
-      padding-bottom: 4px;
+      align-items: center;
+      padding-bottom: 6px;
       border-bottom: 2px solid;
+      white-space: nowrap;
     }
-    .atk-theme { color: var(--val-green); border-color: var(--val-green); }
-    .def-theme { color: var(--val-red); border-color: var(--val-red); }
+    .atk-theme {
+      color: var(--val-green);
+      border-color: var(--val-green);
+      text-shadow: 0 0 16px rgba(0, 255, 136, 0.35);
+    }
+    .def-theme {
+      color: var(--val-red);
+      border-color: var(--val-red);
+      text-shadow: 0 0 16px rgba(255, 70, 85, 0.35);
+    }
 
     .slot-row {
-      background: rgba(14, 22, 30, 0.88);
-      border: 1px solid var(--val-border);
-      padding: 10px 16px;
+      background: linear-gradient(135deg, rgba(16, 25, 36, 0.88) 0%, rgba(10, 16, 24, 0.95) 100%);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      padding: 12px 18px;
       cursor: pointer;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      transition: all 0.2s cubic-bezier(0.1, 0.9, 0.2, 1);
+      transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
       position: relative;
+      border-radius: 4px;
+      backdrop-filter: blur(12px);
+      box-shadow: 0 4px 18px rgba(0, 0, 0, 0.35);
+      white-space: nowrap;
     }
     .slot-row:hover {
-      border-color: #fff;
-      transform: translateX(4px);
-      box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+      border-color: rgba(255, 255, 255, 0.35);
+      transform: translateX(6px);
+      background: linear-gradient(135deg, rgba(26, 40, 58, 0.92) 0%, rgba(14, 24, 34, 0.98) 100%);
+      box-shadow: 0 6px 24px rgba(0,0,0,0.55);
     }
     .slot-row.active-self {
       border-color: var(--val-cyan);
-      background: rgba(0, 240, 255, 0.12);
-      box-shadow: 0 0 15px rgba(0,240,255,0.3);
+      background: linear-gradient(135deg, rgba(0, 240, 255, 0.18) 0%, rgba(10, 24, 34, 0.96) 100%);
+      box-shadow: 0 0 24px rgba(0, 240, 255, 0.35), inset 0 0 12px rgba(0, 240, 255, 0.1);
     }
     .slot-row.active-self::before {
-      content: ''; position: absolute; top: 0; left: 0; width: 4px; height: 100%; background: var(--val-cyan);
+      content: ''; position: absolute; top: 0; left: 0; width: 4px; height: 100%;
+      background: var(--val-cyan);
+      box-shadow: 0 0 14px var(--val-cyan);
+      border-radius: 4px 0 0 4px;
     }
-    .slot-left { display: flex; align-items: center; gap: 12px; }
-    .slot-idx { font-family: var(--font-mono); font-size: 13px; color: #778899; font-weight: 700; }
+    .slot-left { display: flex; align-items: center; gap: 14px; white-space: nowrap; }
+    .slot-idx { font-family: var(--font-mono); font-size: 13px; color: #64748b; font-weight: 700; white-space: nowrap; }
     .slot-avatar {
-      width: 36px; height: 36px;
+      width: 38px; height: 38px;
       border-radius: 50%;
-      background: #1a2734;
+      background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 18px;
-      border: 1px solid rgba(255,255,255,0.2);
+      font-size: 20px;
+      border: 1px solid rgba(255,255,255,0.22);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+      flex-shrink: 0;
     }
-    .slot-name { font-family: var(--font-title); font-size: 24px; font-weight: 700; letter-spacing: 1px; line-height: 1; color: #fff; }
-    .slot-agent { font-size: 11px; color: #8899a6; font-weight: 600; }
-    .slot-badge { font-family: var(--font-mono); font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 2px; }
-    .badge-human { background: rgba(0, 240, 255, 0.2); color: var(--val-cyan); border: 1px solid var(--val-cyan); }
-    .badge-ai { background: rgba(255, 255, 255, 0.08); color: #999; border: 1px solid rgba(255,255,255,0.15); }
+    .slot-name { font-family: var(--font-title); font-size: 25px; font-weight: 700; letter-spacing: 1.2px; line-height: 1; color: #fff; white-space: nowrap; }
+    .slot-agent { font-size: 11px; color: #94a3b8; font-weight: 600; letter-spacing: 0.5px; white-space: nowrap; }
+    .slot-badge { font-family: var(--font-mono); font-size: 10px; font-weight: 800; padding: 3px 10px; border-radius: 3px; letter-spacing: 0.8px; white-space: nowrap; flex-shrink: 0; }
+    .badge-human { 
+      background: linear-gradient(135deg, rgba(0, 240, 255, 0.25) 0%, rgba(0, 240, 255, 0.1) 100%); 
+      color: var(--val-cyan); 
+      border: 1px solid var(--val-cyan);
+      box-shadow: 0 0 10px rgba(0, 240, 255, 0.3);
+      white-space: nowrap;
+    }
+    .badge-ai { 
+      background: rgba(255, 255, 255, 0.06); 
+      color: #94a3b8; 
+      border: 1px solid rgba(255,255,255,0.12); 
+      white-space: nowrap;
+    }
 
     .lobby-center-panel {
-      width: 290px;
+      width: 320px;
       display: flex;
       flex-direction: column;
-      gap: 14px;
+      gap: 16px;
       align-items: center;
+      flex-shrink: 0;
     }
     .map-box {
-      background: rgba(14, 22, 30, 0.95);
-      border: 1px solid var(--val-border);
-      padding: 14px;
+      background: linear-gradient(135deg, rgba(16, 26, 38, 0.94) 0%, rgba(9, 14, 21, 0.98) 100%);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      padding: 18px 20px;
       width: 100%;
       text-align: center;
+      border-radius: 4px;
+      backdrop-filter: blur(14px);
+      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.1);
     }
     .map-select-btn {
-      background: rgba(255, 70, 85, 0.2);
+      background: linear-gradient(135deg, rgba(255, 70, 85, 0.25) 0%, rgba(255, 70, 85, 0.1) 100%);
       border: 1px solid var(--val-red);
       color: #fff;
       font-family: var(--font-title);
-      font-size: 24px;
-      letter-spacing: 2px;
-      padding: 6px 12px;
+      font-size: 25px;
+      letter-spacing: 2.5px;
+      padding: 8px 16px;
       width: 100%;
       cursor: pointer;
-      margin-top: 6px;
+      margin-top: 8px;
+      border-radius: 3px;
+      transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+      box-shadow: 0 4px 16px rgba(255, 70, 85, 0.25);
+      white-space: nowrap;
+    }
+    .map-select-btn:hover {
+      background: var(--val-red);
+      box-shadow: 0 0 28px var(--val-red-glow);
+      transform: translateY(-2px);
+    }
+    .active-round-btn {
+      background: linear-gradient(135deg, rgba(255, 70, 85, 0.35) 0%, rgba(255, 70, 85, 0.15) 100%) !important;
+      border-color: var(--val-red) !important;
+      color: #fff !important;
+      box-shadow: 0 0 16px rgba(255, 70, 85, 0.45) !important;
+    }
+
+    /* Game Mode Bar & Sleek Mode Buttons */
+    #lobby-mode-bar {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 10px;
+      margin: 12px 0;
+      background: linear-gradient(135deg, rgba(14, 22, 34, 0.9) 0%, rgba(8, 14, 22, 0.96) 100%);
+      padding: 6px 16px;
+      border-radius: 6px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(12px);
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+      white-space: nowrap;
+    }
+    .mode-btn {
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      color: #94a3b8;
+      font-family: var(--font-hud);
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.8px;
+      padding: 6px 18px;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+      text-transform: uppercase;
+      position: relative;
+      overflow: hidden;
+      white-space: nowrap;
+    }
+    .mode-btn:hover {
+      background: rgba(255, 255, 255, 0.1);
+      color: #fff;
+      border-color: rgba(255, 255, 255, 0.3);
+      transform: translateY(-1px);
+    }
+    .mode-btn.active {
+      background: linear-gradient(135deg, rgba(255, 70, 85, 0.28) 0%, rgba(255, 70, 85, 0.12) 100%);
+      border-color: var(--val-red);
+      color: #fff;
+      box-shadow: 0 0 20px rgba(255, 70, 85, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+    }
+    .mode-btn.active::after {
+      content: '';
+      position: absolute;
+      bottom: 0; left: 15%; width: 70%; height: 2px;
+      background: var(--val-red);
+      box-shadow: 0 0 8px var(--val-red);
     }
 
     .lobby-bottom {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      border-top: 1px solid var(--val-border);
-      padding-top: 14px;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      padding-top: 16px;
+      white-space: nowrap;
     }
     #btn-start-game {
-      background: var(--val-red);
+      background: linear-gradient(135deg, #ff4655 0%, #d42232 100%);
       color: #fff;
       font-family: var(--font-title);
-      font-size: 32px;
+      font-size: 34px;
       font-weight: 800;
-      letter-spacing: 4px;
-      padding: 8px 80px;
+      letter-spacing: 5px;
+      padding: 12px 88px;
       border: none;
       cursor: pointer;
-      transition: all 0.2s;
-      box-shadow: 0 4px 25px var(--val-red-glow);
+      position: relative;
+      overflow: hidden;
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+      box-shadow: 0 4px 30px rgba(255, 70, 85, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.3);
+      white-space: nowrap;
     }
-    #btn-start-game:hover { background: var(--val-red-hover); transform: scale(1.03); }
+    #btn-start-game::before {
+      content: '';
+      position: absolute;
+      top: 0; left: -100%; width: 50%; height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.35), transparent);
+      transform: skewX(-25deg);
+      transition: 0.6s;
+    }
+    #btn-start-game:hover {
+      background: linear-gradient(135deg, #ff5e6c 0%, #e03243 100%);
+      transform: translateY(-2px) scale(1.02);
+      box-shadow: 0 8px 45px rgba(255, 70, 85, 0.85);
+    }
+    #btn-start-game:hover::before {
+      left: 150%;
+    }
 
     /* Cheats & Practice Console ([F1]) */
     #cheats-panel {
@@ -1606,10 +1779,10 @@
       background: repeating-linear-gradient(0deg, rgba(0,0,0,0.1), rgba(0,0,0,0.1) 1px, transparent 1px, transparent 2px);
       pointer-events: none; z-index: 100; opacity: 0.5;
     }
-    #hud-top-bar, #buy-menu, #settings-modal, #custom-lobby, #combat-report {
+    #buy-menu, #settings-modal, #combat-report {
       backdrop-filter: blur(16px);
-      background: rgba(10, 15, 20, 0.75) !important;
-      border: 1px solid rgba(255, 255, 255, 0.15) !important;
+      background: rgba(10, 15, 20, 0.85);
+      border: 1px solid rgba(255, 255, 255, 0.15);
       box-shadow: 0 10px 40px rgba(0,0,0,0.8);
     }
     .val-btn, .color-swatch, .weapon-card {
@@ -1623,6 +1796,75 @@
       box-shadow: 0 0 20px rgba(0, 240, 255, 0.4);
       transform: scale(1.02);
       border-color: var(--val-cyan);
+    }
+    /* Tactical Click to Play / Aim Lock Notification Banner */
+    #click-to-play-prompt {
+      display: none;
+      position: fixed;
+      top: 18%; left: 50%;
+      transform: translateX(-50%);
+      z-index: 95;
+      flex-direction: column;
+      align-items: center;
+      pointer-events: auto;
+      cursor: pointer;
+      background: linear-gradient(135deg, rgba(12, 22, 34, 0.94) 0%, rgba(6, 12, 18, 0.98) 100%);
+      border: 1px solid rgba(0, 240, 255, 0.55);
+      border-radius: 6px;
+      padding: 10px 36px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.85), 0 0 24px rgba(0, 240, 255, 0.3);
+      text-align: center;
+      backdrop-filter: blur(12px);
+      user-select: none;
+      white-space: nowrap;
+      transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    #click-to-play-prompt:hover {
+      transform: translateX(-50%) translateY(-2px);
+      border-color: var(--val-cyan);
+      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.9), 0 0 35px rgba(0, 240, 255, 0.55);
+    }
+    .ctp-top {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      justify-content: center;
+      white-space: nowrap;
+    }
+    .ctp-pulse-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: var(--val-cyan);
+      box-shadow: 0 0 10px var(--val-cyan);
+      animation: ctpBlink 1.2s infinite ease-in-out;
+    }
+    @keyframes ctpBlink {
+      0%, 100% { opacity: 0.4; transform: scale(0.85); }
+      50% { opacity: 1; transform: scale(1.3); box-shadow: 0 0 16px var(--val-cyan); }
+    }
+    .ctp-title {
+      font-family: var(--font-title);
+      font-size: 22px;
+      font-weight: 800;
+      color: var(--val-cyan);
+      letter-spacing: 2.5px;
+      text-shadow: 0 0 14px rgba(0, 240, 255, 0.45);
+      white-space: nowrap;
+    }
+    .ctp-sub {
+      font-size: 12px;
+      color: #94a3b8;
+      font-family: var(--font-mono);
+      letter-spacing: 0.6px;
+      margin-top: 3px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      white-space: nowrap;
+    }
+    .ctp-gold {
+      color: var(--val-gold);
+      font-weight: 700;
     }
 
   </style>
@@ -1649,13 +1891,15 @@
   <div id="tp-flash-overlay"></div>
 
   <!-- Tactical Click to Play / Aim Lock Notification Banner -->
-  <div id="click-to-play-prompt" style="display:none; position:fixed; top:42%; left:50%; transform:translate(-50%, -50%); z-index:95; flex-direction:column; align-items:center; pointer-events:auto; cursor:pointer; background:rgba(15,25,35,0.88); border:1px solid var(--val-cyan); border-radius:4px; padding:20px 40px; box-shadow:0 0 35px rgba(0,240,255,0.45); text-align:center; backdrop-filter:blur(8px); user-select:none;">
-    <div style="font-family:var(--font-title); font-size:22px; font-weight:900; color:var(--val-cyan); letter-spacing:3px; margin-bottom:8px; text-transform:uppercase;">
-      [ 화면을 클릭하여 조준 고정 (CLICK TO PLAY) ]
+  <div id="click-to-play-prompt" class="val-clip">
+    <div class="ctp-top">
+      <span class="ctp-pulse-dot"></span>
+      <span class="ctp-title">[ 화면을 클릭하여 조준 고정 // CLICK TO PLAY ]</span>
     </div>
-    <div style="font-size:13px; color:#cfd8dc; font-family:var(--font-mono); letter-spacing:1px; line-height:1.6;">
-      클릭: 마우스 조준 고정 &bull; [ESC]: 환경 설정<br>
-      <span style="color:var(--val-gold);">[드래그 또는 키보드 방향키(←↑↓→)로도 시점 회전 가능]</span>
+    <div class="ctp-sub">
+      <span>클릭: 마우스 조준 고정</span> &bull;
+      <span>[ESC]: 환경 설정</span> &bull;
+      <span class="ctp-gold">[마우스 드래그 또는 키보드 방향키(←↑↓→) 시점 회전 지원]</span>
     </div>
   </div>
 
@@ -2165,7 +2409,6 @@
       <div class="map-badge" id="hud-mode-badge" style="background: rgba(255, 70, 85, 0.2); border: 1px solid #ff4655; color: #ff4655; margin-left: 8px; cursor: pointer;" onclick="cycleGameMode()">COMPETITIVE</div>
     </div>
     <div id="spike-planted-banner">🔴 SPIKE PLANTED // <span id="spike-live-timer">45.0</span>s</div>
-    </div>
 
     <!-- Minimap Radar with Vision Cone -->
     <div id="minimap-card">
@@ -2343,10 +2586,10 @@
           <button class="map-select-btn val-clip" id="btn-cycle-map">맵 변경 (CYCLE MAP)</button>
         </div>
         <div style="margin-top:10px; display:flex; gap:6px; justify-content:center; align-items:center;">
-          <span style="font-size:12px; color:#8899a6;">선취 라운드:</span>
-          <button class="map-select-btn val-clip active-round-btn" id="btn-round-13" style="width:75px; padding:4px 6px; font-size:13px;">13선취</button>
-          <button class="map-select-btn val-clip" id="btn-round-7" style="width:75px; padding:4px 6px; font-size:13px; background:rgba(255,255,255,0.06); border-color:#8899a6;">7선취</button>
-          <button class="map-select-btn val-clip" id="btn-round-3" style="width:75px; padding:4px 6px; font-size:13px; background:rgba(255,255,255,0.06); border-color:#8899a6;">3선취</button>
+          <span style="font-size:12px; color:#8899a6; white-space:nowrap;">선취 라운드:</span>
+          <button class="map-select-btn val-clip active-round-btn" id="btn-round-13" style="width:75px; padding:4px 6px; font-size:13px; margin-top:0;">13선취</button>
+          <button class="map-select-btn val-clip" id="btn-round-7" style="width:75px; padding:4px 6px; font-size:13px; margin-top:0; background:rgba(255,255,255,0.06); border-color:#8899a6;">7선취</button>
+          <button class="map-select-btn val-clip" id="btn-round-3" style="width:75px; padding:4px 6px; font-size:13px; margin-top:0; background:rgba(255,255,255,0.06); border-color:#8899a6;">3선취</button>
         </div>
         <div style="font-size: 12px; color:#8899a6; text-align: center; line-height: 1.5;">
           💡 <b>자리 고르기 & 멀티 안내:</b><br>
@@ -2363,8 +2606,8 @@
       </div>
     </div>
 
-    <div id="lobby-mode-bar" style="display:flex; justify-content:center; align-items:center; gap:10px; margin: 14px 0; background:rgba(15,23,42,0.75); padding:8px 14px; border-radius:6px; border:1px solid rgba(255,255,255,0.1);">
-        <span style="font-size:13px; font-weight:bold; color:#8899a6; letter-spacing:0.5px;">GAME MODE:</span>
+    <div id="lobby-mode-bar">
+        <span style="font-size:13px; font-weight:800; color:#8899a6; letter-spacing:1px; white-space:nowrap;">게임 모드 // MODE:</span>
         <button type="button" class="mode-btn active" onclick="setGameMode(0)" id="mode-btn-0">경쟁전 5V5</button>
         <button type="button" class="mode-btn" onclick="setGameMode(1)" id="mode-btn-1">스파이크 돌격</button>
         <button type="button" class="mode-btn" onclick="setGameMode(2)" id="mode-btn-2">데스매치 FFA</button>
@@ -3695,12 +3938,12 @@
             <div class="slot-left">
               <span class="slot-idx">#0${idx + 1}</span>
               <div class="slot-avatar">${AGENT_EMOJIS[slot.agent] || '👤'}</div>
-              <div>
+              <div style="min-width:0; white-space:nowrap;">
                 <div class="slot-name">${slot.name} ${isMe ? '<span style="font-size:12px; color:var(--val-cyan);">(나)</span>' : ''}</div>
                 <div class="slot-agent">${slot.agent}</div>
               </div>
             </div>
-            <div>
+            <div style="flex-shrink:0; white-space:nowrap;">
               <span class="slot-badge ${slot.type === 'human' ? 'badge-human' : 'badge-ai'}">
                 ${slot.type === 'human' ? 'HUMAN (사람)' : 'AI BOT (봇)'}
               </span>
