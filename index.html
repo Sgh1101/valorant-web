@@ -2101,7 +2101,7 @@
       <div style="display: flex; justify-content: space-between; align-items: flex-end; border-bottom: 2px solid var(--val-border); padding-bottom: 10px; margin-bottom: 14px;">
         <div>
           <h3 style="font-family: var(--font-title); font-size: 34px; letter-spacing: 2px; color: #fff; line-height: 1;">TACTICAL SCOREBOARD // 5V5 MATCH</h3>
-          <div style="font-size: 12px; color: #8899a6;">PRESS [TAB] TO TOGGLE | [Y] INSPECT | [G] SKINS | [H] AGENTS | [M] MAPS | [L] LASER | [J] FLASH | [U] CHARM | [3] MELEE | [F5] TURBO | [F6] FTG</div>
+          <div style="font-size: 12px; color: #8899a6;">PRESS [TAB] TO TOGGLE | [Y] INSPECT | [G] SKINS | [H] AGENTS | [M] MAPS | [L] LASER | [J] FLASH | [U] CHARM | [3] MELEE | [F5] TURBO | [F6] FTG | [F7] FX</div>
         </div>
         <div style="display: flex; gap: 16px; font-family: var(--font-title); font-size: 28px;">
           <span style="color: var(--val-cyan);">ATK <span id="sb-score-atk">0</span></span>
@@ -3599,7 +3599,7 @@
     const myClientId = 'user_' + Math.random().toString(36).substring(2, 8);
     const networkChannel = new BroadcastChannel('VALORANT_5V5_NET');
 
-    const MAP_LIST = ['ascent', 'bind', 'haven', 'icebox', 'split', 'lotus', 'breeze', 'sunset', 'pearl', 'fracture', 'abyss', 'range'];
+    const MAP_LIST = ['ascent', 'bind', 'haven', 'icebox', 'split', 'lotus', 'breeze', 'sunset', 'pearl', 'fracture', 'abyss', 'district', 'range'];
     const MAP_NAMES = {
       ascent: 'ASCENT (어센트) - 베네치아 요새 & 전동 셔터 도어 [F]',
       bind: 'BIND (바인드) - 모로코 사막 & 차원 이동 텔레포터',
@@ -3612,6 +3612,7 @@
       pearl: 'PEARL (펄) - 리스본 심해 수중 돔 & B 롱 해저 파노라마 & 아줄레주 분수대 & 에어락 [F]',
       fracture: 'FRACTURE (프랙처) - 산타페 기밀 연구소 & H자형 듀얼 스폰 & 협곡 고속 집라인 [F]',
       abyss: 'ABYSS (어비스) - 스발바르 무저갱 심연 유적 & 낙사 절벽 & 미드 도약대 [F]',
+      district: 'DISTRICT (디스트릭트) - 서울 도심 네오 골목 & 사이버펑크 홀로그램 빌보드 & 고속 점프패드 [F]',
       range: 'THE RANGE (사격장) - 사격 훈련장 & 봇 연습'
     };
     let currentMapIndex = 0;
@@ -3623,7 +3624,8 @@
       Deadlock: '🕸️', Clove: '🦋', Vyse: '🥀', 'KAY/O': '⚙️',
       Tejo: '🦅',
       Astra: '🌌',
-      Breach: '🔨'
+      Breach: '🔨',
+      Skye: '🌿'
     };
     const AGENT_COLORS = {
       Jett: '#00f0ff', Phoenix: '#ff6600', Reyna: '#be00ff', Sova: '#2979ff',
@@ -3634,7 +3636,8 @@
       Deadlock: '#cbd5e1', Clove: '#f472b6', Vyse: '#94a3b8', 'KAY/O': '#38bdf8',
       Tejo: '#10b981',
       Astra: '#9c27b0',
-      Breach: '#f59e0b'
+      Breach: '#f59e0b',
+      Skye: '#84cc16'
     };
     const AGENT_ROLES = {
       Jett: '타격대 (Duelist)', Phoenix: '타격대 (Duelist)', Reyna: '타격대 (Duelist)', Raze: '타격대 (Duelist)',
@@ -3644,7 +3647,8 @@
       Sage: '감시대 (Sentinel)', Cypher: '감시대 (Sentinel)', Killjoy: '감시대 (Sentinel)', Chamber: '감시대 (Sentinel)', Deadlock: '감시대 (Sentinel)', Vyse: '감시대 (Sentinel)',
       Tejo: '척후대 (Initiator)',
       Astra: '전략가 (Controller)',
-      Breach: '척후대 (Initiator)'
+      Breach: '척후대 (Initiator)',
+      Skye: '척후대 (Initiator)'
     };
 
     const lobbySlots = {
@@ -4462,7 +4466,7 @@
     /* ==========================================================
        DYNAMIC AGENT SWITCHING SYSTEM ([H] KEY TO CYCLE AGENT)
        ========================================================== */
-    const PLAYABLE_AGENTS = ['Jett', 'Phoenix', 'Reyna', 'Sova', 'Sage', 'Omen', 'Brimstone', 'Raze', 'Killjoy', 'Chamber', 'Viper', 'Cypher', 'Neon', 'Yoru', 'Fade', 'Gekko', 'Harbor', 'Iso', 'Deadlock', 'Clove', 'Vyse', 'KAY/O', 'Tejo', 'Astra', 'Breach'];
+    const PLAYABLE_AGENTS = ['Jett', 'Phoenix', 'Reyna', 'Sova', 'Sage', 'Omen', 'Brimstone', 'Raze', 'Killjoy', 'Chamber', 'Viper', 'Cypher', 'Neon', 'Yoru', 'Fade', 'Gekko', 'Harbor', 'Iso', 'Deadlock', 'Clove', 'Vyse', 'KAY/O', 'Tejo', 'Astra', 'Breach', 'Skye'];
     let currentAgentIdx = 0;
 
     const AGENT_SKILL_LABELS = {
@@ -4481,7 +4485,8 @@
       Harbor: { c: '폭포 (C)', q: '만 (Q)', e: '간석지 장막 (E)', x: '심판 해일 (X)' },
       Iso: { c: '응징 사격 (C)', q: '취약 사쇄 (Q)', e: '더블 탭 실드 (E)', x: '결투 영역 (X)' },
       Astra: { c: '중력 샘 (C)', q: '신경 파동 (Q)', e: '성운 연막 (E)', x: '우주 장벽 (X)' },
-      Breach: { c: '여진 (C)', q: '눈먼 길 (Q)', e: '균열 (E)', x: '지진 강타 (X)' }
+      Breach: { c: '여진 (C)', q: '눈먼 길 (Q)', e: '균열 (E)', x: '지진 강타 (X)' },
+      Skye: { c: '재생 (C)', q: '정향 폭발 (Q)', e: '인도하는 빛 (E)', x: '추적자 (X)' }
     };
 
     let spectatorTargetIndex = 0;
@@ -4649,6 +4654,8 @@
     let pearlAirlock = null;
     let fractureZipline = null;
     let abyssJumppad = null;
+    let districtJumppad = null;
+    let currentVisualFilterIdx = 0;
     let isFTGActive = false;
     let isFlashlightActive = false;
     let tacticalFlashlight = null;
@@ -5293,6 +5300,21 @@
         vikingBeard.position.set(0, 1.62, 0.16);
         vikingBeard.rotation.x = 0.3;
         grp.add(vikingBeard);
+      } else if (agentName === 'Skye') {
+        // Tasmanian guide initiator with emerald bandana, wooden talisman, and hawk vambrace
+        const bandana = new THREE.Mesh(new THREE.TorusGeometry(0.24, 0.045, 6, 14), new THREE.MeshStandardMaterial({ color: 0x65a30d }));
+        bandana.rotation.x = Math.PI / 2;
+        bandana.position.set(0, 1.85, 0);
+        grp.add(bandana);
+        const talisman = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.12, 0.06), new THREE.MeshStandardMaterial({ color: 0x78350f, roughness: 0.8 }));
+        talisman.position.set(-0.22, 1.05, 0.1);
+        grp.add(talisman);
+        const hawkCuff = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.09, 0.28, 8), new THREE.MeshStandardMaterial({ color: 0x4d7c0f, metalness: 0.6 }));
+        hawkCuff.position.set(0.28, 1.05, 0.05);
+        grp.add(hawkCuff);
+        const floralVest = new THREE.Mesh(new THREE.BoxGeometry(0.36, 0.34, 0.16), new THREE.MeshStandardMaterial({ color: 0x3f6212 }));
+        floralVest.position.set(0, 1.25, 0.06);
+        grp.add(floralVest);
       }
 
       // Distinct tactical role underfoot glowing aura ring
@@ -5312,6 +5334,30 @@
       grp.add(auraRing);
 
       return { mesh: grp, head, body, legs: [legL, legR] };
+    }
+
+    const VISUAL_FILTERS = [
+      { name: '표준 (STANDARD)', css: 'none' },
+      { name: 'e스포츠 바이브런트 (VIBRANT ESPORTS)', css: 'saturate(1.35) contrast(1.1) brightness(1.05)' },
+      { name: '사이버펑크 네온 (CYBERPUNK HIGH-CONTRAST)', css: 'saturate(1.65) contrast(1.2) hue-rotate(10deg)' },
+      { name: '나이트 비전 (NIGHT VISION TACTICAL)', css: 'contrast(1.25) brightness(1.15) sepia(0.3) hue-rotate(60deg)' }
+    ];
+
+    function toggleVisualFilter() {
+      currentVisualFilterIdx = (currentVisualFilterIdx + 1) % VISUAL_FILTERS.length;
+      const f = VISUAL_FILTERS[currentVisualFilterIdx];
+      const cvs = renderer.domElement;
+      if (cvs) cvs.style.filter = f.css;
+      sound.playSwitchClick();
+      showToast(`🎨 [VISUAL FX] 화면 컬러 프로파일: [${f.name}]`);
+    }
+
+    function triggerDistrictJumppad() {
+      sound.playZipline();
+      player.velocity.y = 16.0;
+      player.velocity.z = (camera.position.z > 0) ? -22 : 22;
+      player.isGrounded = false;
+      showToast('⚡ [DISTRICT] 네오 부스터 점프패드 발동! (NEO JUMP LAUNCH)');
     }
 
     function triggerAbyssJumppad() {
@@ -5680,6 +5726,7 @@
       }
       fractureZipline = null;
       abyssJumppad = null;
+      districtJumppad = null;
 
       if (lotusDoor && lotusDoor.mesh) {
         scene.remove(lotusDoor.mesh);
@@ -5938,6 +5985,19 @@
         sunLight.position.set(-30, 80, -40);
         scene.fog.color.setHex(0x090d16);
         scene.fog.density = 0.007;
+      } else if (mapKey === 'district') {
+        // Neo Seoul Cyberpunk Night / Violet Rain Fog & Vibrant Neon Lighting
+        grad.addColorStop(0, '#0a0014');   // Deep cyber violet
+        grad.addColorStop(0.35, '#1e0538'); // Neon purple night
+        grad.addColorStop(0.7, '#001a33');  // Rainy dark cyan
+        grad.addColorStop(1, '#ff007f');   // Neon pink horizon
+        ambientLight.color.setHex(0xec4899);
+        ambientLight.intensity = 0.95;
+        sunLight.color.setHex(0x06b6d4);
+        sunLight.intensity = 1.35;
+        sunLight.position.set(-20, 60, -30);
+        scene.fog.color.setHex(0x130a21);
+        scene.fog.density = 0.0065;
       } else {
         // Range: High-tech military hangar
         grad.addColorStop(0, '#080c10');
@@ -7130,6 +7190,79 @@
           mapObjects.push(mon);
         });
       }
+      else if (mapKey === 'district') {
+        // ==========================================================
+        // MAP 12: DISTRICT (디스트릭트) - 서울 도심 네오 골목 & 사이버펑크 홀로그램 빌보드 & 고속 점프패드 [F]
+        // ==========================================================
+        const matAsphalt = new THREE.MeshStandardMaterial({ color: 0x18181b, roughness: 0.35, metalness: 0.3 });
+        const matBuildingConcrete = new THREE.MeshStandardMaterial({ color: 0x27272a, roughness: 0.7 });
+        const matNeonPink = new THREE.MeshStandardMaterial({ color: 0xff007f, emissive: 0xff007f, emissiveIntensity: 0.9 });
+        const matNeonCyan = new THREE.MeshStandardMaterial({ color: 0x00f0ff, emissive: 0x00f0ff, emissiveIntensity: 0.9 });
+
+        // Outer City Boundaries (120x120m)
+        addBox(0, -0.5, 0, 120, 1, 120, matAsphalt);
+        addBox(0, 8, -60, 120, 16, 2, matBuildingConcrete);
+        addBox(0, 8, 60, 120, 16, 2, matBuildingConcrete);
+        addBox(-60, 8, 0, 2, 16, 120, matBuildingConcrete);
+        addBox(60, 8, 0, 2, 16, 120, matBuildingConcrete);
+
+        // Cyberpunk Korean Neon Billboards Overhead
+        addTextBillboard(0, 12, -45, '네오 서울 // NEO SEOUL TACTICAL DISTRICT', 3.0, '#ff007f');
+        addTextBillboard(0, 10, 45, '라디언트 프로토콜 // RADIANITE RESEARCH', 3.0, '#00f0ff');
+        addTextBillboard(32, 8, -20, '야시장 // NIGHT MARKET', 2.0, '#ffd700');
+        addTextBillboard(-32, 8, -20, '사이버 카페 // PC CAFE', 2.0, '#00ffaa');
+
+        // Central Holographic Prism Tower at (0, 7.0, 0)
+        const holoTower = new THREE.Mesh(new THREE.CylinderGeometry(1.4, 1.8, 12, 12), matNeonCyan);
+        holoTower.position.set(0, 6.0, 0);
+        scene.add(holoTower);
+        mapObjects.push(holoTower);
+        colliders.push({ box: new THREE.Box3().setFromObject(holoTower), mesh: holoTower });
+
+        // Interactive Neo Jump Pad at (0, 0.4, 4)
+        const padMesh = new THREE.Mesh(new THREE.CylinderGeometry(2.0, 2.4, 0.4, 16), matNeonPink);
+        padMesh.position.set(0, 0.2, 4);
+        scene.add(padMesh);
+        mapObjects.push(padMesh);
+        colliders.push({ box: new THREE.Box3().setFromObject(padMesh), mesh: padMesh });
+
+        addTextBillboard(0, 1.6, 4, '[F] 네오 부스터 점프패드 (JUMP-PAD)', 1.4, '#ff007f');
+
+        districtJumppad = {
+          pos: new THREE.Vector3(0, 0.4, 4),
+          mesh: padMesh
+        };
+
+        // --- A SITE: A NEON LOUNGE & MARKET ALLEY (x = 30, z = -20) ---
+        addBox(30, 0.05, -20, 22, 0.05, 22, matSiteFloor, false);
+        addTextBillboard(30, 0.2, -20, 'A SITE', 1.8);
+        spikeSiteAreas.push({ minX: 18, maxX: 42, minZ: -32, maxZ: -8, name: 'A SITE' });
+
+        // 2F Elevated Sniper Walkway Bridge (y = 4.2)
+        addPlatform(36, 0, -32, 12, 4.2, 10, matBuildingConcrete);
+        addRailing(29.9, 4.2, -32, 10, 'z');
+        addStairs(36, -14, 0, 3.8, 4.2, 12, 12, 'z-');
+        addCrateStack(24, -20, 2.4);
+
+        // --- B SITE: B TECH PLAZA & ARCADE (x = -30, z = -20) ---
+        addBox(-30, 0.05, -20, 22, 0.05, 22, matSiteFloor, false);
+        addTextBillboard(-30, 0.2, -20, 'B SITE', 1.8);
+        spikeSiteAreas.push({ minX: -42, maxX: -18, minZ: -32, maxZ: -8, name: 'B SITE' });
+
+        addPlatform(-36, 0, -32, 12, 4.2, 10, matBuildingConcrete);
+        addRailing(-29.9, 4.2, -32, 10, 'z');
+        addStairs(-36, -14, 0, 3.8, 4.2, 12, 12, 'z-');
+        addCrateStack(-24, -20, 2.4);
+
+        // Alleyway Neon Dividers & Streetlight Columns
+        [-14, 14].forEach(sx => {
+          const col = new THREE.Mesh(new THREE.BoxGeometry(1.0, 7.0, 1.0), matBuildingConcrete);
+          col.position.set(sx, 3.5, 0);
+          scene.add(col);
+          mapObjects.push(col);
+          colliders.push({ box: new THREE.Box3().setFromObject(col), mesh: col });
+        });
+      }
       else if (mapKey === 'range') {
         addBox(0, -0.5, 0, 60, 1, 120, matConcrete);
         addBox(0, 7, -60, 60, 14, 2, matWallStone);
@@ -7458,6 +7591,13 @@
       if (e.code === 'F6') {
         e.preventDefault();
         toggleFrametimeGraph();
+        return;
+      }
+
+      // [F7] Key: Quick Toggle eSports Visual Color Filter
+      if (e.code === 'F7') {
+        e.preventDefault();
+        toggleVisualFilter();
         return;
       }
 
@@ -9154,6 +9294,16 @@
         }
       }
 
+      // 8. District Neo Jump Pad [F]
+      if (MAP_LIST[currentMapIndex] === 'district' && districtJumppad) {
+        const pPos = camera.position;
+        const distToPad = pPos.distanceTo(districtJumppad.pos);
+        if (distToPad < 4.0) {
+          triggerDistrictJumppad();
+          return;
+        }
+      }
+
       // 4. Ascent B Shutter Door
       if (!ascentDoor || ascentDoor.isDestroyed) return;
       const dist = camera.position.distanceTo(ascentDoor.switchPos);
@@ -10302,6 +10452,16 @@
         { label: 'DEF SPAWN', x: 0, z: -36, color: '#00ffaa' },
         { label: 'ATK SPAWN', x: 0, z: 36, color: '#ff4655' }
       ],
+      district: [
+        { label: 'A SITE', x: 30, z: -20, color: '#00f0ff' },
+        { label: 'A LOUNGE', x: 36, z: -30, color: '#88a0b8' },
+        { label: 'B SITE', x: -30, z: -20, color: '#00f0ff' },
+        { label: 'B PLAZA', x: -36, z: -30, color: '#88a0b8' },
+        { label: 'MID ALLEY', x: 0, z: 0, color: '#ff007f' },
+        { label: 'NEO JUMP [F]', x: 0, z: 4, color: '#38bdf8' },
+        { label: 'DEF SPAWN', x: 0, z: -40, color: '#00ffaa' },
+        { label: 'ATK SPAWN', x: 0, z: 40, color: '#ff4655' }
+      ],
       range: [
         { label: 'TARGETS', x: 0, z: -22, color: '#00f0ff' },
         { label: 'BENCH', x: 0, z: 0, color: '#ffc83b' },
@@ -10827,6 +10987,13 @@
           if (MAP_LIST[currentMapIndex] === 'abyss' && abyssJumppad && !player.isDead) {
             if (Math.abs(camera.position.x) < 2.0 && Math.abs(camera.position.z) < 2.0 && Math.abs(camera.position.y - 1.7) < 1.2) {
               if (player.velocity.y <= 0) triggerAbyssJumppad();
+            }
+          }
+
+          // Auto-launch when walking directly over District Neo Jump Pad
+          if (MAP_LIST[currentMapIndex] === 'district' && districtJumppad && !player.isDead) {
+            if (Math.abs(camera.position.x - districtJumppad.pos.x) < 2.2 && Math.abs(camera.position.z - districtJumppad.pos.z) < 2.2 && Math.abs(camera.position.y - 1.7) < 1.0) {
+              if (player.velocity.y <= 0) triggerDistrictJumppad();
             }
           }
         }
