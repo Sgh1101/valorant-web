@@ -1557,146 +1557,164 @@
     #gfx-modal {
       position: absolute;
       top: 0; left: 0; width: 100%; height: 100%;
-      background: rgba(5, 8, 14, 0.94);
+      background: rgba(4, 7, 12, 0.90);
       z-index: 60;
       display: none;
       align-items: center;
       justify-content: center;
-      backdrop-filter: blur(18px);
+      backdrop-filter: blur(14px);
     }
     .gfx-container {
-      background: linear-gradient(180deg, rgba(14, 22, 32, 0.98) 0%, rgba(8, 12, 18, 0.99) 100%);
-      border: 1px solid rgba(0, 240, 255, 0.3);
-      border-top: 4px solid var(--val-cyan);
-      box-shadow: 0 0 60px rgba(0, 0, 0, 0.9), 0 0 35px rgba(0, 240, 255, 0.25);
-      padding: 26px 36px;
-      max-width: 880px;
+      background: linear-gradient(180deg, rgba(13, 20, 30, 0.98) 0%, rgba(8, 12, 18, 0.99) 100%);
+      border: 1px solid rgba(0, 240, 255, 0.28);
+      border-top: 3px solid var(--val-cyan);
+      box-shadow: 0 0 50px rgba(0, 0, 0, 0.95), 0 0 25px rgba(0, 240, 255, 0.2);
+      padding: 16px 22px;
+      max-width: 680px;
       width: 92%;
       display: flex;
       flex-direction: column;
-      gap: 16px;
+      gap: 10px;
     }
     .gfx-header {
       display: flex;
       justify-content: space-between;
-      align-items: flex-start;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.12);
-      padding-bottom: 12px;
+      align-items: center;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      padding-bottom: 8px;
     }
     .gfx-title {
       font-family: var(--font-title);
-      font-size: 34px;
+      font-size: 22px;
       color: #fff;
-      letter-spacing: 2px;
-      line-height: 1;
+      letter-spacing: 1.5px;
+      line-height: 1.1;
     }
     .gfx-title span {
       color: var(--val-cyan);
     }
     .gfx-subtitle {
       font-family: var(--font-mono);
-      font-size: 11px;
+      font-size: 10px;
       color: #8899a6;
-      letter-spacing: 1px;
-      margin-top: 4px;
+      letter-spacing: 0.5px;
     }
-    .gfx-presets-grid {
+    .gfx-presets-bar {
       display: grid;
       grid-template-columns: repeat(4, 1fr);
-      gap: 12px;
-      margin-bottom: 6px;
+      gap: 8px;
     }
     .gfx-preset-card {
-      background: rgba(255, 255, 255, 0.04);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      padding: 14px 12px;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      padding: 6px 8px;
       cursor: pointer;
       position: relative;
-      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+      transition: all 0.18s ease;
       display: flex;
       flex-direction: column;
-      gap: 6px;
+      gap: 2px;
+      border-radius: 2px;
     }
     .gfx-preset-card:hover {
       background: rgba(0, 240, 255, 0.08);
       border-color: var(--val-cyan);
-      transform: translateY(-2px);
     }
     .gfx-preset-card.active {
-      background: rgba(0, 240, 255, 0.15);
-      border: 2px solid var(--val-cyan);
-      box-shadow: 0 0 16px rgba(0, 240, 255, 0.4);
+      background: rgba(0, 240, 255, 0.14);
+      border: 1.5px solid var(--val-cyan);
+      box-shadow: 0 0 10px rgba(0, 240, 255, 0.35);
+    }
+    .gpc-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
     }
     .gpc-badge {
       font-family: var(--font-mono);
-      font-size: 9px;
+      font-size: 8.5px;
       font-weight: 800;
       color: var(--val-darker);
       background: var(--val-cyan);
-      padding: 1px 6px;
-      display: inline-block;
-      align-self: flex-start;
+      padding: 1px 4px;
       letter-spacing: 0.5px;
-    }
-    .gpc-icon {
-      font-size: 24px;
-      line-height: 1;
     }
     .gpc-name {
       font-family: var(--font-hud);
-      font-size: 15px;
-      font-weight: 800;
+      font-size: 12.5px;
+      font-weight: 700;
       color: #fff;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
     .gpc-desc {
-      font-size: 11px;
+      font-size: 9.5px;
       color: #8899a6;
-      line-height: 1.3;
+      line-height: 1.2;
     }
-    .gfx-settings-grid {
+    .gfx-compartments-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 18px;
-      background: rgba(0, 0, 0, 0.3);
-      padding: 14px 18px;
-      border: 1px solid rgba(255, 255, 255, 0.06);
+      gap: 10px;
     }
-    .gfx-col {
+    .gfx-compartment {
+      background: rgba(14, 22, 34, 0.6);
+      border: 1px solid rgba(0, 240, 255, 0.15);
+      border-left: 3px solid var(--val-cyan);
+      padding: 9px 11px;
       display: flex;
       flex-direction: column;
-      gap: 10px;
+      gap: 7px;
+      border-radius: 2px;
+    }
+    .gfx-compartment-title {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      font-weight: 800;
+      color: var(--val-cyan);
+      letter-spacing: 0.8px;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+      padding-bottom: 4px;
+      text-transform: uppercase;
     }
     .gfx-row {
       display: flex;
       flex-direction: column;
-      gap: 4px;
+      gap: 2px;
     }
     .gfx-label {
-      font-size: 13px;
+      font-size: 11.5px;
       font-weight: 700;
-      color: #c0cad4;
+      color: #b0c0ce;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
     }
     .gfx-select {
-      background: #080c12;
-      border: 1px solid rgba(255, 255, 255, 0.18);
+      background: #070b10;
+      border: 1px solid rgba(255, 255, 255, 0.16);
       color: var(--val-cyan);
       font-family: var(--font-hud);
-      font-size: 13px;
-      padding: 6px 10px;
+      font-size: 12px;
+      padding: 4px 7px;
       outline: none;
       cursor: pointer;
       border-radius: 0;
     }
     .gfx-select:focus {
       border-color: var(--val-cyan);
-      box-shadow: 0 0 10px rgba(0, 240, 255, 0.4);
+      box-shadow: 0 0 8px rgba(0, 240, 255, 0.35);
     }
     .gfx-footer {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      border-top: 1px solid rgba(255, 255, 255, 0.12);
-      padding-top: 14px;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      padding-top: 8px;
     }
 
     /* 5V5 CUSTOM GAME LOBBY - HIGH-END ESPORTS PREMIER SUITE */
@@ -2653,113 +2671,140 @@
   </div>
 
   <!-- DEDICATED GRAPHICS SETTINGS SUITE MODAL ([F2] / [⚙️ 그래픽 설정]) -->
+  <!-- DEDICATED GRAPHICS SETTINGS SUITE MODAL ([F2] / [⚙️ 그래픽 설정]) -->
   <div id="gfx-modal">
     <div class="gfx-container val-clip-tl-br">
       <div class="gfx-header">
         <div>
-          <div class="gfx-title">GRAPHICS & VISUAL ENGINE // <span>그래픽 품질 및 연출 설정</span></div>
-          <div class="gfx-subtitle">REAL-TIME THREE.JS SHADER, RESOLUTION, SHADOWS, PARTICLES & DYNAMIC LIGHTING</div>
+          <div class="gfx-title">GRAPHICS SETTINGS // <span>그래픽 품질 설정</span></div>
+          <div class="gfx-subtitle">SHADER &bull; RESOLUTION &bull; LIGHTING &bull; SHADOWS &bull; EFFECTS</div>
         </div>
-        <button id="gfx-close-btn" class="val-clip" onclick="closeGraphicsModal()" style="background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.2); color:#fff; padding:6px 14px; cursor:pointer; font-family:var(--font-mono); font-size:12px;">✕ 닫기 [ESC / F2]</button>
+        <button id="gfx-close-btn" class="val-clip" onclick="closeGraphicsModal()" style="background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.2); color:#fff; padding:4px 10px; cursor:pointer; font-family:var(--font-mono); font-size:11px;">✕ 닫기 [ESC / F2]</button>
       </div>
 
-      <!-- 4 Quick Presets -->
-      <div style="font-size:12px; color:var(--val-gold); font-weight:800; letter-spacing:1px; margin-top:6px;">⚡ 원클릭 퀵 프리셋 (ONE-CLICK PRESETS)</div>
-      <div class="gfx-presets-grid">
-        <div class="gfx-preset-card" id="gpc-potato" data-preset="potato" onclick="selectGfxPreset('potato')">
-          <div class="gpc-badge">MAX FPS</div>
-          <div class="gpc-icon">🚀</div>
-          <div class="gpc-name">감자 / 초저사양</div>
-          <div class="gpc-desc">0.7x 해상도 / 그림자 OFF / 동적조명 OFF / 240+ FPS 보장</div>
-        </div>
-        <div class="gfx-preset-card" id="gpc-esports" data-preset="esports" onclick="selectGfxPreset('esports')">
-          <div class="gpc-badge">COMPETITIVE</div>
-          <div class="gpc-icon">⚡</div>
-          <div class="gpc-name">e스포츠 표준</div>
-          <div class="gpc-desc">1.0x 네이티브 / 144Hz 락 / 입력지연 최소화 / 하이 콘트라스트</div>
-        </div>
-        <div class="gfx-preset-card" id="gpc-high" data-preset="high" onclick="selectGfxPreset('high')">
-          <div class="gpc-badge">BALANCED</div>
-          <div class="gpc-icon">✨</div>
-          <div class="gpc-name">고급 화질</div>
-          <div class="gpc-desc">1.25x 스케일 / 소프트 섀도우 / 파티클 200% / 동적 광원 ON</div>
-        </div>
-        <div class="gfx-preset-card active" id="gpc-ultra" data-preset="ultra" onclick="selectGfxPreset('ultra')">
-          <div class="gpc-badge" style="background:linear-gradient(135deg,#ff4655,#ffc83b); color:#000;">ULTRA VIVID</div>
-          <div class="gpc-icon">🔥</div>
-          <div class="gpc-name">울트라 화려함</div>
-          <div class="gpc-desc">1.5x 슈퍼샘플링 / 4096 그림자 / 파티클 300% / 풀 광원 & 룬 각인</div>
+      <!-- Quick Preset Compartment (칸 0: 원클릭 프리셋) -->
+      <div style="display:flex; flex-direction:column; gap:4px;">
+        <div style="font-size:11px; color:var(--val-gold); font-weight:800; letter-spacing:0.8px;">⚡ 원클릭 퀵 프리셋 (QUICK PRESETS)</div>
+        <div class="gfx-presets-bar">
+          <div class="gfx-preset-card" id="gpc-potato" data-preset="potato" onclick="selectGfxPreset('potato')">
+            <div class="gpc-top">
+              <span class="gpc-name">🚀 감자 / 초저사양</span>
+              <span class="gpc-badge">MAX FPS</span>
+            </div>
+            <div class="gpc-desc">0.7x &bull; 그림자 OFF &bull; 240+ FPS</div>
+          </div>
+          <div class="gfx-preset-card" id="gpc-esports" data-preset="esports" onclick="selectGfxPreset('esports')">
+            <div class="gpc-top">
+              <span class="gpc-name">⚡ e스포츠 표준</span>
+              <span class="gpc-badge">144Hz</span>
+            </div>
+            <div class="gpc-desc">1.0x &bull; 저지연 &bull; 고대비</div>
+          </div>
+          <div class="gfx-preset-card" id="gpc-high" data-preset="high" onclick="selectGfxPreset('high')">
+            <div class="gpc-top">
+              <span class="gpc-name">✨ 고급 화질</span>
+              <span class="gpc-badge">60FPS</span>
+            </div>
+            <div class="gpc-desc">1.25x &bull; 소프트 섀도우 &bull; 광원 ON</div>
+          </div>
+          <div class="gfx-preset-card active" id="gpc-ultra" data-preset="ultra" onclick="selectGfxPreset('ultra')">
+            <div class="gpc-top">
+              <span class="gpc-name">🔥 울트라 화려함</span>
+              <span class="gpc-badge" style="background:linear-gradient(135deg,#ff4655,#ffc83b); color:#000;">VIVID</span>
+            </div>
+            <div class="gpc-desc">1.5x &bull; 4096 섀도우 &bull; 풀 VFX</div>
+          </div>
         </div>
       </div>
 
-      <!-- Granular Settings Grid -->
-      <div class="gfx-settings-grid">
-        <div class="gfx-col">
+      <!-- 4 Distinct Compartments (2x2 Grid) -->
+      <div class="gfx-compartments-grid">
+        <!-- [칸 1: 🖥️ 디스플레이 & 해상도] -->
+        <div class="gfx-compartment">
+          <div class="gfx-compartment-title"><span>🖥️</span> 디스플레이 & 해상도</div>
           <div class="gfx-row">
-            <span class="gfx-label">렌더링 해상도 (Render Scale)</span>
+            <span class="gfx-label">렌더링 스케일 (Render Scale)</span>
             <select id="gfx-opt-scale" class="gfx-select" onchange="updateCustomGfxSetting('renderScale', parseFloat(this.value))">
-              <option value="0.5">50% (초저사양 / 극한 프레임)</option>
+              <option value="0.5">50% (초저사양 / 극대화 FPS)</option>
               <option value="0.75">75% (성능 우선)</option>
-              <option value="1.0">100% (네이티브 표준)</option>
+              <option value="1.0">100% (네이티브 1080p)</option>
               <option value="1.25">125% (고선명 e스포츠)</option>
               <option value="1.5" selected>150% (울트라 슈퍼샘플링)</option>
               <option value="2.0">200% (레티나 극초고화질)</option>
             </select>
           </div>
           <div class="gfx-row">
-            <span class="gfx-label">실시간 동적 조명 (Dynamic PointLights)</span>
+            <span class="gfx-label">컬러 필터 프로파일 (Color Profile)</span>
+            <select id="gfx-opt-color" class="gfx-select" onchange="updateCustomGfxSetting('colorProfile', this.value)">
+              <option value="cyberpunk" selected>사이버펑크 네온 (CYBERPUNK)</option>
+              <option value="esports">e스포츠 바이브런트 (VIBRANT)</option>
+              <option value="none">표준 원본 (STANDARD)</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- [칸 2: 💡 조명 & 파티클 연출] -->
+        <div class="gfx-compartment" style="border-left-color: var(--val-gold);">
+          <div class="gfx-compartment-title" style="color: var(--val-gold);"><span>💡</span> 조명 & 파티클 이펙트</div>
+          <div class="gfx-row">
+            <span class="gfx-label">실시간 동적 조명 (PointLights)</span>
             <select id="gfx-opt-lights" class="gfx-select" onchange="updateCustomGfxSetting('dynamicLights', this.value === 'true')">
-              <option value="true" selected>켜짐 (ON - 스킬/폭발 시 맵 발광)</option>
-              <option value="false">꺼짐 (OFF - 프레임 절약)</option>
+              <option value="true" selected>켜짐 (ON - 스킬/폭발 맵 발광)</option>
+              <option value="false">꺼짐 (OFF - 프레임 최적화)</option>
             </select>
           </div>
           <div class="gfx-row">
-            <span class="gfx-label">파티클 폭발량 & 밀도 (Particle Density)</span>
+            <span class="gfx-label">파티클 분출 밀도 (Particles)</span>
             <select id="gfx-opt-particles" class="gfx-select" onchange="updateCustomGfxSetting('particleDensity', parseFloat(this.value))">
-              <option value="3.0" selected>300% (울트라 파티클 분출)</option>
-              <option value="2.0">200% (풍성한 화려함)</option>
+              <option value="3.0" selected>300% (울트라 화려한 분출)</option>
+              <option value="2.0">200% (풍성함)</option>
               <option value="1.0">100% (표준)</option>
               <option value="0.5">50% (간소화)</option>
             </select>
           </div>
         </div>
 
-        <div class="gfx-col">
+        <!-- [칸 3: 🌑 그림자 품질] -->
+        <div class="gfx-compartment" style="border-left-color: #a78bfa;">
+          <div class="gfx-compartment-title" style="color: #a78bfa;"><span>🌑</span> 그림자 품질 (Shadows)</div>
           <div class="gfx-row">
-            <span class="gfx-label">그림자 품질 (Shadow Quality)</span>
+            <span class="gfx-label">실시간 그림자 맵 (Shadow Map)</span>
             <select id="gfx-opt-shadows" class="gfx-select" onchange="updateCustomGfxSetting('shadows', this.value)">
               <option value="ultra" selected>울트라 부드러운 그림자 (4096)</option>
               <option value="soft">소프트 섀도우 (2048)</option>
               <option value="hard">기본 그림자 (1024)</option>
-              <option value="off">그림자 끔 (OFF)</option>
+              <option value="off">그림자 끔 (OFF - 최대 성능)</option>
             </select>
           </div>
+          <div style="font-size:10.5px; color:#8899a6; line-height:1.3; margin-top:2px;">
+            PC 사양에 맞춰 Three.js PCFSoft 섀도우 해상도를 동적으로 최적화합니다.
+          </div>
+        </div>
+
+        <!-- [칸 4: 📳 화면 진동 & 타격 연출] -->
+        <div class="gfx-compartment" style="border-left-color: var(--val-red);">
+          <div class="gfx-compartment-title" style="color: var(--val-red);"><span>📳</span> 화면 진동 & 타격감</div>
           <div class="gfx-row">
-            <span class="gfx-label">화면 진동 & 엣지 플래시 (Screen Shake/Flash)</span>
+            <span class="gfx-label">화면 진동 & 엣지 플래시 (Shake/Flash)</span>
             <select id="gfx-opt-shake" class="gfx-select" onchange="updateCustomGfxSetting('screenShake', parseFloat(this.value))">
               <option value="1.5" selected>150% (극대화 시네마틱 타격감)</option>
               <option value="1.0">100% (표준 타격감)</option>
-              <option value="0.5">50% (약하게)</option>
-              <option value="0.0">0% (진동 끔)</option>
+              <option value="0.5">50% (약한 진동)</option>
+              <option value="0.0">0% (진동 끔 - 멀미 방지)</option>
             </select>
           </div>
-          <div class="gfx-row">
-            <span class="gfx-label">포스트 컬러 필터 (Color Profile)</span>
-            <select id="gfx-opt-color" class="gfx-select" onchange="updateCustomGfxSetting('colorProfile', this.value)">
-              <option value="cyberpunk" selected>사이버펑크 네온 (CYBERPUNK)</option>
-              <option value="esports">e스포츠 바이브런트 (VIBRANT)</option>
-              <option value="none">표준 컬러 (STANDARD)</option>
-            </select>
+          <div style="font-size:10.5px; color:#8899a6; line-height:1.3; margin-top:2px;">
+            피격, 궁극기 및 폭발 시 카메라 흔들림과 비네트 펄스 강도를 제어합니다.
           </div>
         </div>
       </div>
 
       <!-- Action Footer -->
       <div class="gfx-footer">
-        <div style="font-size:12px; color:#8899a6;">
-          💡 실시간 즉시 적용됨 &bull; 단축키: <b style="color:var(--val-cyan);">[F2]</b> 누르면 언제든 즉시 호출
+        <div style="font-size:11px; color:#8899a6;">
+          💡 실시간 즉시 적용 &bull; 언제든 단축키 <b style="color:var(--val-cyan);">[F2]</b> 로 열기/닫기 가능
         </div>
-        <button id="gfx-apply-btn" class="val-clip" onclick="closeGraphicsModal()" style="background:linear-gradient(135deg,var(--val-cyan),#0077b6); color:#000; font-weight:800; font-size:15px; padding:10px 28px; cursor:pointer; border:none;">설정 완료 (SAVE & CLOSE)</button>
+        <button id="gfx-apply-btn" class="val-clip" onclick="closeGraphicsModal()" style="background:linear-gradient(135deg,var(--val-cyan),#0077b6); color:#000; font-weight:800; font-size:13px; padding:7px 22px; cursor:pointer; border:none;">설정 완료 (SAVE & CLOSE)</button>
       </div>
     </div>
   </div>
@@ -17627,23 +17672,33 @@
 
         const distToSpike = spikeState.mesh ? camera.position.distanceTo(spikeState.mesh.position) : 999;
         const wantsDefuse = (keys['Digit4'] || keys['KeyE'] || keys['KeyF']);
-        if (distToSpike < 4 && myTeam === 'def' && wantsDefuse) {
+        if (distToSpike < 4 && myTeam === 'def') {
           progContainer.style.display = 'block';
-          progLabel.innerText = '스파이크 해체 중... (HOLD 4 / E / F)';
-          const prevDefuse = spikeState.defuseProgress;
-          spikeState.defuseProgress += dt / 7.0;
+          if (wantsDefuse) {
+            progLabel.innerText = '스파이크 해체 중... (HOLD 4 / E / F)';
+            const prevDefuse = spikeState.defuseProgress;
+            spikeState.defuseProgress += dt / 7.0;
 
-          if (prevDefuse < 0.5 && spikeState.defuseProgress >= 0.5) {
-            sound.playDefuseHalf();
-            radioVoice.speak('Half defused!');
-            showToast('스파이크 절반(50%) 해체 완료!');
-          }
+            if (prevDefuse < 0.5 && spikeState.defuseProgress >= 0.5) {
+              sound.playDefuseHalf();
+              radioVoice.speak('Half defused!');
+              showToast('스파이크 절반(50%) 해체 완료!');
+            }
 
-          progFill.style.width = (spikeState.defuseProgress * 100) + '%';
+            progFill.style.width = (spikeState.defuseProgress * 100) + '%';
 
-          if (spikeState.defuseProgress >= 1) {
-            if (spikeBanner) spikeBanner.style.display = 'none';
-            triggerRoundCeremony(true, 'SPIKE DEFUSED // DEFENDERS WIN');
+            if (spikeState.defuseProgress >= 1) {
+              if (spikeBanner) spikeBanner.style.display = 'none';
+              triggerRoundCeremony(true, 'SPIKE DEFUSED // DEFENDERS WIN');
+            }
+          } else {
+            progLabel.innerText = '스파이크 해체 가능 [4 / E / F 길게 누르기]';
+            if (spikeState.defuseProgress < 0.5) {
+              spikeState.defuseProgress = Math.max(0, spikeState.defuseProgress - dt * 2);
+            } else {
+              spikeState.defuseProgress = Math.max(0.5, spikeState.defuseProgress - dt * 2);
+            }
+            progFill.style.width = (spikeState.defuseProgress * 100) + '%';
           }
         } else {
           if (spikeState.defuseProgress < 0.5) {
@@ -19820,13 +19875,14 @@
           }
         }
 
-        const isPlanting = (!spikeState.isPlanted && myTeam === 'atk' && keys['Digit4'] && spikeSiteAreas.some(site => 
+        const wantsSpikeAction = (keys['Digit4'] || keys['KeyE'] || keys['KeyF']);
+        const isPlanting = (!spikeState.isPlanted && myTeam === 'atk' && wantsSpikeAction && spikeSiteAreas.some(site => 
           camera.position.x >= site.minX && camera.position.x <= site.maxX &&
           camera.position.z >= site.minZ && camera.position.z <= site.maxZ
         ));
 
         const distToSpike = spikeState.mesh ? camera.position.distanceTo(spikeState.mesh.position) : 999;
-        const isDefusing = (spikeState.isPlanted && myTeam === 'def' && keys['Digit4'] && distToSpike < 4);
+        const isDefusing = (spikeState.isPlanted && myTeam === 'def' && wantsSpikeAction && distToSpike < 4);
 
         if (isPlanting) {
           updateSpikeTether(true, new THREE.Vector3(camera.position.x, 0.1, camera.position.z), 0xffc83b);
