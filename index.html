@@ -1979,7 +1979,63 @@
       font-weight: 700;
     }
 
-  </style>
+  
+/* ══════ ULTIMATE CUT-IN & SCREEN EFFECTS ══════ */
+#ultcut{position:fixed;inset:0;pointer-events:none;z-index:140;opacity:0;display:flex;align-items:center;justify-content:center;transition:opacity .15s ease-out}
+#ultcut.on{opacity:1}
+#ultcut .uc-bar{position:absolute;left:0;right:0;height:20vh;background:#05070c;transform:scaleY(0);transition:transform .18s cubic-bezier(.2,.9,.2,1);z-index:2}
+#ultcut .uc-top{top:0;transform-origin:top}
+#ultcut .uc-bot{bottom:0;transform-origin:bottom}
+#ultcut.on .uc-bar{transform:scaleY(1)}
+#ultcut .uc-body{position:relative;text-align:center;transform:translateY(14px) scale(.94);opacity:0;transition:.22s cubic-bezier(.2,.9,.2,1) .06s;z-index:3}
+#ultcut.on .uc-body{transform:none;opacity:1}
+#ultcut .uc-agent{font-family:'Oswald',sans-serif;font-size:14px;letter-spacing:.32em;color:var(--uc,#ffc849);margin-bottom:10px;text-transform:uppercase}
+#ultcut .uc-name{font-family:'Oswald',sans-serif;font-size:min(9vw,74px);font-weight:900;color:#fff;letter-spacing:.06em;line-height:1;text-shadow:0 0 26px var(--uc,#ffc849),0 0 70px var(--uc,#ffc849),0 6px 0 rgba(0,0,0,.45)}
+#ultcut .uc-quote{margin-top:12px;font-size:14px;color:#cfd8e3;letter-spacing:.06em;opacity:.9;font-style:italic}
+#ultcut .uc-sweep{position:absolute;inset:0;background:linear-gradient(100deg,transparent 38%,var(--uc,#ffc849) 50%,transparent 62%);opacity:0;mix-blend-mode:screen;z-index:1}
+#ultcut.on .uc-sweep{animation:ucSweep .5s ease-out}
+@keyframes ucSweep{0%{opacity:0;transform:translateX(-100%)}50%{opacity:.8}100%{opacity:0;transform:translateX(100%)}}
+
+#edgefx{position:fixed;inset:0;pointer-events:none;opacity:0;z-index:90;box-shadow:inset 0 0 150px 40px var(--efc,#fff);transition:opacity .16s ease-out}
+#edgefx.on{opacity:.92}
+
+/* ══════ AGENT SELECT SCREEN MODAL ══════ */
+#s-select{position:fixed;inset:0;z-index:150;background:rgba(8,12,18,.96);backdrop-filter:blur(12px);display:flex;flex-direction:column;opacity:0;pointer-events:none;transition:opacity .2s ease-out;font-family:'Segoe UI',sans-serif}
+#s-select.active{opacity:1;pointer-events:all}
+.sel-top{display:flex;align-items:center;justify-content:space-between;padding:18px 32px;border-bottom:1px solid rgba(255,255,255,.08);background:rgba(15,23,42,.6)}
+.sel-top h2{font-family:'Oswald',sans-serif;font-size:22px;letter-spacing:.14em;font-weight:700;color:#fff;margin:0}
+.sel-top .lbl{font-size:12px;color:#8a97ab;margin-left:14px}
+.sel-body{flex:1;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,400px);gap:0;min-height:0}
+.sel-grid{padding:24px;display:grid;gap:16px;align-content:start;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));overflow-y:auto}
+.sel-detail{border-left:1px solid rgba(255,255,255,.08);padding:24px;overflow-y:auto;background:linear-gradient(180deg,rgba(15,23,42,.9) 0%,rgba(10,14,22,.95) 100%)}
+.sel-foot{padding:16px 32px;border-top:1px solid rgba(255,255,255,.08);display:flex;justify-content:space-between;align-items:center;background:rgba(15,23,42,.6)}
+
+.acard{position:relative;padding:0;border:1px solid rgba(255,255,255,.15);border-radius:10px;background:#111722;overflow:hidden;cursor:pointer;transition:transform .18s,border-color .18s,box-shadow .18s;display:flex;flex-direction:column;text-align:left;min-height:190px}
+.acard-img{width:100%;height:115px;object-fit:cover;display:block;background:#0d121c;flex-shrink:0}
+.acard-body{position:relative;z-index:2;padding:10px 12px 14px;background:linear-gradient(0deg,#0a0e16 0%,rgba(10,14,22,0.85) 75%,transparent 100%);margin-top:-38px;flex:1;display:flex;flex-direction:column;justify-content:flex-end}
+.acard:hover{transform:translateY(-4px);border-color:var(--ac,#00f0ff);box-shadow:0 8px 24px rgba(0,0,0,.5)}
+.acard[aria-pressed="true"]{border-color:var(--ac,#00f0ff);box-shadow:0 0 0 2px var(--ac,#00f0ff),0 12px 32px -8px var(--ac,#00f0ff)}
+.acard-role{font-family:'Oswald',sans-serif;font-size:10px;letter-spacing:.16em;color:var(--ac,#00f0ff);font-weight:700}
+.acard-name{font-family:'Oswald',sans-serif;font-weight:900;font-size:24px;margin-top:2px;color:#fff;letter-spacing:.02em}
+.acard-q{font-size:11px;color:#8a97ab;margin-top:4px;line-height:1.4;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+.det-hero{position:relative;border-radius:10px;overflow:hidden;margin-bottom:16px;box-shadow:0 10px 30px rgba(0,0,0,.6)}
+.det-img{width:100%;aspect-ratio:4/3.2;object-fit:cover;display:block;background:#0d121c}
+.det-hero-txt{position:absolute;left:18px;right:18px;bottom:14px}
+.det-name{font-family:'Oswald',sans-serif;font-weight:900;font-size:36px;color:var(--ac,#00f0ff);line-height:1}
+.det-role{font-family:'Oswald',sans-serif;font-size:11px;letter-spacing:.2em;color:#8a97ab;margin-top:6px}
+.det-desc{font-size:13px;color:#c0cce0;line-height:1.7;margin-bottom:16px;padding-bottom:14px;border-bottom:1px solid rgba(255,255,255,.08)}
+.ab-list{display:flex;flex-direction:column;gap:10px}
+.ab{display:flex;gap:12px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);border-radius:8px;padding:10px}
+.ab-key{width:28px;height:28px;border-radius:6px;background:rgba(255,255,255,.08);color:var(--ac,#00f0ff);font-weight:900;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0}
+.ab-name{font-weight:bold;color:#fff;font-size:13px}
+.ab-meta{font-size:11px;color:#78889b;margin-left:8px}
+.ab-desc{font-size:11px;color:#9aaec4;margin-top:4px;line-height:1.4}
+
+.spike-under-fire{animation:spikeFirePulse .4s infinite alternate}
+@keyframes spikeFirePulse{0%{filter:drop-shadow(0 0 6px #ff4655)}100%{filter:drop-shadow(0 0 18px #ff2244)}}
+
+</style>
 </head>
 <body>
 
@@ -2492,6 +2548,39 @@
     </div>
   </div>
 
+  
+  <!-- ══════ ADVANCED SCREEN EFFECTS & ULTIMATE CUT-IN ══════ -->
+  <div id="edgefx"></div>
+  <div id="ultcut">
+    <div class="uc-bar uc-top"></div>
+    <div class="uc-bar uc-bot"></div>
+    <div class="uc-body">
+      <div class="uc-agent" id="uc-agent">AGENT</div>
+      <div class="uc-name" id="uc-name">ULTIMATE</div>
+      <div class="uc-quote" id="uc-quote">QUOTE</div>
+    </div>
+    <div class="uc-sweep"></div>
+  </div>
+
+  <!-- ══════ 7-AGENT SELECTION MODAL ══════ -->
+  <div id="s-select">
+    <div class="sel-top">
+      <div style="display:flex;align-items:baseline;">
+        <h2>요원 선택 (SELECT AGENT)</h2>
+        <span class="lbl">일곱 명의 특수 정예 요원 중 한 명을 선택하십시오</span>
+      </div>
+      <button class="val-btn" id="sel-close-btn" style="background:#1e293b;color:#fff;border:none;padding:6px 16px;cursor:pointer;">✕ 닫기</button>
+    </div>
+    <div class="sel-body">
+      <div class="sel-grid" id="sel-grid"></div>
+      <div class="sel-detail" id="sel-detail"></div>
+    </div>
+    <div class="sel-foot">
+      <button class="val-btn" id="sel-back">취소</button>
+      <button class="val-btn btn-go" id="sel-go" style="background:#ff4655;color:#fff;font-weight:bold;padding:12px 36px;font-size:15px;cursor:pointer;">전투 투입 (LOCK IN)</button>
+    </div>
+  </div>
+
   <!-- In-Game Tactical HUD -->
   <div id="hud">
     <div id="perf-hud" style="position:absolute; top:12px; right:18px; font-family:var(--font-mono); font-size:13px; color:var(--val-green); font-weight:700; text-shadow:0 0 8px rgba(0,255,136,0.6); pointer-events:none; z-index:30; letter-spacing:1px;">144 FPS // 6.9ms</div>
@@ -2730,7 +2819,8 @@
       <div style="font-size: 13px; color:#8899a6;">
         내 슬롯: <b style="color:var(--val-cyan);" id="my-slot-desc">공격팀 1번 (JETT)</b>
       </div>
-      <button id="btn-start-game" class="val-clip-lg">게임 시작 (START MATCH)</button>
+      <button id="btn-open-agent-select" class="val-clip-lg" style="background:linear-gradient(135deg,#ff4655,#cc2030); color:#fff; font-weight:bold; padding:12px 24px; cursor:pointer; margin-right:12px; font-family:'Oswald',sans-serif; letter-spacing:0.05em;">👤 요원 선택 (SELECT AGENT)</button>
+        <button id="btn-start-game" class="val-clip-lg">게임 시작 (START MATCH)</button>
     </div>
   </div>
 
@@ -2738,7 +2828,276 @@
     /* ==========================================================
        1. SYNTHESIZED WEB AUDIO & TACTICAL RADIO VOICE
        ========================================================== */
+    
+    /* ══════ ADVANCED SOUND ENGINE 20 GUNS + SURFACES + ABILITIES ══════ */
+    const GUN_SFX_DATA = {
+      knife: { f: 1400, d: 0.05, w: 'triangle', v: 0.16, slide: 600, nd: 0.04, nv: 0.3, nc: 1.6, nf: 'highpass' },
+      pistol: { f: 430, d: 0.045, w: 'square', v: 0.22, slide: 170, nd: 0.05, nv: 0.55, nc: 0.95, nf: 'highpass' },
+      silenced: { f: 250, d: 0.04, w: 'sine', v: 0.11, slide: 120, nd: 0.045, nv: 0.24, nc: 0.18 },
+      revolver: { f: 300, d: 0.1, w: 'sawtooth', v: 0.34, slide: 80, nd: 0.09, nv: 0.78, nc: 0.7, tail: 0.22 },
+      machpist: { f: 520, d: 0.03, w: 'square', v: 0.18, slide: 240, nd: 0.04, nv: 0.48, nc: 1.1, nf: 'highpass' },
+      handcan: { f: 210, d: 0.14, w: 'sawtooth', v: 0.4, slide: 55, nd: 0.11, nv: 0.88, nc: 0.55, tail: 0.28 },
+      smg: { f: 360, d: 0.035, w: 'sawtooth', v: 0.24, slide: 150, nd: 0.05, nv: 0.6, nc: 0.9 },
+      vector: { f: 430, d: 0.028, w: 'square', v: 0.2, slide: 200, nd: 0.04, nv: 0.52, nc: 1.05 },
+      pdw: { f: 330, d: 0.04, w: 'sawtooth', v: 0.25, slide: 130, nd: 0.055, nv: 0.62, nc: 0.85 },
+      shotgun: { f: 165, d: 0.14, w: 'square', v: 0.36, slide: 52, nd: 0.14, nv: 0.92, nc: 0.48, tail: 0.26 },
+      autoshot: { f: 190, d: 0.1, w: 'square', v: 0.3, slide: 60, nd: 0.11, nv: 0.84, nc: 0.55, tail: 0.18 },
+      slugger: { f: 220, d: 0.12, w: 'sawtooth', v: 0.38, slide: 70, nd: 0.12, nv: 0.88, nc: 0.6, tail: 0.24 },
+      rifle: { f: 280, d: 0.065, w: 'sawtooth', v: 0.3, slide: 95, nd: 0.07, nv: 0.72, nc: 0.8, tail: 0.15 },
+      carbine: { f: 310, d: 0.055, w: 'square', v: 0.26, slide: 110, nd: 0.06, nv: 0.65, nc: 0.85 },
+      battle: { f: 230, d: 0.09, w: 'sawtooth', v: 0.36, slide: 75, nd: 0.08, nv: 0.8, nc: 0.7, tail: 0.2 },
+      burst: { f: 320, d: 0.045, w: 'sawtooth', v: 0.28, slide: 120, nd: 0.055, nv: 0.68, nc: 0.9 },
+      lmg: { f: 260, d: 0.07, w: 'square', v: 0.32, slide: 90, nd: 0.075, nv: 0.75, nc: 0.75, tail: 0.18 },
+      hmg: { f: 200, d: 0.11, w: 'sawtooth', v: 0.42, slide: 65, nd: 0.1, nv: 0.9, nc: 0.6, tail: 0.26 },
+      marksman: { f: 190, d: 0.13, w: 'sawtooth', v: 0.44, slide: 60, nd: 0.12, nv: 0.92, nc: 0.55, tail: 0.3 },
+      sniper: { f: 140, d: 0.18, w: 'sawtooth', v: 0.5, slide: 45, nd: 0.16, nv: 1.0, nc: 0.45, tail: 0.42 }
+    };
+
+    const STEP_SFX_DATA = {
+      stone: { d: 0.05, v: 0.32, cut: 1800, f: 120 },
+      metal: { d: 0.06, v: 0.38, cut: 3400, f: 320, filt: 'highpass' },
+      snow: { d: 0.08, v: 0.26, cut: 900, f: 80 },
+      sand: { d: 0.065, v: 0.28, cut: 1200, f: 95 },
+      wood: { d: 0.055, v: 0.35, cut: 1500, f: 160 },
+      water: { d: 0.09, v: 0.34, cut: 2200, f: 240 }
+    };
+
+    const ABIL_SFX_DATA = {
+      wall_fire: { f: 180, d: 0.4, w: 'sawtooth', slide: 60, nd: 0.3, nc: 1200 },
+      proj_fire: { f: 320, d: 0.25, w: 'triangle', slide: 480, nd: 0.18, nc: 2400 },
+      smoke_fire: { f: 220, d: 0.35, w: 'sine', slide: 110, nd: 0.25, nc: 1500 },
+      ult_fire: { f: 120, d: 0.7, w: 'sawtooth', slide: 40, nd: 0.5, nc: 3200 },
+      trap_slow: { f: 450, d: 0.2, w: 'sine', slide: 200, nd: 0.15, nc: 1800 },
+      wall_ice: { f: 600, d: 0.3, w: 'triangle', slide: 300, nd: 0.22, nc: 2800 },
+      smoke_ice: { f: 380, d: 0.35, w: 'sine', slide: 180, nd: 0.24, nc: 1600 },
+      ult_ice: { f: 140, d: 0.8, w: 'triangle', slide: 50, nd: 0.6, nc: 3600 },
+      recon_dart: { f: 550, d: 0.22, w: 'sine', slide: 880, nd: 0.12, nc: 2200 },
+      dash: { f: 280, d: 0.18, w: 'sawtooth', slide: 620, nd: 0.15, nc: 1900 },
+      flash: { f: 720, d: 0.25, w: 'sine', slide: 1200, nd: 0.2, nc: 4200 },
+      ult_recon: { f: 160, d: 0.75, w: 'square', slide: 80, nd: 0.55, nc: 3800 },
+      nade: { f: 240, d: 0.28, w: 'square', slide: 100, nd: 0.25, nc: 2600 },
+      shield: { f: 340, d: 0.35, w: 'sine', slide: 520, nd: 0.2, nc: 2100 },
+      charge: { f: 190, d: 0.3, w: 'sawtooth', slide: 380, nd: 0.22, nc: 2000 },
+      ult_smash: { f: 90, d: 0.85, w: 'sawtooth', slide: 30, nd: 0.65, nc: 4000 },
+      heal: { f: 480, d: 0.4, w: 'sine', slide: 640, nd: 0.16, nc: 1800 },
+      root: { f: 310, d: 0.32, w: 'triangle', slide: 150, nd: 0.24, nc: 2200 },
+      smoke: { f: 260, d: 0.38, w: 'sine', slide: 140, nd: 0.26, nc: 1400 },
+      ult_res: { f: 520, d: 0.9, w: 'sine', slide: 1040, nd: 0.5, nc: 3400 },
+      emp: { f: 380, d: 0.3, w: 'square', slide: 90, nd: 0.3, nc: 3000 },
+      drone: { f: 650, d: 0.25, w: 'triangle', slide: 780, nd: 0.14, nc: 2500 },
+      mine: { f: 420, d: 0.28, w: 'sawtooth', slide: 180, nd: 0.22, nc: 2300 },
+      ult_emp: { f: 110, d: 0.8, w: 'square', slide: 40, nd: 0.6, nc: 3900 },
+      pierce: { f: 880, d: 0.3, w: 'sawtooth', slide: 220, nd: 0.28, nc: 4500 },
+      sensor: { f: 580, d: 0.2, w: 'sine', slide: 820, nd: 0.14, nc: 2400 },
+      smoke_fast: { f: 290, d: 0.3, w: 'sine', slide: 160, nd: 0.22, nc: 1700 },
+      ult_snipe: { f: 150, d: 0.85, w: 'sawtooth', slide: 45, nd: 0.58, nc: 4200 },
+      _default: { f: 350, d: 0.25, w: 'sine', slide: 180, nd: 0.2, nc: 2000 }
+    };
+
     class SoundEngine {
+
+      /* ══════ ENHANCED SFX METHODS ══════ */
+      playGunshotAdvanced(weaponKey = 'rifle', distRatio = 0) {
+        if (!this.ctx) return;
+        const now = this.ctx.currentTime;
+        const s = Math.min(1, Math.max(0, distRatio));
+        const atten = Math.max(0.05, 1 - 0.82 * s);
+        
+        const mapKey = {
+          vandal: 'rifle', phantom: 'carbine', operator: 'sniper', sheriff: 'revolver',
+          classic: 'pistol', spectre: 'smg', ghost: 'silenced', frenzy: 'machpist',
+          shorty: 'shotgun', judge: 'autoshot', bucky: 'slugger', stinger: 'vector',
+          bulldog: 'burst', guardian: 'battle', marshal: 'marksman', ares: 'lmg',
+          odin: 'hmg', knife: 'knife'
+        }[weaponKey.toLowerCase()] || weaponKey.toLowerCase();
+
+        const p = GUN_SFX_DATA[mapKey] || GUN_SFX_DATA.rifle;
+        const cutoff = Math.max(800, 9000 - 7600 * s);
+
+        // Procedural noise burst
+        try {
+          const bSize = Math.max(1, Math.floor(this.ctx.sampleRate * (p.nd || 0.06)));
+          const b = this.ctx.createBuffer(1, bSize, this.ctx.sampleRate);
+          const ch = b.getChannelData(0);
+          for (let i = 0; i < bSize; i++) ch[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / bSize, 2.2);
+          const src = this.ctx.createBufferSource();
+          src.buffer = b;
+          const filt = this.ctx.createBiquadFilter();
+          filt.type = p.nf || 'lowpass';
+          filt.frequency.setValueAtTime(Math.min(cutoff * (p.nc || 1), 18000), now);
+          const g = this.ctx.createGain();
+          g.gain.setValueAtTime(p.nv * atten, now);
+          src.connect(filt); filt.connect(g); g.connect(this.dest);
+          src.start(now);
+        } catch(e) {}
+
+        // Tonal punch
+        try {
+          const osc = this.ctx.createOscillator();
+          const oscG = this.ctx.createGain();
+          osc.type = p.w || 'sawtooth';
+          osc.frequency.setValueAtTime(p.f, now);
+          if (p.slide) osc.frequency.exponentialRampToValueAtTime(Math.max(20, p.slide), now + p.d);
+          oscG.gain.setValueAtTime(0.001, now);
+          oscG.gain.exponentialRampToValueAtTime(p.v * atten, now + 0.005);
+          oscG.gain.exponentialRampToValueAtTime(0.001, now + p.d);
+          osc.connect(oscG); oscG.connect(this.dest);
+          osc.start(now); osc.stop(now + p.d + 0.02);
+        } catch(e) {}
+      }
+
+      abilityCast(type = 'dash') {
+        if (!this.ctx) return;
+        const now = this.ctx.currentTime;
+        const t = ABIL_SFX_DATA[type] || ABIL_SFX_DATA._default;
+        try {
+          const osc = this.ctx.createOscillator();
+          const oscG = this.ctx.createGain();
+          osc.type = t.w || 'sine';
+          osc.frequency.setValueAtTime(t.f, now);
+          if (t.slide) osc.frequency.exponentialRampToValueAtTime(Math.max(20, t.slide), now + t.d);
+          oscG.gain.setValueAtTime(0.001, now);
+          oscG.gain.exponentialRampToValueAtTime(0.28, now + 0.008);
+          oscG.gain.exponentialRampToValueAtTime(0.001, now + t.d);
+          osc.connect(oscG); oscG.connect(this.dest);
+          osc.start(now); osc.stop(now + t.d + 0.02);
+
+          const bSize = Math.floor(this.ctx.sampleRate * (t.nd || 0.15));
+          const b = this.ctx.createBuffer(1, bSize, this.ctx.sampleRate);
+          const ch = b.getChannelData(0);
+          for (let i = 0; i < bSize; i++) ch[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / bSize, 2);
+          const src = this.ctx.createBufferSource();
+          src.buffer = b;
+          const filt = this.ctx.createBiquadFilter();
+          filt.type = 'lowpass';
+          filt.frequency.setValueAtTime(t.nc || 2200, now);
+          const g = this.ctx.createGain();
+          g.gain.setValueAtTime(0.3, now);
+          src.connect(filt); filt.connect(g); g.connect(this.dest);
+          src.start(now);
+        } catch(e) {}
+      }
+
+      abilityHit() {
+        if (!this.ctx) return;
+        const now = this.ctx.currentTime;
+        try {
+          const o1 = this.ctx.createOscillator();
+          const g1 = this.ctx.createGain();
+          o1.type = 'triangle';
+          o1.frequency.setValueAtTime(880, now);
+          g1.gain.setValueAtTime(0.25, now);
+          g1.gain.exponentialRampToValueAtTime(0.001, now + 0.06);
+          o1.connect(g1); g1.connect(this.dest);
+          o1.start(now); o1.stop(now + 0.07);
+
+          setTimeout(() => {
+            if (!this.ctx) return;
+            const n2 = this.ctx.currentTime;
+            const o2 = this.ctx.createOscillator();
+            const g2 = this.ctx.createGain();
+            o2.type = 'sine';
+            o2.frequency.setValueAtTime(1320, n2);
+            g2.gain.setValueAtTime(0.22, n2);
+            g2.gain.exponentialRampToValueAtTime(0.001, n2 + 0.08);
+            o2.connect(g2); g2.connect(this.dest);
+            o2.start(n2); o2.stop(n2 + 0.09);
+          }, 50);
+        } catch(e) {}
+      }
+
+      abilityEnd() {
+        if (!this.ctx) return;
+        const now = this.ctx.currentTime;
+        try {
+          const osc = this.ctx.createOscillator();
+          const g = this.ctx.createGain();
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(440, now);
+          osc.frequency.exponentialRampToValueAtTime(120, now + 0.2);
+          g.gain.setValueAtTime(0.18, now);
+          g.gain.exponentialRampToValueAtTime(0.001, now + 0.2);
+          osc.connect(g); g.connect(this.dest);
+          osc.start(now); osc.stop(now + 0.21);
+        } catch(e) {}
+      }
+
+      ultCast() {
+        if (!this.ctx) return;
+        const now = this.ctx.currentTime;
+        try {
+          // 1. Sub-bass boom
+          const osc1 = this.ctx.createOscillator();
+          const g1 = this.ctx.createGain();
+          osc1.type = 'sawtooth';
+          osc1.frequency.setValueAtTime(70, now);
+          osc1.frequency.exponentialRampToValueAtTime(25, now + 0.8);
+          g1.gain.setValueAtTime(0.42, now);
+          g1.gain.exponentialRampToValueAtTime(0.001, now + 0.8);
+          osc1.connect(g1); g1.connect(this.dest);
+          osc1.start(now); osc1.stop(now + 0.82);
+
+          // 2. Rising resonant gong
+          setTimeout(() => {
+            if (!this.ctx) return;
+            const n2 = this.ctx.currentTime;
+            const osc2 = this.ctx.createOscillator();
+            const g2 = this.ctx.createGain();
+            osc2.type = 'triangle';
+            osc2.frequency.setValueAtTime(260, n2);
+            osc2.frequency.exponentialRampToValueAtTime(880, n2 + 0.35);
+            g2.gain.setValueAtTime(0.32, n2);
+            g2.gain.exponentialRampToValueAtTime(0.001, n2 + 0.35);
+            osc2.connect(g2); g2.connect(this.dest);
+            osc2.start(n2); osc2.stop(n2 + 0.37);
+          }, 100);
+
+          // 3. Ethereal atmospheric wash
+          setTimeout(() => {
+            if (!this.ctx) return;
+            const n3 = this.ctx.currentTime;
+            const osc3 = this.ctx.createOscillator();
+            const g3 = this.ctx.createGain();
+            osc3.type = 'sine';
+            osc3.frequency.setValueAtTime(600, n3);
+            osc3.frequency.exponentialRampToValueAtTime(1500, n3 + 0.45);
+            g3.gain.setValueAtTime(0.25, n3);
+            g3.gain.exponentialRampToValueAtTime(0.001, n3 + 0.45);
+            osc3.connect(g3); g3.connect(this.dest);
+            osc3.start(n3); osc3.stop(n3 + 0.47);
+          }, 220);
+        } catch(e) {}
+      }
+
+      playFootstepAdvanced(surface = 'stone', gait = 'run', dist = 0) {
+        if (!this.ctx) return;
+        const now = this.ctx.currentTime;
+        const maxDist = 32;
+        if (dist > maxDist) return;
+        const s = Math.min(1, dist / maxDist);
+        const atten = (1 - s) * (1 - s);
+        if (atten < 0.03) return;
+
+        const gaitMult = gait === 'run' ? 1.0 : (gait === 'crouch' ? 0.32 : 0.6);
+        const p = STEP_SFX_DATA[surface] || STEP_SFX_DATA.stone;
+
+        try {
+          const bSize = Math.max(1, Math.floor(this.ctx.sampleRate * p.d));
+          const b = this.ctx.createBuffer(1, bSize, this.ctx.sampleRate);
+          const ch = b.getChannelData(0);
+          for (let i = 0; i < bSize; i++) ch[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / bSize, 2.4);
+          const src = this.ctx.createBufferSource();
+          src.buffer = b;
+          const filt = this.ctx.createBiquadFilter();
+          filt.type = p.filt || 'lowpass';
+          filt.frequency.setValueAtTime(p.cut * (1 - 0.5 * s), now);
+          const g = this.ctx.createGain();
+          g.gain.setValueAtTime(p.v * gaitMult * atten, now);
+          src.connect(filt); filt.connect(g); g.connect(this.dest);
+          src.start(now);
+        } catch(e) {}
+      }
+
       constructor() {
         this.ctx = null;
         this.masterGain = null;
@@ -2999,7 +3358,8 @@
         osc.stop(now + 1.25);
       }
 
-      playGunshot(weaponKey = 'vandal') {
+      playGunshot(weaponKey = 'vandal', distRatio = 0) {
+        if (this.playGunshotAdvanced) { this.playGunshotAdvanced(weaponKey, distRatio); return; }
         if (!this.ctx) return;
         const now = this.ctx.currentTime;
 
@@ -3271,7 +3631,8 @@
         osc.stop(now + 0.47);
       }
 
-      playFootstep(surface = 'stone') {
+      playFootstep(surface = 'stone', gait = 'run', dist = 0) {
+        if (this.playFootstepAdvanced) { this.playFootstepAdvanced(surface, gait, dist); return; }
         if (!this.ctx) return;
         const now = this.ctx.currentTime;
         const osc = this.ctx.createOscillator();
@@ -5662,6 +6023,7 @@
       const holsterMesh = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.18, 0.12), bootMat);
       holsterMesh.position.set(0.24, 0.65, 0);
       grp.add(holsterMesh);
+      attachAgentSilhouette(grp, getAgentDef(agentName));
 
       // Distinct 3D Visual Customizations for ALL 14 Agents
       if (agentName === 'Jett') {
@@ -13254,6 +13616,7 @@
     });
     document.getElementById('btn-cheat-respawn').addEventListener('click', () => {
       build5v5Map(MAP_LIST[currentMapIndex]);
+      const myAgent = getAgentDef(lobbySlots[myTeam][mySlotIdx].agent); updateSkillsHUD(myAgent);
       showToast('모든 봇이 재배치되었습니다!');
     });
 
@@ -15230,64 +15593,1143 @@
     }
 
     
-    function castSkillC() {
+    
+    /* ══════ 7 OFFICIAL AGENTS ROSTER ══════ */
+    const AGENTS = [
+      {
+        id: "hwaryeong", name: "화령", role: "타격대", color: "#ff5a3c", accent: "#ffb347",
+        quote: "불은 길을 묻지 않는다.",
+        desc: "전선을 강제로 여는 돌격형 요원. 맹렬한 불길로 적의 수비 진형을 일거에 태워버린다.",
+        abilities: [
+          { key: "Q", name: "불꽃 장막", cost: 200, charges: 2, cd: 0, type: "wall_fire", desc: "전방에 거대한 불의 장벽을 세운다. 통과하는 적에게 초당 12 피해." },
+          { key: "E", name: "화염탄", cost: 0, charges: 1, cd: 35, type: "proj_fire", desc: "폭발하는 화염구. 직격 55, 범위 30 피해 후 3초간 화염 장판." },
+          { key: "C", name: "잔불", cost: 150, charges: 2, cd: 0, type: "smoke_fire", desc: "시야를 가리는 고온 열기 연막을 전개한다. 12초 지속." },
+          { key: "X", name: "업화", cost: 0, charges: 1, cd: 0, ult: 5, type: "ult_fire", desc: "궁극기 — 전방 부채꼴을 불바다로 만든다. 초당 40 피해, 6초." }
+        ]
+      },
+      {
+        id: "seorin", name: "서린", role: "감시자", color: "#4fc3f7", accent: "#b3e5fc",
+        quote: "기다리는 쪽이 이긴다.",
+        desc: "주요 거점을 잠그는 방어형 요원. 단단한 얼음벽과 냉기 덫으로 진입로를 완벽 봉쇄한다.",
+        abilities: [
+          { key: "Q", name: "서리 덫", cost: 200, charges: 2, cd: 0, type: "trap_slow", desc: "설치형 덫. 밟은 적을 4초간 55% 둔화시키고 위치를 노출한다." },
+          { key: "E", name: "빙벽", cost: 0, charges: 1, cd: 40, type: "wall_ice", desc: "단단한 얼음벽을 세운다. 체력 400, 총격으로 파괴 가능." },
+          { key: "C", name: "한기 구역", cost: 150, charges: 2, cd: 0, type: "smoke_ice", desc: "냉기 연막 구역. 내부의 적은 25% 둔화된다. 14초 지속." },
+          { key: "X", name: "빙결", cost: 0, charges: 1, cd: 0, ult: 5, type: "ult_ice", desc: "궁극기 — 넓은 원형 구역을 얼려 범위 내 적을 2초간 완전히 묶는다." }
+        ]
+      },
+      {
+        id: "muyeong", name: "무영", role: "척후대", color: "#ab47bc", accent: "#e1bee7",
+        quote: "네가 보는 건 이미 지나간 나다.",
+        desc: "적진의 정보를 캐내고 교란하는 정찰형 요원. 그림자로 순간 도약하며 적의 감각을 마비시킨다.",
+        abilities: [
+          { key: "Q", name: "그림자 화살", cost: 200, charges: 2, cd: 0, type: "recon_dart", desc: "명중 지점 반경 14m의 적을 3초간 벽 너머로 실시간 투시한다." },
+          { key: "E", name: "잔영", cost: 0, charges: 1, cd: 30, type: "dash", desc: "바라보는 방향으로 순간 도약한다. 도약 중 0.4초간 완전 무적." },
+          { key: "C", name: "감각 차단", cost: 150, charges: 2, cd: 0, type: "flash", desc: "벽을 관통하는 암흑 구체 투사. 적중한 적의 시야를 3초간 완전 차단(피해망상)." },
+          { key: "X", name: "그림자 사냥", cost: 0, charges: 1, cd: 0, ult: 5, type: "ult_recon", desc: "궁극기 — 전 맵에 EMP 파동 방출. 모든 적을 8초간 감지하고 이속 30% 증가." }
+        ]
+      },
+      {
+        id: "gangcheol", name: "강철", role: "타격대", color: "#ffa726", accent: "#ffd180",
+        quote: "부서지지 않는 건 없다.",
+        desc: "중장갑과 고폭 화력으로 요충지를 분쇄하는 진격형 요원. 실드와 돌진으로 적진을 유린한다.",
+        abilities: [
+          { key: "Q", name: "충격 수류탄", cost: 200, charges: 2, cd: 0, type: "nade", desc: "벽에 튕긴 후 폭발하는 고폭탄. 65 직격 피해 및 대형 폭발." },
+          { key: "E", name: "전선 방패", cost: 0, charges: 1, cd: 35, type: "shield", desc: "8초간 전방 공격 피해를 흡수하는 고강도 전술 에너지 쉴드를 전개한다." },
+          { key: "C", name: "돌진", cost: 150, charges: 2, cd: 0, type: "charge", desc: "전방으로 고속 충격 돌진. 경로상의 적을 밀쳐내고 40 피해를 입힌다." },
+          { key: "X", name: "파쇄", cost: 0, charges: 1, cd: 0, ult: 5, type: "ult_smash", desc: "궁극기 — 대지진 충격파로 반경 14m 내 적에게 120 피해 및 40% 둔화 부여." }
+        ]
+      },
+      {
+        id: "yeonhwa", name: "연화", role: "전략가", color: "#66bb6a", accent: "#c8e6c9",
+        quote: "생명은 다시 피어난다.",
+        desc: "아군을 유지시키고 전장을 제어하는 서포트형 요원. 생명력 치유와 결박으로 판도를 뒤집는다.",
+        abilities: [
+          { key: "Q", name: "회복의 씨앗", cost: 200, charges: 2, cd: 0, type: "heal", desc: "치유 구역 생성. 반경 8m 내 아군과 자신의 체력을 초당 15 회복 (8초)." },
+          { key: "E", name: "뿌리 결박", cost: 0, charges: 1, cd: 35, type: "root", desc: "시야 내 적을 덩굴로 2.5초간 이동 불가 결박하고 3초간 위치 노출." },
+          { key: "C", name: "안개꽃", cost: 150, charges: 2, cd: 0, type: "smoke", desc: "대형 연꽃 연막을 전개하여 16초간 시야를 완벽 차단한다." },
+          { key: "X", name: "재생", cost: 0, charges: 1, cd: 0, ult: 5, type: "ult_res", desc: "궁극기 — 자신 체력 60 즉시 회복 + 사망한 아군 1명을 본진에 즉시 부활." }
+        ]
+      },
+      {
+        id: "noeun", name: "노은", role: "전략가", color: "#ffd54f", accent: "#fff59d",
+        quote: "시스템은 완벽하게 침묵한다.",
+        desc: "첨단 드론과 전자 장비로 적의 시스템을 마비시키는 기술형 요원. 전자기 지뢰와 펄스를 다룬다.",
+        abilities: [
+          { key: "Q", name: "전자 교란", cost: 200, charges: 2, cd: 0, type: "emp", desc: "전자기 파동으로 범위 내 적의 스킬을 침묵시키고 6초간 사격을 무력화." },
+          { key: "E", name: "감시 드론", cost: 0, charges: 1, cd: 35, type: "drone", desc: "자율 비행 감시 드론을 전방으로 사출하여 적의 위치를 스캔한다." },
+          { key: "C", name: "과부하 지뢰", cost: 150, charges: 2, cd: 0, type: "mine", desc: "접근 감지 지뢰. 적이 밟으면 폭발하며 45 피해, 3초 실명, 4초 둔화." },
+          { key: "X", name: "정전", cost: 0, charges: 1, cd: 0, ult: 5, type: "ult_emp", desc: "궁극기 — 전 맵 정전 펄스 방출. 모든 적을 10초간 스턴 및 완전 무력화." }
+        ]
+      },
+      {
+        id: "baekho", name: "백호", role: "감시자", color: "#e0e0e0", accent: "#ffffff",
+        quote: "숨어도 내 시선은 피할 수 없다.",
+        desc: "초장거리 저격과 초감각 센서로 전장을 감시하는 정밀 저격수. 벽을 꿰뚫는 관통탄을 보유했다.",
+        abilities: [
+          { key: "Q", name: "관통 사격", cost: 200, charges: 2, cd: 0, type: "pierce", desc: "모든 지형과 벽을 관통하는 고압 레일건 탄환 발사. 적중 시 80 피해." },
+          { key: "E", name: "경계 센서", cost: 0, charges: 1, cd: 30, type: "sensor", desc: "감지 트랩 설치. 적 통과 시 6초간 실시간 노출 및 60% 둔화." },
+          { key: "C", name: "연막탄", cost: 150, charges: 2, cd: 0, type: "smoke_fast", desc: "즉시 터지는 전술 신속 연막탄 투척. 10초간 시야 차단." },
+          { key: "X", name: "응시", cost: 0, charges: 1, cd: 0, ult: 5, type: "ult_snipe", desc: "궁극기 — 모든 적의 위치를 8초간 벽 너머로 실시간 투시 및 즉발 저격 모드." }
+        ]
+      }
+    ];
+
+    // Normalized Agent Resolver supporting both English legacy names and Korean official names
+    function getAgentDef(nameOrId) {
+      if (!nameOrId) return AGENTS[0];
+      const s = String(nameOrId).toLowerCase().trim();
+      if (s === 'hwaryeong' || s === '화령' || s === 'phoenix') return AGENTS[0];
+      if (s === 'seorin' || s === '서린' || s === 'sage') return AGENTS[1];
+      if (s === 'muyeong' || s === '무영' || s === 'omen' || s === 'reyna' || s === 'fade') return AGENTS[2];
+      if (s === 'gangcheol' || s === '강철' || s === 'breach' || s === 'raze') return AGENTS[3];
+      if (s === 'yeonhwa' || s === '연화' || s === 'skye') return AGENTS[4];
+      if (s === 'noeun' || s === '노은' || s === 'killjoy' || s === 'cypher' || s === 'brimstone') return AGENTS[5];
+      if (s === 'baekho' || s === '백호' || s === 'jett' || s === 'sova' || s === 'chamber') return AGENTS[6];
+      return AGENTS.find(a => a.id === s || a.name === nameOrId) || AGENTS[0];
+    }
+
+    const PORTRAIT_CACHE = {};
+    function agentPortrait(agent, w = 300, h = 380) {
+      const key = agent.id + '_' + w + 'x' + h;
+      if (PORTRAIT_CACHE[key]) return PORTRAIT_CACHE[key];
+      const canvas = document.createElement('canvas');
+      canvas.width = w; canvas.height = h;
+      const ctx = canvas.getContext('2d');
+      const hex = agent.color || '#ff5a3c';
+      const cInt = parseInt(hex.replace('#', ''), 16);
+      const r = (cInt >> 16) & 255, g = (cInt >> 8) & 255, b = cInt & 255;
+
+      // Dark futuristic background
+      const grad = ctx.createRadialGradient(w * 0.5, h * 0.35, 10, w * 0.5, h * 0.6, w * 0.8);
+      grad.addColorStop(0, `rgba(${r},${g},${b},0.35)`);
+      grad.addColorStop(0.5, `rgba(${r},${g},${b},0.08)`);
+      grad.addColorStop(1, '#0b0f17');
+      ctx.fillStyle = '#0b0f17'; ctx.fillRect(0, 0, w, h);
+      ctx.fillStyle = grad; ctx.fillRect(0, 0, w, h);
+
+      // Geometric tactical accents
+      ctx.save();
+      ctx.strokeStyle = hex; ctx.lineWidth = 1.5; ctx.globalAlpha = 0.2;
+      for (let i = 0; i < 6; i++) {
+        ctx.beginPath();
+        ctx.arc(w * 0.5, h * 0.45, w * (0.15 + i * 0.08), 0, Math.PI * 2);
+        ctx.stroke();
+      }
+      ctx.restore();
+
+      // Stylized Agent Silhouette / Bust
+      ctx.save();
+      ctx.fillStyle = `rgb(${Math.round(r * 0.4 + 15)}, ${Math.round(g * 0.4 + 20)}, ${Math.round(b * 0.4 + 30)})`;
+      ctx.beginPath();
+      ctx.moveTo(w * 0.5 - w * 0.35, h);
+      ctx.quadraticCurveTo(w * 0.5 - w * 0.3, h * 0.65, w * 0.5 - w * 0.14, h * 0.58);
+      ctx.lineTo(w * 0.5 + w * 0.14, h * 0.58);
+      ctx.quadraticCurveTo(w * 0.5 + w * 0.3, h * 0.65, w * 0.5 + w * 0.35, h);
+      ctx.closePath();
+      ctx.fill();
+
+      // Head / Mask
+      ctx.fillStyle = '#1e293b';
+      ctx.beginPath();
+      ctx.arc(w * 0.5, h * 0.42, w * 0.18, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Glowing Neon Visor / Mask Core
+      ctx.fillStyle = hex;
+      ctx.shadowColor = hex; ctx.shadowBlur = 18;
+      ctx.fillRect(w * 0.5 - w * 0.12, h * 0.41, w * 0.24, h * 0.035);
+
+      // Distinct head silhouette accessory per agent
+      if (agent.id === 'hwaryeong') {
+        // Twin horns
+        ctx.beginPath();
+        ctx.moveTo(w * 0.38, h * 0.38); ctx.lineTo(w * 0.30, h * 0.22); ctx.lineTo(w * 0.44, h * 0.32);
+        ctx.moveTo(w * 0.62, h * 0.38); ctx.lineTo(w * 0.70, h * 0.22); ctx.lineTo(w * 0.56, h * 0.32);
+        ctx.fill();
+      } else if (agent.id === 'seorin') {
+        // Ice Spikes
+        ctx.beginPath();
+        ctx.moveTo(w * 0.5, h * 0.18); ctx.lineTo(w * 0.44, h * 0.32); ctx.lineTo(w * 0.56, h * 0.32);
+        ctx.moveTo(w * 0.32, h * 0.24); ctx.lineTo(w * 0.38, h * 0.35); ctx.lineTo(w * 0.30, h * 0.38);
+        ctx.moveTo(w * 0.68, h * 0.24); ctx.lineTo(w * 0.62, h * 0.35); ctx.lineTo(w * 0.70, h * 0.38);
+        ctx.fill();
+      } else if (agent.id === 'muyeong') {
+        // Shadow Hood & 3 glowing slits
+        ctx.fillStyle = '#060911';
+        ctx.beginPath();
+        ctx.arc(w * 0.5, h * 0.40, w * 0.22, Math.PI, 0);
+        ctx.lineTo(w * 0.5 + w * 0.22, h * 0.56);
+        ctx.lineTo(w * 0.5 - w * 0.22, h * 0.56);
+        ctx.fill();
+        ctx.fillStyle = hex;
+        [-0.06, 0, 0.06].forEach(xOff => {
+          ctx.fillRect(w * (0.5 + xOff) - 3, h * 0.42, 6, 14);
+        });
+      } else if (agent.id === 'gangcheol') {
+        // Heavy pauldron plates
+        ctx.fillStyle = hex;
+        ctx.fillRect(w * 0.18, h * 0.58, w * 0.18, h * 0.12);
+        ctx.fillRect(w * 0.64, h * 0.58, w * 0.18, h * 0.12);
+      } else if (agent.id === 'yeonhwa') {
+        // Lotus halo ring
+        ctx.strokeStyle = hex; ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.ellipse(w * 0.5, h * 0.26, w * 0.24, h * 0.05, 0, 0, Math.PI * 2);
+        ctx.stroke();
+      } else if (agent.id === 'noeun') {
+        // Antenna & visor goggles
+        ctx.strokeStyle = hex; ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.moveTo(w * 0.35, h * 0.4); ctx.lineTo(w * 0.28, h * 0.16); ctx.stroke();
+        ctx.fillStyle = hex;
+        ctx.beginPath(); ctx.arc(w * 0.28, h * 0.15, 6, 0, Math.PI * 2); ctx.fill();
+      } else if (agent.id === 'baekho') {
+        // Tactical trench coat collar & sniper monocle
+        ctx.strokeStyle = hex; ctx.lineWidth = 2.5;
+        ctx.beginPath(); ctx.arc(w * 0.58, h * 0.41, 10, 0, Math.PI * 2); ctx.stroke();
+      }
+
+      ctx.restore();
+      const url = canvas.toDataURL('image/png');
+      PORTRAIT_CACHE[key] = url;
+      return url;
+    }
+
+    // Dynamic 3D Model Attachment per Agent Silhouette
+    function attachAgentSilhouette(group, agentDef) {
+      if (!agentDef || !group) return;
+      const hex = parseInt((agentDef.color || '#ff5a3c').replace('#', ''), 16);
+      const accHex = parseInt((agentDef.accent || '#ffffff').replace('#', ''), 16);
+      const glowMat = new THREE.MeshStandardMaterial({
+        color: hex, emissive: hex, emissiveIntensity: 0.85, roughness: 0.35
+      });
+      const trimMat = new THREE.MeshStandardMaterial({ color: accHex, roughness: 0.4, metalness: 0.6 });
+      const darkMat = new THREE.MeshStandardMaterial({ color: 0x0a0e17, roughness: 0.9 });
+
+      const addBox = (w, h, d, x, y, z, mat = glowMat) => {
+        const m = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), mat);
+        m.position.set(x, y, z); group.add(m); return m;
+      };
+      const addCone = (r, h, s, x, y, z, rx, ry, rz, mat = glowMat) => {
+        const m = new THREE.Mesh(new THREE.ConeGeometry(r, h, s), mat);
+        m.position.set(x, y, z); m.rotation.set(rx || 0, ry || 0, rz || 0);
+        group.add(m); return m;
+      };
+
+      switch (agentDef.id) {
+        case 'hwaryeong':
+          // Twin curved horns & flame vents
+          [-1, 1].forEach(sign => {
+            addCone(0.065, 0.42, 6, sign * 0.14, 2.05, -0.02, -0.2, 0, sign * 0.35, glowMat);
+            addBox(0.08, 0.26, 0.18, sign * 0.32, 1.52, 0.02, glowMat);
+          });
+          break;
+        case 'seorin':
+          // Triple jagged ice crystal spikes on back
+          [[-0.12, 1.45, -0.22, 0.45], [0, 1.62, -0.25, 0.65], [0.12, 1.45, -0.22, 0.45]].forEach(([x, y, z, scale]) => {
+            addCone(0.08, 0.55 * scale, 5, x, y, z, -0.25, 0, 0, glowMat);
+          });
+          break;
+        case 'muyeong':
+          // Shadow hood & flowing tactical void cape
+          addCone(0.32, 0.42, 8, 0, 1.95, -0.04, 0, 0, 0, darkMat);
+          const cape = addBox(0.42, 0.85, 0.04, 0, 1.1, -0.22, darkMat);
+          cape.rotation.x = -0.12;
+          [-0.05, 0, 0.05].forEach(xOff => {
+            addBox(0.02, 0.05, 0.02, xOff, 1.80, 0.22, glowMat);
+          });
+          break;
+        case 'gangcheol':
+          // Heavy reinforced blast pauldrons & chest armor
+          [-1, 1].forEach(sign => {
+            addBox(0.24, 0.22, 0.30, sign * 0.36, 1.48, 0, trimMat);
+          });
+          addBox(0.42, 0.52, 0.08, 0, 1.25, 0.12, trimMat);
+          break;
+        case 'yeonhwa':
+          // Spinning lotus halo ring & organic petal shoulder pads
+          const halo = new THREE.Mesh(new THREE.TorusGeometry(0.22, 0.028, 8, 24), glowMat);
+          halo.rotation.x = Math.PI / 2; halo.position.set(0, 2.05, 0);
+          group.add(halo);
+          [-1, 1].forEach(sign => {
+            addBox(0.14, 0.12, 0.22, sign * 0.28, 1.44, 0, glowMat);
+          });
+          break;
+        case 'noeun':
+          // Comms backpack & whip antenna & ocular sensor
+          addBox(0.3, 0.36, 0.18, 0, 1.3, -0.22, darkMat);
+          const ant = new THREE.Mesh(new THREE.CylinderGeometry(0.012, 0.012, 0.6, 6), trimMat);
+          ant.position.set(-0.12, 1.75, -0.22); group.add(ant);
+          const sensor = new THREE.Mesh(new THREE.SphereGeometry(0.04, 8, 8), glowMat);
+          sensor.position.set(-0.12, 2.05, -0.22); group.add(sensor);
+          break;
+        case 'baekho':
+          // Sniper coat tails & shoulder mount scope
+          [-1, 1].forEach(sign => {
+            const coat = addBox(0.18, 0.72, 0.04, sign * 0.16, 0.75, -0.16, darkMat);
+            coat.rotation.x = 0.08; coat.rotation.z = sign * 0.06;
+          });
+          const scope = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.03, 0.24, 8), trimMat);
+          scope.rotation.x = Math.PI / 2; scope.position.set(0.16, 1.62, 0);
+          group.add(scope);
+          break;
+      }
+    }
+
+
+    /* ══════ ADVANCED VFX SYSTEM ══════ */
+    const TIMEFX = { scale: 1.0, t: 0 };
+    function slowMo(scale = 0.35, duration = 0.55) {
+      TIMEFX.scale = scale;
+      TIMEFX.t = duration;
+    }
+
+    let _ultCutTimer = 0;
+    function ultCutIn(agent, ultName = '궁극기') {
+      const el = document.getElementById('ultcut');
+      if (!el) return;
+      const hex = agent ? (agent.color || '#ffc849') : '#ffc849';
+      el.style.setProperty('--uc', hex);
+      const aEl = document.getElementById('uc-agent');
+      const nEl = document.getElementById('uc-name');
+      const qEl = document.getElementById('uc-quote');
+      if (aEl) aEl.textContent = (agent ? agent.name : 'AGENT') + ' · ' + (agent ? agent.role : '');
+      if (nEl) nEl.textContent = ultName;
+      if (qEl) qEl.textContent = agent ? (agent.quote || '') : '';
+
+      el.classList.add('on');
+      _ultCutTimer = 1.25;
+      slowMo(0.35, 0.55);
+      edgeFlash(hex, 0.92);
+      screenShake(0.7);
+      if (sound && sound.ultCast) sound.ultCast();
+    }
+
+    let _edgeTimer = 0;
+    function edgeFlash(colorHex = '#ffffff', intensity = 0.6) {
+      const el = document.getElementById('edgefx');
+      if (!el) return;
+      el.style.setProperty('--efc', colorHex);
+      el.style.opacity = String(Math.min(0.95, intensity));
+      el.classList.add('on');
+      _edgeTimer = 0.35;
+    }
+
+    function screenShake(amount = 0.25) {
+      addCameraTrauma(amount * 1.5);
+    }
+
+    // Procedural 3D Visual Bursts and Shockwaves
+    function castBurst(x, z, colorInt = 0xff5a3c, scale = 1.0) {
+      for (let i = 0; i < 3; i++) {
+        const ringGeo = new THREE.RingGeometry(0.5, 1.1, 36);
+        const ringMat = new THREE.MeshBasicMaterial({
+          color: colorInt, transparent: true, opacity: 0.85 - i * 0.2,
+          side: THREE.DoubleSide, depthWrite: false
+        });
+        const ring = new THREE.Mesh(ringGeo, ringMat);
+        ring.rotation.x = -Math.PI / 2;
+        ring.position.set(x, 0.15 + i * 0.1, z);
+        scene.add(ring);
+
+        let progress = 0;
+        const dur = 0.55 + i * 0.12;
+        const interval = setInterval(() => {
+          progress += 0.025;
+          const t = progress / dur;
+          if (t >= 1) {
+            clearInterval(interval);
+            scene.remove(ring);
+            ringGeo.dispose();
+            ringMat.dispose();
+          } else {
+            const s = (1 + t * (4 + i * 2.5)) * scale;
+            ring.scale.set(s, s, s);
+            ring.position.y = 0.15 + i * 0.1 + t * 1.5;
+            ringMat.opacity = (1 - t) * (0.85 - i * 0.2);
+          }
+        }, 20);
+      }
+    }
+
+    function endBurst(x, z, colorInt = 0xff5a3c, radius = 5.0) {
+      const ringGeo = new THREE.RingGeometry(radius * 0.8, radius, 36);
+      const ringMat = new THREE.MeshBasicMaterial({
+        color: colorInt, transparent: true, opacity: 0.75,
+        side: THREE.DoubleSide, depthWrite: false
+      });
+      const ring = new THREE.Mesh(ringGeo, ringMat);
+      ring.rotation.x = -Math.PI / 2;
+      ring.position.set(x, 0.15, z);
+      scene.add(ring);
+
+      let progress = 0;
+      const interval = setInterval(() => {
+        progress += 0.03;
+        const t = progress / 0.45;
+        if (t >= 1) {
+          clearInterval(interval);
+          scene.remove(ring);
+          ringGeo.dispose();
+          ringMat.dispose();
+        } else {
+          const s = 1 - 0.45 * t;
+          ring.scale.set(s, s, s);
+          ringMat.opacity = 0.75 * (1 - t);
+        }
+      }, 20);
+    }
+
+    function shardErupt(x, z, radius = 10, colorInt = 0xff5a3c, count = 16) {
+      const shardMat = new THREE.MeshBasicMaterial({
+        color: colorInt, transparent: true, opacity: 0.8, depthWrite: false
+      });
+      for (let i = 0; i < count; i++) {
+        const ang = (i / count) * Math.PI * 2 + Math.random() * 0.5;
+        const dist = radius * (0.2 + 0.8 * Math.random());
+        const h = 2.5 + Math.random() * 3.5;
+        const cone = new THREE.Mesh(new THREE.ConeGeometry(0.25 + Math.random() * 0.25, h, 5), shardMat);
+        const px = x + Math.cos(ang) * dist;
+        const pz = z + Math.sin(ang) * dist;
+        cone.position.set(px, -h, pz);
+        cone.rotation.set((Math.random() - 0.5) * 0.4, Math.random() * Math.PI, (Math.random() - 0.5) * 0.4);
+        scene.add(cone);
+
+        let t = 0;
+        const iv = setInterval(() => {
+          t += 0.04;
+          if (t <= 0.3) {
+            cone.position.y = -h + (t / 0.3) * (h + 0.3);
+          } else if (t >= 1.2) {
+            clearInterval(iv);
+            scene.remove(cone);
+            cone.geometry.dispose();
+          } else {
+            cone.position.y -= 0.05;
+            shardMat.opacity = Math.max(0, 0.8 * (1 - (t - 0.3) / 0.9));
+          }
+        }, 20);
+      }
+    }
+
+    function empWave(x, z, colorInt = 0x00f0ff) {
+      for (let i = 0; i < 4; i++) {
+        const ringGeo = new THREE.RingGeometry(0.8, 1.6, 48);
+        const ringMat = new THREE.MeshBasicMaterial({
+          color: colorInt, transparent: true, opacity: 0.8,
+          side: THREE.DoubleSide, depthWrite: false
+        });
+        const ring = new THREE.Mesh(ringGeo, ringMat);
+        ring.rotation.x = -Math.PI / 2;
+        ring.position.set(x, 0.2 + i * 0.3, z);
+        scene.add(ring);
+
+        let t = 0;
+        const iv = setInterval(() => {
+          t += 0.025;
+          if (t >= 1.2) {
+            clearInterval(iv);
+            scene.remove(ring);
+            ringGeo.dispose();
+            ringMat.dispose();
+          } else {
+            const s = 1 + t * 42;
+            ring.scale.set(s, s, 1);
+            ringMat.opacity = Math.max(0, 0.8 - t * 0.7);
+          }
+        }, 20);
+      }
+    }
+
+
+    /* ══════ 28 ABILITIES COMPLETE EXECUTION SYSTEM ══════ */
+    function castAbility(type, abilityDef) {
+      const activeAgent = getAgentDef(lobbySlots[myTeam][mySlotIdx].agent);
+      const forward = new THREE.Vector3(0, 0, -1).applyQuaternion(camera.quaternion);
+      forward.y = 0; forward.normalize();
+      const pPos = camera.position.clone();
+      const aColorHex = activeAgent.color || '#ff5a3c';
+      const aColorInt = parseInt(aColorHex.replace('#', ''), 16);
+
+      // Phase 1: 발동 (Cast) Feedback
+      if (abilityDef && abilityDef.ult) {
+        ultCutIn(activeAgent, abilityDef.name);
+        castBurst(pPos.x, pPos.z, aColorInt, 2.2);
+        showToast(`⚡ [궁극기 발동] ${activeAgent.name} — ${abilityDef.name}!`);
+      } else {
+        edgeFlash(aColorHex, 0.45);
+        screenShake(0.18);
+        castBurst(pPos.x, pPos.z, aColorInt, 1.0);
+        if (sound && sound.abilityCast) sound.abilityCast(type);
+        showToast(`✨ [${activeAgent.name}] ${abilityDef ? abilityDef.name : type} 발동!`);
+      }
+
+      // Phase 3: 효과 적용 (Active Execution)
+      switch (type) {
+        case 'wall_fire': {
+          // Flame Wall across 7 segments
+          const side = new THREE.Vector3(-forward.z, 0, forward.x);
+          const center = pPos.clone().add(forward.clone().multiplyScalar(14));
+          for (let i = -3; i <= 3; i++) {
+            const segPos = center.clone().add(side.clone().multiplyScalar(i * 2.2));
+            const wallGeo = new THREE.CylinderGeometry(1.6, 1.6, 3.8, 16);
+            const wallMat = new THREE.MeshBasicMaterial({ color: 0xff4500, transparent: true, opacity: 0.7 });
+            const seg = new THREE.Mesh(wallGeo, wallMat);
+            seg.position.set(segPos.x, 1.9, segPos.z);
+            scene.add(seg);
+
+            // Active DPS loop
+            const dpsTimer = setInterval(() => {
+              enemiesList.forEach(e => {
+                if (!e.isDead && e.mesh && e.mesh.position.distanceTo(seg.position) < 2.5) {
+                  e.hp = Math.max(0, (e.hp || 100) - 4);
+                  if (sound && sound.abilityHit) sound.abilityHit();
+                }
+              });
+            }, 300);
+
+            // Phase 4: 종료 (End)
+            setTimeout(() => {
+              clearInterval(dpsTimer);
+              scene.remove(seg);
+              wallGeo.dispose(); wallMat.dispose();
+              endBurst(segPos.x, segPos.z, 0xff4500, 2.0);
+              if (sound && sound.abilityEnd) sound.abilityEnd();
+            }, 10000);
+          }
+          break;
+        }
+
+        case 'proj_fire': {
+          // Thrown Fireball projectile
+          const ballGeo = new THREE.SphereGeometry(0.35, 12, 12);
+          const ballMat = new THREE.MeshBasicMaterial({ color: 0xff3300 });
+          const ball = new THREE.Mesh(ballGeo, ballMat);
+          ball.position.copy(pPos);
+          scene.add(ball);
+
+          const vel = forward.clone().multiplyScalar(24);
+          let elapsed = 0;
+          const iv = setInterval(() => {
+            elapsed += 0.03;
+            ball.position.add(vel.clone().multiplyScalar(0.03));
+            ball.position.y -= 0.05 * elapsed;
+
+            if (elapsed >= 0.8 || ball.position.y <= 0.2) {
+              clearInterval(iv);
+              const impact = ball.position.clone();
+              scene.remove(ball);
+              ballGeo.dispose(); ballMat.dispose();
+
+              // Detonation
+              shardErupt(impact.x, impact.z, 5, 0xff4400, 10);
+              screenShake(0.35);
+              if (sound && sound.abilityHit) sound.abilityHit();
+
+              enemiesList.forEach(e => {
+                if (!e.isDead && e.mesh && e.mesh.position.distanceTo(impact) < 6) {
+                  e.hp = Math.max(0, (e.hp || 100) - 50);
+                  showToast('🔥 화염탄 적중!');
+                }
+              });
+            }
+          }, 30);
+          break;
+        }
+
+        case 'smoke_fire':
+        case 'smoke_ice':
+        case 'smoke':
+        case 'smoke_fast': {
+          // Tactical Smoke Sphere
+          const color = type === 'smoke_fire' ? 0xff6622 : (type === 'smoke_ice' ? 0x88ddff : 0x00f0ff);
+          const dur = type === 'smoke_fast' ? 10000 : 14000;
+          const target = pPos.clone().add(forward.clone().multiplyScalar(16));
+          const smokeGeo = new THREE.SphereGeometry(6.5, 16, 16);
+          const smokeMat = new THREE.MeshStandardMaterial({
+            color: color, transparent: true, opacity: 0.82, roughness: 0.9, side: THREE.DoubleSide
+          });
+          const smoke = new THREE.Mesh(smokeGeo, smokeMat);
+          smoke.position.set(target.x, 3.2, target.z);
+          scene.add(smoke);
+
+          // Phase 4: 종료 (End)
+          setTimeout(() => {
+            scene.remove(smoke);
+            smokeGeo.dispose(); smokeMat.dispose();
+            endBurst(target.x, target.z, color, 6.5);
+            if (sound && sound.abilityEnd) sound.abilityEnd();
+          }, dur);
+          break;
+        }
+
+        case 'ult_fire': {
+          // Flame Eruption Fan Barrage
+          for (let i = 1; i <= 6; i++) {
+            const dist = i * 5.5;
+            const fx = pPos.x + forward.x * dist;
+            const fz = pPos.z + forward.z * dist;
+            shardErupt(fx, fz, 3.5 + i * 0.6, 0xff3300, 14);
+            enemiesList.forEach(e => {
+              if (!e.isDead && e.mesh && Math.hypot(e.mesh.position.x - fx, e.mesh.position.z - fz) < 5) {
+                e.hp = Math.max(0, (e.hp || 100) - 45);
+              }
+            });
+          }
+          screenShake(0.7);
+          break;
+        }
+
+        case 'trap_slow': {
+          // Frost Trap
+          const tPos = pPos.clone().add(forward.clone().multiplyScalar(12));
+          const trapGeo = new THREE.RingGeometry(0.2, 2.5, 24);
+          const trapMat = new THREE.MeshBasicMaterial({ color: 0x4fc3f7, side: THREE.DoubleSide });
+          const trap = new THREE.Mesh(trapGeo, trapMat);
+          trap.rotation.x = -Math.PI / 2; trap.position.set(tPos.x, 0.05, tPos.z);
+          scene.add(trap);
+
+          const chk = setInterval(() => {
+            enemiesList.forEach(e => {
+              if (!e.isDead && e.mesh && e.mesh.position.distanceTo(trap.position) < 3.0) {
+                e.slow = 0.55;
+                e.revealed = 5;
+                showToast('❄️ [서린] 서리 덫 발동! 적 55% 둔화!');
+                if (sound && sound.abilityHit) sound.abilityHit();
+                clearInterval(chk);
+                scene.remove(trap);
+                trapGeo.dispose(); trapMat.dispose();
+                endBurst(tPos.x, tPos.z, 0x4fc3f7, 3.0);
+                setTimeout(() => { e.slow = 0; }, 5000);
+              }
+            });
+          }, 200);
+          break;
+        }
+
+        case 'wall_ice': {
+          // 400 HP Glacial Wall
+          const wPos = pPos.clone().add(forward.clone().multiplyScalar(10));
+          const iceGeo = new THREE.BoxGeometry(8, 4.2, 1.2);
+          const iceMat = new THREE.MeshStandardMaterial({
+            color: 0xa0e8ff, transparent: true, opacity: 0.78, roughness: 0.2, metalness: 0.3
+          });
+          const wall = new THREE.Mesh(iceGeo, iceMat);
+          wall.position.set(wPos.x, 2.1, wPos.z);
+          wall.rotation.y = Math.atan2(forward.x, forward.z) + Math.PI / 2;
+          scene.add(wall);
+
+          setTimeout(() => {
+            scene.remove(wall);
+            iceGeo.dispose(); iceMat.dispose();
+            endBurst(wPos.x, wPos.z, 0xa0e8ff, 4.0);
+            if (sound && sound.abilityEnd) sound.abilityEnd();
+          }, 25000);
+          break;
+        }
+
+        case 'ult_ice': {
+          // Absolute Zero Freeze
+          const cPos = pPos.clone().add(forward.clone().multiplyScalar(18));
+          shardErupt(cPos.x, cPos.z, 14, 0x4fc3f7, 26);
+          screenShake(0.6);
+          enemiesList.forEach(e => {
+            if (!e.isDead && e.mesh && e.mesh.position.distanceTo(cPos) < 16) {
+              e.root = 2.5; // Immobilize completely
+              e.revealed = 5;
+              showToast('❄️ [서린] 적 완전 빙결(결박) 적용!');
+              if (sound && sound.abilityHit) sound.abilityHit();
+              setTimeout(() => { e.root = 0; }, 2500);
+            }
+          });
+          break;
+        }
+
+        case 'recon_dart': {
+          // Recon Dart
+          const dPos = pPos.clone().add(forward.clone().multiplyScalar(22));
+          empWave(dPos.x, dPos.z, 0xab47bc);
+          showToast('🎯 [그림자 화살] 14m 반경 정찰 펄스 전개!');
+          enemiesList.forEach(e => {
+            if (!e.isDead && e.mesh && e.mesh.position.distanceTo(dPos) < 18) {
+              e.revealed = 4;
+              showToast('👁️ 적 위치 식별됨!');
+              if (sound && sound.abilityHit) sound.abilityHit();
+            }
+          });
+          break;
+        }
+
+        case 'dash': {
+          // Invulnerable Shadow Dash
+          const dest = camera.position.clone().add(forward.clone().multiplyScalar(10));
+          player.isInvulnerable = true;
+          camera.position.x = dest.x; camera.position.z = dest.z;
+          screenShake(0.2);
+          setTimeout(() => { player.isInvulnerable = false; }, 400);
+          break;
+        }
+
+        case 'flash': {
+          // Paranoia / Sensory Disruption Flash
+          const fPos = pPos.clone().add(forward.clone().multiplyScalar(18));
+          empWave(fPos.x, fPos.z, 0xab47bc);
+          enemiesList.forEach(e => {
+            if (!e.isDead && e.mesh && e.mesh.position.distanceTo(fPos) < 26) {
+              e.isBlinded = true;
+              e.blind = 3.5;
+              showToast('🔮 [무영] 감각 차단(피해망상) 적중! 적 실명 및 조준 상실!');
+              if (sound && sound.abilityHit) sound.abilityHit();
+
+              setTimeout(() => {
+                e.isBlinded = false;
+                e.blind = 0;
+                if (sound && sound.abilityEnd) sound.abilityEnd();
+              }, 3500);
+            }
+          });
+          break;
+        }
+
+        case 'ult_recon': {
+          // Shadow Hunt Ultimate
+          empWave(pPos.x, pPos.z, 0xab47bc);
+          screenShake(0.4);
+          enemiesList.forEach(e => {
+            if (!e.isDead) e.revealed = 8;
+          });
+          player.speedBuff = 1.3;
+          setTimeout(() => { player.speedBuff = 1.0; }, 8000);
+          showToast('🔮 [그림자 사냥] 모든 적 위치 8초간 노출 및 이동속도 +30%!');
+          break;
+        }
+
+        case 'nade': {
+          // Fragmentation Grenade
+          const nPos = pPos.clone().add(forward.clone().multiplyScalar(16));
+          setTimeout(() => {
+            shardErupt(nPos.x, nPos.z, 8, 0xffa726, 18);
+            screenShake(0.5);
+            enemiesList.forEach(e => {
+              if (!e.isDead && e.mesh && e.mesh.position.distanceTo(nPos) < 9) {
+                e.hp = Math.max(0, (e.hp || 100) - 75);
+                showToast('💥 유탄 폭발 적중!');
+              }
+            });
+          }, 600);
+          break;
+        }
+
+        case 'shield': {
+          // Frontline Kinetic Shield
+          player.shield = Math.min(100, (player.shield || 0) + 50);
+          showToast('🛡️ [강철] 전선 방패 가동! 실드 50 생성!');
+          break;
+        }
+
+        case 'charge': {
+          // Shoulder Charge
+          const cDest = camera.position.clone().add(forward.clone().multiplyScalar(12));
+          camera.position.x = cDest.x; camera.position.z = cDest.z;
+          screenShake(0.4);
+          enemiesList.forEach(e => {
+            if (!e.isDead && e.mesh && e.mesh.position.distanceTo(camera.position) < 4) {
+              e.hp = Math.max(0, (e.hp || 100) - 40);
+              showToast('💥 돌진 충돌! 적 넉백 및 피해!');
+            }
+          });
+          break;
+        }
+
+        case 'ult_smash': {
+          // Ground Slam Shatter
+          shardErupt(pPos.x, pPos.z, 14, 0xffa726, 24);
+          screenShake(0.85);
+          enemiesList.forEach(e => {
+            if (!e.isDead && e.mesh && e.mesh.position.distanceTo(pPos) < 14) {
+              e.hp = Math.max(0, (e.hp || 100) - 120);
+              e.slow = 0.4;
+              setTimeout(() => { e.slow = 0; }, 4000);
+            }
+          });
+          showToast('💥 [강철] 파쇄 궁극기 대폭발! 120 광역 피해!');
+          break;
+        }
+
+        case 'heal': {
+          // Healing Zone
+          const hPos = pPos.clone();
+          const hGeo = new THREE.RingGeometry(0.2, 8, 32);
+          const hMat = new THREE.MeshBasicMaterial({ color: 0x66bb6a, transparent: true, opacity: 0.5, side: THREE.DoubleSide });
+          const hRing = new THREE.Mesh(hGeo, hMat);
+          hRing.rotation.x = -Math.PI / 2; hRing.position.set(hPos.x, 0.05, hPos.z);
+          scene.add(hRing);
+
+          let hTick = 0;
+          const hIv = setInterval(() => {
+            hTick++;
+            if (camera.position.distanceTo(hPos) < 8) {
+              player.hp = Math.min(100, player.hp + 5);
+              updateHUD();
+            }
+            if (hTick >= 16) {
+              clearInterval(hIv);
+              scene.remove(hRing);
+              hGeo.dispose(); hMat.dispose();
+            }
+          }, 500);
+          break;
+        }
+
+        case 'root': {
+          // Entangling Roots
+          const target = enemiesList.find(e => !e.isDead && e.mesh && e.mesh.position.distanceTo(pPos) < 30);
+          if (target) {
+            target.root = 2.5; target.revealed = 4;
+            showToast('🌿 [연화] 적 결박(이동 불가) 성공!');
+            endBurst(target.mesh.position.x, target.mesh.position.z, 0x66bb6a, 2.0);
+            setTimeout(() => { target.root = 0; }, 2500);
+          } else {
+            showToast('🌿 결박 사거리 내 적이 없습니다.');
+          }
+          break;
+        }
+
+        case 'ult_res': {
+          // Resurrection Ultimate
+          player.hp = 100;
+          const deadTeammate = teammatesList.find(t => t.isDead);
+          if (deadTeammate) {
+            deadTeammate.isDead = false;
+            deadTeammate.hp = 100;
+            if (deadTeammate.mesh) deadTeammate.mesh.visible = true;
+            showToast(`🌿 [연화] 재생! 쓰러진 아군 ${deadTeammate.name} 부활!`);
+          } else {
+            showToast('🌿 [연화] 재생! 생명력 완전 회복!');
+          }
+          empWave(pPos.x, pPos.z, 0x66bb6a);
+          break;
+        }
+
+        case 'emp': {
+          // EMP Disruption
+          const ePos = pPos.clone().add(forward.clone().multiplyScalar(15));
+          empWave(ePos.x, ePos.z, 0xffd54f);
+          enemiesList.forEach(e => {
+            if (!e.isDead && e.mesh && e.mesh.position.distanceTo(ePos) < 12) {
+              e.silenced = true;
+              setTimeout(() => { e.silenced = false; }, 6000);
+            }
+          });
+          showToast('⚡ [노은] 전자 교란 적중! 적 무기 침묵!');
+          break;
+        }
+
+        case 'drone': {
+          // Surveillance Drone
+          showToast('🤖 [노은] 감시 드론 전방 정찰 시작!');
+          empWave(pPos.x, pPos.z, 0xffd54f);
+          setTimeout(() => {
+            enemiesList.forEach(e => { if (!e.isDead) e.revealed = 4; });
+            showToast('📡 드론 정찰: 적 위치 식별 완료!');
+          }, 1500);
+          break;
+        }
+
+        case 'mine': {
+          // Overload Mine
+          const mPos = pPos.clone().add(forward.clone().multiplyScalar(10));
+          const mGeo = new THREE.CylinderGeometry(0.3, 0.4, 0.15, 12);
+          const mMat = new THREE.MeshBasicMaterial({ color: 0xffd54f });
+          const mine = new THREE.Mesh(mGeo, mMat);
+          mine.position.set(mPos.x, 0.08, mPos.z);
+          scene.add(mine);
+
+          const mChk = setInterval(() => {
+            enemiesList.forEach(e => {
+              if (!e.isDead && e.mesh && e.mesh.position.distanceTo(mine.position) < 3.5) {
+                clearInterval(mChk);
+                scene.remove(mine);
+                mGeo.dispose(); mMat.dispose();
+                shardErupt(mPos.x, mPos.z, 6, 0xffd54f, 14);
+                e.hp = Math.max(0, (e.hp || 100) - 45);
+                e.isBlinded = true; e.blind = 3; e.slow = 0.45;
+                showToast('⚡ 과부하 지뢰 기폭! 적 실명 및 둔화!');
+                setTimeout(() => { e.isBlinded = false; e.blind = 0; e.slow = 0; }, 3000);
+              }
+            });
+          }, 200);
+          break;
+        }
+
+        case 'ult_emp': {
+          // Total Blackout Ultimate
+          empWave(pPos.x, pPos.z, 0xffd54f);
+          screenShake(0.5);
+          enemiesList.forEach(e => {
+            if (!e.isDead) {
+              e.silenced = true; e.slow = 0.5; e.revealed = 10;
+              setTimeout(() => { e.silenced = false; e.slow = 0; }, 10000);
+            }
+          });
+          showToast('⚡ [노은] 정전 궁극기 가동! 모든 적 10초간 완전 무력화!');
+          break;
+        }
+
+        case 'pierce': {
+          // Wall Piercing Railgun
+          const rRay = new THREE.Ray(camera.position, forward);
+          enemiesList.forEach(e => {
+            if (!e.isDead && e.mesh) {
+              const diff = e.mesh.position.clone().sub(camera.position);
+              const proj = diff.dot(forward);
+              if (proj > 0 && proj < 100) {
+                const perp = diff.clone().sub(forward.clone().multiplyScalar(proj)).length();
+                if (perp < 1.8) {
+                  e.hp = Math.max(0, (e.hp || 100) - 80);
+                  showToast('🎯 [백호] 관통 사격 명중! 80 관통 피해!');
+                }
+              }
+            }
+          });
+          empWave(pPos.x, pPos.z, 0xffffff);
+          screenShake(0.3);
+          break;
+        }
+
+        case 'sensor': {
+          // Perimeter Sensor
+          const sPos = pPos.clone().add(forward.clone().multiplyScalar(14));
+          const sGeo = new THREE.RingGeometry(0.2, 3.5, 24);
+          const sMat = new THREE.MeshBasicMaterial({ color: 0xffffff, side: THREE.DoubleSide });
+          const sensorRing = new THREE.Mesh(sGeo, sMat);
+          sensorRing.rotation.x = -Math.PI / 2; sensorRing.position.set(sPos.x, 0.05, sPos.z);
+          scene.add(sensorRing);
+
+          const sChk = setInterval(() => {
+            enemiesList.forEach(e => {
+              if (!e.isDead && e.mesh && e.mesh.position.distanceTo(sensorRing.position) < 4) {
+                e.slow = 0.6; e.revealed = 6;
+                showToast('🚨 [백호] 경계 센서 침입 감지!');
+                clearInterval(sChk);
+                scene.remove(sensorRing);
+                sGeo.dispose(); sMat.dispose();
+                setTimeout(() => { e.slow = 0; }, 3000);
+              }
+            });
+          }, 200);
+          break;
+        }
+
+        case 'ult_snipe': {
+          // Gaze Ultimate
+          empWave(pPos.x, pPos.z, 0xffffff);
+          enemiesList.forEach(e => { if (!e.isDead) e.revealed = 8; });
+          showToast('👁️ [백호] 응시 발동! 모든 적 위치 8초간 투시!');
+          break;
+        }
+      }
+    }
+
+    // Dynamic HUD Skills Tray Updating
+    function updateSkillsHUD(agentDef) {
+      if (!agentDef) return;
+      const slotC = document.getElementById('slot-c') || document.getElementById('skill-slot-c');
+      const slotQ = document.getElementById('slot-q') || document.getElementById('skill-slot-q');
+      const slotE = document.getElementById('slot-e') || document.getElementById('skill-slot-e');
+      const slotX = document.getElementById('slot-x') || document.getElementById('skill-slot-x');
+      const abils = agentDef.abilities;
+      if (!abils || abils.length < 4) return;
+
+      const qAbil = abils.find(a => a.key === 'Q') || abils[0];
+      const eAbil = abils.find(a => a.key === 'E') || abils[1];
+      const cAbil = abils.find(a => a.key === 'C') || abils[2];
+      const xAbil = abils.find(a => a.key === 'X') || abils[3];
+
+      const ICONS = {
+        wall_fire: '🔥', proj_fire: '☄️', smoke_fire: '💨', ult_fire: '🌋',
+        trap_slow: '❄️', wall_ice: '🧊', smoke_ice: '🌨️', ult_ice: '💎',
+        recon_dart: '🎯', dash: '⚡', flash: '🔮', ult_recon: '👁️',
+        nade: '💣', shield: '🛡️', charge: '💥', ult_smash: '⚡',
+        heal: '🌱', root: '🌿', smoke: '🌸', ult_res: '✨',
+        emp: '⚡', drone: '🤖', mine: '💥', ult_emp: '⚡',
+        pierce: '🎯', sensor: '🚨', smoke_fast: '💨', ult_snipe: '👁️'
+      };
+
+      if (slotC) {
+        const nameEl = slotC.querySelector('.skill-name');
+        const iconEl = slotC.querySelector('.skill-icon');
+        if (nameEl) nameEl.innerText = cAbil.name;
+        if (iconEl && ICONS[cAbil.type]) iconEl.innerText = ICONS[cAbil.type];
+      }
+      if (slotQ) {
+        const nameEl = slotQ.querySelector('.skill-name');
+        const iconEl = slotQ.querySelector('.skill-icon');
+        if (nameEl) nameEl.innerText = qAbil.name;
+        if (iconEl && ICONS[qAbil.type]) iconEl.innerText = ICONS[qAbil.type];
+      }
+      if (slotE) {
+        const nameEl = slotE.querySelector('.skill-name');
+        const iconEl = slotE.querySelector('.skill-icon');
+        if (nameEl) nameEl.innerText = eAbil.name;
+        if (iconEl && ICONS[eAbil.type]) iconEl.innerText = ICONS[eAbil.type];
+      }
+      if (slotX) {
+        const nameEl = slotX.querySelector('.skill-name');
+        const iconEl = slotX.querySelector('.skill-icon');
+        if (nameEl) nameEl.innerText = xAbil.name;
+        if (iconEl && ICONS[xAbil.type]) iconEl.innerText = ICONS[xAbil.type];
+      }
+    }
+
+
+    /* ══════ AGENT SELECT MODAL LOGIC ══════ */
+    let pickedAgent = AGENTS[0];
+
+    function openAgentSelectModal() {
+      const modal = document.getElementById('s-select');
+      if (!modal) return;
+      const curAgent = getAgentDef(lobbySlots[myTeam][mySlotIdx].agent);
+      pickedAgent = curAgent;
+      renderAgentSelectGrid();
+      modal.classList.add('active');
+    }
+
+    function closeAgentSelectModal() {
+      const modal = document.getElementById('s-select');
+      if (modal) modal.classList.remove('active');
+    }
+
+    
+    // Expose to window for global access & verification
+    window.AGENTS = AGENTS;
+    window.getAgentDef = getAgentDef;
+    window.agentPortrait = agentPortrait;
+    window.openAgentSelectModal = openAgentSelectModal;
+    window.closeAgentSelectModal = closeAgentSelectModal;
+    window.confirmAgentSelection = confirmAgentSelection;
+    window.castAbility = castAbility;
+    window.updateSkillsHUD = updateSkillsHUD;
+    window.ultCutIn = ultCutIn;
+    window.edgeFlash = edgeFlash;
+    window.screenShake = screenShake;
+    window.castBurst = castBurst;
+    window.endBurst = endBurst;
+    window.shardErupt = shardErupt;
+    window.empWave = empWave;
+
+    function renderAgentSelectGrid() {
+      const grid = document.getElementById('sel-grid');
+      const detail = document.getElementById('sel-detail');
+      if (!grid || !detail) return;
+      grid.innerHTML = '';
+
+      AGENTS.forEach(ag => {
+        const card = document.createElement('div');
+        card.className = 'acard';
+        card.style.setProperty('--ac', ag.color);
+        card.setAttribute('aria-pressed', ag.id === pickedAgent.id);
+        card.innerHTML = `
+          <img class="acard-img" src="${agentPortrait(ag, 220, 260)}" alt="${ag.name}">
+          <div class="acard-body">
+            <div class="acard-role">${ag.role}</div>
+            <div class="acard-name">${ag.name}</div>
+            <div class="acard-q">${ag.quote}</div>
+          </div>
+        `;
+        card.onclick = () => {
+          pickedAgent = ag;
+          if (sound && sound.playSwitchClick) sound.playSwitchClick();
+          renderAgentSelectGrid();
+        };
+        grid.appendChild(card);
+      });
+
+      // Detail Pane
+      detail.style.setProperty('--ac', pickedAgent.color);
+      detail.innerHTML = `
+        <div class="det-hero">
+          <img class="det-img" src="${agentPortrait(pickedAgent, 400, 320)}" alt="${pickedAgent.name}">
+          <div class="det-hero-txt">
+            <div class="det-name">${pickedAgent.name}</div>
+            <div class="det-role">${pickedAgent.role} · ${pickedAgent.id.toUpperCase()}</div>
+          </div>
+        </div>
+        <div class="det-desc">${pickedAgent.desc}</div>
+        <div style="font-weight:bold; color:#fff; font-size:13px; margin-bottom:10px; letter-spacing:0.08em;">고유 능력 세트 (ABILITIES)</div>
+        <div class="ab-list">
+          ${pickedAgent.abilities.map(ab => `
+            <div class="ab">
+              <div class="ab-key">${ab.key}</div>
+              <div style="flex:1;">
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                  <span class="ab-name">${ab.name}</span>
+                  <span class="ab-meta">${ab.ult ? '궁극기 (5P)' : (ab.cd ? ab.cd + 's CD' : ab.charges + '회')}</span>
+                </div>
+                <div class="ab-desc">${ab.desc}</div>
+              </div>
+            </div>
+          `).join('')}
+        </div>
+      `;
+    }
+
+    function confirmAgentSelection() {
+      if (!pickedAgent) return;
+      lobbySlots[myTeam][mySlotIdx].agent = pickedAgent.name;
+      updateSkillsHUD(pickedAgent);
+      updatePlayerArmsTheme(pickedAgent.id);
+      renderTopAgentsBar();
+      renderLobbySlots();
+      closeAgentSelectModal();
+      showToast(`⚡ 요원 확정: [${pickedAgent.name}] (${pickedAgent.role}) 투입 완료!`);
+    }
+
+    // Bind Event Listeners
+    window.addEventListener('DOMContentLoaded', () => {
+      const openBtn = document.getElementById('btn-open-agent-select');
+      const closeBtn = document.getElementById('sel-close-btn');
+      const backBtn = document.getElementById('sel-back');
+      const lockInBtn = document.getElementById('sel-go');
+      if (openBtn) openBtn.onclick = openAgentSelectModal;
+      if (closeBtn) closeBtn.onclick = closeAgentSelectModal;
+      if (backBtn) backBtn.onclick = closeAgentSelectModal;
+      if (lockInBtn) lockInBtn.onclick = confirmAgentSelection;
+    });
+
+
+        function castSkillC() {
       const now = performance.now() / 1000;
       if (!cheats.noCooldowns && now - abilities.c.lastUsed < abilities.c.cd) return;
       abilities.c.lastUsed = now;
-
-      const agent = lobbySlots[myTeam][mySlotIdx].agent;
-      if (agent === 'Phoenix') { castPhoenixBlaze(); radioVoice.speak('Blaze up!'); }
-      else if (agent === 'Reyna') { castReynaLeer(); radioVoice.speak('See nothing!'); }
-      else if (agent === 'Omen') { castOmenShroudedStep(); radioVoice.speak('Stepping through shadows.'); }
-      else { castJettCloudburst(); radioVoice.speak('Smoke!'); }
+      const agentDef = getAgentDef(lobbySlots[myTeam][mySlotIdx].agent);
+      const abil = agentDef.abilities.find(a => a.key === 'C') || agentDef.abilities[2];
+      castAbility(abil.type, abil);
     }
-
 
     function castSkillQ() {
       const now = performance.now() / 1000;
       if (!cheats.noCooldowns && now - abilities.q.lastUsed < abilities.q.cd) return;
       abilities.q.lastUsed = now;
-
-      const agent = lobbySlots[myTeam][mySlotIdx].agent;
-      if (agent === 'Phoenix') { castPhoenixFlash(); radioVoice.speak('Watch your eyes!'); }
-      else if (agent === 'Reyna') { castReynaDevour(); radioVoice.speak('Consumed!'); }
-      else if (agent === 'Omen') { castOmenParanoia(); radioVoice.speak('Blind them!'); }
-      else { castJettUpdraft(); radioVoice.speak('Up you go!'); }
+      const agentDef = getAgentDef(lobbySlots[myTeam][mySlotIdx].agent);
+      const abil = agentDef.abilities.find(a => a.key === 'Q') || agentDef.abilities[0];
+      castAbility(abil.type, abil);
     }
-
 
     function castSkillE() {
       const now = performance.now() / 1000;
       if (!cheats.noCooldowns && now - abilities.e.lastUsed < abilities.e.cd) return;
       abilities.e.lastUsed = now;
-
-      const agent = lobbySlots[myTeam][mySlotIdx].agent;
-      if (agent === 'Phoenix') { castPhoenixHotHands(); radioVoice.speak('Hot hands!'); }
-      else if (agent === 'Reyna') { castReynaDismiss(); radioVoice.speak('Out of your sight.'); }
-      else if (agent === 'Omen') { castOmenDarkCover(); radioVoice.speak('Cover going out.'); }
-      else { castJettTailwind(); radioVoice.speak('Wind!'); }
+      const agentDef = getAgentDef(lobbySlots[myTeam][mySlotIdx].agent);
+      const abil = agentDef.abilities.find(a => a.key === 'E') || agentDef.abilities[1];
+      castAbility(abil.type, abil);
     }
 
-
     function castSkillX() {
-      const agent = lobbySlots[myTeam][mySlotIdx].agent;
-      if (agent === 'Phoenix') {
-        triggerUltBanner('Phoenix', 'Run It Back');
-        castPhoenixRunItBack();
-        radioVoice.speak("Jokes over, you're dead!");
-      } else if (agent === 'Reyna') {
-        triggerUltBanner('Reyna', 'Empress');
-        castReynaEmpress();
-        radioVoice.speak('They will cower!');
-      } else if (agent === 'Omen') {
-        triggerUltBanner('Omen', 'From the Shadows');
-        castOmenShadowTeleport();
-        radioVoice.speak('Scatter!');
-      } else {
-        triggerUltBanner('Jett', 'Blade Storm');
-        castJettBladestorm();
-        radioVoice.speak('Watch this!');
-      }
+      const agentDef = getAgentDef(lobbySlots[myTeam][mySlotIdx].agent);
+      const abil = agentDef.abilities.find(a => a.key === 'X') || agentDef.abilities[3];
+      castAbility(abil.type, abil);
     }
 
 
@@ -16373,6 +17815,10 @@
       clearMap();
     });
 
+    
+    const openAgentBtn = document.getElementById('btn-open-agent-select');
+    if (openAgentBtn) openAgentBtn.addEventListener('click', openAgentSelectModal);
+  
     document.getElementById('btn-start-game').addEventListener('click', () => {
       sound.init();
       sound.playDash();
@@ -17257,6 +18703,7 @@
                     player.shield -= dealtToShield;
                     const remainder = baseIncoming - dealtToShield;
                     player.hp -= remainder;
+                    player.lastDamageTime = performance.now() / 1000;
 
                     if (prevPlayerShield > 0 && player.shield === 0) {
                       sound.playShieldBreak();
@@ -17588,6 +19035,26 @@
         checkTeleporters();
 
         updateParticlesAndCasings(dt);
+        // VFX Tick Timers
+        if (_ultCutTimer > 0) {
+          _ultCutTimer -= dt;
+          if (_ultCutTimer <= 0) {
+            const el = document.getElementById('ultcut');
+            if (el) el.classList.remove('on');
+          }
+        }
+        if (_edgeTimer > 0) {
+          _edgeTimer -= dt;
+          if (_edgeTimer <= 0) {
+            const el = document.getElementById('edgefx');
+            if (el) { el.classList.remove('on'); el.style.opacity = '0'; }
+          }
+        }
+        if (TIMEFX.t > 0) {
+          TIMEFX.t -= dt;
+          if (TIMEFX.t <= 0) TIMEFX.scale = 1.0;
+        }
+  
 
         // Update Collapsing Bodies
         enemiesList.forEach(e => {
