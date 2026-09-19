@@ -3599,7 +3599,7 @@
     const myClientId = 'user_' + Math.random().toString(36).substring(2, 8);
     const networkChannel = new BroadcastChannel('VALORANT_5V5_NET');
 
-    const MAP_LIST = ['ascent', 'bind', 'haven', 'icebox', 'split', 'lotus', 'breeze', 'sunset', 'pearl', 'fracture', 'abyss', 'district', 'drift', 'glitch', 'kasbah', 'piazza', 'range'];
+    const MAP_LIST = ['ascent', 'bind', 'haven', 'icebox', 'split', 'lotus', 'breeze', 'sunset', 'pearl', 'fracture', 'abyss', 'district', 'drift', 'glitch', 'kasbah', 'piazza', 'bastion', 'range'];
     const MAP_NAMES = {
       ascent: 'ASCENT (어센트) - 베네치아 요새 & 전동 셔터 도어 [F]',
       bind: 'BIND (바인드) - 모로코 사막 & 차원 이동 텔레포터',
@@ -3617,6 +3617,7 @@
       glitch: 'GLITCH (글리치) - 가상 시뮬레이션 매트릭스 & 양자 점프 게이트 [F] & 글리치 포털',
       kasbah: 'KASBAH (카스바) - 모로코 사막 바틱 요새 & 2단 성벽 회랑 & 고대 기류 분수 [F]',
       piazza: 'PIAZZA (피아자) - 이탈리아 토스카나 해안 광장 & 르네상스 종탑 & 수로 부스터 [F]',
+      bastion: 'BASTION (바스티온) - 스위스 알프스 산악 요새 & 레이더 타워 & 지열 증기 벤트 [F]',
       range: 'THE RANGE (사격장) - 사격 훈련장 & 봇 연습'
     };
     let currentMapIndex = 0;
@@ -3633,7 +3634,8 @@
       Waylay: '⚡',
       Maxbot: '🤖',
       Nox: '🌑',
-      Zephyr: '🌪️'
+      Zephyr: '🌪️',
+      Veto: '💥'
     };
     const AGENT_COLORS = {
       Jett: '#00f0ff', Phoenix: '#ff6600', Reyna: '#be00ff', Sova: '#2979ff',
@@ -3649,7 +3651,8 @@
       Waylay: '#38bdf8',
       Maxbot: '#f97316',
       Nox: '#6366f1',
-      Zephyr: '#34d399'
+      Zephyr: '#34d399',
+      Veto: '#ef4444'
     };
     const AGENT_ROLES = {
       Jett: '타격대 (Duelist)', Phoenix: '타격대 (Duelist)', Reyna: '타격대 (Duelist)', Raze: '타격대 (Duelist)',
@@ -3664,7 +3667,8 @@
       Waylay: '타격대 (Duelist)',
       Maxbot: '감시대 (Sentinel)',
       Nox: '전략가 (Controller)',
-      Zephyr: '척후대 (Initiator)'
+      Zephyr: '척후대 (Initiator)',
+      Veto: '타격대 (Duelist)'
     };
 
     const lobbySlots = {
@@ -4490,7 +4494,7 @@
     /* ==========================================================
        DYNAMIC AGENT SWITCHING SYSTEM ([H] KEY TO CYCLE AGENT)
        ========================================================== */
-    const PLAYABLE_AGENTS = ['Jett', 'Phoenix', 'Reyna', 'Sova', 'Sage', 'Omen', 'Brimstone', 'Raze', 'Killjoy', 'Chamber', 'Viper', 'Cypher', 'Neon', 'Yoru', 'Fade', 'Gekko', 'Harbor', 'Iso', 'Deadlock', 'Clove', 'Vyse', 'KAY/O', 'Tejo', 'Astra', 'Breach', 'Skye', 'Waylay', 'Maxbot', 'Nox', 'Zephyr'];
+    const PLAYABLE_AGENTS = ['Jett', 'Phoenix', 'Reyna', 'Sova', 'Sage', 'Omen', 'Brimstone', 'Raze', 'Killjoy', 'Chamber', 'Viper', 'Cypher', 'Neon', 'Yoru', 'Fade', 'Gekko', 'Harbor', 'Iso', 'Deadlock', 'Clove', 'Vyse', 'KAY/O', 'Tejo', 'Astra', 'Breach', 'Skye', 'Waylay', 'Maxbot', 'Nox', 'Zephyr', 'Veto'];
     let currentAgentIdx = 0;
 
     const AGENT_SKILL_LABELS = {
@@ -4514,7 +4518,8 @@
       Waylay: { c: '광자 굴절 (C)', q: '차원 가속 (Q)', e: '빛의 도약 (E)', x: '프리즘 오버드라이브 (X)' },
       Maxbot: { c: '유도 로켓 (C)', q: '전자기 펄스 EMP (Q)', e: '오버클럭 배리어 (E)', x: '맥스봇 전탄 발사 (X)' },
       Nox: { c: '공허 장막 (C)', q: '그림자 족쇄 (Q)', e: '암흑 성운 (E)', x: '심연의 포식 (X)' },
-      Zephyr: { c: '돌풍 회오리 (C)', q: '폭풍 깃털 수리검 (Q)', e: '기류 정찰선 (E)', x: '템페스트 타이푼 (X)' }
+      Zephyr: { c: '돌풍 회오리 (C)', q: '폭풍 깃털 수리검 (Q)', e: '기류 정찰선 (E)', x: '템페스트 타이푼 (X)' },
+      Veto: { c: '지진 균열 (C)', q: '분쇄 충격파 (Q)', e: '피스톤 돌진 (E)', x: '대격변 그라운드 슬램 (X)' }
     };
 
     let spectatorTargetIndex = 0;
@@ -4687,6 +4692,8 @@
     let glitchJumpGate = null;
     let kasbahFountain = null;
     let piazzaCanalBoost = null;
+    let bastionSteamVent = null;
+    let isHardwareFrameSync = true;
     let pollingRateModeIdx = 0;
     let isLowJitterMode = true;
     let currentDrsModeIdx = 0;
@@ -5424,6 +5431,23 @@
         const bracer = new THREE.Mesh(new THREE.CylinderGeometry(0.07, 0.08, 0.24, 8), new THREE.MeshStandardMaterial({ color: 0x10b981, metalness: 0.8 }));
         bracer.position.set(0.28, 1.05, 0.05);
         grp.add(bracer);
+      } else if (agentName === 'Veto') {
+        // Chilean tectonic heavy duelist with seismic hydraulic piston gauntlets
+        const helm = new THREE.Mesh(new THREE.BoxGeometry(0.32, 0.28, 0.32), new THREE.MeshStandardMaterial({ color: 0x991b1b, metalness: 0.85 }));
+        helm.position.set(0, 1.82, 0);
+        grp.add(helm);
+        const visor = new THREE.Mesh(new THREE.BoxGeometry(0.24, 0.06, 0.05), new THREE.MeshBasicMaterial({ color: 0xf59e0b }));
+        visor.position.set(0, 1.82, 0.17);
+        grp.add(visor);
+        const pistonL = new THREE.Mesh(new THREE.CylinderGeometry(0.09, 0.1, 0.36, 8), new THREE.MeshStandardMaterial({ color: 0xef4444, metalness: 0.9, roughness: 0.2 }));
+        pistonL.position.set(-0.28, 1.05, 0.06);
+        const pistonR = new THREE.Mesh(new THREE.CylinderGeometry(0.09, 0.1, 0.36, 8), new THREE.MeshStandardMaterial({ color: 0xef4444, metalness: 0.9, roughness: 0.2 }));
+        pistonR.position.set(0.28, 1.05, 0.06);
+        grp.add(pistonL);
+        grp.add(pistonR);
+        const chestCore = new THREE.Mesh(new THREE.OctahedronGeometry(0.09), new THREE.MeshStandardMaterial({ color: 0xf59e0b, emissive: 0xd97706, emissiveIntensity: 1.2 }));
+        chestCore.position.set(0, 1.25, 0.22);
+        grp.add(chestCore);
       }
 
       // Distinct tactical role underfoot glowing aura ring
@@ -5495,6 +5519,20 @@
       const pm = POLLING_MODES[pollingRateModeIdx];
       sound.playSwitchClick();
       showToast(`⚡ 마우스 인풋 폴링 레이트: [${pm.name}]`);
+    }
+
+    function toggleHardwareFrameSync() {
+      isHardwareFrameSync = !isHardwareFrameSync;
+      sound.playSwitchClick();
+      showToast(`⚡ 하드웨어 프레임 동기화 (DIRECT FLUSH): [${isHardwareFrameSync ? 'ON (초저지연)' : 'OFF'}]`);
+    }
+
+    function triggerBastionSteamVent() {
+      if (!bastionSteamVent || player.isDead) return;
+      sound.playTeleport();
+      player.velocity.y = 19.5;
+      player.isGrounded = false;
+      showToast('⚡ [BASTION] 고압 지열 증기 벤트 분출! (GEOTHERMAL STEAM SURGE)');
     }
 
     function triggerPiazzaCanalBoost() {
@@ -5921,6 +5959,8 @@
       if (kasbahFountain && kasbahFountain.fountainMesh) scene.remove(kasbahFountain.fountainMesh);
       kasbahFountain = null;
       piazzaCanalBoost = null;
+      if (bastionSteamVent && bastionSteamVent.ventMesh) scene.remove(bastionSteamVent.ventMesh);
+      bastionSteamVent = null;
 
       if (lotusDoor && lotusDoor.mesh) {
         scene.remove(lotusDoor.mesh);
@@ -6243,6 +6283,19 @@
         sunLight.intensity = 1.45;
         sunLight.position.set(30, 80, -30);
         scene.fog.color.setHex(0x38bdf8);
+        scene.fog.density = 0.005;
+      } else if (mapKey === 'bastion') {
+        // Swiss Alpine Mountain Bastion / Crystal Crisp Snow Sky & Frost Sunlight
+        grad.addColorStop(0, '#0f172a');
+        grad.addColorStop(0.35, '#1e293b');
+        grad.addColorStop(0.7, '#38bdf8');
+        grad.addColorStop(1, '#e0f2fe');
+        ambientLight.color.setHex(0xe0f2fe);
+        ambientLight.intensity = 1.1;
+        sunLight.color.setHex(0xffffff);
+        sunLight.intensity = 1.5;
+        sunLight.position.set(-20, 80, -30);
+        scene.fog.color.setHex(0x1e293b);
         scene.fog.density = 0.005;
       } else {
         // Range: High-tech military hangar
@@ -7762,6 +7815,69 @@
         addPlatform(0, 0, 40, 40, 0.5, 16, matTuscanStone);
         addPlatform(0, 0, -40, 40, 0.5, 16, matTuscanStone);
       }
+      else if (mapKey === 'bastion') {
+        // ==========================================================
+        // MAP 17: BASTION (바스티온) - 스위스 알프스 산악 요새 & 레이더 타워 & 지열 증기 벤트 [F]
+        // ==========================================================
+        const matAlpineSnow = new THREE.MeshStandardMaterial({ color: 0xe2e8f0, roughness: 0.85 });
+        const matBunkerWall = new THREE.MeshStandardMaterial({ color: 0x334155, roughness: 0.6, metalness: 0.5 });
+        const matSteelAntenna = new THREE.MeshStandardMaterial({ color: 0x0284c7, metalness: 0.9, roughness: 0.2 });
+        const matSteamVent = new THREE.MeshStandardMaterial({ color: 0x0ea5e9, emissive: 0x0284c7, emissiveIntensity: 0.7 });
+
+        // Outer Snowy Alpine Perimeter (120x120m)
+        addBox(0, -0.5, 0, 120, 1, 120, matAlpineSnow);
+        addBox(0, 8, -60, 120, 16, 2, matBunkerWall);
+        addBox(0, 8, 60, 120, 16, 2, matBunkerWall);
+        addBox(-60, 8, 0, 2, 16, 120, matBunkerWall);
+        addBox(60, 8, 0, 2, 16, 120, matBunkerWall);
+
+        // Center Mid High-Pressure Geothermal Steam Vent at (0, 0, 0)
+        const ventBase = new THREE.Mesh(new THREE.CylinderGeometry(3.0, 3.6, 0.8, 12), matBunkerWall);
+        ventBase.position.set(0, 0.4, 0);
+        const ventCore = new THREE.Mesh(new THREE.CylinderGeometry(2.4, 2.4, 0.2, 12), matSteamVent);
+        ventCore.position.set(0, 0.8, 0);
+        scene.add(ventBase);
+        scene.add(ventCore);
+        mapObjects.push(ventBase);
+        mapObjects.push(ventCore);
+
+        addTextBillboard(0, 2.2, 0, '[F] 지열 증기 벤트 승강기 (GEOTHERMAL STEAM VENT)', 1.5, '#38bdf8');
+
+        bastionSteamVent = {
+          pos: new THREE.Vector3(0, 0.4, 0),
+          ventMesh: ventBase
+        };
+
+        // Mid High-Altitude Bunker Catwalk (y = 4.5)
+        addPlatform(0, 0, 10, 36, 4.5, 6, matBunkerWall);
+        addRailing(0, 4.5, 7.1, 36, 'x');
+        addRailing(0, 4.5, 12.9, 36, 'x');
+        addStairs(16, 10, 0, 3.8, 4.5, 10, 10, 'x-');
+        addStairs(-16, 10, 0, 3.8, 4.5, 10, 10, 'x+');
+
+        // --- A SITE: RADAR ANTENNA COMPLEX (x = 30, z = -20) ---
+        addPlatform(30, 0, -20, 24, 0.5, 24, matSiteFloor);
+        addTextBillboard(30, 0.2, -20, 'A SITE', 1.8);
+        spikeSiteAreas.push({ minX: 18, maxX: 42, minZ: -32, maxZ: -8, name: 'A SITE' });
+
+        // 18m High-Altitude Steel Radar Antenna
+        addBox(36, 9.0, -32, 2.4, 18, 2.4, matSteelAntenna);
+        addBox(36, 18.0, -32, 8.0, 0.8, 8.0, matSteelAntenna); // Radar Dish
+        addCrateStack(24, -20, 2.4);
+
+        // --- B SITE: ALPINE CRYO BUNKER (x = -30, z = -20) ---
+        addPlatform(-30, 0, -20, 24, 0.5, 24, matSiteFloor);
+        addTextBillboard(-30, 0.2, -20, 'B SITE', 1.8);
+        spikeSiteAreas.push({ minX: -42, maxX: -18, minZ: -32, maxZ: -8, name: 'B SITE' });
+
+        // Bunker Concrete Facility
+        addBox(-36, 4.0, -30, 12, 8.0, 12, matBunkerWall);
+        addCrateStack(-24, -20, 2.4);
+
+        // ATK & DEF Spawns
+        addPlatform(0, 0, 40, 40, 0.5, 16, matAlpineSnow);
+        addPlatform(0, 0, -40, 40, 0.5, 16, matAlpineSnow);
+      }
       else if (mapKey === 'range') {
         addBox(0, -0.5, 0, 60, 1, 120, matConcrete);
         addBox(0, 7, -60, 60, 14, 2, matWallStone);
@@ -8126,6 +8242,13 @@
       if (e.code === 'F10') {
         e.preventDefault();
         togglePollingRateMode();
+        return;
+      }
+
+      // [F11] Key: Quick Toggle Ultra Low-Latency Hardware Frame Sync
+      if (e.code === 'F11') {
+        e.preventDefault();
+        toggleHardwareFrameSync();
         return;
       }
 
@@ -9872,6 +9995,15 @@
         }
       }
 
+      // 13. Bastion Geothermal Steam Vent [F]
+      if (MAP_LIST[currentMapIndex] === 'bastion' && bastionSteamVent) {
+        const pPos = camera.position;
+        if (pPos.distanceTo(bastionSteamVent.pos) < 5.0) {
+          triggerBastionSteamVent();
+          return;
+        }
+      }
+
       // 4. Ascent B Shutter Door
       if (!ascentDoor || ascentDoor.isDestroyed) return;
       const dist = camera.position.distanceTo(ascentDoor.switchPos);
@@ -11069,6 +11201,16 @@
         { label: 'DEF SPAWN', x: 0, z: -40, color: '#00ffaa' },
         { label: 'ATK SPAWN', x: 0, z: 40, color: '#ff4655' }
       ],
+      bastion: [
+        { label: 'A SITE', x: 30, z: -20, color: '#38bdf8' },
+        { label: 'RADAR TOWER', x: 36, z: -32, color: '#0284c7' },
+        { label: 'B SITE', x: -30, z: -20, color: '#38bdf8' },
+        { label: 'CRYO BUNKER', x: -36, z: -30, color: '#64748b' },
+        { label: 'STEAM VENT [F]', x: 0, z: 0, color: '#00f0ff' },
+        { label: 'CATWALK', x: 0, z: 10, color: '#94a3b8' },
+        { label: 'DEF SPAWN', x: 0, z: -40, color: '#00ffaa' },
+        { label: 'ATK SPAWN', x: 0, z: 40, color: '#ff4655' }
+      ],
       range: [
         { label: 'TARGETS', x: 0, z: -22, color: '#00f0ff' },
         { label: 'BENCH', x: 0, z: 0, color: '#ffc83b' },
@@ -11622,6 +11764,13 @@
           if (MAP_LIST[currentMapIndex] === 'piazza' && piazzaCanalBoost && !player.isDead) {
             if (Math.abs(camera.position.x) < 3.0 && Math.abs(camera.position.z) < 25.0 && Math.abs(camera.position.y - 1.7) < 1.0) {
               triggerPiazzaCanalBoost();
+            }
+          }
+
+          // Auto-launch when stepping onto Bastion Geothermal Steam Vent
+          if (MAP_LIST[currentMapIndex] === 'bastion' && bastionSteamVent && !player.isDead) {
+            if (Math.abs(camera.position.x) < 3.2 && Math.abs(camera.position.z) < 3.2 && Math.abs(camera.position.y - 1.7) < 1.2) {
+              if (player.velocity.y <= 0) triggerBastionSteamVent();
             }
           }
         }
