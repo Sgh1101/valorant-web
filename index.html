@@ -3824,7 +3824,7 @@
     const myClientId = 'user_' + Math.random().toString(36).substring(2, 8);
     const networkChannel = new BroadcastChannel('VALORANT_5V5_NET');
 
-    const MAP_LIST = ['ascent', 'bind', 'haven', 'icebox', 'split', 'lotus', 'breeze', 'sunset', 'pearl', 'fracture', 'abyss', 'district', 'drift', 'glitch', 'kasbah', 'piazza', 'bastion', 'colosseum', 'corrode', 'sanctum', 'zenith', 'subzero', 'oasis', 'eclipse', 'magma', 'cyberia', 'overgrowth', 'aerodrome', 'catacomb', 'solarium', 'citadel', 'foundry', 'chronos', 'monsoon', 'monolith', 'aurora', 'nexus', 'mirage', 'abyssal', 'inferno', 'vortex', 'range'];
+    const MAP_LIST = ['ascent', 'bind', 'haven', 'icebox', 'split', 'lotus', 'breeze', 'sunset', 'pearl', 'fracture', 'abyss', 'district', 'drift', 'glitch', 'kasbah', 'piazza', 'bastion', 'colosseum', 'corrode', 'sanctum', 'zenith', 'subzero', 'oasis', 'eclipse', 'magma', 'cyberia', 'overgrowth', 'aerodrome', 'catacomb', 'solarium', 'citadel', 'foundry', 'chronos', 'monsoon', 'monolith', 'aurora', 'nexus', 'mirage', 'abyssal', 'inferno', 'vortex', 'celestial', 'canyon', 'necropolis', 'zen', 'reactor', 'horizon', 'range'];
     const MAP_NAMES = {
       ascent: 'ASCENT (어센트) - 베네치아 요새 & 전동 셔터 도어 [F]',
       bind: 'BIND (바인드) - 모로코 사막 & 차원 이동 텔레포터',
@@ -3867,6 +3867,12 @@
       abyssal: 'ABYSSAL (어비설) - 마리아나 해구 10,000m 심해 기지 & 수압 방출 추진기 [F]',
       inferno: 'INFERNO (인페르노) - 이탈리아 토스카나 고성 와이너리 & 유압 화물 리프트 [F]',
       vortex: 'VORTEX (볼텍스) - 버뮤다 삼각지대 시공간 소용돌이 부유섬 & 차원 슬링샷 [F]',
+      celestial: 'CELESTIAL (셀레스티얼) - 성운 관측 우주 정거장 궤도 플랫폼 & 무중력 퀀텀 슬라이드 [F]',
+      canyon: 'CANYON (캐니언) - 미국 그랜드 캐니언 붉은 사암 협곡 & 협곡 와이어 로프웨이 [F]',
+      necropolis: 'NECROPOLIS (네크로폴리스) - 멕시코 마야 고대 피라미드 지하 묘실 & 진동 석판 제단 [F]',
+      zen: 'ZEN (젠) - 일본 교토 대나무 숲 & 젠 가든 사찰 & 돌풍 회오리 풍령 벤트 [F]',
+      reactor: 'REACTOR (리액터) - 체르노빌 원자력 발전소 4호기 냉각탑 & 방사선 증기 냉각 벤트 [F]',
+      horizon: 'HORIZON (호라이즌) - 몰디브 산호초 환초 해상 메가 플로트 시티 & 수중 제트 추진 패드 [F]',
       range: 'THE RANGE (사격장) - 사격 훈련장 & 봇 연습'
     };
     let currentMapIndex = 0;
@@ -4970,6 +4976,12 @@
     let abyssalWaterJet = null;
     let infernoCellarLift = null;
     let vortexSlingshot = null;
+    let celestialQuantumSlide = null;
+    let canyonRopeway = null;
+    let necropolisAltar = null;
+    let zenWindChime = null;
+    let reactorCoolantVent = null;
+    let horizonJetPlatform = null;
     let isGcLockerActive = true;
     let isHardwareFrameSync = true;
     let pollingRateModeIdx = 0;
@@ -5451,6 +5463,21 @@
       armR.position.set(0.28, 1.15, 0);
       grp.add(armL);
       grp.add(armR);
+
+      // Ballistic chest armor plate and neck collar
+      const vestPlate = new THREE.Mesh(new THREE.BoxGeometry(0.38, 0.42, 0.18), bodyMat);
+      vestPlate.position.set(0, 1.22, 0.08);
+      grp.add(vestPlate);
+
+      const neckCollar = new THREE.Mesh(new THREE.CylinderGeometry(0.14, 0.16, 0.12, 10), bodyMat);
+      neckCollar.position.set(0, 1.58, 0);
+      grp.add(neckCollar);
+
+      // Procedural black tactical rifle held by bot pointing forward
+      const botGunMat = new THREE.MeshStandardMaterial({ color: 0x0f172a, roughness: 0.3, metalness: 0.8 });
+      const botGun = new THREE.Mesh(new THREE.BoxGeometry(0.07, 0.10, 0.55), botGunMat);
+      botGun.position.set(0.22, 1.12, 0.28);
+      grp.add(botGun);
 
       // Distinct 3D Visual Customizations for ALL 14 Agents
       if (agentName === 'Jett') {
@@ -6222,6 +6249,60 @@
       showToast('🌀 [VORTEX] 시공간 차원 소용돌이 슬링샷 사출! (DIMENSIONAL SLINGSHOT)');
     }
 
+    function triggerCelestialQuantumSlide() {
+      if (!celestialQuantumSlide || player.isDead) return;
+      sound.playZipline();
+      player.velocity.x = (camera.position.x > 0) ? -32.0 : 32.0;
+      player.velocity.y = 4.0;
+      player.isGrounded = false;
+      showToast('✨ [CELESTIAL] 무중력 퀀텀 레일 슬라이드 가속! (QUANTUM SLIDE)');
+    }
+
+    function triggerCanyonRopeway() {
+      if (!canyonRopeway || player.isDead) return;
+      sound.playZipline();
+      player.velocity.z = (camera.position.z > 0) ? -30.0 : 30.0;
+      player.velocity.y = 4.5;
+      player.isGrounded = false;
+      showToast('🏜️ [CANYON] 협곡 고속 와이어 로프웨이 활강! (CANYON ROPEWAY)');
+    }
+
+    function triggerNecropolisAltar() {
+      if (!necropolisAltar || player.isDead) return;
+      sound.playTeleport();
+      player.velocity.y = 17.5;
+      player.velocity.z = (camera.position.z > 0) ? -18.0 : 18.0;
+      player.isGrounded = false;
+      showToast('🗿 [NECROPOLIS] 마야 고대 진동 석판 제단 공명 도약! (JADE ALTAR LEVITATION)');
+    }
+
+    function triggerZenWindChime() {
+      if (!zenWindChime || player.isDead) return;
+      sound.playDash();
+      player.velocity.x = (camera.position.x > 0) ? -30.0 : 30.0;
+      player.velocity.y = 4.2;
+      player.isGrounded = false;
+      showToast('🎋 [ZEN] 교토 젠 가든 돌풍 회오리 바람 분출! (TEMPEST SURGE)');
+    }
+
+    function triggerReactorCoolantVent() {
+      if (!reactorCoolantVent || player.isDead) return;
+      sound.playTeleport();
+      player.velocity.y = 18.5;
+      player.velocity.z = (camera.position.z > 0) ? -16.0 : 16.0;
+      player.isGrounded = false;
+      showToast('☢️ [REACTOR] 원자로 방사선 냉각 증기 고압 분출! (COOLANT STEAM SURGE)');
+    }
+
+    function triggerHorizonJetPlatform() {
+      if (!horizonJetPlatform || player.isDead) return;
+      sound.playDash();
+      player.velocity.z = (camera.position.z > 0) ? -32.0 : 32.0;
+      player.velocity.y = 3.5;
+      player.isGrounded = false;
+      showToast('🏝️ [HORIZON] 해상 메가플로트 수중 제트 추진 질주! (HYDRO-JET BOOST)');
+    }
+
     function triggerColosseumLift() {
       if (!colosseumLift || player.isDead) return;
       sound.playDoorSlide();
@@ -6702,6 +6783,12 @@
       abyssalWaterJet = null;
       infernoCellarLift = null;
       vortexSlingshot = null;
+      celestialQuantumSlide = null;
+      canyonRopeway = null;
+      necropolisAltar = null;
+      zenWindChime = null;
+      reactorCoolantVent = null;
+      horizonJetPlatform = null;
 
       if (lotusDoor && lotusDoor.mesh) {
         scene.remove(lotusDoor.mesh);
@@ -7350,6 +7437,84 @@
         sunLight.position.set(-25, 90, 35);
         scene.fog.color.setHex(0x3b0764);
         scene.fog.density = 0.008;
+      } else if (mapKey === 'celestial') {
+        // Nebula Space Station / Starlight Blue & Cosmic Ultraviolet
+        grad.addColorStop(0, '#020412');
+        grad.addColorStop(0.35, '#082f49');
+        grad.addColorStop(0.7, '#0284c7');
+        grad.addColorStop(1, '#38bdf8');
+        ambientLight.color.setHex(0x38bdf8);
+        ambientLight.intensity = 1.25;
+        sunLight.color.setHex(0x7dd3fc);
+        sunLight.intensity = 1.65;
+        sunLight.position.set(0, 95, 0);
+        scene.fog.color.setHex(0x0c1322);
+        scene.fog.density = 0.0065;
+      } else if (mapKey === 'canyon') {
+        // Grand Canyon Red Sandstone / Ochre Cliffs & Copper Amber Haze
+        grad.addColorStop(0, '#450a0a');
+        grad.addColorStop(0.35, '#7f1d1d');
+        grad.addColorStop(0.7, '#ea580c');
+        grad.addColorStop(1, '#fed7aa');
+        ambientLight.color.setHex(0xfeb272);
+        ambientLight.intensity = 1.2;
+        sunLight.color.setHex(0xf97316);
+        sunLight.intensity = 1.75;
+        sunLight.position.set(40, 85, 30);
+        scene.fog.color.setHex(0x7c2d12);
+        scene.fog.density = 0.0065;
+      } else if (mapKey === 'necropolis') {
+        // Mayan Subterranean Pyramid / Ancient Jade Turquoise Mist & Dark Stone
+        grad.addColorStop(0, '#022c22');
+        grad.addColorStop(0.35, '#064e3b');
+        grad.addColorStop(0.7, '#059669');
+        grad.addColorStop(1, '#34d399');
+        ambientLight.color.setHex(0x6ee7b7);
+        ambientLight.intensity = 1.15;
+        sunLight.color.setHex(0x10b981);
+        sunLight.intensity = 1.55;
+        sunLight.position.set(-20, 80, 20);
+        scene.fog.color.setHex(0x064e3b);
+        scene.fog.density = 0.0075;
+      } else if (mapKey === 'zen') {
+        // Kyoto Bamboo Temple / Cherry Blossom Dawn & Serene Gold
+        grad.addColorStop(0, '#2e1065');
+        grad.addColorStop(0.35, '#701a75');
+        grad.addColorStop(0.7, '#ec4899');
+        grad.addColorStop(1, '#fbcfe8');
+        ambientLight.color.setHex(0xfbcfe8);
+        ambientLight.intensity = 1.2;
+        sunLight.color.setHex(0xf472b6);
+        sunLight.intensity = 1.5;
+        sunLight.position.set(30, 80, -20);
+        scene.fog.color.setHex(0x14532d);
+        scene.fog.density = 0.006;
+      } else if (mapKey === 'reactor') {
+        // Chernobyl Reactor 4 / Radioactive Emerald Glow & Smoggy Industrial Fog
+        grad.addColorStop(0, '#052e16');
+        grad.addColorStop(0.35, '#14532d');
+        grad.addColorStop(0.7, '#16a34a');
+        grad.addColorStop(1, '#86efac');
+        ambientLight.color.setHex(0x86efac);
+        ambientLight.intensity = 1.15;
+        sunLight.color.setHex(0x4ade80);
+        sunLight.intensity = 1.6;
+        sunLight.position.set(10, 85, 10);
+        scene.fog.color.setHex(0x052e16);
+        scene.fog.density = 0.008;
+      } else if (mapKey === 'horizon') {
+        // Maldives Mega-Float City / Vibrant Tropical Turquoise Lagoon & Azure Sky
+        grad.addColorStop(0, '#0c4a6e');
+        grad.addColorStop(0.35, '#0284c7');
+        grad.addColorStop(0.7, '#38bdf8');
+        grad.addColorStop(1, '#e0f2fe');
+        ambientLight.color.setHex(0xbae6fd);
+        ambientLight.intensity = 1.3;
+        sunLight.color.setHex(0xffffff);
+        sunLight.intensity = 1.85;
+        sunLight.position.set(20, 95, 20);
+        scene.fog.color.setHex(0x0891b2);
+        scene.fog.density = 0.0055;
       } else {
         // Range: High-tech military hangar
         grad.addColorStop(0, '#080c10');
@@ -10502,6 +10667,293 @@
         addPlatform(0, 0, 42, 42, 0.5, 16, matVoidStone);
         addPlatform(0, 0, -42, 42, 0.5, 16, matVoidStone);
       }
+      else if (mapKey === 'celestial') {
+        // ==========================================================
+        // MAP 42: CELESTIAL (셀레스티얼) - 성운 관측 우주 정거장 & 퀀텀 슬라이드 [F]
+        // ==========================================================
+        const matSpaceHull = new THREE.MeshStandardMaterial({ color: 0x0f172a, roughness: 0.2, metalness: 0.9 });
+        const matStarGlass = new THREE.MeshStandardMaterial({ color: 0x0369a1, roughness: 0.1, metalness: 0.5 });
+        const matQuantumCyan = new THREE.MeshBasicMaterial({ color: 0x38bdf8 });
+        const matAlloyTrim = new THREE.MeshStandardMaterial({ color: 0x334155, metalness: 0.8 });
+
+        addBox(0, -0.5, 0, 116, 1, 116, matSpaceHull);
+        addBox(0, 7, -58, 116, 14, 2, matAlloyTrim);
+        addBox(0, 7, 58, 116, 14, 2, matAlloyTrim);
+        addBox(-58, 7, 0, 2, 14, 116, matAlloyTrim);
+        addBox(58, 7, 0, 2, 14, 116, matAlloyTrim);
+
+        // Center Quantum Slide Rail at (0, 0.2, 0)
+        const railPad = addPlatform(0, 0, 0, 24, 0.3, 5, matQuantumCyan, true);
+        const observatoryDome = new THREE.Mesh(new THREE.SphereGeometry(4.5, 16, 12, 0, Math.PI * 2, 0, Math.PI / 2), matStarGlass);
+        observatoryDome.position.set(0, 4.0, 0);
+        scene.add(observatoryDome);
+        mapObjects.push(observatoryDome);
+
+        addTextBillboard(0, 2.6, 0, '[F] 무중력 퀀텀 슬라이드 (QUANTUM SLIDE)', 1.5, '#7dd3fc');
+        celestialQuantumSlide = { pos: new THREE.Vector3(0, 0.2, 0), mesh: railPad };
+
+        addPlatform(0, 0, 15, 12, 4.0, 4, matAlloyTrim);
+        addPlatform(0, 0, -15, 12, 4.0, 4, matAlloyTrim);
+
+        // A SITE: NEBULA OBSERVATORY
+        addPlatform(30, 0, -20, 24, 0.5, 24, matSiteFloor);
+        spikeSiteAreas.push({ minX: 18, maxX: 42, minZ: -32, maxZ: -8, name: 'A SITE' });
+        addBox(30, 4.0, -20, 4, 8.0, 4, matAlloyTrim);
+        addPlatform(36, 0, -32, 12, 4.0, 10, matSpaceHull);
+        addRailing(29.9, 4.0, -32, 10, 'z');
+        addStairs(36, -14, 0, 3.8, 4.0, 12, 12, 'z-');
+        addCrateStack(24, -20, 2.4);
+
+        // B SITE: SOLAR DOCK
+        addPlatform(-30, 0, -20, 24, 0.5, 24, matSiteFloor);
+        spikeSiteAreas.push({ minX: -42, maxX: -18, minZ: -32, maxZ: -8, name: 'B SITE' });
+        addBox(-30, 3.5, -20, 4, 7.0, 4, matAlloyTrim);
+        addPlatform(-36, 0, -32, 12, 4.0, 10, matSpaceHull);
+        addRailing(-29.9, 4.0, -32, 10, 'z');
+        addStairs(-36, -14, 0, 3.8, 4.0, 12, 12, 'z-');
+        addCrateStack(-22, -20, 2.4);
+
+        addPlatform(0, 0, 42, 42, 0.5, 16, matSpaceHull);
+        addPlatform(0, 0, -42, 42, 0.5, 16, matSpaceHull);
+      }
+      else if (mapKey === 'canyon') {
+        // ==========================================================
+        // MAP 43: CANYON (캐니언) - 그랜드 캐니언 붉은 사암 협곡 & 와이어 로프웨이 [F]
+        // ==========================================================
+        const matRedSandstone = new THREE.MeshStandardMaterial({ color: 0x991b1b, roughness: 0.9 });
+        const matOchreRock = new THREE.MeshStandardMaterial({ color: 0x78350f, roughness: 0.85 });
+        const matRopeSteel = new THREE.MeshStandardMaterial({ color: 0x475569, metalness: 0.9, roughness: 0.2 });
+        const matCableBeam = new THREE.MeshBasicMaterial({ color: 0xf97316 });
+
+        addBox(0, -0.5, 0, 116, 1, 116, matRedSandstone);
+        addBox(0, 7, -58, 116, 14, 2, matOchreRock);
+        addBox(0, 7, 58, 116, 14, 2, matOchreRock);
+        addBox(-58, 7, 0, 2, 14, 116, matOchreRock);
+        addBox(58, 7, 0, 2, 14, 116, matOchreRock);
+
+        // Center Canyon Ropeway at (0, 0.2, 0)
+        const ropePad = addPlatform(0, 0, 0, 6, 0.4, 22, matCableBeam, true);
+        addPillar(0, 0, -11, 0.6, 12.0, matRopeSteel);
+        addPillar(0, 0, 11, 0.6, 12.0, matRopeSteel);
+
+        addTextBillboard(0, 2.6, 0, '[F] 협곡 와이어 로프웨이 (CANYON ROPEWAY)', 1.5, '#fed7aa');
+        canyonRopeway = { pos: new THREE.Vector3(0, 0.2, 0), mesh: ropePad };
+
+        addPlatform(0, 0, 14, 12, 3.8, 4, matOchreRock);
+        addPlatform(0, 0, -14, 12, 3.8, 4, matOchreRock);
+
+        // A SITE: CANYON DAM
+        addPlatform(30, 0, -20, 24, 0.5, 24, matSiteFloor);
+        spikeSiteAreas.push({ minX: 18, maxX: 42, minZ: -32, maxZ: -8, name: 'A SITE' });
+        addBox(30, 4.0, -20, 4, 8.0, 4, matOchreRock);
+        addPlatform(36, 0, -32, 12, 4.0, 10, matRedSandstone);
+        addRailing(29.9, 4.0, -32, 10, 'z');
+        addStairs(36, -14, 0, 3.8, 4.0, 12, 12, 'z-');
+        addCrateStack(24, -20, 2.4);
+
+        // B SITE: RIM OVERLOOK
+        addPlatform(-30, 0, -20, 24, 0.5, 24, matSiteFloor);
+        spikeSiteAreas.push({ minX: -42, maxX: -18, minZ: -32, maxZ: -8, name: 'B SITE' });
+        addBox(-30, 3.5, -20, 4, 7.0, 4, matOchreRock);
+        addPlatform(-36, 0, -32, 12, 4.0, 10, matRedSandstone);
+        addRailing(-29.9, 4.0, -32, 10, 'z');
+        addStairs(-36, -14, 0, 3.8, 4.0, 12, 12, 'z-');
+        addCrateStack(-22, -20, 2.4);
+
+        addPlatform(0, 0, 42, 42, 0.5, 16, matRedSandstone);
+        addPlatform(0, 0, -42, 42, 0.5, 16, matRedSandstone);
+      }
+      else if (mapKey === 'necropolis') {
+        // ==========================================================
+        // MAP 44: NECROPOLIS (네크로폴리스) - 마야 피라미드 지하 묘실 & 진동 석판 [F]
+        // ==========================================================
+        const matJadeRock = new THREE.MeshStandardMaterial({ color: 0x064e3b, roughness: 0.8 });
+        const matTombStone = new THREE.MeshStandardMaterial({ color: 0x022c22, roughness: 0.9 });
+        const matJadeGlow = new THREE.MeshBasicMaterial({ color: 0x34d399 });
+        const matObsidianAltar = new THREE.MeshStandardMaterial({ color: 0x0f172a, roughness: 0.2, metalness: 0.8 });
+
+        addBox(0, -0.5, 0, 116, 1, 116, matTombStone);
+        addBox(0, 7, -58, 116, 14, 2, matJadeRock);
+        addBox(0, 7, 58, 116, 14, 2, matJadeRock);
+        addBox(-58, 7, 0, 2, 14, 116, matJadeRock);
+        addBox(58, 7, 0, 2, 14, 116, matJadeRock);
+
+        // Center Vibrating Jade Altar at (0, 0.2, 0)
+        const altarPad = addPlatform(0, 0, 0, 7, 0.4, 7, matJadeGlow, true);
+        const jadePillar1 = addPillar(-3.0, 0, 0, 0.6, 6.0, matObsidianAltar);
+        const jadePillar2 = addPillar(3.0, 0, 0, 0.6, 6.0, matObsidianAltar);
+
+        addTextBillboard(0, 2.4, 0, '[F] 마야 고대 진동 석판 제단 (JADE ALTAR)', 1.5, '#6ee7b7');
+        necropolisAltar = { pos: new THREE.Vector3(0, 0.2, 0), mesh: altarPad };
+
+        addPlatform(0, 0, 14, 12, 3.8, 4, matJadeRock);
+        addPlatform(0, 0, -14, 12, 3.8, 4, matJadeRock);
+
+        // A SITE: KUKULKAN SANCTUARY
+        addPlatform(30, 0, -20, 24, 0.5, 24, matSiteFloor);
+        spikeSiteAreas.push({ minX: 18, maxX: 42, minZ: -32, maxZ: -8, name: 'A SITE' });
+        addBox(30, 4.0, -20, 4, 8.0, 4, matJadeRock);
+        addPlatform(36, 0, -32, 12, 4.0, 10, matTombStone);
+        addRailing(29.9, 4.0, -32, 10, 'z');
+        addStairs(36, -14, 0, 3.8, 4.0, 12, 12, 'z-');
+        addCrateStack(24, -20, 2.4);
+
+        // B SITE: CRYPT OF KINGS
+        addPlatform(-30, 0, -20, 24, 0.5, 24, matSiteFloor);
+        spikeSiteAreas.push({ minX: -42, maxX: -18, minZ: -32, maxZ: -8, name: 'B SITE' });
+        addBox(-30, 3.5, -20, 4, 7.0, 4, matJadeRock);
+        addPlatform(-36, 0, -32, 12, 4.0, 10, matTombStone);
+        addRailing(-29.9, 4.0, -32, 10, 'z');
+        addStairs(-36, -14, 0, 3.8, 4.0, 12, 12, 'z-');
+        addCrateStack(-22, -20, 2.4);
+
+        addPlatform(0, 0, 42, 42, 0.5, 16, matTombStone);
+        addPlatform(0, 0, -42, 42, 0.5, 16, matTombStone);
+      }
+      else if (mapKey === 'zen') {
+        // ==========================================================
+        // MAP 45: ZEN (젠) - 일본 교토 대나무 숲 & 사찰 & 풍령 벤트 [F]
+        // ==========================================================
+        const matTatamiStone = new THREE.MeshStandardMaterial({ color: 0x3f3f46, roughness: 0.8 });
+        const matBambooWood = new THREE.MeshStandardMaterial({ color: 0x15803d, roughness: 0.7 });
+        const matSakuraTrim = new THREE.MeshStandardMaterial({ color: 0xbe185d, roughness: 0.6 });
+        const matGaleWind = new THREE.MeshBasicMaterial({ color: 0xf472b6 });
+
+        addBox(0, -0.5, 0, 116, 1, 116, matTatamiStone);
+        addBox(0, 7, -58, 116, 14, 2, matBambooWood);
+        addBox(0, 7, 58, 116, 14, 2, matBambooWood);
+        addBox(-58, 7, 0, 2, 14, 116, matBambooWood);
+        addBox(58, 7, 0, 2, 14, 116, matBambooWood);
+
+        // Center Wind Chime Tempest Vent at (0, 0.2, 0)
+        const windPad = addPlatform(0, 0, 0, 22, 0.3, 5, matGaleWind, true);
+        const toriiGateL = addPillar(-4.0, 0, 0, 0.5, 8.0, matSakuraTrim);
+        const toriiGateR = addPillar(4.0, 0, 0, 0.5, 8.0, matSakuraTrim);
+        addBox(0, 8.2, 0, 10, 0.6, 1.2, matSakuraTrim);
+
+        addTextBillboard(0, 2.4, 0, '[F] 교토 돌풍 회오리 풍령 벤트 (TEMPEST SURGE)', 1.5, '#fbcfe8');
+        zenWindChime = { pos: new THREE.Vector3(0, 0.2, 0), mesh: windPad };
+
+        addPlatform(0, 0, 14, 12, 3.8, 4, matBambooWood);
+        addPlatform(0, 0, -14, 12, 3.8, 4, matBambooWood);
+
+        // A SITE: BELL TOWER
+        addPlatform(30, 0, -20, 24, 0.5, 24, matSiteFloor);
+        spikeSiteAreas.push({ minX: 18, maxX: 42, minZ: -32, maxZ: -8, name: 'A SITE' });
+        addBox(30, 4.0, -20, 4, 8.0, 4, matSakuraTrim);
+        addPlatform(36, 0, -32, 12, 4.0, 10, matTatamiStone);
+        addRailing(29.9, 4.0, -32, 10, 'z');
+        addStairs(36, -14, 0, 3.8, 4.0, 12, 12, 'z-');
+        addCrateStack(24, -20, 2.4);
+
+        // B SITE: KOI POND PAVILION
+        addPlatform(-30, 0, -20, 24, 0.5, 24, matSiteFloor);
+        spikeSiteAreas.push({ minX: -42, maxX: -18, minZ: -32, maxZ: -8, name: 'B SITE' });
+        addBox(-30, 3.5, -20, 4, 7.0, 4, matSakuraTrim);
+        addPlatform(-36, 0, -32, 12, 4.0, 10, matTatamiStone);
+        addRailing(-29.9, 4.0, -32, 10, 'z');
+        addStairs(-36, -14, 0, 3.8, 4.0, 12, 12, 'z-');
+        addCrateStack(-22, -20, 2.4);
+
+        addPlatform(0, 0, 42, 42, 0.5, 16, matTatamiStone);
+        addPlatform(0, 0, -42, 42, 0.5, 16, matTatamiStone);
+      }
+      else if (mapKey === 'reactor') {
+        // ==========================================================
+        // MAP 46: REACTOR (리액터) - 체르노빌 4호기 냉각탑 & 증기 냉각 벤트 [F]
+        // ==========================================================
+        const matToxicConcrete = new THREE.MeshStandardMaterial({ color: 0x334155, roughness: 0.85 });
+        const matLeadShield = new THREE.MeshStandardMaterial({ color: 0x1e293b, metalness: 0.9, roughness: 0.2 });
+        const matRadiationGreen = new THREE.MeshBasicMaterial({ color: 0x22c55e });
+        const matSarcophagus = new THREE.MeshStandardMaterial({ color: 0x475569, roughness: 0.7 });
+
+        addBox(0, -0.5, 0, 116, 1, 116, matToxicConcrete);
+        addBox(0, 7, -58, 116, 14, 2, matSarcophagus);
+        addBox(0, 7, 58, 116, 14, 2, matSarcophagus);
+        addBox(-58, 7, 0, 2, 14, 116, matSarcophagus);
+        addBox(58, 7, 0, 2, 14, 116, matSarcophagus);
+
+        // Center Reactor Cooling Vent at (0, 0.2, 0)
+        const ventPad = addPlatform(0, 0, 0, 7, 0.4, 7, matRadiationGreen, true);
+        const coolingTowerRing = new THREE.Mesh(new THREE.CylinderGeometry(4.2, 5.5, 9.0, 16, 1, true), matLeadShield);
+        coolingTowerRing.position.set(0, 6.0, 0);
+        scene.add(coolingTowerRing);
+        mapObjects.push(coolingTowerRing);
+
+        addTextBillboard(0, 2.4, 0, '[F] 방사선 증기 냉각 벤트 (COOLANT VENT)', 1.5, '#86efac');
+        reactorCoolantVent = { pos: new THREE.Vector3(0, 0.2, 0), mesh: ventPad };
+
+        addPlatform(0, 0, 14, 12, 3.8, 4, matLeadShield);
+        addPlatform(0, 0, -14, 12, 3.8, 4, matLeadShield);
+
+        // A SITE: CONTROL ROD BUNKER
+        addPlatform(30, 0, -20, 24, 0.5, 24, matSiteFloor);
+        spikeSiteAreas.push({ minX: 18, maxX: 42, minZ: -32, maxZ: -8, name: 'A SITE' });
+        addBox(30, 4.0, -20, 4, 8.0, 4, matLeadShield);
+        addPlatform(36, 0, -32, 12, 4.0, 10, matToxicConcrete);
+        addRailing(29.9, 4.0, -32, 10, 'z');
+        addStairs(36, -14, 0, 3.8, 4.0, 12, 12, 'z-');
+        addCrateStack(24, -20, 2.4);
+
+        // B SITE: TURBINE GENERATOR
+        addPlatform(-30, 0, -20, 24, 0.5, 24, matSiteFloor);
+        spikeSiteAreas.push({ minX: -42, maxX: -18, minZ: -32, maxZ: -8, name: 'B SITE' });
+        addBox(-30, 3.5, -20, 4, 7.0, 4, matLeadShield);
+        addPlatform(-36, 0, -32, 12, 4.0, 10, matToxicConcrete);
+        addRailing(-29.9, 4.0, -32, 10, 'z');
+        addStairs(-36, -14, 0, 3.8, 4.0, 12, 12, 'z-');
+        addCrateStack(-22, -20, 2.4);
+
+        addPlatform(0, 0, 42, 42, 0.5, 16, matToxicConcrete);
+        addPlatform(0, 0, -42, 42, 0.5, 16, matToxicConcrete);
+      }
+      else if (mapKey === 'horizon') {
+        // ==========================================================
+        // MAP 47: HORIZON (호라이즌) - 몰디브 해상 메가플로트 & 수중 제트 추진 [F]
+        // ==========================================================
+        const matLagoonDeck = new THREE.MeshStandardMaterial({ color: 0x0284c7, roughness: 0.15, metalness: 0.6 });
+        const matYachtTeak = new THREE.MeshStandardMaterial({ color: 0xd97706, roughness: 0.7 });
+        const matOceanAqua = new THREE.MeshBasicMaterial({ color: 0x00f0ff });
+        const matFloatWall = new THREE.MeshStandardMaterial({ color: 0x0369a1, roughness: 0.5 });
+
+        addBox(0, -0.5, 0, 116, 1, 116, matLagoonDeck);
+        addBox(0, 7, -58, 116, 14, 2, matFloatWall);
+        addBox(0, 7, 58, 116, 14, 2, matFloatWall);
+        addBox(-58, 7, 0, 2, 14, 116, matFloatWall);
+        addBox(58, 7, 0, 2, 14, 116, matFloatWall);
+
+        // Center Hydro-Jet Booster Channel at (0, 0.2, 0)
+        const jetPad = addPlatform(0, 0, 0, 6, 0.3, 22, matOceanAqua, true);
+        addBox(0, 1.2, -11, 8, 0.8, 0.5, matLagoonDeck);
+        addBox(0, 1.2, 11, 8, 0.8, 0.5, matLagoonDeck);
+
+        addTextBillboard(0, 2.4, 0, '[F] 해상 수중 제트 추진 패드 (HYDRO-JET BOOST)', 1.5, '#bae6fd');
+        horizonJetPlatform = { pos: new THREE.Vector3(0, 0.2, 0), mesh: jetPad };
+
+        addPlatform(0, 0, 14, 12, 3.8, 4, matYachtTeak);
+        addPlatform(0, 0, -14, 12, 3.8, 4, matYachtTeak);
+
+        // A SITE: MARINA YACHT CLUB
+        addPlatform(30, 0, -20, 24, 0.5, 24, matSiteFloor);
+        spikeSiteAreas.push({ minX: 18, maxX: 42, minZ: -32, maxZ: -8, name: 'A SITE' });
+        addBox(30, 4.0, -20, 4, 8.0, 4, matFloatWall);
+        addPlatform(36, 0, -32, 12, 4.0, 10, matLagoonDeck);
+        addRailing(29.9, 4.0, -32, 10, 'z');
+        addStairs(36, -14, 0, 3.8, 4.0, 12, 12, 'z-');
+        addCrateStack(24, -20, 2.4);
+
+        // B SITE: ATOLL HELIPAD
+        addPlatform(-30, 0, -20, 24, 0.5, 24, matSiteFloor);
+        spikeSiteAreas.push({ minX: -42, maxX: -18, minZ: -32, maxZ: -8, name: 'B SITE' });
+        addBox(-30, 3.5, -20, 4, 7.0, 4, matFloatWall);
+        addPlatform(-36, 0, -32, 12, 4.0, 10, matLagoonDeck);
+        addRailing(-29.9, 4.0, -32, 10, 'z');
+        addStairs(-36, -14, 0, 3.8, 4.0, 12, 12, 'z-');
+        addCrateStack(-22, -20, 2.4);
+
+        addPlatform(0, 0, 42, 42, 0.5, 16, matLagoonDeck);
+        addPlatform(0, 0, -42, 42, 0.5, 16, matLagoonDeck);
+      }
       else if (mapKey === 'range') {
         addBox(0, -0.5, 0, 60, 1, 120, matConcrete);
         addBox(0, 7, -60, 60, 14, 2, matWallStone);
@@ -12922,6 +13374,60 @@
         }
       }
 
+      // 38. Celestial Quantum Slide [F]
+      if (MAP_LIST[currentMapIndex] === 'celestial' && celestialQuantumSlide) {
+        const pPos = camera.position;
+        if (pPos.distanceTo(celestialQuantumSlide.pos) < 5.0) {
+          triggerCelestialQuantumSlide();
+          return;
+        }
+      }
+
+      // 39. Canyon Ropeway [F]
+      if (MAP_LIST[currentMapIndex] === 'canyon' && canyonRopeway) {
+        const pPos = camera.position;
+        if (pPos.distanceTo(canyonRopeway.pos) < 5.0) {
+          triggerCanyonRopeway();
+          return;
+        }
+      }
+
+      // 40. Necropolis Jade Altar [F]
+      if (MAP_LIST[currentMapIndex] === 'necropolis' && necropolisAltar) {
+        const pPos = camera.position;
+        if (pPos.distanceTo(necropolisAltar.pos) < 5.0) {
+          triggerNecropolisAltar();
+          return;
+        }
+      }
+
+      // 41. Zen Wind Chime [F]
+      if (MAP_LIST[currentMapIndex] === 'zen' && zenWindChime) {
+        const pPos = camera.position;
+        if (pPos.distanceTo(zenWindChime.pos) < 5.0) {
+          triggerZenWindChime();
+          return;
+        }
+      }
+
+      // 42. Reactor Coolant Vent [F]
+      if (MAP_LIST[currentMapIndex] === 'reactor' && reactorCoolantVent) {
+        const pPos = camera.position;
+        if (pPos.distanceTo(reactorCoolantVent.pos) < 5.0) {
+          triggerReactorCoolantVent();
+          return;
+        }
+      }
+
+      // 43. Horizon Jet Platform [F]
+      if (MAP_LIST[currentMapIndex] === 'horizon' && horizonJetPlatform) {
+        const pPos = camera.position;
+        if (pPos.distanceTo(horizonJetPlatform.pos) < 5.0) {
+          triggerHorizonJetPlatform();
+          return;
+        }
+      }
+
       // 4. Ascent B Shutter Door
       if (!ascentDoor || ascentDoor.isDestroyed) return;
       const dist = camera.position.distanceTo(ascentDoor.switchPos);
@@ -14395,6 +14901,66 @@
         { label: 'DEF SPAWN', x: 0, z: -42, color: '#00ffaa' },
         { label: 'ATK SPAWN', x: 0, z: 42, color: '#ff4655' }
       ],
+      celestial: [
+        { label: 'A SITE', x: 30, z: -20, color: '#38bdf8' },
+        { label: 'NEBULA OBSERVATORY', x: 30, z: -20, color: '#0284c7' },
+        { label: 'B SITE', x: -30, z: -20, color: '#38bdf8' },
+        { label: 'SOLAR DOCK', x: -30, z: -20, color: '#0369a1' },
+        { label: 'QUANTUM SLIDE [F]', x: 0, z: 0, color: '#7dd3fc' },
+        { label: 'ORBITAL MID', x: 0, z: 0, color: '#0f172a' },
+        { label: 'DEF SPAWN', x: 0, z: -42, color: '#00ffaa' },
+        { label: 'ATK SPAWN', x: 0, z: 42, color: '#ff4655' }
+      ],
+      canyon: [
+        { label: 'A SITE', x: 30, z: -20, color: '#f97316' },
+        { label: 'CANYON DAM', x: 30, z: -20, color: '#ea580c' },
+        { label: 'B SITE', x: -30, z: -20, color: '#f97316' },
+        { label: 'RIM OVERLOOK', x: -30, z: -20, color: '#c2410c' },
+        { label: 'ROPEWAY [F]', x: 0, z: 0, color: '#fed7aa' },
+        { label: 'CHASM MID', x: 0, z: 0, color: '#78350f' },
+        { label: 'DEF SPAWN', x: 0, z: -42, color: '#00ffaa' },
+        { label: 'ATK SPAWN', x: 0, z: 42, color: '#ff4655' }
+      ],
+      necropolis: [
+        { label: 'A SITE', x: 30, z: -20, color: '#34d399' },
+        { label: 'KUKULKAN SANCTUARY', x: 30, z: -20, color: '#10b981' },
+        { label: 'B SITE', x: -30, z: -20, color: '#34d399' },
+        { label: 'CRYPT OF KINGS', x: -30, z: -20, color: '#059669' },
+        { label: 'JADE ALTAR [F]', x: 0, z: 0, color: '#6ee7b7' },
+        { label: 'CENOTE MID', x: 0, z: 0, color: '#064e3b' },
+        { label: 'DEF SPAWN', x: 0, z: -42, color: '#00ffaa' },
+        { label: 'ATK SPAWN', x: 0, z: 42, color: '#ff4655' }
+      ],
+      zen: [
+        { label: 'A SITE', x: 30, z: -20, color: '#f472b6' },
+        { label: 'BELL TOWER', x: 30, z: -20, color: '#db2777' },
+        { label: 'B SITE', x: -30, z: -20, color: '#f472b6' },
+        { label: 'KOI PAVILION', x: -30, z: -20, color: '#be185d' },
+        { label: 'WIND CHIME [F]', x: 0, z: 0, color: '#fbcfe8' },
+        { label: 'GARDEN MID', x: 0, z: 0, color: '#15803d' },
+        { label: 'DEF SPAWN', x: 0, z: -42, color: '#00ffaa' },
+        { label: 'ATK SPAWN', x: 0, z: 42, color: '#ff4655' }
+      ],
+      reactor: [
+        { label: 'A SITE', x: 30, z: -20, color: '#4ade80' },
+        { label: 'CONTROL BUNKER', x: 30, z: -20, color: '#22c55e' },
+        { label: 'B SITE', x: -30, z: -20, color: '#4ade80' },
+        { label: 'TURBINE HALL', x: -30, z: -20, color: '#16a34a' },
+        { label: 'COOLANT VENT [F]', x: 0, z: 0, color: '#86efac' },
+        { label: 'SARCOPHAGUS MID', x: 0, z: 0, color: '#1e293b' },
+        { label: 'DEF SPAWN', x: 0, z: -42, color: '#00ffaa' },
+        { label: 'ATK SPAWN', x: 0, z: 42, color: '#ff4655' }
+      ],
+      horizon: [
+        { label: 'A SITE', x: 30, z: -20, color: '#38bdf8' },
+        { label: 'YACHT CLUB', x: 30, z: -20, color: '#0284c7' },
+        { label: 'B SITE', x: -30, z: -20, color: '#38bdf8' },
+        { label: 'ATOLL HELIPAD', x: -30, z: -20, color: '#0369a1' },
+        { label: 'HYDRO JET [F]', x: 0, z: 0, color: '#bae6fd' },
+        { label: 'LAGOON MID', x: 0, z: 0, color: '#0c4a6e' },
+        { label: 'DEF SPAWN', x: 0, z: -42, color: '#00ffaa' },
+        { label: 'ATK SPAWN', x: 0, z: 42, color: '#ff4655' }
+      ],
       range: [
         { label: 'TARGETS', x: 0, z: -22, color: '#00f0ff' },
         { label: 'BENCH', x: 0, z: 0, color: '#ffc83b' },
@@ -14803,6 +15369,11 @@
         camera.rotation.y = yaw;
         camera.rotation.x = pitch;
 
+        // Subtle organic camera roll on strafe
+        const strafeVel = -player.velocity.x * Math.sin(yaw) + player.velocity.z * Math.cos(yaw);
+        const targetRoll = THREE.MathUtils.clamp(-strafeVel * 0.0018, -0.018, 0.018);
+        camera.rotation.z = THREE.MathUtils.lerp(camera.rotation.z, targetRoll, Math.min(1, 12 * dt));
+
         // Camera Trauma Shake Decay
         if (cameraTrauma > 0.001) {
           const shake = cameraTrauma * cameraTrauma;
@@ -14857,8 +15428,11 @@
 
           if (moveDir.lengthSq() > 0) {
             moveDir.normalize().applyAxisAngle(new THREE.Vector3(0, 1, 0), yaw);
-            player.velocity.x = moveDir.x * moveSpeed;
-            player.velocity.z = moveDir.z * moveSpeed;
+            const targetVelX = moveDir.x * moveSpeed;
+            const targetVelZ = moveDir.z * moveSpeed;
+            // Smooth acceleration and responsive counter-strafing damping
+            player.velocity.x = THREE.MathUtils.lerp(player.velocity.x, targetVelX, Math.min(1, 24 * dt));
+            player.velocity.z = THREE.MathUtils.lerp(player.velocity.z, targetVelZ, Math.min(1, 24 * dt));
 
             if (!player.isWalking && !player.isCrouching && player.isGrounded && (now - sound.lastStepTime > 340)) {
               sound.lastStepTime = now;
@@ -14873,8 +15447,8 @@
               sound.playFootstep(stepSurface);
             }
           } else {
-            player.velocity.x *= 0.78;
-            player.velocity.z *= 0.78;
+            player.velocity.x = THREE.MathUtils.lerp(player.velocity.x, 0, Math.min(1, 18 * dt));
+            player.velocity.z = THREE.MathUtils.lerp(player.velocity.z, 0, Math.min(1, 18 * dt));
           }
 
           if (canMove && keys['Space'] && player.isGrounded) {
@@ -15090,6 +15664,48 @@
           if (MAP_LIST[currentMapIndex] === 'vortex' && vortexSlingshot && !player.isDead) {
             if (Math.abs(camera.position.x) < 3.5 && Math.abs(camera.position.z) < 3.5 && Math.abs(camera.position.y - 1.7) < 1.2) {
               triggerVortexSlingshot();
+            }
+          }
+
+          // Auto-launch when stepping onto Celestial Quantum Slide
+          if (MAP_LIST[currentMapIndex] === 'celestial' && celestialQuantumSlide && !player.isDead) {
+            if (Math.abs(camera.position.x) < 12.0 && Math.abs(camera.position.z) < 2.5 && Math.abs(camera.position.y - 1.7) < 1.0) {
+              triggerCelestialQuantumSlide();
+            }
+          }
+
+          // Auto-launch when stepping onto Canyon Ropeway
+          if (MAP_LIST[currentMapIndex] === 'canyon' && canyonRopeway && !player.isDead) {
+            if (Math.abs(camera.position.x) < 3.0 && Math.abs(camera.position.z) < 11.0 && Math.abs(camera.position.y - 1.7) < 1.0) {
+              triggerCanyonRopeway();
+            }
+          }
+
+          // Auto-launch when stepping onto Necropolis Altar
+          if (MAP_LIST[currentMapIndex] === 'necropolis' && necropolisAltar && !player.isDead) {
+            if (Math.abs(camera.position.x) < 3.5 && Math.abs(camera.position.z) < 3.5 && Math.abs(camera.position.y - 1.7) < 1.2) {
+              if (player.velocity.y <= 0) triggerNecropolisAltar();
+            }
+          }
+
+          // Auto-launch when stepping onto Zen Wind Chime
+          if (MAP_LIST[currentMapIndex] === 'zen' && zenWindChime && !player.isDead) {
+            if (Math.abs(camera.position.x) < 11.0 && Math.abs(camera.position.z) < 2.5 && Math.abs(camera.position.y - 1.7) < 1.0) {
+              triggerZenWindChime();
+            }
+          }
+
+          // Auto-launch when stepping onto Reactor Coolant Vent
+          if (MAP_LIST[currentMapIndex] === 'reactor' && reactorCoolantVent && !player.isDead) {
+            if (Math.abs(camera.position.x) < 3.5 && Math.abs(camera.position.z) < 3.5 && Math.abs(camera.position.y - 1.7) < 1.2) {
+              if (player.velocity.y <= 0) triggerReactorCoolantVent();
+            }
+          }
+
+          // Auto-launch when stepping onto Horizon Jet Platform
+          if (MAP_LIST[currentMapIndex] === 'horizon' && horizonJetPlatform && !player.isDead) {
+            if (Math.abs(camera.position.x) < 3.0 && Math.abs(camera.position.z) < 11.0 && Math.abs(camera.position.y - 1.7) < 1.0) {
+              triggerHorizonJetPlatform();
             }
           }
         }
@@ -15454,6 +16070,16 @@
             if (e.body) {
               e.body.position.y = 1.15 + Math.abs(Math.sin(walkCycle * 2)) * 0.028;
             }
+            // Smooth enemy aim orientation towards player or movement
+            const dxP = camera.position.x - e.mesh.position.x;
+            const dzP = camera.position.z - e.mesh.position.z;
+            const distToPlayer = Math.hypot(dxP, dzP);
+            let targetBotYaw = (e.patrolDir > 0) ? (Math.PI / 2) : (-Math.PI / 2);
+            if (distToPlayer < 28 && !player.isDead) {
+              targetBotYaw = Math.atan2(dxP, dzP);
+            }
+            e.mesh.rotation.y = THREE.MathUtils.lerp(e.mesh.rotation.y, targetBotYaw, Math.min(1, 10 * dt));
+
             if (isSweep) {
               const zDir = (e.mesh.position.z > 0) ? -1 : 1;
               e.mesh.position.z += zDir * 1.5 * botSpeedMult * dt;
@@ -15463,7 +16089,7 @@
             if (t.isDead) return;
             t.mesh.position.x += t.patrolDir * 1.8 * botSpeedMult * dt;
             if (Math.abs(t.mesh.position.x) > 25) t.patrolDir *= -1;
-            // Smooth teammate walking animation
+            // Smooth teammate walking animation & orientation
             const walkCycleT = Math.sin(now * 0.008 * 5.5);
             if (t.legs && t.legs.length === 2) {
               t.legs[0].rotation.x = walkCycleT * 0.42;
@@ -15476,6 +16102,9 @@
             if (t.body) {
               t.body.position.y = 1.15 + Math.abs(Math.sin(walkCycleT * 2)) * 0.025;
             }
+            const targetTeamYaw = (t.patrolDir > 0) ? (Math.PI / 2) : (-Math.PI / 2);
+            t.mesh.rotation.y = THREE.MathUtils.lerp(t.mesh.rotation.y, targetTeamYaw, Math.min(1, 8 * dt));
+
             if (isSweep) {
               const zDir = (t.mesh.position.z > 0) ? -1 : 1;
               t.mesh.position.z += zDir * 1.5 * botSpeedMult * dt;
