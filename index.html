@@ -1648,6 +1648,17 @@
   <div id="speed-lines-overlay"></div>
   <div id="tp-flash-overlay"></div>
 
+  <!-- Tactical Click to Play / Aim Lock Notification Banner -->
+  <div id="click-to-play-prompt" style="display:none; position:fixed; top:42%; left:50%; transform:translate(-50%, -50%); z-index:95; flex-direction:column; align-items:center; pointer-events:auto; cursor:pointer; background:rgba(15,25,35,0.88); border:1px solid var(--val-cyan); border-radius:4px; padding:20px 40px; box-shadow:0 0 35px rgba(0,240,255,0.45); text-align:center; backdrop-filter:blur(8px); user-select:none;">
+    <div style="font-family:var(--font-title); font-size:22px; font-weight:900; color:var(--val-cyan); letter-spacing:3px; margin-bottom:8px; text-transform:uppercase;">
+      [ 화면을 클릭하여 조준 고정 (CLICK TO PLAY) ]
+    </div>
+    <div style="font-size:13px; color:#cfd8dc; font-family:var(--font-mono); letter-spacing:1px; line-height:1.6;">
+      클릭: 마우스 조준 고정 &bull; [ESC]: 환경 설정<br>
+      <span style="color:var(--val-gold);">[드래그 또는 키보드 방향키(←↑↓→)로도 시점 회전 가능]</span>
+    </div>
+  </div>
+
   <!-- Dynamic Customizable Crosshair -->
   <div id="crosshair-container">
     <div class="ch-part ch-t" id="ch-t"></div>
@@ -4919,7 +4930,10 @@
       const enemySpawnZ = playerIsAtk ? -25 : 38;
 
       camera.position.set(0, 1.7, mySpawnZ);
-      camera.rotation.set(0, 0, 0);
+      yaw = playerIsAtk ? 0 : Math.PI;
+      pitch = 0;
+      camera.rotation.order = 'YXZ';
+      camera.rotation.set(pitch, yaw, 0);
 
       // Teammates 4
       if (mapKey !== 'range') {
@@ -5105,12 +5119,76 @@
     let yaw = 0;
     let pitch = 0;
 
+    function isPlayerControlActive() {
+      if (player.isDead) return false;
+      if (isChatActive) return false;
+      const lobby = document.getElementById('custom-lobby');
+      if (lobby && lobby.style.display !== 'none') return false;
+      const settings = document.getElementById('settings-modal');
+      if (settings && settings.style.display === 'flex') return false;
+      const buy = document.getElementById('buy-menu');
+      if (buy && buy.style.display === 'flex') return false;
+      const radio = document.getElementById('radio-wheel-modal');
+      if (radio && radio.style.display === 'flex') return false;
+      const matchEnd = document.getElementById('match-end-modal');
+      if (matchEnd && matchEnd.style.display === 'flex') return false;
+      return true;
+    }
+
+    function updatePlayPrompt() {
+      const prompt = document.getElementById('click-to-play-prompt');
+      if (!prompt) return;
+      const inGame = (document.getElementById('custom-lobby').style.display === 'none');
+      if (inGame && !player.isDead && isPlayerControlActive() && !isPointerLocked) {
+        prompt.style.display = 'flex';
+      } else {
+        prompt.style.display = 'none';
+      }
+    }
+
     window.addEventListener('keydown', (e) => {
       keys[e.code] = true;
       if (e.code === 'Enter') {
         if (!isChatActive) openChat();
       }
       if (isChatActive) return;
+
+      // Robust Escape Key Handling for All Menus & Settings
+      if (e.code === 'Escape') {
+        const radioModal = document.getElementById('radio-wheel-modal');
+        if (radioModal && radioModal.style.display === 'flex') {
+          toggleRadioWheel();
+          return;
+        }
+        const buyMenu = document.getElementById('buy-menu');
+        if (buyMenu && buyMenu.style.display === 'flex') {
+          buyMenu.style.display = 'none';
+          canvas.requestPointerLock();
+          updatePlayPrompt();
+          return;
+        }
+        const crPanel = document.getElementById('combat-report-panel');
+        if (crPanel && crPanel.style.display === 'flex') {
+          crPanel.style.display = 'none';
+          canvas.requestPointerLock();
+          updatePlayPrompt();
+          return;
+        }
+        const settingsModal = document.getElementById('settings-modal');
+        if (settingsModal && settingsModal.style.display === 'flex') {
+          settingsModal.style.display = 'none';
+          canvas.requestPointerLock();
+          updatePlayPrompt();
+          return;
+        }
+        const lobby = document.getElementById('custom-lobby');
+        if (lobby && lobby.style.display === 'none' && !player.isDead) {
+          if (settingsModal) settingsModal.style.display = 'flex';
+          if (document.exitPointerLock) document.exitPointerLock();
+          updatePlayPrompt();
+          return;
+        }
+      }
 
       if (e.code === 'KeyR') reloadWeapon();
       if (e.code === 'KeyB') toggleBuyMenu();
@@ -5130,7 +5208,7 @@
         if (e.code === 'Digit2') { sendRadioCommand('backup'); return; }
         if (e.code === 'Digit3') { sendRadioCommand('spotted'); return; }
         if (e.code === 'Digit4') { sendRadioCommand('quiet'); return; }
-        if (e.code === 'KeyZ' || e.code === 'Escape') { toggleRadioWheel(); return; }
+        if (e.code === 'KeyZ') { toggleRadioWheel(); return; }
       }
       if (e.code === 'KeyZ') toggleRadioWheel();
       if (e.code === 'F1' || e.code === 'Backquote') toggleCheats();
@@ -5166,13 +5244,23 @@
       if (e.code === 'Tab') showScoreboard(false);
     });
 
-    canvas.addEventListener('click', () => {
-      if (!isPointerLocked && document.getElementById('custom-lobby').style.display === 'none' && 
-          document.getElementById('buy-menu').style.display === 'none' && 
-          document.getElementById('settings-modal').style.display === 'none' && !isChatActive) {
+    // Global Click Handler to Acquire Pointer Lock from Anywhere in Game Canvas
+    window.addEventListener('click', (e) => {
+      if (e.target.closest('button, input, select, textarea, .modal, .val-btn, #chat-container, #radio-wheel-modal, .weapon-card, .map-card, .agent-card, .ch-preset-btn, .skin-btn')) {
+        return;
+      }
+      if (isPlayerControlActive() && !isPointerLocked) {
         canvas.requestPointerLock();
       }
     });
+
+    const clickPrompt = document.getElementById('click-to-play-prompt');
+    if (clickPrompt) {
+      clickPrompt.addEventListener('click', (e) => {
+        e.stopPropagation();
+        canvas.requestPointerLock();
+      });
+    }
 
     document.addEventListener('pointerlockchange', () => {
       isPointerLocked = (document.pointerLockElement === canvas);
@@ -5181,19 +5269,14 @@
         document.getElementById('hud').style.display = 'block';
         document.getElementById('buy-menu').style.display = 'none';
         document.getElementById('settings-modal').style.display = 'none';
-      } else {
-        // When pointer lock is released during match, open Settings/Pause menu
-        if (document.getElementById('custom-lobby').style.display === 'none' && 
-            document.getElementById('buy-menu').style.display === 'none' && 
-            !player.isDead && !isChatActive) {
-          document.getElementById('settings-modal').style.display = 'flex';
-        }
       }
+      updatePlayPrompt();
     });
 
     document.getElementById('btn-resume-game').addEventListener('click', () => {
       document.getElementById('settings-modal').style.display = 'none';
       canvas.requestPointerLock();
+      updatePlayPrompt();
     });
 
     // 5-Tier Graphics Presets
@@ -5318,26 +5401,25 @@
       sound.setMasterVolume(parseInt(e.target.value) / 100);
     });
 
-    window.addEventListener('mousemove', (e) => {
-      if (!isPointerLocked) return;
-      if (freeFlyMode) {
-        yaw -= e.movementX * mouseSensitivity;
-        pitch -= e.movementY * mouseSensitivity;
-        pitch = Math.max(-Math.PI / 2.05, Math.min(Math.PI / 2.05, pitch));
-        return;
-      }
-      const sens = player.isADS ? mouseSensitivity * 0.5 : mouseSensitivity;
-      yaw -= e.movementX * sens;
-      pitch -= e.movementY * sens;
-      pitch = Math.max(-Math.PI / 2.1, Math.min(Math.PI / 2.1, pitch));
-
-      // Procedural weapon sway inertia
-      gunSwayYaw = THREE.MathUtils.clamp(gunSwayYaw - e.movementX * 0.0006, -0.06, 0.06);
-      gunSwayPitch = THREE.MathUtils.clamp(gunSwayPitch - e.movementY * 0.0006, -0.05, 0.05);
-    });
+    let isMouseDown = false;
+    let lastMouseX = 0;
+    let lastMouseY = 0;
 
     window.addEventListener('mousedown', (e) => {
-      if (!isPointerLocked) return;
+      if (e.target.closest('button, input, select, textarea, .modal, .val-btn, #chat-container, #radio-wheel-modal, .weapon-card, .map-card, .agent-card, .ch-preset-btn, .skin-btn')) {
+        return;
+      }
+      isMouseDown = true;
+      lastMouseX = e.clientX;
+      lastMouseY = e.clientY;
+
+      if (!isPointerLocked) {
+        if (isPlayerControlActive()) {
+          canvas.requestPointerLock();
+        }
+        return;
+      }
+
       if (e.button === 0) {
         if (abilities.x.active) throwBladeSingle();
         else keys['Mouse0'] = true;
@@ -5351,7 +5433,44 @@
       }
       if (e.button === 1) triggerWorldPing();
     });
-    window.addEventListener('mouseup', (e) => { if (e.button === 0) keys['Mouse0'] = false; });
+
+    window.addEventListener('mouseup', (e) => {
+      isMouseDown = false;
+      if (e.button === 0) keys['Mouse0'] = false;
+    });
+
+    window.addEventListener('mousemove', (e) => {
+      if (isPointerLocked) {
+        if (freeFlyMode) {
+          yaw -= e.movementX * mouseSensitivity;
+          pitch -= e.movementY * mouseSensitivity;
+          pitch = Math.max(-Math.PI / 2.05, Math.min(Math.PI / 2.05, pitch));
+          return;
+        }
+        const sens = player.isADS ? mouseSensitivity * 0.5 : mouseSensitivity;
+        yaw -= e.movementX * sens;
+        pitch -= e.movementY * sens;
+        pitch = Math.max(-Math.PI / 2.1, Math.min(Math.PI / 2.1, pitch));
+
+        // Procedural weapon sway inertia
+        gunSwayYaw = THREE.MathUtils.clamp(gunSwayYaw - e.movementX * 0.0006, -0.06, 0.06);
+        gunSwayPitch = THREE.MathUtils.clamp(gunSwayPitch - e.movementY * 0.0006, -0.05, 0.05);
+      } else if (isMouseDown && isPlayerControlActive()) {
+        // Fallback: mouse drag to look around seamlessly even without pointer lock!
+        const dx = e.clientX - lastMouseX;
+        const dy = e.clientY - lastMouseY;
+        lastMouseX = e.clientX;
+        lastMouseY = e.clientY;
+
+        const sens = (player.isADS ? mouseSensitivity * 0.5 : mouseSensitivity) * 1.5;
+        yaw -= dx * sens;
+        pitch -= dy * sens;
+        pitch = Math.max(-Math.PI / 2.1, Math.min(Math.PI / 2.1, pitch));
+
+        gunSwayYaw = THREE.MathUtils.clamp(gunSwayYaw - dx * 0.0006, -0.06, 0.06);
+        gunSwayPitch = THREE.MathUtils.clamp(gunSwayPitch - dy * 0.0006, -0.05, 0.05);
+      }
+    });
     window.addEventListener('contextmenu', e => e.preventDefault());
 
     
@@ -5908,6 +6027,10 @@
         player.isDead = false;
         gunGroup.visible = true;
         updateHUD();
+        updatePlayPrompt();
+        if (isPlayerControlActive()) {
+          canvas.requestPointerLock();
+        }
       }, 4000);
     }
 
@@ -7736,6 +7859,8 @@
 
     document.getElementById('btn-match-play-again').addEventListener('click', () => {
       document.getElementById('match-end-modal').style.display = 'none';
+      document.getElementById('settings-modal').style.display = 'none';
+      document.getElementById('buy-menu').style.display = 'none';
       document.getElementById('score-atk').innerText = '0';
       document.getElementById('score-def').innerText = '0';
       player.hp = 100;
@@ -7744,10 +7869,16 @@
       player.headshots = 0;
       player.isDead = false;
       player.credits = 800;
+      player.isWalking = false;
+      player.isCrouching = false;
+      player.velocity.set(0, 0, 0);
+      gunGroup.visible = true;
       roundState = 'BUY_PHASE';
       build5v5Map(MAP_LIST[currentMapIndex]);
       document.getElementById('hud').style.display = 'block';
+      document.getElementById('crosshair-container').style.display = 'block';
       updateHUD();
+      updatePlayPrompt();
       canvas.requestPointerLock();
       showToast('새 경기 시작! 건투를 빕니다.');
       radioVoice.speak('Let us do this!');
@@ -7756,6 +7887,7 @@
     document.getElementById('btn-match-lobby').addEventListener('click', () => {
       document.getElementById('match-end-modal').style.display = 'none';
       document.getElementById('custom-lobby').style.display = 'flex';
+      updatePlayPrompt();
       clearMap();
     });
 
@@ -7763,9 +7895,25 @@
       sound.init();
       sound.playDash();
       document.getElementById('custom-lobby').style.display = 'none';
+      document.getElementById('settings-modal').style.display = 'none';
+      document.getElementById('buy-menu').style.display = 'none';
+      document.getElementById('match-end-modal').style.display = 'none';
+      document.getElementById('crosshair-container').style.display = 'block';
+      document.getElementById('hud').style.display = 'block';
+
+      player.isDead = false;
+      player.hp = 100;
+      player.shield = 50;
+      player.isWalking = false;
+      player.isCrouching = false;
+      player.velocity.set(0, 0, 0);
+      gunGroup.visible = true;
+
       build5v5Map(MAP_LIST[currentMapIndex]);
       updatePlayerColors();
       applyCrosshairSettings();
+      updateHUD();
+      updatePlayPrompt();
       canvas.requestPointerLock();
     });
 
@@ -7775,7 +7923,8 @@
     function animate() {
       requestAnimationFrame(animate);
 
-      const now = performance.now();
+      try {
+        const now = performance.now();
       const rawDt = Math.min((now - lastTime) / 1000, 0.1);
       const dt = rawDt * gameTimeScale;
       lastTime = now;
@@ -7860,8 +8009,14 @@
         }
       }
 
-      if (isPointerLocked && !player.isDead) {
-        if (keys['Mouse0'] && !abilities.x.active) shootWeapon();
+      // Camera Rotation & View Controls (Always active when alive)
+      if (!player.isDead) {
+        // Arrow Keys Look Fallback
+        const turnSpeed = player.isADS ? 1.4 : 2.4;
+        if (keys['ArrowLeft']) yaw += turnSpeed * dt;
+        if (keys['ArrowRight']) yaw -= turnSpeed * dt;
+        if (keys['ArrowUp']) pitch = Math.min(Math.PI / 2.1, pitch + turnSpeed * 0.8 * dt);
+        if (keys['ArrowDown']) pitch = Math.max(-Math.PI / 2.1, pitch - turnSpeed * 0.8 * dt);
 
         camera.rotation.order = 'YXZ';
         camera.rotation.y = yaw;
@@ -7876,13 +8031,18 @@
           cameraTrauma = THREE.MathUtils.lerp(cameraTrauma, 0, Math.min(1, 9 * dt));
         }
 
+        // Player Continuous Shooting when Mouse0 is held and controls active
+        if (isPlayerControlActive() && keys['Mouse0'] && !abilities.x.active) {
+          shootWeapon();
+        }
 
+        const canMove = isPlayerControlActive();
         let moveSpeed = player.speed;
         if (player.isWalking) moveSpeed = 4.8;
         if (player.isCrouching) moveSpeed = 3.2;
         if (currentWeapon.isKnife) moveSpeed *= 1.20;
 
-        if (freeFlyMode) {
+        if (freeFlyMode && canMove) {
           const flySpeed = (keys['ControlLeft'] || keys['ControlRight']) ? 36 : 16;
           const flyDir = new THREE.Vector3();
           if (keys['KeyW']) flyDir.z -= 1;
@@ -7899,10 +8059,18 @@
           player.isGrounded = true;
         } else {
           const moveDir = new THREE.Vector3();
-          if (keys['KeyW']) moveDir.z -= 1;
-          if (keys['KeyS']) moveDir.z += 1;
-          if (keys['KeyA']) moveDir.x -= 1;
-          if (keys['KeyD']) moveDir.x += 1;
+          if (canMove) {
+            if (keys['KeyW']) moveDir.z -= 1;
+            if (keys['KeyS']) moveDir.z += 1;
+            if (keys['KeyA']) moveDir.x -= 1;
+            if (keys['KeyD']) moveDir.x += 1;
+          }
+
+          // Pre-calculate vertical ground height to fix Temporal Dead Zone ReferenceError
+          const targetEyeH = player.isCrouching ? 1.0 : 1.7;
+          let nextY = camera.position.y + player.velocity.y * dt;
+          const curFloorY = groundAt(camera.position.x, camera.position.z, nextY - targetEyeH);
+          const minEyeY = curFloorY + targetEyeH;
 
           if (moveDir.lengthSq() > 0) {
             moveDir.normalize().applyAxisAngle(new THREE.Vector3(0, 1, 0), yaw);
@@ -7923,7 +8091,7 @@
             player.velocity.z *= 0.78;
           }
 
-          if (keys['Space'] && player.isGrounded) {
+          if (canMove && keys['Space'] && player.isGrounded) {
             player.velocity.y = 8.2;
             player.isGrounded = false;
           }
@@ -7933,12 +8101,6 @@
           const nextXZ = collideXZ(camera.position, player.velocity.x * dt, player.velocity.z * dt);
           camera.position.x = nextXZ.x;
           camera.position.z = nextXZ.z;
-
-          // Vertical ground height detection for stairs and elevated platforms (Heaven)
-          const targetEyeH = player.isCrouching ? 1.0 : 1.7;
-          let nextY = camera.position.y + player.velocity.y * dt;
-          const curFloorY = groundAt(camera.position.x, camera.position.z, nextY - targetEyeH);
-          const minEyeY = curFloorY + targetEyeH;
 
           if (nextY <= minEyeY) {
             nextY = minEyeY;
@@ -8013,7 +8175,7 @@
             gunGroup.rotation.set(0, 0, 0);
           }
         } else {
-          const isMoving = (moveDir.lengthSq() > 0 && player.isGrounded);
+          const isMoving = (player.velocity.lengthSq() > 0.01 && player.isGrounded);
           const bobAmount = player.isWalking ? 0.004 : 0.010;
           const time = now * 0.005;
           const baseGunPos = player.isADS ? ADS_GUN_POS.clone() : DEFAULT_GUN_POS.clone();
@@ -8027,25 +8189,27 @@
           baseGunPos.z += gunRecoilKickZ;
           gunGroup.position.lerp(baseGunPos, 0.35);
 
-        // Procedural Reload Animation
-        if (currentWeapon.isReloading) {
-          const rProg = ((now / 1000) - reloadStartTime) / reloadDuration;
-          if (rProg >= 0 && rProg <= 1) {
-            const dip = Math.sin(rProg * Math.PI);
-            gunGroup.position.y -= dip * 0.22;
-            gunGroup.position.z += dip * 0.12;
-            gunGroup.rotation.x -= dip * 0.45;
-            gunGroup.rotation.z += Math.sin(rProg * Math.PI * 2) * 0.15;
+          // Procedural Reload Animation
+          if (currentWeapon.isReloading) {
+            const rProg = ((now / 1000) - reloadStartTime) / reloadDuration;
+            if (rProg >= 0 && rProg <= 1) {
+              const dip = Math.sin(rProg * Math.PI);
+              gunGroup.position.y -= dip * 0.22;
+              gunGroup.position.z += dip * 0.12;
+              gunGroup.rotation.x -= dip * 0.45;
+              gunGroup.rotation.z += Math.sin(rProg * Math.PI * 2) * 0.15;
+            }
           }
-        }
-
 
           // Composite weapon rotation: muzzle rise from recoil + sway pitch/yaw (Always returns to 0!)
           gunGroup.rotation.x = gunRecoilRotX + gunSwayPitch;
           gunGroup.rotation.y = gunSwayYaw;
           gunGroup.rotation.z = gunSwayYaw * 0.35;
         }
+      } // End if (!player.isDead)
 
+      // Match Simulation (Runs as long as custom-lobby is closed)
+      if (document.getElementById('custom-lobby').style.display === 'none') {
         // Enemy AI Tactical Fire, Jiggle Peeking & Headshots
         if (roundState === 'IN_ROUND' && !cheats.freezeAI && now - enemyShotTimer > 1.7) {
           enemyShotTimer = now;
@@ -8334,7 +8498,10 @@
       }
 
       renderer.render(scene, camera);
+    } catch (err) {
+      console.warn('Game Loop Frame Warning:', err);
     }
+  }
 
     function showDamageIndicator() {
       const ring = document.getElementById('damage-indicator-ring');
