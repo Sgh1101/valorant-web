@@ -3599,7 +3599,7 @@
     const myClientId = 'user_' + Math.random().toString(36).substring(2, 8);
     const networkChannel = new BroadcastChannel('VALORANT_5V5_NET');
 
-    const MAP_LIST = ['ascent', 'bind', 'haven', 'icebox', 'split', 'lotus', 'breeze', 'sunset', 'pearl', 'fracture', 'abyss', 'district', 'drift', 'glitch', 'range'];
+    const MAP_LIST = ['ascent', 'bind', 'haven', 'icebox', 'split', 'lotus', 'breeze', 'sunset', 'pearl', 'fracture', 'abyss', 'district', 'drift', 'glitch', 'kasbah', 'range'];
     const MAP_NAMES = {
       ascent: 'ASCENT (어센트) - 베네치아 요새 & 전동 셔터 도어 [F]',
       bind: 'BIND (바인드) - 모로코 사막 & 차원 이동 텔레포터',
@@ -3615,6 +3615,7 @@
       district: 'DISTRICT (디스트릭트) - 서울 도심 네오 골목 & 사이버펑크 홀로그램 빌보드 & 고속 점프패드 [F]',
       drift: 'DRIFT (드리프트) - 태국 열대 리조트 & 부유 방갈로 & 오션 짚라인 [F]',
       glitch: 'GLITCH (글리치) - 가상 시뮬레이션 매트릭스 & 양자 점프 게이트 [F] & 글리치 포털',
+      kasbah: 'KASBAH (카스바) - 모로코 사막 바틱 요새 & 2단 성벽 회랑 & 고대 기류 분수 [F]',
       range: 'THE RANGE (사격장) - 사격 훈련장 & 봇 연습'
     };
     let currentMapIndex = 0;
@@ -3629,7 +3630,8 @@
       Breach: '🔨',
       Skye: '🌿',
       Waylay: '⚡',
-      Maxbot: '🤖'
+      Maxbot: '🤖',
+      Nox: '🌑'
     };
     const AGENT_COLORS = {
       Jett: '#00f0ff', Phoenix: '#ff6600', Reyna: '#be00ff', Sova: '#2979ff',
@@ -3643,7 +3645,8 @@
       Breach: '#f59e0b',
       Skye: '#84cc16',
       Waylay: '#38bdf8',
-      Maxbot: '#f97316'
+      Maxbot: '#f97316',
+      Nox: '#6366f1'
     };
     const AGENT_ROLES = {
       Jett: '타격대 (Duelist)', Phoenix: '타격대 (Duelist)', Reyna: '타격대 (Duelist)', Raze: '타격대 (Duelist)',
@@ -3656,7 +3659,8 @@
       Breach: '척후대 (Initiator)',
       Skye: '척후대 (Initiator)',
       Waylay: '타격대 (Duelist)',
-      Maxbot: '감시대 (Sentinel)'
+      Maxbot: '감시대 (Sentinel)',
+      Nox: '전략가 (Controller)'
     };
 
     const lobbySlots = {
@@ -4482,7 +4486,7 @@
     /* ==========================================================
        DYNAMIC AGENT SWITCHING SYSTEM ([H] KEY TO CYCLE AGENT)
        ========================================================== */
-    const PLAYABLE_AGENTS = ['Jett', 'Phoenix', 'Reyna', 'Sova', 'Sage', 'Omen', 'Brimstone', 'Raze', 'Killjoy', 'Chamber', 'Viper', 'Cypher', 'Neon', 'Yoru', 'Fade', 'Gekko', 'Harbor', 'Iso', 'Deadlock', 'Clove', 'Vyse', 'KAY/O', 'Tejo', 'Astra', 'Breach', 'Skye', 'Waylay', 'Maxbot'];
+    const PLAYABLE_AGENTS = ['Jett', 'Phoenix', 'Reyna', 'Sova', 'Sage', 'Omen', 'Brimstone', 'Raze', 'Killjoy', 'Chamber', 'Viper', 'Cypher', 'Neon', 'Yoru', 'Fade', 'Gekko', 'Harbor', 'Iso', 'Deadlock', 'Clove', 'Vyse', 'KAY/O', 'Tejo', 'Astra', 'Breach', 'Skye', 'Waylay', 'Maxbot', 'Nox'];
     let currentAgentIdx = 0;
 
     const AGENT_SKILL_LABELS = {
@@ -4504,7 +4508,8 @@
       Breach: { c: '여진 (C)', q: '눈먼 길 (Q)', e: '균열 (E)', x: '지진 강타 (X)' },
       Skye: { c: '재생 (C)', q: '정향 폭발 (Q)', e: '인도하는 빛 (E)', x: '추적자 (X)' },
       Waylay: { c: '광자 굴절 (C)', q: '차원 가속 (Q)', e: '빛의 도약 (E)', x: '프리즘 오버드라이브 (X)' },
-      Maxbot: { c: '유도 로켓 (C)', q: '전자기 펄스 EMP (Q)', e: '오버클럭 배리어 (E)', x: '맥스봇 전탄 발사 (X)' }
+      Maxbot: { c: '유도 로켓 (C)', q: '전자기 펄스 EMP (Q)', e: '오버클럭 배리어 (E)', x: '맥스봇 전탄 발사 (X)' },
+      Nox: { c: '공허 장막 (C)', q: '그림자 족쇄 (Q)', e: '암흑 성운 (E)', x: '심연의 포식 (X)' }
     };
 
     let spectatorTargetIndex = 0;
@@ -4675,6 +4680,8 @@
     let districtJumppad = null;
     let driftZipline = null;
     let glitchJumpGate = null;
+    let kasbahFountain = null;
+    let isLowJitterMode = true;
     let currentDrsModeIdx = 0;
     let weaponBarrelHeat = 0;
     let reflexMode = 'boost';
@@ -5369,6 +5376,26 @@
         const hazardPlate = new THREE.Mesh(new THREE.BoxGeometry(0.24, 0.08, 0.04), new THREE.MeshStandardMaterial({ color: 0xfacc15 }));
         hazardPlate.position.set(0, 1.15, 0.2);
         grp.add(hazardPlate);
+      } else if (agentName === 'Nox') {
+        // Dark matter void shadow controller with horn crown and flowing cloak
+        const hornL = new THREE.Mesh(new THREE.ConeGeometry(0.06, 0.22, 5), new THREE.MeshStandardMaterial({ color: 0x312e81, metalness: 0.8 }));
+        hornL.position.set(-0.14, 2.05, -0.04);
+        hornL.rotation.z = -0.3;
+        const hornR = new THREE.Mesh(new THREE.ConeGeometry(0.06, 0.22, 5), new THREE.MeshStandardMaterial({ color: 0x312e81, metalness: 0.8 }));
+        hornR.position.set(0.14, 2.05, -0.04);
+        hornR.rotation.z = 0.3;
+        grp.add(hornL);
+        grp.add(hornR);
+        const eyeSlit = new THREE.Mesh(new THREE.BoxGeometry(0.24, 0.04, 0.05), new THREE.MeshBasicMaterial({ color: 0xa855f7 }));
+        eyeSlit.position.set(0, 1.78, 0.17);
+        grp.add(eyeSlit);
+        const voidCloak = new THREE.Mesh(new THREE.BoxGeometry(0.42, 0.7, 0.04), new THREE.MeshStandardMaterial({ color: 0x1e1b4b, roughness: 0.9 }));
+        voidCloak.position.set(0, 1.1, -0.16);
+        voidCloak.rotation.x = 0.12;
+        grp.add(voidCloak);
+        const dagger = new THREE.Mesh(new THREE.BoxGeometry(0.05, 0.24, 0.04), new THREE.MeshStandardMaterial({ color: 0x818cf8, metalness: 0.9 }));
+        dagger.position.set(0.24, 0.95, 0.08);
+        grp.add(dagger);
       }
 
       // Distinct tactical role underfoot glowing aura ring
@@ -5427,6 +5454,14 @@
       }
       sound.playSwitchClick();
       showToast(`⚡ DRS / 해상도 업스케일러: [${m.name}]`);
+    }
+
+    function triggerKasbahFountain() {
+      if (!kasbahFountain || player.isDead) return;
+      sound.playTeleport();
+      player.velocity.y = 17.5;
+      player.isGrounded = false;
+      showToast('⚡ [KASBAH] 고대 기류 분수대 상승 기류 분출! (AIR STREAM BOOST)');
     }
 
     function triggerGlitchJumpGate() {
@@ -5833,6 +5868,8 @@
       driftZipline = null;
       if (glitchJumpGate && glitchJumpGate.rings) glitchJumpGate.rings.forEach(r => scene.remove(r));
       glitchJumpGate = null;
+      if (kasbahFountain && kasbahFountain.fountainMesh) scene.remove(kasbahFountain.fountainMesh);
+      kasbahFountain = null;
 
       if (lotusDoor && lotusDoor.mesh) {
         scene.remove(lotusDoor.mesh);
@@ -6130,6 +6167,19 @@
         sunLight.position.set(0, 80, -20);
         scene.fog.color.setHex(0x130d24);
         scene.fog.density = 0.006;
+      } else if (mapKey === 'kasbah') {
+        // Moroccan Desert Batikh Citadel / Warm Golden Sun & Terracotta Sunset
+        grad.addColorStop(0, '#7c2d12');
+        grad.addColorStop(0.35, '#c2410c');
+        grad.addColorStop(0.7, '#ea580c');
+        grad.addColorStop(1, '#fde047');
+        ambientLight.color.setHex(0xfdba74);
+        ambientLight.intensity = 1.1;
+        sunLight.color.setHex(0xfef08a);
+        sunLight.intensity = 1.5;
+        sunLight.position.set(25, 80, -25);
+        scene.fog.color.setHex(0x7c2d12);
+        scene.fog.density = 0.0055;
       } else {
         // Range: High-tech military hangar
         grad.addColorStop(0, '#080c10');
@@ -7527,6 +7577,69 @@
         addPlatform(0, 0, 40, 40, 0.5, 16, matGlitchFloor);
         addPlatform(0, 0, -40, 40, 0.5, 16, matGlitchFloor);
       }
+      else if (mapKey === 'kasbah') {
+        // ==========================================================
+        // MAP 15: KASBAH (카스바) - 모로코 사막 바틱 요새 & 2단 성벽 회랑 & 고대 기류 분수 [F]
+        // ==========================================================
+        const matTerracottaWall = new THREE.MeshStandardMaterial({ color: 0x9a3412, roughness: 0.8 });
+        const matDesertSand = new THREE.MeshStandardMaterial({ color: 0xd97706, roughness: 0.9 });
+        const matHorseshoeArch = new THREE.MeshStandardMaterial({ color: 0x78350f, roughness: 0.7 });
+        const matFountainWater = new THREE.MeshStandardMaterial({ color: 0x0284c7, roughness: 0.1, transparent: true, opacity: 0.85 });
+
+        // Outer Citadel Perimeter (120x120m)
+        addBox(0, -0.5, 0, 120, 1, 120, matDesertSand);
+        addBox(0, 8, -60, 120, 16, 2, matTerracottaWall);
+        addBox(0, 8, 60, 120, 16, 2, matTerracottaWall);
+        addBox(-60, 8, 0, 2, 16, 120, matTerracottaWall);
+        addBox(60, 8, 0, 2, 16, 120, matTerracottaWall);
+
+        // Mid Courtyard Fountain with Thermal Air Stream at (0, 0, 0)
+        const fountainBase = new THREE.Mesh(new THREE.CylinderGeometry(3.5, 4.0, 0.8, 12), matHorseshoeArch);
+        fountainBase.position.set(0, 0.4, 0);
+        const fountainWater = new THREE.Mesh(new THREE.CylinderGeometry(3.2, 3.2, 0.1, 12), matFountainWater);
+        fountainWater.position.set(0, 0.85, 0);
+        scene.add(fountainBase);
+        scene.add(fountainWater);
+        mapObjects.push(fountainBase);
+        mapObjects.push(fountainWater);
+
+        addTextBillboard(0, 2.4, 0, '[F] 고대 기류 분수대 (AIR STREAM FOUNTAIN)', 1.5, '#38bdf8');
+
+        kasbahFountain = {
+          pos: new THREE.Vector3(0, 0.4, 0),
+          fountainMesh: fountainBase
+        };
+
+        // Mid Elevated Ramparts Bridge (y = 4.2) connecting East & West
+        addPlatform(0, 0, 12, 40, 4.2, 6, matTerracottaWall);
+        addRailing(0, 4.2, 9.1, 40, 'x');
+        addRailing(0, 4.2, 14.9, 40, 'x');
+        addStairs(18, 12, 0, 3.8, 4.2, 10, 10, 'x-');
+        addStairs(-18, 12, 0, 3.8, 4.2, 10, 10, 'x+');
+
+        // --- A SITE: CITADEL MINARET & COURTYARD (x = 30, z = -20) ---
+        addPlatform(30, 0, -20, 24, 0.5, 24, matSiteFloor);
+        addTextBillboard(30, 0.2, -20, 'A SITE', 1.8);
+        spikeSiteAreas.push({ minX: 18, maxX: 42, minZ: -32, maxZ: -8, name: 'A SITE' });
+
+        // Minaret Tower at (36, 0, -32)
+        addBox(36, 6.0, -32, 6, 12, 6, matTerracottaWall);
+        addArch(30, 0, -20, 8, 6.5, 1.8, matHorseshoeArch);
+        addCrateStack(24, -20, 2.4);
+
+        // --- B SITE: BAZAAR VAULT & RADIANITE URNS (x = -30, z = -20) ---
+        addPlatform(-30, 0, -20, 24, 0.5, 24, matSiteFloor);
+        addTextBillboard(-30, 0.2, -20, 'B SITE', 1.8);
+        spikeSiteAreas.push({ minX: -42, maxX: -18, minZ: -32, maxZ: -8, name: 'B SITE' });
+
+        addArch(-30, 0, -20, 8, 6.5, 1.8, matHorseshoeArch);
+        addBox(-36, 3.0, -30, 12, 6.0, 10, matTerracottaWall);
+        addCrateStack(-24, -20, 2.4);
+
+        // ATK & DEF Spawns
+        addPlatform(0, 0, 40, 40, 0.5, 16, matDesertSand);
+        addPlatform(0, 0, -40, 40, 0.5, 16, matDesertSand);
+      }
       else if (mapKey === 'range') {
         addBox(0, -0.5, 0, 60, 1, 120, matConcrete);
         addBox(0, 7, -60, 60, 14, 2, matWallStone);
@@ -7876,6 +7989,14 @@
       if (e.code === 'F9') {
         e.preventDefault();
         toggleDrsMode();
+        return;
+      }
+
+      // [V] Key: Quick Toggle Low-Jitter Frame Pacing Mode
+      if (e.code === 'KeyV' && typeof isTypingInInput !== 'undefined' && !isTypingInInput(e)) {
+        isLowJitterMode = !isLowJitterMode;
+        sound.playSwitchClick();
+        showToast(`⚡ 프레임 페이싱 (LOW-JITTER MODE): [${isLowJitterMode ? 'ON (초안정화)' : 'OFF'}]`);
         return;
       }
 
@@ -9604,6 +9725,15 @@
         }
       }
 
+      // 11. Kasbah Air Stream Fountain [F]
+      if (MAP_LIST[currentMapIndex] === 'kasbah' && kasbahFountain) {
+        const pPos = camera.position;
+        if (pPos.distanceTo(kasbahFountain.pos) < 4.5) {
+          triggerKasbahFountain();
+          return;
+        }
+      }
+
       // 4. Ascent B Shutter Door
       if (!ascentDoor || ascentDoor.isDestroyed) return;
       const dist = camera.position.distanceTo(ascentDoor.switchPos);
@@ -10781,6 +10911,16 @@
         { label: 'DEF SPAWN', x: 0, z: -40, color: '#00ffaa' },
         { label: 'ATK SPAWN', x: 0, z: 40, color: '#ff4655' }
       ],
+      kasbah: [
+        { label: 'A SITE', x: 30, z: -20, color: '#f97316' },
+        { label: 'A MINARET', x: 36, z: -32, color: '#fb923c' },
+        { label: 'B SITE', x: -30, z: -20, color: '#f97316' },
+        { label: 'B BAZAAR', x: -36, z: -30, color: '#fb923c' },
+        { label: 'AIR FOUNTAIN [F]', x: 0, z: 0, color: '#38bdf8' },
+        { label: 'RAMPARTS', x: 0, z: 12, color: '#d97706' },
+        { label: 'DEF SPAWN', x: 0, z: -40, color: '#00ffaa' },
+        { label: 'ATK SPAWN', x: 0, z: 40, color: '#ff4655' }
+      ],
       range: [
         { label: 'TARGETS', x: 0, z: -22, color: '#00f0ff' },
         { label: 'BENCH', x: 0, z: 0, color: '#ffc83b' },
@@ -11320,6 +11460,13 @@
           if (MAP_LIST[currentMapIndex] === 'glitch' && glitchJumpGate && !player.isDead) {
             if (Math.abs(camera.position.x) < 2.4 && Math.abs(camera.position.z) < 2.4 && Math.abs(camera.position.y - 1.7) < 1.0) {
               if (player.velocity.y <= 0) triggerGlitchJumpGate();
+            }
+          }
+
+          // Auto-launch when stepping into Kasbah Air Stream Fountain
+          if (MAP_LIST[currentMapIndex] === 'kasbah' && kasbahFountain && !player.isDead) {
+            if (Math.abs(camera.position.x) < 3.2 && Math.abs(camera.position.z) < 3.2 && Math.abs(camera.position.y - 1.7) < 1.2) {
+              if (player.velocity.y <= 0) triggerKasbahFountain();
             }
           }
         }
