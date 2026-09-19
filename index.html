@@ -1633,7 +1633,7 @@
 
   <div id="damage-indicator-ring"><div class="dmg-arc" id="dmg-arc"></div></div>
   <div id="ads-overlay">
-    <div class="ads-holo-glass">
+    <div class="ads-holo-glass" id="ads-reticle">
       <div class="ads-holo-dot"></div>
     </div>
   </div>
@@ -2032,6 +2032,7 @@
             <option value="165">165 FPS (게이밍 모니터 165Hz)</option>
             <option value="240">240 FPS (초고속 프로 240Hz)</option>
             <option value="360">360 FPS (Apex 최상위 360Hz)</option>
+            <option value="480">480 FPS (e스포츠 극한 주사율 480Hz)</option>
           </select>
         </div>
         <div class="settings-row">
@@ -2042,6 +2043,13 @@
             <option value="1.0" selected>1.00x (네이티브 표준 100%)</option>
             <option value="1.25">1.25x (고화질 선명도)</option>
             <option value="1.5">1.50x (초고화질 슈퍼샘플링)</option>
+          </select>
+        </div>
+        <div class="settings-row">
+          <span>동적 해상도 스케일링 (DRS)</span>
+          <select id="cfg-drs" style="background:#070b10; border:1px solid var(--val-border); color:var(--val-cyan); font-family:var(--font-hud); font-size:14px; padding:3px 8px; outline:none; cursor:pointer;">
+            <option value="on" selected>켜짐 (ON - 프레임 안정화)</option>
+            <option value="off">꺼짐 (OFF - 고정 스케일)</option>
           </select>
         </div>
         <div class="settings-row">
@@ -3487,7 +3495,7 @@
     const myClientId = 'user_' + Math.random().toString(36).substring(2, 8);
     const networkChannel = new BroadcastChannel('VALORANT_5V5_NET');
 
-    const MAP_LIST = ['ascent', 'bind', 'haven', 'icebox', 'split', 'lotus', 'range'];
+    const MAP_LIST = ['ascent', 'bind', 'haven', 'icebox', 'split', 'lotus', 'breeze', 'range'];
     const MAP_NAMES = {
       ascent: 'ASCENT (어센트) - 베네치아 요새 & 전동 셔터 도어 [F]',
       bind: 'BIND (바인드) - 모로코 사막 & 차원 이동 텔레포터',
@@ -3495,6 +3503,7 @@
       icebox: 'ICEBOX (아이스박스) - 북극 비밀 연구 기지 & 선적 컨테이너 & 집라인',
       split: 'SPLIT (스플릿) - 도쿄 네오 신주쿠 & A/B 고지대 타워 & 환기구 벤트 & 지하철역',
       lotus: 'LOTUS (로터스) - 인도 고대 유적 & 3대 폭파 지점(A/B/C) & 360° 회전 석문 [F]',
+      breeze: 'BREEZE (브리즈) - 버뮤다 카리브해 열대 섬 & A 듀얼 피라미드 & A 홀 낙하 슛 [CHUTE] & B 해적 요새 포대',
       range: 'THE RANGE (사격장) - 사격 훈련장 & 봇 연습'
     };
     let currentMapIndex = 0;
@@ -3502,21 +3511,23 @@
     const AGENT_EMOJIS = {
       Jett: '💨', Phoenix: '🔥', Reyna: '👁️', Sova: '🏹', Sage: '❄️', Omen: '🌑', Brimstone: '☄️', Raze: '💣',
       Killjoy: '🤖', Chamber: '👓', Viper: '🧪', Cypher: '🕵️', Neon: '⚡', Yoru: '👹',
-      Fade: '🧿', Gekko: '🦎', Harbor: '🌊', Iso: '🔮'
+      Fade: '🧿', Gekko: '🦎', Harbor: '🌊', Iso: '🔮',
+      Deadlock: '🕸️', Clove: '🦋', Vyse: '🥀', 'KAY/O': '⚙️'
     };
     const AGENT_COLORS = {
       Jett: '#00f0ff', Phoenix: '#ff6600', Reyna: '#be00ff', Sova: '#2979ff',
       Sage: '#00e676', Omen: '#536dfe', Brimstone: '#ff9100', Raze: '#ffd600',
       Killjoy: '#ffeb3b', Chamber: '#e6c35c', Viper: '#00e676', Cypher: '#e0e0e0',
       Neon: '#00e5ff', Yoru: '#3d5afe',
-      Fade: '#5c6b73', Gekko: '#a3e635', Harbor: '#06b6d4', Iso: '#8b5cf6'
+      Fade: '#5c6b73', Gekko: '#a3e635', Harbor: '#06b6d4', Iso: '#8b5cf6',
+      Deadlock: '#cbd5e1', Clove: '#f472b6', Vyse: '#94a3b8', 'KAY/O': '#38bdf8'
     };
     const AGENT_ROLES = {
       Jett: '타격대 (Duelist)', Phoenix: '타격대 (Duelist)', Reyna: '타격대 (Duelist)', Raze: '타격대 (Duelist)',
       Yoru: '타격대 (Duelist)', Neon: '타격대 (Duelist)', Iso: '타격대 (Duelist)',
-      Sova: '척후대 (Initiator)', Fade: '척후대 (Initiator)', Gekko: '척후대 (Initiator)',
-      Omen: '전략가 (Controller)', Brimstone: '전략가 (Controller)', Viper: '전략가 (Controller)', Harbor: '전략가 (Controller)',
-      Sage: '감시대 (Sentinel)', Cypher: '감시대 (Sentinel)', Killjoy: '감시대 (Sentinel)', Chamber: '감시대 (Sentinel)'
+      Sova: '척후대 (Initiator)', Fade: '척후대 (Initiator)', Gekko: '척후대 (Initiator)', 'KAY/O': '척후대 (Initiator)',
+      Omen: '전략가 (Controller)', Brimstone: '전략가 (Controller)', Viper: '전략가 (Controller)', Harbor: '전략가 (Controller)', Clove: '전략가 (Controller)',
+      Sage: '감시대 (Sentinel)', Cypher: '감시대 (Sentinel)', Killjoy: '감시대 (Sentinel)', Chamber: '감시대 (Sentinel)', Deadlock: '감시대 (Sentinel)', Vyse: '감시대 (Sentinel)'
     };
 
     const lobbySlots = {
@@ -4274,7 +4285,7 @@
     /* ==========================================================
        DYNAMIC AGENT SWITCHING SYSTEM ([H] KEY TO CYCLE AGENT)
        ========================================================== */
-    const PLAYABLE_AGENTS = ['Jett', 'Phoenix', 'Reyna', 'Omen', 'Viper', 'Cypher', 'Neon', 'Yoru', 'Chamber', 'Killjoy', 'Fade', 'Gekko', 'Harbor', 'Iso'];
+    const PLAYABLE_AGENTS = ['Jett', 'Phoenix', 'Reyna', 'Sova', 'Sage', 'Omen', 'Brimstone', 'Raze', 'Killjoy', 'Chamber', 'Viper', 'Cypher', 'Neon', 'Yoru', 'Fade', 'Gekko', 'Harbor', 'Iso', 'Deadlock', 'Clove', 'Vyse', 'KAY/O'];
     let currentAgentIdx = 0;
 
     const AGENT_SKILL_LABELS = {
@@ -4362,11 +4373,48 @@
 
     function updatePlayerColors() {
       const slot = lobbySlots[myTeam][mySlotIdx];
-      const color = AGENT_COLORS[slot.agent] || '#00f0ff';
-      matSleeve.color.set(color);
+      const curAgent = slot ? slot.agent : 'Jett';
+      updatePlayerArmsTheme(curAgent);
+    }
+
+    function updatePlayerArmsTheme(agentName = 'Jett') {
+      const colorHex = AGENT_COLORS[agentName] || '#00f0ff';
+      const c = new THREE.Color(colorHex);
+
+      if (typeof matSleeve !== 'undefined' && matSleeve) {
+        if (agentName === 'Jett') matSleeve.color.setHex(0xf0f4f8);
+        else if (agentName === 'Phoenix') matSleeve.color.setHex(0xd9480f);
+        else if (agentName === 'Reyna') matSleeve.color.setHex(0x4a044e);
+        else if (agentName === 'Sage') matSleeve.color.setHex(0x047857);
+        else if (agentName === 'Omen') matSleeve.color.setHex(0x1e1b4b);
+        else if (agentName === 'Cypher') matSleeve.color.setHex(0xd6d3d1);
+        else if (agentName === 'Killjoy') matSleeve.color.setHex(0xeab308);
+        else if (agentName === 'Chamber') matSleeve.color.setHex(0x1e293b);
+        else if (agentName === 'Viper') matSleeve.color.setHex(0x065f46);
+        else if (agentName === 'Deadlock') matSleeve.color.setHex(0x334155);
+        else if (agentName === 'Clove') matSleeve.color.setHex(0xbe185d);
+        else if (agentName === 'Vyse') matSleeve.color.setHex(0x475569);
+        else if (agentName === 'KAY/O') matSleeve.color.setHex(0x0f172a);
+        else matSleeve.color.set(c);
+      }
+
+      if (typeof matGlove !== 'undefined' && matGlove) {
+        if (agentName === 'Chamber') matGlove.color.setHex(0x1e293b);
+        else if (agentName === 'Reyna') matGlove.color.setHex(0x701a75);
+        else if (agentName === 'Phoenix') matGlove.color.setHex(0x292524);
+        else if (agentName === 'Deadlock') matGlove.color.setHex(0x94a3b8);
+        else if (agentName === 'KAY/O') matGlove.color.setHex(0x38bdf8);
+        else matGlove.color.setHex(0x11161d);
+      }
+
+      if (typeof matWristBand !== 'undefined' && matWristBand) {
+        matWristBand.color.set(c);
+      }
+
       if (typeof matWristGem !== 'undefined' && matWristGem) {
-        matWristGem.color.set(color);
-        matWristGem.emissive.set(color);
+        matWristGem.color.set(c);
+        matWristGem.emissive.set(c);
+        matWristGem.emissiveIntensity = 0.85;
       }
     }
 
@@ -4955,10 +5003,59 @@
         const spikeHair = new THREE.Mesh(new THREE.ConeGeometry(0.14, 0.32, 6), new THREE.MeshStandardMaterial({ color: 0x18181b }));
         spikeHair.position.set(0, 2.04, -0.02);
         grp.add(spikeHair);
-        // Floating energy shield prism
         const prism = new THREE.Mesh(new THREE.OctahedronGeometry(0.065), new THREE.MeshStandardMaterial({ color: 0x8b5cf6, emissive: 0xa855f7, emissiveIntensity: 0.8 }));
         prism.position.set(0, 2.12, -0.22);
         grp.add(prism);
+      } else if (agentName === 'Deadlock') {
+        // Cybernetic silver alloy bionic left arm
+        const bionicArm = new THREE.Mesh(new THREE.CylinderGeometry(0.07, 0.055, 0.42, 8), new THREE.MeshStandardMaterial({ color: 0xc0c7d0, metalness: 0.9, roughness: 0.2 }));
+        bionicArm.position.set(-0.28, 1.05, 0.05);
+        grp.add(bionicArm);
+        const nanowireCollar = new THREE.Mesh(new THREE.TorusGeometry(0.22, 0.03, 6, 14), new THREE.MeshStandardMaterial({ color: 0x00f0ff, emissive: 0x00bbdd, emissiveIntensity: 0.6 }));
+        nanowireCollar.rotation.x = Math.PI / 2;
+        nanowireCollar.position.set(0, 1.62, 0);
+        grp.add(nanowireCollar);
+        const blondeSweep = new THREE.Mesh(new THREE.ConeGeometry(0.16, 0.26, 6), new THREE.MeshStandardMaterial({ color: 0xf3e5ab }));
+        blondeSweep.position.set(-0.06, 1.98, -0.02);
+        blondeSweep.rotation.z = 0.4;
+        grp.add(blondeSweep);
+      } else if (agentName === 'Clove') {
+        // Dual floating magenta butterfly wings
+        const wingL = new THREE.Mesh(new THREE.OctahedronGeometry(0.14), new THREE.MeshStandardMaterial({ color: 0xf472b6, emissive: 0xec4899, emissiveIntensity: 0.7, transparent: true, opacity: 0.85 }));
+        wingL.position.set(-0.24, 1.35, -0.22);
+        wingL.scale.set(0.3, 1.0, 1.4);
+        grp.add(wingL);
+        const wingR = new THREE.Mesh(new THREE.OctahedronGeometry(0.14), new THREE.MeshStandardMaterial({ color: 0xf472b6, emissive: 0xec4899, emissiveIntensity: 0.7, transparent: true, opacity: 0.85 }));
+        wingR.position.set(0.24, 1.35, -0.22);
+        wingR.scale.set(0.3, 1.0, 1.4);
+        grp.add(wingR);
+        const punkCollar = new THREE.Mesh(new THREE.TorusGeometry(0.24, 0.04, 6, 14), new THREE.MeshStandardMaterial({ color: 0xdb2777 }));
+        punkCollar.rotation.x = Math.PI / 2;
+        punkCollar.position.set(0, 1.60, 0);
+        grp.add(punkCollar);
+      } else if (agentName === 'Vyse') {
+        // Liquid metal silver thorns wrapping right arm
+        const thornArm = new THREE.Mesh(new THREE.TorusGeometry(0.08, 0.03, 6, 12), new THREE.MeshStandardMaterial({ color: 0x94a3b8, metalness: 0.95, roughness: 0.15 }));
+        thornArm.position.set(0.28, 1.1, 0.05);
+        grp.add(thornArm);
+        const thornCrown = new THREE.Mesh(new THREE.ConeGeometry(0.16, 0.28, 6), new THREE.MeshStandardMaterial({ color: 0x64748b, metalness: 0.8 }));
+        thornCrown.position.set(0, 2.02, -0.04);
+        grp.add(thornCrown);
+        const metalCuirass = new THREE.Mesh(new THREE.BoxGeometry(0.36, 0.32, 0.2), new THREE.MeshStandardMaterial({ color: 0x334155, metalness: 0.9 }));
+        metalCuirass.position.set(0, 1.25, 0.05);
+        grp.add(metalCuirass);
+      } else if (agentName === 'KAY/O') {
+        // Robot war machine head with cyan digital visor
+        const robotHead = new THREE.Mesh(new THREE.BoxGeometry(0.32, 0.32, 0.32), new THREE.MeshStandardMaterial({ color: 0x1e293b, metalness: 0.85 }));
+        robotHead.position.set(0, 1.76, 0);
+        grp.add(robotHead);
+        const ledVisor = new THREE.Mesh(new THREE.BoxGeometry(0.26, 0.08, 0.04), new THREE.MeshBasicMaterial({ color: 0x38bdf8 }));
+        ledVisor.position.set(0, 1.78, 0.17);
+        grp.add(ledVisor);
+        const chestReactor = new THREE.Mesh(new THREE.CylinderGeometry(0.09, 0.09, 0.06, 10), new THREE.MeshStandardMaterial({ color: 0x00f0ff, emissive: 0x00f0ff, emissiveIntensity: 0.9 }));
+        chestReactor.rotation.x = Math.PI / 2;
+        chestReactor.position.set(0, 1.25, 0.22);
+        grp.add(chestReactor);
       }
 
       return { mesh: grp, head, body, legs: [legL, legR] };
@@ -5440,6 +5537,19 @@
         sunLight.position.set(-50, 80, 45);
         scene.fog.color.setHex(0x3a4f41);
         scene.fog.density = 0.007;
+      } else if (mapKey === 'breeze') {
+        // Tropical Caribbean Bermuda Island / Radiant Sun & Turquoise Waters
+        grad.addColorStop(0, '#0077b6');
+        grad.addColorStop(0.35, '#00b4d8');
+        grad.addColorStop(0.7, '#90e0ef');
+        grad.addColorStop(1, '#caf0f8');
+        ambientLight.color.setHex(0xe0f7fa);
+        ambientLight.intensity = 1.05;
+        sunLight.color.setHex(0xfff8e1);
+        sunLight.intensity = 1.5;
+        sunLight.position.set(70, 95, 40);
+        scene.fog.color.setHex(0x90e0ef);
+        scene.fog.density = 0.0055;
       } else {
         // Range: High-tech military hangar
         grad.addColorStop(0, '#080c10');
@@ -6083,6 +6193,133 @@
         addLantern(-16, 0, 4, 0xffd700);
         addLantern(16, 0, 4, 0xffd700);
       }
+      else if (mapKey === 'breeze') {
+        // ==========================================================
+        // MAP 7: BREEZE (브리즈) - 버뮤다 카리브해 열대 섬 & 듀얼 피라미드 & A 홀 슛 & 해적 요새
+        // ==========================================================
+        const matBreezeSand = new THREE.MeshStandardMaterial({ color: 0xe5d4ba, roughness: 0.9 });
+        const matBreezeStone = new THREE.MeshStandardMaterial({ color: 0xd8cbba, roughness: 0.78 });
+        const matBreezeFort = new THREE.MeshStandardMaterial({ color: 0x9c8e82, roughness: 0.75 });
+        const matBreezeOcean = new THREE.MeshStandardMaterial({ color: 0x00b4d8, roughness: 0.1, transparent: true, opacity: 0.85 });
+        const matPalmTrunk = new THREE.MeshStandardMaterial({ color: 0x6f4e37, roughness: 0.8 });
+        const matPalmLeaf = new THREE.MeshStandardMaterial({ color: 0x2d6a4f, roughness: 0.55 });
+        const matBronzeCannon = new THREE.MeshStandardMaterial({ color: 0xb87333, metalness: 0.8, roughness: 0.25 });
+
+        // Vast Caribbean Sand Beach Floor & Outer Fortress Walls
+        addBox(0, -0.5, 0, 130, 1, 130, matBreezeSand);
+        addBox(0, 7, -65, 130, 14, 2, matBreezeStone);
+        addBox(0, 7, 65, 130, 14, 2, matBreezeStone);
+        addBox(-65, 7, 0, 2, 14, 130, matBreezeStone);
+        addBox(65, 7, 0, 2, 14, 130, matBreezeStone);
+
+        // Surrounding Turquoise Caribbean Ocean Plane
+        const oceanGeo = new THREE.BoxGeometry(220, 0.4, 220);
+        const oceanMesh = new THREE.Mesh(oceanGeo, matBreezeOcean);
+        oceanMesh.position.set(0, -0.4, 0);
+        scene.add(oceanMesh);
+        mapObjects.push(oceanMesh);
+
+        // --- A SITE: DUAL PYRAMIDS & A HALL & A CHUTE SLIDE ---
+        addBox(32, 0.05, -24, 24, 0.05, 24, matSiteFloor, false);
+        addTextBillboard(32, 0.2, -24, 'A SITE', 1.8);
+        spikeSiteAreas.push({ minX: 20, maxX: 46, minZ: -36, maxZ: -12, name: 'A SITE' });
+
+        // Iconic Pyramid 1 (Front Stepped Pyramid at x = 26, z = -25)
+        addPlatform(26, 0, -25, 7.5, 1.4, 7.5, matBreezeStone);
+        addPlatform(26, 1.4, -25, 5.5, 1.4, 5.5, matBreezeStone);
+        addPlatform(26, 2.8, -25, 3.5, 1.4, 3.5, matBreezeStone);
+
+        // Iconic Pyramid 2 (Back Stepped Pyramid at x = 38, z = -25)
+        addPlatform(38, 0, -25, 7.5, 1.4, 7.5, matBreezeStone);
+        addPlatform(38, 1.4, -25, 5.5, 1.4, 5.5, matBreezeStone);
+        addPlatform(38, 2.8, -25, 3.5, 1.4, 3.5, matBreezeStone);
+
+        // A Cave Arched Entrance (x = 44, z = 0)
+        addArch(44, 0, 0, 7.0, 6.0, 3.0, matBreezeFort);
+
+        // A Hall Elevated Walkway (y = 4.2)
+        addPlatform(42, 0, -32, 6, 4.2, 18, matBreezeFort);
+        addRailing(38.9, 4.2, -32, 18, 'z');
+        addStairs(42, -18, 0, 4.0, 4.2, 12, 12, 'z-');
+
+        // Interactive A-Hall Chute (Slide tube into A Site) at x = 16, z = -8
+        addBox(16, 2.5, -8, 2.8, 5.0, 2.8, matBreezeFort);
+        addTextBillboard(16, 3.8, -8, '[CHUTE] A-HALL SLIDE', 1.4, '#00f0ff');
+        const chuteTrigger = {
+          pos: new THREE.Vector3(16, 1.2, -8),
+          targetPos: new THREE.Vector3(26, 1.2, -18)
+        };
+
+        // --- B SITE: HIGH FORT PILLAR, B WINDOW 2F & PIRATE CANNONS ---
+        addBox(-32, 0.05, -24, 24, 0.05, 24, matSiteFloor, false);
+        addTextBillboard(-32, 0.2, -24, 'B SITE', 1.8);
+        spikeSiteAreas.push({ minX: -46, maxX: -20, minZ: -36, maxZ: -12, name: 'B SITE' });
+
+        // B Central Massive Fortress Stone Pillar
+        addBox(-32, 4.0, -24, 5.0, 8.0, 5.0, matBreezeFort);
+
+        // B Window 2F Overlook Balcony (y = 4.4)
+        addPlatform(-36, 0, -34, 14, 4.4, 8, matBreezeStone);
+        addRailing(-28.9, 4.4, -34, 8, 'z');
+        addRailing(-36, 4.4, -29.9, 14, 'x');
+        addStairs(-36, -18, 0, 4.0, 4.4, 14, 14, 'z-');
+
+        // B Pirate Fortress Cannon Battery (3 Bronze Cannons)
+        [-42, -36, -30].forEach((cx, cIdx) => {
+          const cBase = new THREE.Mesh(new THREE.BoxGeometry(1.2, 0.6, 1.8), matBreezeFort);
+          cBase.position.set(cx, 0.3, -42);
+          scene.add(cBase);
+          mapObjects.push(cBase);
+          colliders.push({ box: new THREE.Box3().setFromObject(cBase), mesh: cBase });
+
+          const cBarrel = new THREE.Mesh(new THREE.CylinderGeometry(0.18, 0.26, 2.4, 10), matBronzeCannon);
+          cBarrel.rotation.x = -Math.PI / 2.3;
+          cBarrel.position.set(cx, 0.85, -42.4);
+          scene.add(cBarrel);
+          mapObjects.push(cBarrel);
+        });
+
+        // --- MID COURTYARD & TROPICAL PALM TREES & NEST ---
+        // Mid Nest Elevated Sniper Deck (y = 3.8)
+        addPlatform(0, 0, -14, 10, 3.8, 6, matBreezeStone);
+        addRailing(-5.1, 3.8, -14, 6, 'z');
+        addRailing(5.1, 3.8, -14, 6, 'z');
+        addStairs(0, -6, 0, 4.2, 3.8, 8, 8, 'z-');
+
+        // Tropical Caribbean Palm Trees
+        const palmCoords = [
+          { x: 12, z: 10 },
+          { x: -14, z: 12 },
+          { x: 28, z: 8 },
+          { x: -26, z: -8 },
+          { x: 0, z: -32 }
+        ];
+        palmCoords.forEach(pc => {
+          // Curved segmented trunk
+          const pTrunk = new THREE.Mesh(new THREE.CylinderGeometry(0.25, 0.38, 6.5, 8), matPalmTrunk);
+          pTrunk.position.set(pc.x, 3.25, pc.z);
+          pTrunk.rotation.z = (Math.random() - 0.5) * 0.15;
+          scene.add(pTrunk);
+          mapObjects.push(pTrunk);
+          colliders.push({ box: new THREE.Box3().setFromObject(pTrunk), mesh: pTrunk });
+
+          // Spreading Palm Leaves Crown
+          for (let leaf = 0; leaf < 6; leaf++) {
+            const angle = (leaf / 6) * Math.PI * 2;
+            const pLeaf = new THREE.Mesh(new THREE.ConeGeometry(0.4, 2.8, 4), matPalmLeaf);
+            pLeaf.position.set(pc.x + Math.cos(angle) * 1.2, 6.4, pc.z + Math.sin(angle) * 1.2);
+            pLeaf.rotation.x = Math.PI / 2.6;
+            pLeaf.rotation.y = angle;
+            scene.add(pLeaf);
+            mapObjects.push(pLeaf);
+          }
+        });
+
+        // Wooden Tropical Shipping Crates for tactical cover
+        addCrateStack(12, -22, 2.4);
+        addCrateStack(-14, -22, 2.4);
+        addCrateStack(0, 6, 2.4);
+      }
       else if (mapKey === 'range') {
         addBox(0, -0.5, 0, 60, 1, 120, matConcrete);
         addBox(0, 7, -60, 60, 14, 2, matWallStone);
@@ -6359,6 +6596,19 @@
         if (!isChatActive) openChat();
       }
       if (isChatActive) return;
+
+      // F3 Quick Toggle Performance HUD
+      if (e.code === 'F3') {
+        e.preventDefault();
+        const pHudSel = document.getElementById('cfg-perf-hud');
+        if (pHudSel) {
+          if (pHudSel.value === 'full') pHudSel.value = 'simple';
+          else if (pHudSel.value === 'simple') pHudSel.value = 'off';
+          else pHudSel.value = 'full';
+          showToast(`⚡ 퍼포먼스 HUD: [${pHudSel.value.toUpperCase()}]`);
+        }
+        return;
+      }
 
       // Robust Escape Key Handling for All Menus & Settings
       if (e.code === 'Escape') {
@@ -6877,11 +7127,12 @@
     function updateADS() {
       const adsOverlay = document.getElementById('ads-overlay');
       const opScope = document.getElementById('op-scope-overlay');
+      const adsReticle = document.getElementById('ads-reticle');
 
       if (currentWeapon.isSniper) {
         adsOverlay.style.opacity = '0';
         if (player.isADS) {
-          camera.fov = 24;
+          camera.fov = currentWeaponKey === 'operator' ? 22 : (currentWeaponKey === 'outlaw' ? 28 : 34);
           opScope.style.display = 'block';
           gunGroup.visible = false;
         } else {
@@ -6893,8 +7144,38 @@
         opScope.style.display = 'none';
         gunGroup.visible = true;
         if (player.isADS) {
-          camera.fov = 54;
+          camera.fov = (currentWeapon.category === 'rifle') ? 52 : (currentWeapon.category === 'heavy' ? 56 : 58);
           adsOverlay.style.opacity = '1';
+
+          // Weapon-specific reticle styling
+          if (adsReticle) {
+            if (currentWeaponKey === 'vandal') {
+              adsReticle.style.borderColor = 'rgba(255, 30, 60, 0.7)';
+              adsReticle.style.borderRadius = '2px';
+              adsReticle.style.width = '24px';
+              adsReticle.style.height = '24px';
+            } else if (currentWeaponKey === 'phantom') {
+              adsReticle.style.borderColor = 'rgba(0, 240, 255, 0.8)';
+              adsReticle.style.borderRadius = '50%';
+              adsReticle.style.width = '36px';
+              adsReticle.style.height = '36px';
+            } else if (currentWeapon.category === 'shotgun') {
+              adsReticle.style.borderColor = 'rgba(255, 215, 0, 0.6)';
+              adsReticle.style.borderRadius = '50%';
+              adsReticle.style.width = '80px';
+              adsReticle.style.height = '80px';
+            } else if (currentWeapon.category === 'heavy') {
+              adsReticle.style.borderColor = 'rgba(0, 255, 136, 0.7)';
+              adsReticle.style.borderRadius = '50%';
+              adsReticle.style.width = '60px';
+              adsReticle.style.height = '60px';
+            } else {
+              adsReticle.style.borderColor = 'rgba(0, 255, 136, 0.4)';
+              adsReticle.style.borderRadius = '50%';
+              adsReticle.style.width = '40px';
+              adsReticle.style.height = '40px';
+            }
+          }
         } else {
           camera.fov = 75;
           adsOverlay.style.opacity = '0';
@@ -9324,7 +9605,20 @@
             } else {
               const rScale = document.getElementById('cfg-render-scale') ? document.getElementById('cfg-render-scale').value : '1.0';
               const curMapKey = (MAP_LIST && MAP_LIST[currentMapIndex]) ? MAP_LIST[currentMapIndex].toUpperCase() : 'ASCENT';
-              perfElem.innerText = `${fpsDisplayVal} FPS // ${frameTimeMsVal}ms // ${rScale}x RES // ${curMapKey}`;
+              const drsActive = document.getElementById('cfg-drs')?.value === 'on' ? ' // DRS:ON' : '';
+              perfElem.innerText = `${fpsDisplayVal} FPS // ${frameTimeMsVal}ms // ${rScale}x RES${drsActive} // ${curMapKey}`;
+
+              // Dynamic Resolution Scaling (DRS) Auto Pacing
+              if (document.getElementById('cfg-drs')?.value === 'on' && fpsDisplayVal > 0) {
+                const targetFps = maxFpsSetting > 0 ? maxFpsSetting : 144;
+                if (fpsDisplayVal < targetFps * 0.85 && window.RENDER_SCALE > 0.6) {
+                  window.RENDER_SCALE = Math.max(0.5, window.RENDER_SCALE - 0.05);
+                  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.0) * window.RENDER_SCALE);
+                } else if (fpsDisplayVal >= targetFps * 0.98 && window.RENDER_SCALE < 1.0) {
+                  window.RENDER_SCALE = Math.min(1.0, window.RENDER_SCALE + 0.02);
+                  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.0) * window.RENDER_SCALE);
+                }
+              }
             }
           }
         }
@@ -9633,6 +9927,45 @@
               gunGroup.position.copy(DEFAULT_GUN_POS);
               gunGroup.rotation.set(0, 0, 0);
             }
+          } else if (currentWeaponKey === 'operator' || currentWeaponKey === 'outlaw' || currentWeaponKey === 'marshal') {
+            // Sniper Bolt Cycle & Scope Flourish
+            const totalDuration = 2.2;
+            if (elapsed < totalDuration) {
+              const p = elapsed / totalDuration;
+              const tiltX = Math.sin(p * Math.PI) * 0.25;
+              const cycleZ = (p > 0.3 && p < 0.7) ? Math.sin((p - 0.3) / 0.4 * Math.PI) * 0.08 : 0;
+              gunGroup.rotation.set(-tiltX, Math.sin(p * Math.PI) * 0.35, Math.sin(p * Math.PI) * 0.2);
+              gunGroup.position.set(DEFAULT_GUN_POS.x - 0.04, DEFAULT_GUN_POS.y + 0.02, DEFAULT_GUN_POS.z + cycleZ);
+            } else {
+              isInspecting = false;
+              gunGroup.position.copy(DEFAULT_GUN_POS);
+              gunGroup.rotation.set(0, 0, 0);
+            }
+          } else if (currentWeaponKey === 'bucky' || currentWeaponKey === 'judge') {
+            // Shotgun Pump & Chamber Check
+            const totalDuration = 1.9;
+            if (elapsed < totalDuration) {
+              const p = elapsed / totalDuration;
+              const pumpAction = (p > 0.35 && p < 0.65) ? Math.sin((p - 0.35) / 0.3 * Math.PI) * 0.06 : 0;
+              gunGroup.rotation.set(0.2 * Math.sin(p * Math.PI), 0.3 * Math.sin(p * Math.PI), -0.25 * Math.sin(p * Math.PI));
+              gunGroup.position.set(DEFAULT_GUN_POS.x, DEFAULT_GUN_POS.y, DEFAULT_GUN_POS.z + pumpAction);
+            } else {
+              isInspecting = false;
+              gunGroup.position.copy(DEFAULT_GUN_POS);
+              gunGroup.rotation.set(0, 0, 0);
+            }
+          } else if (currentWeaponKey === 'ares' || currentWeaponKey === 'odin') {
+            // Heavy Machine Gun Belt Inspection
+            const totalDuration = 2.4;
+            if (elapsed < totalDuration) {
+              const p = elapsed / totalDuration;
+              gunGroup.rotation.set(0.15 * Math.sin(p * Math.PI), -0.45 * Math.sin(p * Math.PI), 0.2 * Math.sin(p * Math.PI));
+              gunGroup.position.set(DEFAULT_GUN_POS.x - 0.06 * Math.sin(p * Math.PI), DEFAULT_GUN_POS.y + 0.03 * Math.sin(p * Math.PI), DEFAULT_GUN_POS.z);
+            } else {
+              isInspecting = false;
+              gunGroup.position.copy(DEFAULT_GUN_POS);
+              gunGroup.rotation.set(0, 0, 0);
+            }
           } else {
             const totalDuration = 2.4;
             if (elapsed < totalDuration) {
@@ -9839,6 +10172,16 @@
               t.mesh.position.z += zDir * 1.5 * botSpeedMult * dt;
             }
           });
+        }
+
+        // Breeze A-Hall Chute Sliding Detection
+        if (MAP_LIST[currentMapIndex] === 'breeze' && !player.isDead) {
+          if (Math.abs(camera.position.x - 16) < 2.0 && Math.abs(camera.position.z - (-8)) < 2.0) {
+            camera.position.set(26, 1.4, -18);
+            player.velocity.set(4, 0, -8);
+            sound.playDash();
+            showToast('💨 [CHUTE] A-홀 고속 슬라이드 착지 성공!');
+          }
         }
 
         // Tactical Clutch 1vX Check
