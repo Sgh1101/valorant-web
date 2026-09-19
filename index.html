@@ -3599,7 +3599,7 @@
     const myClientId = 'user_' + Math.random().toString(36).substring(2, 8);
     const networkChannel = new BroadcastChannel('VALORANT_5V5_NET');
 
-    const MAP_LIST = ['ascent', 'bind', 'haven', 'icebox', 'split', 'lotus', 'breeze', 'sunset', 'pearl', 'fracture', 'abyss', 'district', 'drift', 'glitch', 'kasbah', 'range'];
+    const MAP_LIST = ['ascent', 'bind', 'haven', 'icebox', 'split', 'lotus', 'breeze', 'sunset', 'pearl', 'fracture', 'abyss', 'district', 'drift', 'glitch', 'kasbah', 'piazza', 'range'];
     const MAP_NAMES = {
       ascent: 'ASCENT (어센트) - 베네치아 요새 & 전동 셔터 도어 [F]',
       bind: 'BIND (바인드) - 모로코 사막 & 차원 이동 텔레포터',
@@ -3616,6 +3616,7 @@
       drift: 'DRIFT (드리프트) - 태국 열대 리조트 & 부유 방갈로 & 오션 짚라인 [F]',
       glitch: 'GLITCH (글리치) - 가상 시뮬레이션 매트릭스 & 양자 점프 게이트 [F] & 글리치 포털',
       kasbah: 'KASBAH (카스바) - 모로코 사막 바틱 요새 & 2단 성벽 회랑 & 고대 기류 분수 [F]',
+      piazza: 'PIAZZA (피아자) - 이탈리아 토스카나 해안 광장 & 르네상스 종탑 & 수로 부스터 [F]',
       range: 'THE RANGE (사격장) - 사격 훈련장 & 봇 연습'
     };
     let currentMapIndex = 0;
@@ -3631,7 +3632,8 @@
       Skye: '🌿',
       Waylay: '⚡',
       Maxbot: '🤖',
-      Nox: '🌑'
+      Nox: '🌑',
+      Zephyr: '🌪️'
     };
     const AGENT_COLORS = {
       Jett: '#00f0ff', Phoenix: '#ff6600', Reyna: '#be00ff', Sova: '#2979ff',
@@ -3646,7 +3648,8 @@
       Skye: '#84cc16',
       Waylay: '#38bdf8',
       Maxbot: '#f97316',
-      Nox: '#6366f1'
+      Nox: '#6366f1',
+      Zephyr: '#34d399'
     };
     const AGENT_ROLES = {
       Jett: '타격대 (Duelist)', Phoenix: '타격대 (Duelist)', Reyna: '타격대 (Duelist)', Raze: '타격대 (Duelist)',
@@ -3660,7 +3663,8 @@
       Skye: '척후대 (Initiator)',
       Waylay: '타격대 (Duelist)',
       Maxbot: '감시대 (Sentinel)',
-      Nox: '전략가 (Controller)'
+      Nox: '전략가 (Controller)',
+      Zephyr: '척후대 (Initiator)'
     };
 
     const lobbySlots = {
@@ -4486,7 +4490,7 @@
     /* ==========================================================
        DYNAMIC AGENT SWITCHING SYSTEM ([H] KEY TO CYCLE AGENT)
        ========================================================== */
-    const PLAYABLE_AGENTS = ['Jett', 'Phoenix', 'Reyna', 'Sova', 'Sage', 'Omen', 'Brimstone', 'Raze', 'Killjoy', 'Chamber', 'Viper', 'Cypher', 'Neon', 'Yoru', 'Fade', 'Gekko', 'Harbor', 'Iso', 'Deadlock', 'Clove', 'Vyse', 'KAY/O', 'Tejo', 'Astra', 'Breach', 'Skye', 'Waylay', 'Maxbot', 'Nox'];
+    const PLAYABLE_AGENTS = ['Jett', 'Phoenix', 'Reyna', 'Sova', 'Sage', 'Omen', 'Brimstone', 'Raze', 'Killjoy', 'Chamber', 'Viper', 'Cypher', 'Neon', 'Yoru', 'Fade', 'Gekko', 'Harbor', 'Iso', 'Deadlock', 'Clove', 'Vyse', 'KAY/O', 'Tejo', 'Astra', 'Breach', 'Skye', 'Waylay', 'Maxbot', 'Nox', 'Zephyr'];
     let currentAgentIdx = 0;
 
     const AGENT_SKILL_LABELS = {
@@ -4509,7 +4513,8 @@
       Skye: { c: '재생 (C)', q: '정향 폭발 (Q)', e: '인도하는 빛 (E)', x: '추적자 (X)' },
       Waylay: { c: '광자 굴절 (C)', q: '차원 가속 (Q)', e: '빛의 도약 (E)', x: '프리즘 오버드라이브 (X)' },
       Maxbot: { c: '유도 로켓 (C)', q: '전자기 펄스 EMP (Q)', e: '오버클럭 배리어 (E)', x: '맥스봇 전탄 발사 (X)' },
-      Nox: { c: '공허 장막 (C)', q: '그림자 족쇄 (Q)', e: '암흑 성운 (E)', x: '심연의 포식 (X)' }
+      Nox: { c: '공허 장막 (C)', q: '그림자 족쇄 (Q)', e: '암흑 성운 (E)', x: '심연의 포식 (X)' },
+      Zephyr: { c: '돌풍 회오리 (C)', q: '폭풍 깃털 수리검 (Q)', e: '기류 정찰선 (E)', x: '템페스트 타이푼 (X)' }
     };
 
     let spectatorTargetIndex = 0;
@@ -4681,6 +4686,8 @@
     let driftZipline = null;
     let glitchJumpGate = null;
     let kasbahFountain = null;
+    let piazzaCanalBoost = null;
+    let pollingRateModeIdx = 0;
     let isLowJitterMode = true;
     let currentDrsModeIdx = 0;
     let weaponBarrelHeat = 0;
@@ -5396,6 +5403,27 @@
         const dagger = new THREE.Mesh(new THREE.BoxGeometry(0.05, 0.24, 0.04), new THREE.MeshStandardMaterial({ color: 0x818cf8, metalness: 0.9 }));
         dagger.position.set(0.24, 0.95, 0.08);
         grp.add(dagger);
+      } else if (agentName === 'Zephyr') {
+        // Emerald tempest wind initiator with feather circlet and cyclone twin scarves
+        const circlet = new THREE.Mesh(new THREE.TorusGeometry(0.24, 0.035, 6, 14), new THREE.MeshStandardMaterial({ color: 0x10b981, emissive: 0x059669, emissiveIntensity: 0.6 }));
+        circlet.rotation.x = Math.PI / 2;
+        circlet.position.set(0, 1.88, 0);
+        grp.add(circlet);
+        const feather = new THREE.Mesh(new THREE.ConeGeometry(0.04, 0.28, 4), new THREE.MeshStandardMaterial({ color: 0x34d399 }));
+        feather.position.set(-0.2, 2.05, -0.05);
+        feather.rotation.z = -0.4;
+        grp.add(feather);
+        const scarfL = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.45, 0.02), new THREE.MeshStandardMaterial({ color: 0x059669 }));
+        scarfL.position.set(-0.16, 1.25, -0.15);
+        scarfL.rotation.x = 0.25;
+        grp.add(scarfL);
+        const scarfR = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.45, 0.02), new THREE.MeshStandardMaterial({ color: 0x059669 }));
+        scarfR.position.set(0.16, 1.25, -0.15);
+        scarfR.rotation.x = 0.25;
+        grp.add(scarfR);
+        const bracer = new THREE.Mesh(new THREE.CylinderGeometry(0.07, 0.08, 0.24, 8), new THREE.MeshStandardMaterial({ color: 0x10b981, metalness: 0.8 }));
+        bracer.position.set(0.28, 1.05, 0.05);
+        grp.add(bracer);
       }
 
       // Distinct tactical role underfoot glowing aura ring
@@ -5454,6 +5482,28 @@
       }
       sound.playSwitchClick();
       showToast(`⚡ DRS / 해상도 업스케일러: [${m.name}]`);
+    }
+
+    const POLLING_MODES = [
+      { name: '표준 1000Hz (STANDARD)', rate: 1000 },
+      { name: '게이밍 4000Hz (HIGH-SPEED)', rate: 4000 },
+      { name: 'e스포츠 8000Hz 울트라 (8K POLLING)', rate: 8000 }
+    ];
+
+    function togglePollingRateMode() {
+      pollingRateModeIdx = (pollingRateModeIdx + 1) % POLLING_MODES.length;
+      const pm = POLLING_MODES[pollingRateModeIdx];
+      sound.playSwitchClick();
+      showToast(`⚡ 마우스 인풋 폴링 레이트: [${pm.name}]`);
+    }
+
+    function triggerPiazzaCanalBoost() {
+      if (!piazzaCanalBoost || player.isDead) return;
+      sound.playZipline();
+      player.velocity.z = (camera.position.z > 0) ? -28.0 : 28.0;
+      player.velocity.y = 4.5;
+      player.isGrounded = false;
+      showToast('⚡ [PIAZZA] 토스카나 운하 고속 수로 부스트 작동! (AQUEDUCT SURGE)');
     }
 
     function triggerKasbahFountain() {
@@ -5870,6 +5920,7 @@
       glitchJumpGate = null;
       if (kasbahFountain && kasbahFountain.fountainMesh) scene.remove(kasbahFountain.fountainMesh);
       kasbahFountain = null;
+      piazzaCanalBoost = null;
 
       if (lotusDoor && lotusDoor.mesh) {
         scene.remove(lotusDoor.mesh);
@@ -6180,6 +6231,19 @@
         sunLight.position.set(25, 80, -25);
         scene.fog.color.setHex(0x7c2d12);
         scene.fog.density = 0.0055;
+      } else if (mapKey === 'piazza') {
+        // Italian Tuscan Piazza / Mediterranean Azure Sky & Terracotta Warmth
+        grad.addColorStop(0, '#0284c7');
+        grad.addColorStop(0.35, '#38bdf8');
+        grad.addColorStop(0.7, '#fb923c');
+        grad.addColorStop(1, '#fde047');
+        ambientLight.color.setHex(0xfef3c7);
+        ambientLight.intensity = 1.15;
+        sunLight.color.setHex(0xfef08a);
+        sunLight.intensity = 1.45;
+        sunLight.position.set(30, 80, -30);
+        scene.fog.color.setHex(0x38bdf8);
+        scene.fog.density = 0.005;
       } else {
         // Range: High-tech military hangar
         grad.addColorStop(0, '#080c10');
@@ -7640,6 +7704,64 @@
         addPlatform(0, 0, 40, 40, 0.5, 16, matDesertSand);
         addPlatform(0, 0, -40, 40, 0.5, 16, matDesertSand);
       }
+      else if (mapKey === 'piazza') {
+        // ==========================================================
+        // MAP 16: PIAZZA (피아자) - 이탈리아 토스카나 해안 광장 & 르네상스 종탑 & 수로 부스터 [F]
+        // ==========================================================
+        const matTuscanStone = new THREE.MeshStandardMaterial({ color: 0xd4d4d8, roughness: 0.65 });
+        const matTerracottaTile = new THREE.MeshStandardMaterial({ color: 0xc2410c, roughness: 0.7 });
+        const matCanalWater = new THREE.MeshStandardMaterial({ color: 0x0284c7, roughness: 0.1, transparent: true, opacity: 0.8 });
+        const matCafeAwning = new THREE.MeshStandardMaterial({ color: 0x15803d, roughness: 0.8 });
+
+        // Outer Piazza Perimeter (120x120m)
+        addBox(0, -0.5, 0, 120, 1, 120, matTuscanStone);
+        addBox(0, 8, -60, 120, 16, 2, matTerracottaTile);
+        addBox(0, 8, 60, 120, 16, 2, matTerracottaTile);
+        addBox(-60, 8, 0, 2, 16, 120, matTerracottaTile);
+        addBox(60, 8, 0, 2, 16, 120, matTerracottaTile);
+
+        // Central Mid Venetian Canal Water Channel with Speed Boost
+        addPlatform(0, -0.2, 0, 12, 0.4, 50, matCanalWater);
+        addRailing(-5.9, 0.4, 0, 50, 'z');
+        addRailing(5.9, 0.4, 0, 50, 'z');
+
+        addTextBillboard(0, 2.0, 0, '[F] 토스카나 운하 수로 가속 부스터 (CANAL SURGE)', 1.5, '#00f0ff');
+
+        piazzaCanalBoost = {
+          pos: new THREE.Vector3(0, 0.2, 0)
+        };
+
+        // Mid Stone Arch Bridge over Canal (y = 2.4)
+        addPlatform(0, 0, 0, 20, 2.4, 8, matTuscanStone);
+        addRailing(0, 2.4, -3.9, 20, 'x');
+        addRailing(0, 2.4, 3.9, 20, 'x');
+        addStairs(0, -8, 0, 8, 2.4, 8, 8, 'z-');
+        addStairs(0, 8, 0, 8, 2.4, 8, 8, 'z+');
+
+        // --- A SITE: BELL TOWER PLAZA (x = 30, z = -20) ---
+        addPlatform(30, 0, -20, 24, 0.5, 24, matSiteFloor);
+        addTextBillboard(30, 0.2, -20, 'A SITE', 1.8);
+        spikeSiteAreas.push({ minX: 18, maxX: 42, minZ: -32, maxZ: -8, name: 'A SITE' });
+
+        // Renaissance Campanile Bell Tower at (36, 0, -32)
+        addBox(36, 8.0, -32, 7, 16, 7, matTuscanStone);
+        addEave(36, 16.0, -32, 8, 8, matTerracottaTile);
+        addCrateStack(24, -20, 2.4);
+
+        // --- B SITE: CANAL CAFE TERRACE (x = -30, z = -20) ---
+        addPlatform(-30, 0, -20, 24, 0.5, 24, matSiteFloor);
+        addTextBillboard(-30, 0.2, -20, 'B SITE', 1.8);
+        spikeSiteAreas.push({ minX: -42, maxX: -18, minZ: -32, maxZ: -8, name: 'B SITE' });
+
+        // Cafe Terrace Building & Awning
+        addBox(-36, 3.5, -30, 12, 7.0, 10, matTuscanStone);
+        addBox(-30, 3.2, -22, 6, 0.2, 4, matCafeAwning);
+        addCrateStack(-24, -20, 2.4);
+
+        // ATK & DEF Spawns
+        addPlatform(0, 0, 40, 40, 0.5, 16, matTuscanStone);
+        addPlatform(0, 0, -40, 40, 0.5, 16, matTuscanStone);
+      }
       else if (mapKey === 'range') {
         addBox(0, -0.5, 0, 60, 1, 120, matConcrete);
         addBox(0, 7, -60, 60, 14, 2, matWallStone);
@@ -7997,6 +8119,13 @@
         isLowJitterMode = !isLowJitterMode;
         sound.playSwitchClick();
         showToast(`⚡ 프레임 페이싱 (LOW-JITTER MODE): [${isLowJitterMode ? 'ON (초안정화)' : 'OFF'}]`);
+        return;
+      }
+
+      // [F10] Key: Quick Toggle Mouse Input Polling Rate Optimizer
+      if (e.code === 'F10') {
+        e.preventDefault();
+        togglePollingRateMode();
         return;
       }
 
@@ -9734,6 +9863,15 @@
         }
       }
 
+      // 12. Piazza Canal Water Boost [F]
+      if (MAP_LIST[currentMapIndex] === 'piazza' && piazzaCanalBoost) {
+        const pPos = camera.position;
+        if (pPos.distanceTo(piazzaCanalBoost.pos) < 5.0) {
+          triggerPiazzaCanalBoost();
+          return;
+        }
+      }
+
       // 4. Ascent B Shutter Door
       if (!ascentDoor || ascentDoor.isDestroyed) return;
       const dist = camera.position.distanceTo(ascentDoor.switchPos);
@@ -10921,6 +11059,16 @@
         { label: 'DEF SPAWN', x: 0, z: -40, color: '#00ffaa' },
         { label: 'ATK SPAWN', x: 0, z: 40, color: '#ff4655' }
       ],
+      piazza: [
+        { label: 'A SITE', x: 30, z: -20, color: '#38bdf8' },
+        { label: 'BELL TOWER', x: 36, z: -32, color: '#e2e8f0' },
+        { label: 'B SITE', x: -30, z: -20, color: '#38bdf8' },
+        { label: 'CANAL CAFE', x: -36, z: -30, color: '#22c55e' },
+        { label: 'CANAL SURGE [F]', x: 0, z: 0, color: '#00f0ff' },
+        { label: 'BRIDGE', x: 0, z: 0, color: '#f59e0b' },
+        { label: 'DEF SPAWN', x: 0, z: -40, color: '#00ffaa' },
+        { label: 'ATK SPAWN', x: 0, z: 40, color: '#ff4655' }
+      ],
       range: [
         { label: 'TARGETS', x: 0, z: -22, color: '#00f0ff' },
         { label: 'BENCH', x: 0, z: 0, color: '#ffc83b' },
@@ -11467,6 +11615,13 @@
           if (MAP_LIST[currentMapIndex] === 'kasbah' && kasbahFountain && !player.isDead) {
             if (Math.abs(camera.position.x) < 3.2 && Math.abs(camera.position.z) < 3.2 && Math.abs(camera.position.y - 1.7) < 1.2) {
               if (player.velocity.y <= 0) triggerKasbahFountain();
+            }
+          }
+
+          // Auto-launch when stepping into Piazza Canal Water Boost
+          if (MAP_LIST[currentMapIndex] === 'piazza' && piazzaCanalBoost && !player.isDead) {
+            if (Math.abs(camera.position.x) < 3.0 && Math.abs(camera.position.z) < 25.0 && Math.abs(camera.position.y - 1.7) < 1.0) {
+              triggerPiazzaCanalBoost();
             }
           }
         }
