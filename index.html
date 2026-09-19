@@ -1735,6 +1735,171 @@
       overflow-x: hidden;
       min-width: 1000px;
     }
+    
+    /* ══════ LOBBY EXTENSION: MODES, MAPS, OPTS & AGENT BAR ══════ */
+    .lb-maps {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+    .lb-map {
+      padding: 6px 14px;
+      border: 1px solid rgba(255, 255, 255, 0.16);
+      border-radius: 999px;
+      background: rgba(14, 22, 34, 0.85);
+      font-family: var(--font-hud);
+      font-size: 12px;
+      color: #94a3b8;
+      cursor: pointer;
+      transition: all 0.16s ease;
+      white-space: nowrap;
+    }
+    .lb-map:hover {
+      border-color: var(--val-cyan);
+      color: #fff;
+      transform: translateY(-1px);
+    }
+    .lb-map.active {
+      border-color: var(--val-cyan);
+      color: #000;
+      background: linear-gradient(135deg, var(--val-cyan), #00b4d8);
+      font-weight: 800;
+      box-shadow: 0 0 14px rgba(0, 240, 255, 0.45);
+    }
+
+    .lb-opts {
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+      align-items: center;
+      margin: 10px 0 14px;
+      padding: 10px 18px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 8px;
+      background: rgba(14, 22, 34, 0.65);
+      backdrop-filter: blur(10px);
+    }
+    .lb-opt {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .lb-olab {
+      font-size: 11px;
+      letter-spacing: 0.8px;
+      color: #94a3b8;
+      font-family: var(--font-mono);
+      font-weight: 700;
+      white-space: nowrap;
+    }
+    .lb-orow {
+      display: flex;
+      gap: 5px;
+      flex-wrap: wrap;
+    }
+    .lb-obtn {
+      padding: 5px 12px;
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      border-radius: 999px;
+      background: rgba(8, 14, 22, 0.8);
+      font-family: var(--font-hud);
+      font-size: 11.5px;
+      color: #cbd5e1;
+      transition: all 0.14s ease;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+    .lb-obtn:hover {
+      border-color: var(--val-cyan);
+      color: #fff;
+    }
+    .lb-obtn.on {
+      border-color: var(--val-cyan);
+      color: #000;
+      background: var(--val-cyan);
+      font-weight: 800;
+      box-shadow: 0 0 10px rgba(0, 240, 255, 0.35);
+    }
+
+    .lb-agents {
+      margin-top: 10px;
+      padding-top: 12px;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      width: 100%;
+    }
+    .lb-alabel {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      letter-spacing: 1px;
+      color: var(--val-gold);
+      font-weight: 800;
+      margin-bottom: 8px;
+    }
+    .lb-alabel span {
+      color: #64748b;
+      font-size: 10px;
+      margin-left: 6px;
+      font-weight: normal;
+    }
+    .lb-arow {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 8px;
+    }
+    .lb-agent-card {
+      padding: 8px 6px;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 6px;
+      background: rgba(14, 22, 34, 0.7);
+      text-align: center;
+      transition: all 0.16s ease;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      align-items: center;
+    }
+    .lb-agent-card:hover {
+      border-color: var(--val-cyan);
+      transform: translateY(-2px);
+      background: rgba(0, 240, 255, 0.08);
+    }
+    .lb-agent-card.on {
+      border: 1.5px solid var(--val-cyan);
+      background: rgba(0, 240, 255, 0.18);
+      box-shadow: 0 0 14px rgba(0, 240, 255, 0.35);
+    }
+    .lb-agent-card b {
+      display: block;
+      font-size: 13px;
+      font-family: var(--font-hud);
+      font-weight: 800;
+      color: #fff;
+    }
+    .lb-agent-card em {
+      display: block;
+      font-style: normal;
+      font-size: 9.5px;
+      color: #94a3b8;
+    }
+    .slot-btn-toggle {
+      font-family: var(--font-mono);
+      font-size: 9px;
+      padding: 2px 7px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      color: #94a3b8;
+      cursor: pointer;
+      margin-left: 6px;
+      transition: all 0.12s ease;
+    }
+    .slot-btn-toggle:hover {
+      border-color: var(--val-cyan);
+      color: #fff;
+    }
+
     .lobby-top {
       display: flex;
       justify-content: space-between;
@@ -3063,23 +3228,68 @@
 
   <!-- 5V5 CUSTOM GAME LOBBY -->
   <div id="custom-lobby">
+    <!-- Top Header & Maps Bar -->
     <div class="lobby-top">
       <div>
         <div class="lobby-title">CUSTOM GAME <span>//</span> 사용자 설정 게임</div>
-        <div style="font-size: 12px; color: #8899a6; letter-spacing: 1.5px;">5V5 TACTICAL PROTOCOL LOBBY</div>
+        <div style="font-size: 12px; color: #8899a6; letter-spacing: 1.5px;">5V5 TACTICAL ESPORTS SUITE</div>
       </div>
-      <div class="lobby-net-status">
-        <span>세션 네트워크:</span>
-        <span class="net-pill" id="net-status-badge">멀티 세션 동기화 활성</span>
-        <span id="player-count-tag" style="color:var(--val-cyan);">온라인: 1명</span>
+      <div class="lb-maps" id="lb-maps-bar">
+        <button class="lb-map active" data-map="ascent" onclick="selectLobbyMap('ascent')">어센트 (ASCENT)</button>
+        <button class="lb-map" data-map="bind" onclick="selectLobbyMap('bind')">바인드 (BIND)</button>
+        <button class="lb-map" data-map="haven" onclick="selectLobbyMap('haven')">헤이븐 (HAVEN)</button>
+        <button class="lb-map" data-map="lotus" onclick="selectLobbyMap('lotus')">로터스 (LOTUS)</button>
+        <button class="lb-map" data-map="sunset" onclick="selectLobbyMap('sunset')">선셋 (SUNSET)</button>
+        <button class="lb-map" data-map="icebox" onclick="selectLobbyMap('icebox')">아이스박스 (ICEBOX)</button>
+        <button class="lb-map" data-map="range" onclick="selectLobbyMap('range')">사격 훈련장 (RANGE)</button>
       </div>
     </div>
 
+    <!-- Match Configuration Options Bar -->
+    <div class="lb-opts">
+      <div class="lb-opt">
+        <span class="lb-olab">🎮 모드</span>
+        <div class="lb-orow" id="lb-modes">
+          <button class="lb-obtn on" onclick="setGameMode(0)" id="mode-btn-0">💣 스파이크 (기본)</button>
+          <button class="lb-obtn" onclick="setGameMode(1)" id="mode-btn-1">💀 데스매치</button>
+          <button class="lb-obtn" onclick="setGameMode(2)" id="mode-btn-2">⚡ 능력 무제한</button>
+          <button class="lb-obtn" onclick="setGameMode(3)" id="mode-btn-3">🎯 사격 훈련장</button>
+        </div>
+      </div>
+
+      <div class="lb-opt">
+        <span class="lb-olab" id="lb-rounds-label">🏆 승리 조건</span>
+        <div class="lb-orow" id="lb-rounds">
+          <button class="lb-obtn on" id="btn-round-13" onclick="setLobbyRounds(13)">13선취</button>
+          <button class="lb-obtn" id="btn-round-7" onclick="setLobbyRounds(7)">7선취</button>
+          <button class="lb-obtn" id="btn-round-3" onclick="setLobbyRounds(3)">3선취</button>
+        </div>
+      </div>
+
+      <div class="lb-opt">
+        <span class="lb-olab">🤖 AI 난이도</span>
+        <div class="lb-orow" id="lb-diff">
+          <button class="lb-obtn" id="diff-btn-easy" onclick="setAiDifficulty('easy')">순한맛</button>
+          <button class="lb-obtn on" id="diff-btn-normal" onclick="setAiDifficulty('normal')">보통</button>
+          <button class="lb-obtn" id="diff-btn-hard" onclick="setAiDifficulty('hard')">빡셈</button>
+        </div>
+      </div>
+
+      <div class="lb-opt">
+        <span class="lb-olab">👥 AI 자리</span>
+        <div class="lb-orow">
+          <button class="lb-obtn" onclick="fillAllAI()">빈 자리 전부 AI</button>
+          <button class="lb-obtn" onclick="clearAllAI()">AI 전부 빼기</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 5v5 Team Rosters & Map Center Panel -->
     <div class="rosters-wrap">
       <div class="team-col">
         <div class="team-header atk-theme">
           <span>공격팀 (ATTACKERS)</span>
-          <span style="font-size: 16px;">5 SLOTS</span>
+          <span style="font-size: 15px;">5 SLOTS</span>
         </div>
         <div id="atk-slots-container" style="display: flex; flex-direction: column; gap: 8px;"></div>
       </div>
@@ -3088,48 +3298,39 @@
         <div class="map-box val-clip">
           <div style="font-size: 11px; color:#8899a6; letter-spacing: 1px;">선택된 전장 (MAP)</div>
           <div style="font-family: var(--font-title); font-size: 32px; color:#fff;" id="lobby-map-title">ASCENT (어센트)</div>
-          <button class="map-select-btn val-clip" id="btn-cycle-map">맵 변경 (CYCLE MAP)</button>
+          <div style="font-size:12px; color:var(--val-cyan); font-weight:700; margin-top:4px;" id="lobby-mode-desc">모드: 스파이크 설치 & 해제 (공수교대)</div>
         </div>
-        <div style="margin-top:10px; display:flex; gap:6px; justify-content:center; align-items:center;">
-          <span style="font-size:12px; color:#8899a6; white-space:nowrap;">선취 라운드:</span>
-          <button class="map-select-btn val-clip active-round-btn" id="btn-round-13" style="width:75px; padding:4px 6px; font-size:13px; margin-top:0;">13선취</button>
-          <button class="map-select-btn val-clip" id="btn-round-7" style="width:75px; padding:4px 6px; font-size:13px; margin-top:0; background:rgba(255,255,255,0.06); border-color:#8899a6;">7선취</button>
-          <button class="map-select-btn val-clip" id="btn-round-3" style="width:75px; padding:4px 6px; font-size:13px; margin-top:0; background:rgba(255,255,255,0.06); border-color:#8899a6;">3선취</button>
-        </div>
-        <div style="font-size: 12px; color:#8899a6; text-align: center; line-height: 1.5;">
-          💡 <b>자리 고르기 & 멀티 안내:</b><br>
-          원하는 슬롯(1~5)을 클릭하여 팀/자리를 선택하세요. 빈자리는 <b>전술 AI 봇</b>이 채우며, 새 창을 열면 <b>다른 플레이어가 난입하여 AI를 대체</b>합니다!
+        <div style="font-size: 11.5px; color:#8899a6; text-align: center; line-height: 1.5; padding: 0 8px;">
+          💡 <b>자리 변경 & AI 설정:</b> 원하는 슬롯을 클릭하여 팀을 옮기거나 <b>[AI 빼기] / [+ AI]</b> 버튼으로 봇을 켜고 끌 수 있습니다.
         </div>
       </div>
 
       <div class="team-col">
         <div class="team-header def-theme">
           <span>수비팀 (DEFENDERS)</span>
-          <span style="font-size: 16px;">5 SLOTS</span>
+          <span style="font-size: 15px;">5 SLOTS</span>
         </div>
         <div id="def-slots-container" style="display: flex; flex-direction: column; gap: 8px;"></div>
       </div>
     </div>
 
-    <div id="lobby-mode-bar">
-        <span style="font-size:13px; font-weight:800; color:#8899a6; letter-spacing:1px; white-space:nowrap;">게임 모드 // MODE:</span>
-        <button type="button" class="mode-btn active" onclick="setGameMode(0)" id="mode-btn-0">경쟁전 5V5</button>
-        <button type="button" class="mode-btn" onclick="setGameMode(1)" id="mode-btn-1">스파이크 돌격</button>
-        <button type="button" class="mode-btn" onclick="setGameMode(2)" id="mode-btn-2">데스매치 FFA</button>
-        <button type="button" class="mode-btn" onclick="setGameMode(3)" id="mode-btn-3">신속플레이</button>
-        <button type="button" class="mode-btn" onclick="setGameMode(4)" id="mode-btn-4">사격 훈련장</button>
-      </div>
-    <div class="lobby-bottom">
+    <!-- In-Lobby One-Click Agent Selector Grid (Reference Style) -->
+    <div class="lb-agents">
+      <div class="lb-alabel">👤 요원 선택 <span>// 내가 플레이할 요원 바로 선택 (원클릭 교체)</span></div>
+      <div class="lb-arow" id="lobby-agents-grid"></div>
+    </div>
+
+    <!-- Bottom Actions -->
+    <div class="lobby-bottom" style="margin-top:12px;">
       <div style="font-size: 13px; color:#8899a6;">
         내 슬롯: <b style="color:var(--val-cyan);" id="my-slot-desc">공격팀 1번 (JETT)</b>
       </div>
-      <button id="btn-open-graphics-modal" class="val-clip-lg" style="background:linear-gradient(135deg,#00b4d8,#0077b6); color:#fff; font-weight:bold; padding:12px 24px; cursor:pointer; margin-right:12px; font-family:'Oswald',sans-serif; letter-spacing:0.05em; border:1px solid #00f0ff; box-shadow:0 0 15px rgba(0,240,255,0.4);" onclick="openGraphicsModal()">⚙️ 그래픽 설정 (GRAPHICS)</button>
-      <button id="btn-open-agent-select" class="val-clip-lg" style="background:linear-gradient(135deg,#ff4655,#cc2030); color:#fff; font-weight:bold; padding:12px 24px; cursor:pointer; margin-right:12px; font-family:'Oswald',sans-serif; letter-spacing:0.05em;">👤 요원 선택 (SELECT AGENT)</button>
-        <button id="btn-start-game" class="val-clip-lg">게임 시작 (START MATCH)</button>
+      <div style="display:flex; gap:10px; align-items:center;">
+        <button id="btn-open-graphics-modal" class="val-clip-lg" style="background:linear-gradient(135deg,#00b4d8,#0077b6); color:#fff; font-weight:bold; padding:10px 20px; cursor:pointer; font-family:'Oswald',sans-serif; letter-spacing:0.05em; border:1px solid #00f0ff; box-shadow:0 0 15px rgba(0,240,255,0.4);" onclick="openGraphicsModal()">⚙️ 그래픽 설정 [F2]</button>
+        <button id="btn-start-game" class="val-clip-lg" style="background:linear-gradient(135deg,var(--val-red),#b91c1c); color:#fff; font-weight:900; font-size:18px; padding:12px 36px; cursor:pointer; border:none; box-shadow:0 0 20px rgba(255,70,85,0.6);">🎮 교전 시작 (START MATCH)</button>
+      </div>
     </div>
-  </div>
-
-  <script>
+  </div>  <script>
     /* ==========================================================
        1. SYNTHESIZED WEB AUDIO & TACTICAL RADIO VOICE
        ========================================================== */
@@ -4749,6 +4950,101 @@
       Khepri: '감시대 (Sentinel)'
     };
 
+    /* ══════ 7 OFFICIAL AGENTS ROSTER ══════ */
+    const AGENTS = [
+      {
+        id: "hwaryeong", name: "화령", role: "타격대", color: "#ff5a3c", accent: "#ffb347",
+        quote: "불은 길을 묻지 않는다.",
+        desc: "전선을 강제로 여는 돌격형 요원. 맹렬한 불길로 적의 수비 진형을 일거에 태워버린다.",
+        abilities: [
+          { key: "Q", name: "불꽃 장막", cost: 200, charges: 2, cd: 0, type: "wall_fire", desc: "전방에 거대한 불의 장벽을 세운다. 통과하는 적에게 초당 12 피해." },
+          { key: "E", name: "화염탄", cost: 0, charges: 1, cd: 35, type: "proj_fire", desc: "폭발하는 화염구. 직격 55, 범위 30 피해 후 3초간 화염 장판." },
+          { key: "C", name: "잔불", cost: 150, charges: 2, cd: 0, type: "smoke_fire", desc: "시야를 가리는 고온 열기 연막을 전개한다. 12초 지속." },
+          { key: "X", name: "업화", cost: 0, charges: 1, cd: 0, ult: 5, type: "ult_fire", desc: "궁극기 — 전방 부채꼴을 불바다로 만든다. 초당 40 피해, 6초." }
+        ]
+      },
+      {
+        id: "seorin", name: "서린", role: "감시자", color: "#4fc3f7", accent: "#b3e5fc",
+        quote: "기다리는 쪽이 이긴다.",
+        desc: "주요 거점을 잠그는 방어형 요원. 단단한 얼음벽과 냉기 덫으로 진입로를 완벽 봉쇄한다.",
+        abilities: [
+          { key: "Q", name: "서리 덫", cost: 200, charges: 2, cd: 0, type: "trap_slow", desc: "설치형 덫. 밟은 적을 4초간 55% 둔화시키고 위치를 노출한다." },
+          { key: "E", name: "빙벽", cost: 0, charges: 1, cd: 40, type: "wall_ice", desc: "단단한 얼음벽을 세운다. 체력 400, 총격으로 파괴 가능." },
+          { key: "C", name: "한기 구역", cost: 150, charges: 2, cd: 0, type: "smoke_ice", desc: "냉기 연막 구역. 내부의 적은 25% 둔화된다. 14초 지속." },
+          { key: "X", name: "빙결", cost: 0, charges: 1, cd: 0, ult: 5, type: "ult_ice", desc: "궁극기 — 넓은 원형 구역을 얼려 범위 내 적을 2초간 완전히 묶는다." }
+        ]
+      },
+      {
+        id: "muyeong", name: "무영", role: "척후대", color: "#ab47bc", accent: "#e1bee7",
+        quote: "네가 보는 건 이미 지나간 나다.",
+        desc: "적진의 정보를 캐내고 교란하는 정찰형 요원. 그림자로 순간 도약하며 적의 감각을 마비시킨다.",
+        abilities: [
+          { key: "Q", name: "그림자 화살", cost: 200, charges: 2, cd: 0, type: "recon_dart", desc: "명중 지점 반경 14m의 적을 3초간 벽 너머로 실시간 투시한다." },
+          { key: "E", name: "잔영", cost: 0, charges: 1, cd: 30, type: "dash", desc: "바라보는 방향으로 순간 도약한다. 도약 중 0.4초간 완전 무적." },
+          { key: "C", name: "감각 차단", cost: 150, charges: 2, cd: 0, type: "flash", desc: "벽을 관통하는 암흑 구체 투사. 적중한 적의 시야를 3초간 완전 차단(피해망상)." },
+          { key: "X", name: "그림자 사냥", cost: 0, charges: 1, cd: 0, ult: 5, type: "ult_recon", desc: "궁극기 — 전 맵에 EMP 파동 방출. 모든 적을 8초간 감지하고 이속 30% 증가." }
+        ]
+      },
+      {
+        id: "gangcheol", name: "강철", role: "타격대", color: "#ffa726", accent: "#ffd180",
+        quote: "부서지지 않는 건 없다.",
+        desc: "중장갑과 고폭 화력으로 요충지를 분쇄하는 진격형 요원. 실드와 돌진으로 적진을 유린한다.",
+        abilities: [
+          { key: "Q", name: "충격 수류탄", cost: 200, charges: 2, cd: 0, type: "nade", desc: "벽에 튕긴 후 폭발하는 고폭탄. 65 직격 피해 및 대형 폭발." },
+          { key: "E", name: "전선 방패", cost: 0, charges: 1, cd: 35, type: "shield", desc: "8초간 전방 공격 피해를 흡수하는 고강도 전술 에너지 쉴드를 전개한다." },
+          { key: "C", name: "돌진", cost: 150, charges: 2, cd: 0, type: "charge", desc: "전방으로 고속 충격 돌진. 경로상의 적을 밀쳐내고 40 피해를 입힌다." },
+          { key: "X", name: "파쇄", cost: 0, charges: 1, cd: 0, ult: 5, type: "ult_smash", desc: "궁극기 — 대지진 충격파로 반경 14m 내 적에게 120 피해 및 40% 둔화 부여." }
+        ]
+      },
+      {
+        id: "yeonhwa", name: "연화", role: "전략가", color: "#66bb6a", accent: "#c8e6c9",
+        quote: "생명은 다시 피어난다.",
+        desc: "아군을 유지시키고 전장을 제어하는 서포트형 요원. 생명력 치유와 결박으로 판도를 뒤집는다.",
+        abilities: [
+          { key: "Q", name: "회복의 씨앗", cost: 200, charges: 2, cd: 0, type: "heal", desc: "치유 구역 생성. 반경 8m 내 아군과 자신의 체력을 초당 15 회복 (8초)." },
+          { key: "E", name: "뿌리 결박", cost: 0, charges: 1, cd: 35, type: "root", desc: "시야 내 적을 덩굴로 2.5초간 이동 불가 결박하고 3초간 위치 노출." },
+          { key: "C", name: "안개꽃", cost: 150, charges: 2, cd: 0, type: "smoke", desc: "대형 연꽃 연막을 전개하여 16초간 시야를 완벽 차단한다." },
+          { key: "X", name: "재생", cost: 0, charges: 1, cd: 0, ult: 5, type: "ult_res", desc: "궁극기 — 자신 체력 60 즉시 회복 + 사망한 아군 1명을 본진에 즉시 부활." }
+        ]
+      },
+      {
+        id: "noeun", name: "노은", role: "전략가", color: "#ffd54f", accent: "#fff59d",
+        quote: "시스템은 완벽하게 침묵한다.",
+        desc: "첨단 드론과 전자 장비로 적의 시스템을 마비시키는 기술형 요원. 전자기 지뢰와 펄스를 다룬다.",
+        abilities: [
+          { key: "Q", name: "전자 교란", cost: 200, charges: 2, cd: 0, type: "emp", desc: "전자기 파동으로 범위 내 적의 스킬을 침묵시키고 6초간 사격을 무력화." },
+          { key: "E", name: "감시 드론", cost: 0, charges: 1, cd: 35, type: "drone", desc: "자율 비행 감시 드론을 전방으로 사출하여 적의 위치를 스캔한다." },
+          { key: "C", name: "과부하 지뢰", cost: 150, charges: 2, cd: 0, type: "mine", desc: "접근 감지 지뢰. 적이 밟으면 폭발하며 45 피해, 3초 실명, 4초 둔화." },
+          { key: "X", name: "정전", cost: 0, charges: 1, cd: 0, ult: 5, type: "ult_emp", desc: "궁극기 — 전 맵 정전 펄스 방출. 모든 적을 10초간 스턴 및 완전 무력화." }
+        ]
+      },
+      {
+        id: "baekho", name: "백호", role: "감시자", color: "#e0e0e0", accent: "#ffffff",
+        quote: "숨어도 내 시선은 피할 수 없다.",
+        desc: "초장거리 저격과 초감각 센서로 전장을 감시하는 정밀 저격수. 벽을 꿰뚫는 관통탄을 보유했다.",
+        abilities: [
+          { key: "Q", name: "관통 사격", cost: 200, charges: 2, cd: 0, type: "pierce", desc: "모든 지형과 벽을 관통하는 고압 레일건 탄환 발사. 적중 시 80 피해." },
+          { key: "E", name: "경계 센서", cost: 0, charges: 1, cd: 30, type: "sensor", desc: "감지 트랩 설치. 적 통과 시 6초간 실시간 노출 및 60% 둔화." },
+          { key: "C", name: "연막탄", cost: 150, charges: 2, cd: 0, type: "smoke_fast", desc: "즉시 터지는 전술 신속 연막탄 투척. 10초간 시야 차단." },
+          { key: "X", name: "응시", cost: 0, charges: 1, cd: 0, ult: 5, type: "ult_snipe", desc: "궁극기 — 모든 적의 위치를 8초간 벽 너머로 실시간 투시 및 즉발 저격 모드." }
+        ]
+      }
+    ];
+
+    // Normalized Agent Resolver supporting both English legacy names and Korean official names
+    function getAgentDef(nameOrId) {
+      if (!nameOrId) return AGENTS[0];
+      const s = String(nameOrId).toLowerCase().trim();
+      if (s === 'hwaryeong' || s === '화령' || s === 'phoenix') return AGENTS[0];
+      if (s === 'seorin' || s === '서린' || s === 'sage') return AGENTS[1];
+      if (s === 'muyeong' || s === '무영' || s === 'omen' || s === 'reyna' || s === 'fade') return AGENTS[2];
+      if (s === 'gangcheol' || s === '강철' || s === 'breach' || s === 'raze') return AGENTS[3];
+      if (s === 'yeonhwa' || s === '연화' || s === 'skye') return AGENTS[4];
+      if (s === 'noeun' || s === '노은' || s === 'killjoy' || s === 'cypher' || s === 'brimstone') return AGENTS[5];
+      if (s === 'baekho' || s === '백호' || s === 'jett' || s === 'sova' || s === 'chamber') return AGENTS[6];
+      return AGENTS.find(a => a.id === s || a.name === nameOrId) || AGENTS[0];
+    }
+
     const lobbySlots = {
       atk: [
         { id: 0, type: 'human', name: 'YOU', agent: 'Jett', clientId: myClientId },
@@ -4771,9 +5067,193 @@
 
     const cheats = { infiniteAmmo: true, noCooldowns: false, godMode: false };
 
+    
+    /* ══════ LOBBY & GAME MODES EXTENSION SYSTEM ══════ */
+    const GAME_MODES = [
+      { id: 'SPIKE', name: '스파이크 설치/해제 (기본)', roundsToWin: 13, buyTime: 15, roundTime: 100, isSpike: true, isDeathmatch: false, isMayhem: false },
+      { id: 'DEATHMATCH', name: '데스매치 (무한 리스폰 30킬)', roundsToWin: 30, buyTime: 0, roundTime: 600, isSpike: false, isDeathmatch: true, isMayhem: false },
+      { id: 'MAYHEM', name: '능력 무제한 (노쿨다운 난투)', roundsToWin: 13, buyTime: 10, roundTime: 100, isSpike: true, isDeathmatch: false, isMayhem: true },
+      { id: 'RANGE', name: '사격 훈련장 (RANGE)', roundsToWin: 999, buyTime: 0, roundTime: 9999, isSpike: false, isDeathmatch: false, isMayhem: false }
+    ];
+    let currentGameModeIdx = 0;
+    let deathmatchTargetKills = 30;
+    let deathmatchTeamKills = { atk: 0, def: 0 };
+    let aiDifficulty = 'normal';
+
+    const LOBBY_CORE_AGENTS = [
+      { id: 'phoenix', name: '화령 (Phoenix)', role: '타격대', color: '#ff5a3c', icon: '🔥' },
+      { id: 'sage', name: '서린 (Sage)', role: '감시자', color: '#4fc3f7', icon: '❄️' },
+      { id: 'omen', name: '무영 (Omen)', role: '척후대', color: '#ab47bc', icon: '🌑' },
+      { id: 'raze', name: '강철 (Raze)', role: '타격대', color: '#ffa726', icon: '💥' },
+      { id: 'skye', name: '연화 (Skye)', role: '전략가', color: '#66bb6a', icon: '🌿' },
+      { id: 'killjoy', name: '노은 (Killjoy)', role: '전략가', color: '#ffd54f', icon: '⚡' },
+      { id: 'jett', name: '백호 (Jett)', role: '타격대', color: '#00f0ff', icon: '💨' }
+    ];
+
+    function selectLobbyMap(mapKey) {
+      const idx = MAP_LIST.indexOf(mapKey);
+      if (idx !== -1) currentMapIndex = idx;
+      const titleEl = document.getElementById('lobby-map-title');
+      if (titleEl) titleEl.innerText = (MAP_NAMES[mapKey] || mapKey.toUpperCase());
+      const mapBadge = document.getElementById('hud-map-badge');
+      if (mapBadge) mapBadge.innerText = mapKey.toUpperCase();
+
+      document.querySelectorAll('#lb-maps-bar .lb-map').forEach(b => {
+        b.classList.toggle('active', b.dataset.map === mapKey);
+      });
+      sound.playSwitchClick();
+      showToast('전장 선택: [' + (MAP_NAMES[mapKey] || mapKey.toUpperCase()) + ']');
+    }
+
+    function setGameMode(idx) {
+      currentGameModeIdx = (idx % GAME_MODES.length + GAME_MODES.length) % GAME_MODES.length;
+      const gm = GAME_MODES[currentGameModeIdx];
+      const descEl = document.getElementById('lobby-mode-desc');
+      if (descEl) descEl.innerText = '모드: ' + gm.name;
+
+      for (let i = 0; i < GAME_MODES.length; i++) {
+        const btn = document.getElementById('mode-btn-' + i);
+        if (btn) btn.classList.toggle('on', i === currentGameModeIdx);
+      }
+
+      const rLabel = document.getElementById('lb-rounds-label');
+      const b13 = document.getElementById('btn-round-13');
+      const b7 = document.getElementById('btn-round-7');
+      const b3 = document.getElementById('btn-round-3');
+
+      if (gm.isDeathmatch) {
+        if (rLabel) rLabel.innerText = '🎯 목표 킬수';
+        if (b13) b13.innerText = '30킬';
+        if (b7) b7.innerText = '20킬';
+        if (b3) b3.innerText = '10킬';
+      } else {
+        if (rLabel) rLabel.innerText = '🏆 승리 조건';
+        if (b13) b13.innerText = '13선취';
+        if (b7) b7.innerText = '7선취';
+        if (b3) b3.innerText = '3선취';
+      }
+
+      if (gm.isMayhem) {
+        cheats.noCooldowns = true;
+        cheats.infiniteAmmo = true;
+      } else {
+        cheats.noCooldowns = false;
+        cheats.infiniteAmmo = true; // User preference: infinite ammo standard
+      }
+
+      sound.playSwitchClick();
+      showToast('게임 모드 변경: [' + gm.name + ']');
+    }
+
+    function setLobbyRounds(rounds) {
+      if (GAME_MODES[currentGameModeIdx].isDeathmatch) {
+        deathmatchTargetKills = (rounds === 13 ? 30 : rounds === 7 ? 20 : 10);
+        showToast('데스매치 목표 킬수 설정: ' + deathmatchTargetKills + '킬 선착 승리');
+      } else {
+        GAME_MODES[0].roundsToWin = rounds;
+        showToast('선취 라운드 설정: ' + rounds + '선취 승리');
+      }
+      document.querySelectorAll('#lb-rounds .lb-obtn').forEach(b => b.classList.remove('on'));
+      const activeBtn = document.getElementById('btn-round-' + rounds);
+      if (activeBtn) activeBtn.classList.add('on');
+      sound.playSwitchClick();
+    }
+
+    function setAiDifficulty(diff) {
+      aiDifficulty = diff;
+      document.querySelectorAll('#lb-diff .lb-obtn').forEach(b => b.classList.remove('on'));
+      const btn = document.getElementById('diff-btn-' + diff);
+      if (btn) btn.classList.add('on');
+      sound.playSwitchClick();
+      const diffName = (diff === 'easy' ? '순한맛 (EASY)' : diff === 'hard' ? '빡셈 (HARD)' : '보통 (NORMAL)');
+      showToast('AI 봇 난이도 변경: [' + diffName + ']');
+    }
+
+    function fillAllAI() {
+      ['atk', 'def'].forEach(team => {
+        lobbySlots[team].forEach((slot, idx) => {
+          if (myTeam === team && mySlotIdx === idx) return; // Keep player
+          slot.type = 'ai';
+          slot.name = 'AI ' + slot.agent;
+        });
+      });
+      renderLobbySlots();
+      sound.playSwitchClick();
+      showToast('빈자리를 모두 AI 전술 봇으로 채웠습니다!');
+    }
+
+    function clearAllAI() {
+      ['atk', 'def'].forEach(team => {
+        lobbySlots[team].forEach((slot, idx) => {
+          if (myTeam === team && mySlotIdx === idx) return; // Keep player
+          slot.type = 'empty';
+          slot.name = '빈 자리 (EMPTY)';
+        });
+      });
+      renderLobbySlots();
+      sound.playSwitchClick();
+      showToast('AI 봇을 모두 제거했습니다.');
+    }
+
+    function toggleSlotAI(team, idx, event) {
+      if (event) event.stopPropagation();
+      if (myTeam === team && mySlotIdx === idx) return;
+      const slot = lobbySlots[team][idx];
+      if (slot.type === 'ai') {
+        slot.type = 'empty';
+        slot.name = '빈 자리 (EMPTY)';
+        showToast(`${team === 'atk' ? '공격팀' : '수비팀'} #${idx + 1} 봇 제거 완료`);
+      } else {
+        slot.type = 'ai';
+        slot.name = 'AI ' + slot.agent;
+        showToast(`${team === 'atk' ? '공격팀' : '수비팀'} #${idx + 1} 봇 추가 완료`);
+      }
+      renderLobbySlots();
+      sound.playSwitchClick();
+    }
+
+    function pickLobbyAgent(agentName) {
+      const mySlot = lobbySlots[myTeam][mySlotIdx];
+      mySlot.agent = agentName;
+      renderLobbySlots();
+      renderLobbyAgentPicker();
+
+      const myAgentDef = getAgentDef(agentName);
+      if (typeof updateSkillsHUD === 'function') updateSkillsHUD(myAgentDef);
+      try {
+        if (typeof rebuildWeaponModel === 'function' && typeof weaponSubMesh !== 'undefined' && weaponSubMesh) {
+          rebuildWeaponModel(currentWeaponKey);
+        }
+      } catch (e) {}
+
+      if (typeof sound.playSwitchClick === 'function') sound.playSwitchClick();
+      showToast('요원 선택 완료: [' + agentName + ']');
+    }
+
+    function renderLobbyAgentPicker() {
+      const container = document.getElementById('lobby-agents-grid');
+      if (!container) return;
+      container.innerHTML = '';
+      const currentAgent = lobbySlots[myTeam][mySlotIdx].agent;
+
+      LOBBY_CORE_AGENTS.forEach(ag => {
+        const isSelected = (currentAgent.toLowerCase().includes(ag.id) || currentAgent.includes(ag.name.split(' ')[0]));
+        const card = document.createElement('div');
+        card.className = 'lb-agent-card' + (isSelected ? ' on' : '');
+        card.innerHTML = `
+          <span style="font-size:18px;">${ag.icon}</span>
+          <b>${ag.name}</b>
+          <em>${ag.role}</em>
+        `;
+        card.addEventListener('click', () => pickLobbyAgent(ag.name.split(' ')[0]));
+        container.appendChild(card);
+      });
+    }
+
     function renderLobbySlots() {
       const atkContainer = document.getElementById('atk-slots-container');
       const defContainer = document.getElementById('def-slots-container');
+      if (!atkContainer || !defContainer) return;
       atkContainer.innerHTML = '';
       defContainer.innerHTML = '';
 
@@ -4781,21 +5261,23 @@
         const container = team === 'atk' ? atkContainer : defContainer;
         lobbySlots[team].forEach((slot, idx) => {
           const isMe = (myTeam === team && mySlotIdx === idx);
+          const isEmpty = (slot.type === 'empty');
           const row = document.createElement('div');
-          row.className = `slot-row val-clip ${isMe ? 'active-self' : ''}`;
+          row.className = `slot-row val-clip ${isMe ? 'active-self' : ''} ${isEmpty ? 'slot-empty' : ''}`;
           row.innerHTML = `
             <div class="slot-left">
               <span class="slot-idx">#0${idx + 1}</span>
-              <div class="slot-avatar">${AGENT_EMOJIS[slot.agent] || '👤'}</div>
+              <div class="slot-avatar">${isEmpty ? '➕' : (AGENT_EMOJIS[slot.agent] || '👤')}</div>
               <div style="min-width:0; white-space:nowrap;">
                 <div class="slot-name">${slot.name} ${isMe ? '<span style="font-size:12px; color:var(--val-cyan);">(나)</span>' : ''}</div>
-                <div class="slot-agent">${slot.agent}</div>
+                <div class="slot-agent">${isEmpty ? '빈 슬롯' : slot.agent}</div>
               </div>
             </div>
-            <div style="flex-shrink:0; white-space:nowrap;">
-              <span class="slot-badge ${slot.type === 'human' ? 'badge-human' : 'badge-ai'}">
-                ${slot.type === 'human' ? 'HUMAN (사람)' : 'AI BOT (봇)'}
+            <div style="display:flex; align-items:center; gap:6px; flex-shrink:0; white-space:nowrap;">
+              <span class="slot-badge ${isMe ? 'badge-human' : isEmpty ? 'badge-empty' : 'badge-ai'}">
+                ${isMe ? 'YOU (나)' : isEmpty ? 'EMPTY' : 'AI BOT'}
               </span>
+              ${!isMe ? `<button type="button" class="slot-btn-toggle" onclick="toggleSlotAI('${team}', ${idx}, event)">${isEmpty ? '+ AI' : '봇 빼기'}</button>` : ''}
             </div>
           `;
           row.addEventListener('click', () => claimSlot(team, idx));
@@ -4804,8 +5286,11 @@
       });
 
       const currentSlot = lobbySlots[myTeam][mySlotIdx];
-      document.getElementById('my-slot-desc').innerText = 
-        `${myTeam === 'atk' ? '공격팀' : '수비팀'} ${mySlotIdx + 1}번 (${currentSlot.agent})`;
+      const slotDescEl = document.getElementById('my-slot-desc');
+      if (slotDescEl && currentSlot) {
+        slotDescEl.innerText = `${myTeam === 'atk' ? '공격팀' : '수비팀'} ${mySlotIdx + 1}번 (${currentSlot.agent})`;
+      }
+      renderLobbyAgentPicker();
     }
 
     function claimSlot(team, idx) {
@@ -4851,12 +5336,14 @@
       }
     };
 
-    document.getElementById('btn-cycle-map').addEventListener('click', () => {
-      currentMapIndex = (currentMapIndex + 1) % MAP_LIST.length;
-      const mapKey = MAP_LIST[currentMapIndex];
-      document.getElementById('lobby-map-title').innerText = MAP_NAMES[mapKey];
-      document.getElementById('hud-map-badge').innerText = mapKey.toUpperCase();
-    });
+    const btnCycleMap = document.getElementById('btn-cycle-map');
+    if (btnCycleMap) {
+      btnCycleMap.addEventListener('click', () => {
+        currentMapIndex = (currentMapIndex + 1) % MAP_LIST.length;
+        const mapKey = MAP_LIST[currentMapIndex];
+        selectLobbyMap(mapKey);
+      });
+    }
 
     /* ==========================================================
        4. CHAT SYSTEM ([ENTER])
@@ -5827,34 +6314,6 @@
     let weaponBarrelHeat = 0;
     let reflexMode = 'boost';
     let currentVisualFilterIdx = 0;
-    const GAME_MODES = [
-      { id: 'COMPETITIVE', name: '경쟁전 (5V5)', roundsToWin: 13, buyTime: 20, roundTime: 100 },
-      { id: 'SPIKE_RUSH', name: '스파이크 돌격 (SPIKE RUSH)', roundsToWin: 4, buyTime: 15, roundTime: 80 },
-      { id: 'DEATHMATCH', name: '데스매치 (DEATHMATCH FFA)', roundsToWin: 40, buyTime: 5, roundTime: 600 },
-      { id: 'SWIFTPLAY', name: '신속플레이 (SWIFTPLAY)', roundsToWin: 5, buyTime: 15, roundTime: 90 },
-      { id: 'RANGE', name: '사격 훈련장 (RANGE)', roundsToWin: 999, buyTime: 0, roundTime: 9999 }
-    ];
-    let currentGameModeIdx = 0;
-
-    function setGameMode(idx) {
-      currentGameModeIdx = (idx % GAME_MODES.length + GAME_MODES.length) % GAME_MODES.length;
-      const gm = GAME_MODES[currentGameModeIdx];
-      const modeBadge = document.getElementById('hud-mode-badge');
-      if (modeBadge) modeBadge.innerText = gm.id;
-      for (let i = 0; i < GAME_MODES.length; i++) {
-        const btn = document.getElementById('mode-btn-' + i);
-        if (btn) {
-          if (i === currentGameModeIdx) btn.classList.add('active');
-          else btn.classList.remove('active');
-        }
-      }
-      sound.playSwitchClick();
-      showToast(`⚡ 게임 모드 변경: [${gm.name}]`);
-    }
-
-    function cycleGameMode() {
-      setGameMode(currentGameModeIdx + 1);
-    }
     let isFTGActive = false;
     let isFlashlightActive = false;
     let tacticalFlashlight = null;
@@ -15987,100 +16446,7 @@
 
     
     
-    /* ══════ 7 OFFICIAL AGENTS ROSTER ══════ */
-    const AGENTS = [
-      {
-        id: "hwaryeong", name: "화령", role: "타격대", color: "#ff5a3c", accent: "#ffb347",
-        quote: "불은 길을 묻지 않는다.",
-        desc: "전선을 강제로 여는 돌격형 요원. 맹렬한 불길로 적의 수비 진형을 일거에 태워버린다.",
-        abilities: [
-          { key: "Q", name: "불꽃 장막", cost: 200, charges: 2, cd: 0, type: "wall_fire", desc: "전방에 거대한 불의 장벽을 세운다. 통과하는 적에게 초당 12 피해." },
-          { key: "E", name: "화염탄", cost: 0, charges: 1, cd: 35, type: "proj_fire", desc: "폭발하는 화염구. 직격 55, 범위 30 피해 후 3초간 화염 장판." },
-          { key: "C", name: "잔불", cost: 150, charges: 2, cd: 0, type: "smoke_fire", desc: "시야를 가리는 고온 열기 연막을 전개한다. 12초 지속." },
-          { key: "X", name: "업화", cost: 0, charges: 1, cd: 0, ult: 5, type: "ult_fire", desc: "궁극기 — 전방 부채꼴을 불바다로 만든다. 초당 40 피해, 6초." }
-        ]
-      },
-      {
-        id: "seorin", name: "서린", role: "감시자", color: "#4fc3f7", accent: "#b3e5fc",
-        quote: "기다리는 쪽이 이긴다.",
-        desc: "주요 거점을 잠그는 방어형 요원. 단단한 얼음벽과 냉기 덫으로 진입로를 완벽 봉쇄한다.",
-        abilities: [
-          { key: "Q", name: "서리 덫", cost: 200, charges: 2, cd: 0, type: "trap_slow", desc: "설치형 덫. 밟은 적을 4초간 55% 둔화시키고 위치를 노출한다." },
-          { key: "E", name: "빙벽", cost: 0, charges: 1, cd: 40, type: "wall_ice", desc: "단단한 얼음벽을 세운다. 체력 400, 총격으로 파괴 가능." },
-          { key: "C", name: "한기 구역", cost: 150, charges: 2, cd: 0, type: "smoke_ice", desc: "냉기 연막 구역. 내부의 적은 25% 둔화된다. 14초 지속." },
-          { key: "X", name: "빙결", cost: 0, charges: 1, cd: 0, ult: 5, type: "ult_ice", desc: "궁극기 — 넓은 원형 구역을 얼려 범위 내 적을 2초간 완전히 묶는다." }
-        ]
-      },
-      {
-        id: "muyeong", name: "무영", role: "척후대", color: "#ab47bc", accent: "#e1bee7",
-        quote: "네가 보는 건 이미 지나간 나다.",
-        desc: "적진의 정보를 캐내고 교란하는 정찰형 요원. 그림자로 순간 도약하며 적의 감각을 마비시킨다.",
-        abilities: [
-          { key: "Q", name: "그림자 화살", cost: 200, charges: 2, cd: 0, type: "recon_dart", desc: "명중 지점 반경 14m의 적을 3초간 벽 너머로 실시간 투시한다." },
-          { key: "E", name: "잔영", cost: 0, charges: 1, cd: 30, type: "dash", desc: "바라보는 방향으로 순간 도약한다. 도약 중 0.4초간 완전 무적." },
-          { key: "C", name: "감각 차단", cost: 150, charges: 2, cd: 0, type: "flash", desc: "벽을 관통하는 암흑 구체 투사. 적중한 적의 시야를 3초간 완전 차단(피해망상)." },
-          { key: "X", name: "그림자 사냥", cost: 0, charges: 1, cd: 0, ult: 5, type: "ult_recon", desc: "궁극기 — 전 맵에 EMP 파동 방출. 모든 적을 8초간 감지하고 이속 30% 증가." }
-        ]
-      },
-      {
-        id: "gangcheol", name: "강철", role: "타격대", color: "#ffa726", accent: "#ffd180",
-        quote: "부서지지 않는 건 없다.",
-        desc: "중장갑과 고폭 화력으로 요충지를 분쇄하는 진격형 요원. 실드와 돌진으로 적진을 유린한다.",
-        abilities: [
-          { key: "Q", name: "충격 수류탄", cost: 200, charges: 2, cd: 0, type: "nade", desc: "벽에 튕긴 후 폭발하는 고폭탄. 65 직격 피해 및 대형 폭발." },
-          { key: "E", name: "전선 방패", cost: 0, charges: 1, cd: 35, type: "shield", desc: "8초간 전방 공격 피해를 흡수하는 고강도 전술 에너지 쉴드를 전개한다." },
-          { key: "C", name: "돌진", cost: 150, charges: 2, cd: 0, type: "charge", desc: "전방으로 고속 충격 돌진. 경로상의 적을 밀쳐내고 40 피해를 입힌다." },
-          { key: "X", name: "파쇄", cost: 0, charges: 1, cd: 0, ult: 5, type: "ult_smash", desc: "궁극기 — 대지진 충격파로 반경 14m 내 적에게 120 피해 및 40% 둔화 부여." }
-        ]
-      },
-      {
-        id: "yeonhwa", name: "연화", role: "전략가", color: "#66bb6a", accent: "#c8e6c9",
-        quote: "생명은 다시 피어난다.",
-        desc: "아군을 유지시키고 전장을 제어하는 서포트형 요원. 생명력 치유와 결박으로 판도를 뒤집는다.",
-        abilities: [
-          { key: "Q", name: "회복의 씨앗", cost: 200, charges: 2, cd: 0, type: "heal", desc: "치유 구역 생성. 반경 8m 내 아군과 자신의 체력을 초당 15 회복 (8초)." },
-          { key: "E", name: "뿌리 결박", cost: 0, charges: 1, cd: 35, type: "root", desc: "시야 내 적을 덩굴로 2.5초간 이동 불가 결박하고 3초간 위치 노출." },
-          { key: "C", name: "안개꽃", cost: 150, charges: 2, cd: 0, type: "smoke", desc: "대형 연꽃 연막을 전개하여 16초간 시야를 완벽 차단한다." },
-          { key: "X", name: "재생", cost: 0, charges: 1, cd: 0, ult: 5, type: "ult_res", desc: "궁극기 — 자신 체력 60 즉시 회복 + 사망한 아군 1명을 본진에 즉시 부활." }
-        ]
-      },
-      {
-        id: "noeun", name: "노은", role: "전략가", color: "#ffd54f", accent: "#fff59d",
-        quote: "시스템은 완벽하게 침묵한다.",
-        desc: "첨단 드론과 전자 장비로 적의 시스템을 마비시키는 기술형 요원. 전자기 지뢰와 펄스를 다룬다.",
-        abilities: [
-          { key: "Q", name: "전자 교란", cost: 200, charges: 2, cd: 0, type: "emp", desc: "전자기 파동으로 범위 내 적의 스킬을 침묵시키고 6초간 사격을 무력화." },
-          { key: "E", name: "감시 드론", cost: 0, charges: 1, cd: 35, type: "drone", desc: "자율 비행 감시 드론을 전방으로 사출하여 적의 위치를 스캔한다." },
-          { key: "C", name: "과부하 지뢰", cost: 150, charges: 2, cd: 0, type: "mine", desc: "접근 감지 지뢰. 적이 밟으면 폭발하며 45 피해, 3초 실명, 4초 둔화." },
-          { key: "X", name: "정전", cost: 0, charges: 1, cd: 0, ult: 5, type: "ult_emp", desc: "궁극기 — 전 맵 정전 펄스 방출. 모든 적을 10초간 스턴 및 완전 무력화." }
-        ]
-      },
-      {
-        id: "baekho", name: "백호", role: "감시자", color: "#e0e0e0", accent: "#ffffff",
-        quote: "숨어도 내 시선은 피할 수 없다.",
-        desc: "초장거리 저격과 초감각 센서로 전장을 감시하는 정밀 저격수. 벽을 꿰뚫는 관통탄을 보유했다.",
-        abilities: [
-          { key: "Q", name: "관통 사격", cost: 200, charges: 2, cd: 0, type: "pierce", desc: "모든 지형과 벽을 관통하는 고압 레일건 탄환 발사. 적중 시 80 피해." },
-          { key: "E", name: "경계 센서", cost: 0, charges: 1, cd: 30, type: "sensor", desc: "감지 트랩 설치. 적 통과 시 6초간 실시간 노출 및 60% 둔화." },
-          { key: "C", name: "연막탄", cost: 150, charges: 2, cd: 0, type: "smoke_fast", desc: "즉시 터지는 전술 신속 연막탄 투척. 10초간 시야 차단." },
-          { key: "X", name: "응시", cost: 0, charges: 1, cd: 0, ult: 5, type: "ult_snipe", desc: "궁극기 — 모든 적의 위치를 8초간 벽 너머로 실시간 투시 및 즉발 저격 모드." }
-        ]
-      }
-    ];
-
-    // Normalized Agent Resolver supporting both English legacy names and Korean official names
-    function getAgentDef(nameOrId) {
-      if (!nameOrId) return AGENTS[0];
-      const s = String(nameOrId).toLowerCase().trim();
-      if (s === 'hwaryeong' || s === '화령' || s === 'phoenix') return AGENTS[0];
-      if (s === 'seorin' || s === '서린' || s === 'sage') return AGENTS[1];
-      if (s === 'muyeong' || s === '무영' || s === 'omen' || s === 'reyna' || s === 'fade') return AGENTS[2];
-      if (s === 'gangcheol' || s === '강철' || s === 'breach' || s === 'raze') return AGENTS[3];
-      if (s === 'yeonhwa' || s === '연화' || s === 'skye') return AGENTS[4];
-      if (s === 'noeun' || s === '노은' || s === 'killjoy' || s === 'cypher' || s === 'brimstone') return AGENTS[5];
-      if (s === 'baekho' || s === '백호' || s === 'jett' || s === 'sova' || s === 'chamber') return AGENTS[6];
-      return AGENTS.find(a => a.id === s || a.name === nameOrId) || AGENTS[0];
-    }
+    /* AGENTS & getAgentDef defined above */
 
     const PORTRAIT_CACHE = {};
     function agentPortrait(agent, w = 300, h = 380) {
@@ -19961,6 +20327,69 @@
           });
         }
 
+
+        // Mode-Specific Systems (Deathmatch Respawns & Mayhem Abilities)
+        const activeMode = GAME_MODES[currentGameModeIdx] || GAME_MODES[0];
+        if (activeMode.isMayhem) {
+          cheats.noCooldowns = true;
+          cheats.infiniteAmmo = true;
+          ['c', 'q', 'e', 'x'].forEach(k => {
+            if (abilities[k]) {
+              abilities[k].lastUsed = 0;
+              abilities[k].charges = abilities[k].maxCharges;
+            }
+          });
+          player.ultPoints = player.maxUltPoints;
+          abilities.x.ready = true;
+        }
+
+        if (activeMode.isDeathmatch) {
+          // Deathmatch: Handle 3-second player respawn loop
+          if (player.isDead) {
+            if (player._dmRespawnT == null) player._dmRespawnT = 3.0;
+            player._dmRespawnT -= dt;
+            const respawnPrompt = document.getElementById('action-progress-label');
+            const respawnCont = document.getElementById('action-progress-container');
+            const respawnFill = document.getElementById('action-progress-fill');
+            if (respawnCont && respawnPrompt) {
+              respawnCont.style.display = 'block';
+              respawnPrompt.innerText = `💀 리스폰 준비 중... (${Math.max(1, Math.ceil(player._dmRespawnT))}초)`;
+              if (respawnFill) respawnFill.style.width = `${Math.max(0, (1 - player._dmRespawnT / 3.0) * 100)}%`;
+            }
+
+            if (player._dmRespawnT <= 0) {
+              player.isDead = false;
+              player.hp = 100;
+              player.shield = 50;
+              player._dmRespawnT = null;
+              if (respawnCont) respawnCont.style.display = 'none';
+              // Random map spawn node
+              const spawnX = (Math.random() - 0.5) * 40;
+              const spawnZ = (Math.random() - 0.5) * 40;
+              camera.position.set(spawnX, 1.6, spawnZ);
+              player.velocity.set(0, 0, 0);
+              sound.playTeleport();
+              showToast('⚔️ 전장 즉시 재투입 완료! (RESPAWNED)');
+              updateHUD();
+            }
+          }
+
+          // Deathmatch: Handle 3-second bot respawn loop
+          enemiesList.forEach(bot => {
+            if (bot.isDead) {
+              if (bot._dmRespawnT == null) bot._dmRespawnT = 3.0;
+              bot._dmRespawnT -= dt;
+              if (bot._dmRespawnT <= 0) {
+                bot.isDead = false;
+                bot.hp = 100;
+                bot.shield = 50;
+                bot._dmRespawnT = null;
+                bot.mesh.position.set((Math.random() - 0.5) * 60, 0, (Math.random() - 0.5) * 60);
+                bot.mesh.visible = true;
+              }
+            }
+          });
+        }
 
         // Low HP Warning Heartbeat & Screen Pulse (Relaxed periodic pulse)
         if (player.hp < 30 && !player.isDead) {
