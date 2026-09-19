@@ -2101,7 +2101,7 @@
       <div style="display: flex; justify-content: space-between; align-items: flex-end; border-bottom: 2px solid var(--val-border); padding-bottom: 10px; margin-bottom: 14px;">
         <div>
           <h3 style="font-family: var(--font-title); font-size: 34px; letter-spacing: 2px; color: #fff; line-height: 1;">TACTICAL SCOREBOARD // 5V5 MATCH</h3>
-          <div style="font-size: 12px; color: #8899a6;">PRESS [TAB] TO TOGGLE | [Y] INSPECT | [G] SKINS | [H] AGENTS | [M] MAPS | [L] LASER | [J] FLASH | [U] CHARM | [3] MELEE | [F5] TURBO</div>
+          <div style="font-size: 12px; color: #8899a6;">PRESS [TAB] TO TOGGLE | [Y] INSPECT | [G] SKINS | [H] AGENTS | [M] MAPS | [L] LASER | [J] FLASH | [U] CHARM | [3] MELEE | [F5] TURBO | [F6] FTG</div>
         </div>
         <div style="display: flex; gap: 16px; font-family: var(--font-title); font-size: 28px;">
           <span style="color: var(--val-cyan);">ATK <span id="sb-score-atk">0</span></span>
@@ -2139,6 +2139,11 @@
   <!-- In-Game Tactical HUD -->
   <div id="hud">
     <div id="perf-hud" style="position:absolute; top:12px; right:18px; font-family:var(--font-mono); font-size:13px; color:var(--val-green); font-weight:700; text-shadow:0 0 8px rgba(0,255,136,0.6); pointer-events:none; z-index:30; letter-spacing:1px;">144 FPS // 6.9ms</div>
+    <div id="ftg-osd-panel" style="position:absolute; top:36px; right:18px; font-family:var(--font-mono); font-size:11px; font-weight:700; color:#10b981; pointer-events:none; z-index:35; display:none; flex-direction:column; gap:2px; background:rgba(7,11,16,0.88); padding:5px 10px; border:1px solid #10b981; box-shadow:0 0 10px rgba(16,185,129,0.3);">
+      <span style="color:#00f0ff;">[FTG // HARDWARE PROFILER]</span>
+      <span id="ftg-stat-text">FT: 0.98ms (980µs) | 1% LOW: 140 FPS</span>
+      <span style="color:#f59e0b;">PIPELINE: SUB-1MS LOW-LATENCY</span>
+    </div>
     <!-- TOP BAR: 10 AGENT HEAD ICONS & SCORES -->
     <div id="top-bar">
       <!-- Attackers 5 Roster -->
@@ -3594,7 +3599,7 @@
     const myClientId = 'user_' + Math.random().toString(36).substring(2, 8);
     const networkChannel = new BroadcastChannel('VALORANT_5V5_NET');
 
-    const MAP_LIST = ['ascent', 'bind', 'haven', 'icebox', 'split', 'lotus', 'breeze', 'sunset', 'pearl', 'fracture', 'range'];
+    const MAP_LIST = ['ascent', 'bind', 'haven', 'icebox', 'split', 'lotus', 'breeze', 'sunset', 'pearl', 'fracture', 'abyss', 'range'];
     const MAP_NAMES = {
       ascent: 'ASCENT (어센트) - 베네치아 요새 & 전동 셔터 도어 [F]',
       bind: 'BIND (바인드) - 모로코 사막 & 차원 이동 텔레포터',
@@ -3606,6 +3611,7 @@
       sunset: 'SUNSET (선셋) - LA 도심 골든아워 & A 보바 카페 & B 마켓 전동 차단문 [F] & 타코 푸드트럭',
       pearl: 'PEARL (펄) - 리스본 심해 수중 돔 & B 롱 해저 파노라마 & 아줄레주 분수대 & 에어락 [F]',
       fracture: 'FRACTURE (프랙처) - 산타페 기밀 연구소 & H자형 듀얼 스폰 & 협곡 고속 집라인 [F]',
+      abyss: 'ABYSS (어비스) - 스발바르 무저갱 심연 유적 & 낙사 절벽 & 미드 도약대 [F]',
       range: 'THE RANGE (사격장) - 사격 훈련장 & 봇 연습'
     };
     let currentMapIndex = 0;
@@ -3616,7 +3622,8 @@
       Fade: '🧿', Gekko: '🦎', Harbor: '🌊', Iso: '🔮',
       Deadlock: '🕸️', Clove: '🦋', Vyse: '🥀', 'KAY/O': '⚙️',
       Tejo: '🦅',
-      Astra: '🌌'
+      Astra: '🌌',
+      Breach: '🔨'
     };
     const AGENT_COLORS = {
       Jett: '#00f0ff', Phoenix: '#ff6600', Reyna: '#be00ff', Sova: '#2979ff',
@@ -3626,7 +3633,8 @@
       Fade: '#5c6b73', Gekko: '#a3e635', Harbor: '#06b6d4', Iso: '#8b5cf6',
       Deadlock: '#cbd5e1', Clove: '#f472b6', Vyse: '#94a3b8', 'KAY/O': '#38bdf8',
       Tejo: '#10b981',
-      Astra: '#9c27b0'
+      Astra: '#9c27b0',
+      Breach: '#f59e0b'
     };
     const AGENT_ROLES = {
       Jett: '타격대 (Duelist)', Phoenix: '타격대 (Duelist)', Reyna: '타격대 (Duelist)', Raze: '타격대 (Duelist)',
@@ -3635,7 +3643,8 @@
       Omen: '전략가 (Controller)', Brimstone: '전략가 (Controller)', Viper: '전략가 (Controller)', Harbor: '전략가 (Controller)', Clove: '전략가 (Controller)',
       Sage: '감시대 (Sentinel)', Cypher: '감시대 (Sentinel)', Killjoy: '감시대 (Sentinel)', Chamber: '감시대 (Sentinel)', Deadlock: '감시대 (Sentinel)', Vyse: '감시대 (Sentinel)',
       Tejo: '척후대 (Initiator)',
-      Astra: '전략가 (Controller)'
+      Astra: '전략가 (Controller)',
+      Breach: '척후대 (Initiator)'
     };
 
     const lobbySlots = {
@@ -3865,11 +3874,16 @@
       kunaiMeshes.push(kGrp);
     }
 
+    let muzzlePointLight = null;
     const flashMat = new THREE.MeshBasicMaterial({ color: 0xfff3a0, transparent: true, opacity: 0 });
     const flashMesh = new THREE.Mesh(new THREE.ConeGeometry(0.07, 0.22, 8), flashMat);
     flashMesh.rotation.x = -Math.PI / 2;
     flashMesh.position.set(0, 0.02, -0.8);
     gunGroup.add(flashMesh);
+
+    muzzlePointLight = new THREE.PointLight(0xffaa22, 0, 14, 1.8);
+    muzzlePointLight.position.set(0, 0.02, -0.8);
+    gunGroup.add(muzzlePointLight);
 
     // Upgraded Tactical Hands & Carbon Knuckle Protectors
     const rightArm = new THREE.Mesh(new THREE.CylinderGeometry(0.055, 0.065, 0.4, 8), matSleeve);
@@ -4448,7 +4462,7 @@
     /* ==========================================================
        DYNAMIC AGENT SWITCHING SYSTEM ([H] KEY TO CYCLE AGENT)
        ========================================================== */
-    const PLAYABLE_AGENTS = ['Jett', 'Phoenix', 'Reyna', 'Sova', 'Sage', 'Omen', 'Brimstone', 'Raze', 'Killjoy', 'Chamber', 'Viper', 'Cypher', 'Neon', 'Yoru', 'Fade', 'Gekko', 'Harbor', 'Iso', 'Deadlock', 'Clove', 'Vyse', 'KAY/O', 'Tejo', 'Astra'];
+    const PLAYABLE_AGENTS = ['Jett', 'Phoenix', 'Reyna', 'Sova', 'Sage', 'Omen', 'Brimstone', 'Raze', 'Killjoy', 'Chamber', 'Viper', 'Cypher', 'Neon', 'Yoru', 'Fade', 'Gekko', 'Harbor', 'Iso', 'Deadlock', 'Clove', 'Vyse', 'KAY/O', 'Tejo', 'Astra', 'Breach'];
     let currentAgentIdx = 0;
 
     const AGENT_SKILL_LABELS = {
@@ -4466,7 +4480,8 @@
       Gekko: { c: '모쉬 핏 (C)', q: '윙맨 기동 (Q)', e: '디지 섬광 (E)', x: '요동 격돌 (X)' },
       Harbor: { c: '폭포 (C)', q: '만 (Q)', e: '간석지 장막 (E)', x: '심판 해일 (X)' },
       Iso: { c: '응징 사격 (C)', q: '취약 사쇄 (Q)', e: '더블 탭 실드 (E)', x: '결투 영역 (X)' },
-      Astra: { c: '중력 샘 (C)', q: '신경 파동 (Q)', e: '성운 연막 (E)', x: '우주 장벽 (X)' }
+      Astra: { c: '중력 샘 (C)', q: '신경 파동 (Q)', e: '성운 연막 (E)', x: '우주 장벽 (X)' },
+      Breach: { c: '여진 (C)', q: '눈먼 길 (Q)', e: '균열 (E)', x: '지진 강타 (X)' }
     };
 
     let spectatorTargetIndex = 0;
@@ -4633,6 +4648,8 @@
     let sunsetMarketDoor = null;
     let pearlAirlock = null;
     let fractureZipline = null;
+    let abyssJumppad = null;
+    let isFTGActive = false;
     let isFlashlightActive = false;
     let tacticalFlashlight = null;
     let currentMeleeKey = 'knife';
@@ -4640,7 +4657,6 @@
     let isLaserActive = false;
     let laserBeamMesh = null;
     let laserDotMesh = null;
-    let muzzlePointLight = null;
     let lotusBreakableWall = null;
     let spikeTetherLine = null;
     const roundCombatData = {
@@ -4737,12 +4753,15 @@
     const walkableSurfaces = []; // Dynamic stair & platform traversal bounds { minX, maxX, minZ, maxZ, topY }
 
     function groundAt(x, z, curFootY = 0) {
-      let highestY = 0;
+      const curMap = (MAP_LIST && MAP_LIST[currentMapIndex]) || '';
+      let highestY = (curMap === 'abyss') ? -100 : 0;
+      let foundSurface = false;
       for (let i = 0; i < walkableSurfaces.length; i++) {
         const s = walkableSurfaces[i];
         if (x >= s.minX && x <= s.maxX && z >= s.minZ && z <= s.maxZ) {
-          if (s.topY <= curFootY + 0.65 && s.topY > highestY) {
+          if (s.topY <= curFootY + 0.65 && (s.topY > highestY || !foundSurface)) {
             highestY = s.topY;
+            foundSurface = true;
           }
         }
       }
@@ -5258,6 +5277,22 @@
         cape.position.set(0, 1.1, -0.16);
         cape.rotation.x = 0.15;
         grp.add(cape);
+      } else if (agentName === 'Breach') {
+        // Swedish bionic initiator with mechanical titanium arms and seismic shock coils
+        const bionicArmL = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.10, 0.42, 8), new THREE.MeshStandardMaterial({ color: 0xd97706, metalness: 0.9, roughness: 0.2 }));
+        bionicArmL.position.set(-0.28, 1.05, 0.06);
+        grp.add(bionicArmL);
+        const bionicArmR = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.10, 0.42, 8), new THREE.MeshStandardMaterial({ color: 0xd97706, metalness: 0.9, roughness: 0.2 }));
+        bionicArmR.position.set(0.28, 1.05, 0.06);
+        grp.add(bionicArmR);
+        const seismicCoil = new THREE.Mesh(new THREE.TorusGeometry(0.12, 0.03, 6, 12), new THREE.MeshStandardMaterial({ color: 0xf59e0b, emissive: 0xd97706, emissiveIntensity: 0.8 }));
+        seismicCoil.rotation.x = Math.PI / 2;
+        seismicCoil.position.set(0, 1.25, 0.22);
+        grp.add(seismicCoil);
+        const vikingBeard = new THREE.Mesh(new THREE.ConeGeometry(0.12, 0.18, 5), new THREE.MeshStandardMaterial({ color: 0x92400e }));
+        vikingBeard.position.set(0, 1.62, 0.16);
+        vikingBeard.rotation.x = 0.3;
+        grp.add(vikingBeard);
       }
 
       // Distinct tactical role underfoot glowing aura ring
@@ -5277,6 +5312,23 @@
       grp.add(auraRing);
 
       return { mesh: grp, head, body, legs: [legL, legR] };
+    }
+
+    function triggerAbyssJumppad() {
+      sound.playZipline();
+      player.velocity.y = 15.0;
+      const forwardDir = (camera.position.z > 0) ? -20 : 20;
+      player.velocity.z = forwardDir;
+      player.isGrounded = false;
+      showToast('💨 [ABYSS] 심연 공중 도약대 가동! (JUMP-PAD LAUNCH)');
+    }
+
+    function toggleFrametimeGraph() {
+      isFTGActive = !isFTGActive;
+      sound.playSwitchClick();
+      const ftgEl = document.getElementById('ftg-osd-panel');
+      if (ftgEl) ftgEl.style.display = isFTGActive ? 'flex' : 'none';
+      showToast(`📊 [FTG] 마이크로초 프레임타임 & 지터 그래프: [${isFTGActive ? 'ON' : 'OFF'}]`);
     }
 
     function toggleTacticalFlashlight() {
@@ -5627,6 +5679,7 @@
         fractureZipline.cables.forEach(c => scene.remove(c));
       }
       fractureZipline = null;
+      abyssJumppad = null;
 
       if (lotusDoor && lotusDoor.mesh) {
         scene.remove(lotusDoor.mesh);
@@ -5872,6 +5925,19 @@
         sunLight.position.set(45, 75, -35);
         scene.fog.color.setHex(0x27272a);
         scene.fog.density = 0.0055;
+      } else if (mapKey === 'abyss') {
+        // Svalbard Arctic Abyssal Void / Starlight Aurora & Moonlit Ruins
+        grad.addColorStop(0, '#030712');   // Deep void black
+        grad.addColorStop(0.3, '#0b1329'); // Deep abyssal navy
+        grad.addColorStop(0.65, '#1e1b4b'); // Twilight cosmic indigo
+        grad.addColorStop(1, '#065f46');   // Arctic aurora teal
+        ambientLight.color.setHex(0x60a5fa);
+        ambientLight.intensity = 0.85;
+        sunLight.color.setHex(0xa5f3fc);
+        sunLight.intensity = 1.35;
+        sunLight.position.set(-30, 80, -40);
+        scene.fog.color.setHex(0x090d16);
+        scene.fog.density = 0.007;
       } else {
         // Range: High-tech military hangar
         grad.addColorStop(0, '#080c10');
@@ -6985,6 +7051,85 @@
           speed: 26.0
         };
       }
+      else if (mapKey === 'abyss') {
+        // ==========================================================
+        // MAP 11: ABYSS (어비스) - 노르웨이 스발바르 무저갱 심연 유적 & 낙사 절벽 & 미드 도약대 [F]
+        // ==========================================================
+        const matAbyssStone = new THREE.MeshStandardMaterial({ color: 0x334155, roughness: 0.75 });
+        const matAbyssBasalt = new THREE.MeshStandardMaterial({ color: 0x0f172a, roughness: 0.9 });
+        const matAbyssGlow = new THREE.MeshStandardMaterial({ color: 0x0ea5e9, emissive: 0x0284c7, emissiveIntensity: 0.8 });
+        const matAbyssHazard = new THREE.MeshStandardMaterial({ color: 0xf59e0b, emissive: 0xd97706, emissiveIntensity: 0.4 });
+        const matAbyssWalkway = new THREE.MeshStandardMaterial({ color: 0x475569, metalness: 0.8, roughness: 0.25 });
+
+        // Note: ABYSS has NO solid 120x120 floor! Catwalks suspend directly over the fatal void.
+
+        // --- 1. CENTRAL MID CHASM & INTERACTIVE JUMPPAD [F] (x = 0, z = 0) ---
+        addPlatform(0, 0, 0, 14, 0.6, 18, matAbyssStone);
+        addBox(0, 0.6, 9.2, 14, 0.4, 0.4, matAbyssHazard);
+        addBox(0, 0.6, -9.2, 14, 0.4, 0.4, matAbyssHazard);
+
+        const ventBase = new THREE.Mesh(new THREE.CylinderGeometry(2.2, 2.6, 0.4, 16), matAbyssWalkway);
+        ventBase.position.set(0, 0.7, 0);
+        scene.add(ventBase);
+        mapObjects.push(ventBase);
+        colliders.push({ box: new THREE.Box3().setFromObject(ventBase), mesh: ventBase });
+
+        const ventRing = new THREE.Mesh(new THREE.TorusGeometry(1.9, 0.15, 8, 20), matAbyssGlow);
+        ventRing.rotation.x = Math.PI / 2;
+        ventRing.position.set(0, 0.95, 0);
+        scene.add(ventRing);
+        mapObjects.push(ventRing);
+
+        addTextBillboard(0, 2.0, 0, '[F] 심연 공중 도약대 (ABYSS JUMP-PAD)', 1.4, '#38bdf8');
+
+        abyssJumppad = {
+          pos: new THREE.Vector3(0, 0.8, 0),
+          mesh: ventBase
+        };
+
+        // --- 2. A SITE: A TOWER & A DANGER VOID OVERHANG (x = 32, z = -20) ---
+        addPlatform(32, 0, -20, 24, 0.6, 24, matSiteFloor);
+        addTextBillboard(32, 0.2, -20, 'A SITE', 1.8);
+        spikeSiteAreas.push({ minX: 20, maxX: 44, minZ: -32, maxZ: -8, name: 'A SITE' });
+
+        addPlatform(44, 0, -20, 8, 0.5, 12, matAbyssWalkway);
+        addBox(48, 0.55, -20, 0.4, 0.4, 12, matAbyssHazard);
+
+        addPlatform(36, 0, -32, 12, 4.2, 10, matAbyssStone);
+        addRailing(29.9, 4.2, -32, 10, 'z');
+        addStairs(36, -14, 0, 3.8, 4.2, 12, 12, 'z-');
+        addCrateStack(26, -20, 2.4);
+
+        // --- 3. B SITE: B NEST & B DANGER CATWALK (x = -32, z = -20) ---
+        addPlatform(-32, 0, -20, 24, 0.6, 24, matSiteFloor);
+        addTextBillboard(-32, 0.2, -20, 'B SITE', 1.8);
+        spikeSiteAreas.push({ minX: -44, maxX: -20, minZ: -32, maxZ: -8, name: 'B SITE' });
+
+        addPlatform(-44, 0, -20, 8, 0.5, 12, matAbyssWalkway);
+        addBox(-48, 0.55, -20, 0.4, 0.4, 12, matAbyssHazard);
+
+        addPlatform(-36, 0, -32, 12, 4.2, 10, matAbyssStone);
+        addRailing(-29.9, 4.2, -32, 10, 'z');
+        addStairs(-36, -14, 0, 3.8, 4.2, 12, 12, 'z-');
+        addCrateStack(-26, -20, 2.4);
+
+        // --- 4. ATK & DEF SPAWN PLATFORMS & SUSPENDED BRIDGES ---
+        addPlatform(0, 0, 38, 44, 0.6, 16, matAbyssStone);
+        addPlatform(0, 0, -38, 44, 0.6, 16, matAbyssStone);
+
+        addPlatform(20, 0, 16, 6, 0.5, 30, matAbyssWalkway);
+        addPlatform(-20, 0, 16, 6, 0.5, 30, matAbyssWalkway);
+        addPlatform(20, 0, -28, 6, 0.5, 20, matAbyssWalkway);
+        addPlatform(-20, 0, -28, 6, 0.5, 20, matAbyssWalkway);
+
+        // Floating Monoliths Hovering in the Abyssal Void Below
+        [-25, 0, 25].forEach((mx, mIdx) => {
+          const mon = new THREE.Mesh(new THREE.OctahedronGeometry(4.0), matAbyssBasalt);
+          mon.position.set(mx, -18, (mIdx % 2 === 0 ? 10 : -10));
+          scene.add(mon);
+          mapObjects.push(mon);
+        });
+      }
       else if (mapKey === 'range') {
         addBox(0, -0.5, 0, 60, 1, 120, matConcrete);
         addBox(0, 7, -60, 60, 14, 2, matWallStone);
@@ -7306,6 +7451,13 @@
       if (e.code === 'F5') {
         e.preventDefault();
         toggleGameTurboMode();
+        return;
+      }
+
+      // [F6] Key: Quick Toggle Microsecond Frametime & Jitter OSD
+      if (e.code === 'F6') {
+        e.preventDefault();
+        toggleFrametimeGraph();
         return;
       }
 
@@ -8336,7 +8488,11 @@
       sound.playGunshot(currentWeaponKey);
 
       flashMat.opacity = 1;
-      setTimeout(() => { flashMat.opacity = 0; }, 40);
+      muzzlePointLight.intensity = 3.5;
+      setTimeout(() => {
+        flashMat.opacity = 0;
+        muzzlePointLight.intensity = 0;
+      }, 45);
 
       // Eject Brass Shell Casing with 3D Physics
       if (!currentWeapon.isKnife && activeShellCasings.length < 24) {
@@ -8984,6 +9140,16 @@
         const dSouth = pPos.distanceTo(fractureZipline.southPos);
         if (dNorth < 5.5 || dSouth < 5.5 || (Math.abs(pPos.x) < 4.0 && Math.abs(pPos.z) <= 38)) {
           startFractureZiplineRide();
+          return;
+        }
+      }
+
+      // 7. Abyss Mid Chasm Jumppad [F]
+      if (MAP_LIST[currentMapIndex] === 'abyss' && abyssJumppad) {
+        const pPos = camera.position;
+        const distToJumppad = pPos.distanceTo(abyssJumppad.pos);
+        if (distToJumppad < 4.0) {
+          triggerAbyssJumppad();
           return;
         }
       }
@@ -10125,6 +10291,17 @@
         { label: 'ATK NORTH', x: 0, z: -45, color: '#ff4655' },
         { label: 'ATK SOUTH', x: 0, z: 45, color: '#ff4655' }
       ],
+      abyss: [
+        { label: 'A SITE', x: 30, z: -20, color: '#00f0ff' },
+        { label: 'A TOWER', x: 36, z: -30, color: '#88a0b8' },
+        { label: 'A DANGER', x: 42, z: -15, color: '#ff4655' },
+        { label: 'B SITE', x: -30, z: -20, color: '#00f0ff' },
+        { label: 'B NEST', x: -36, z: -30, color: '#88a0b8' },
+        { label: 'B DANGER', x: -42, z: -15, color: '#ff4655' },
+        { label: 'MID JUMP-PAD [F]', x: 0, z: 0, color: '#38bdf8' },
+        { label: 'DEF SPAWN', x: 0, z: -36, color: '#00ffaa' },
+        { label: 'ATK SPAWN', x: 0, z: 36, color: '#ff4655' }
+      ],
       range: [
         { label: 'TARGETS', x: 0, z: -22, color: '#00f0ff' },
         { label: 'BENCH', x: 0, z: 0, color: '#ffc83b' },
@@ -10417,6 +10594,12 @@
               const curMapKey = (MAP_LIST && MAP_LIST[currentMapIndex]) ? MAP_LIST[currentMapIndex].toUpperCase() : 'ASCENT';
               const drsActive = document.getElementById('cfg-drs')?.value === 'on' ? ' // DRS:ON' : '';
               perfElem.innerText = `${fpsDisplayVal} FPS // ${frameTimeMsVal}ms // ${rScale}x RES${drsActive} // ${curMapKey}`;
+              const ftgStat = document.getElementById('ftg-stat-text');
+              if (ftgStat && isFTGActive) {
+                const microsec = (frameTimeMsVal * 1000).toFixed(0);
+                const low1Pct = Math.max(30, Math.floor(fpsDisplayVal * 0.92));
+                ftgStat.innerText = `FT: ${frameTimeMsVal}ms (${microsec}µs) | 1% LOW: ${low1Pct} FPS | DC: ${renderer.info.render.calls}`;
+              }
 
               // Dynamic Resolution Scaling (DRS) Auto Pacing
               if (document.getElementById('cfg-drs')?.value === 'on' && fpsDisplayVal > 0) {
@@ -10628,6 +10811,23 @@
             const bobFreq = player.isWalking ? 7.5 : 12;
             const bobAmp = player.isWalking ? 0.008 : 0.016;
             camera.position.y += Math.sin(now * 0.001 * bobFreq) * bobAmp;
+          }
+
+          // ABYSS Fatal Void Drop Detection (Falling off the cliffs)
+          if (MAP_LIST[currentMapIndex] === 'abyss' && camera.position.y < -12 && !player.isDead) {
+            player.isDead = true;
+            player.hp = 0;
+            updateHUD();
+            sound.playLandingThud();
+            showToast('☠️ [ABYSS] 심연 무저갱으로 추락했습니다! (FALLEN INTO THE ABYSS)');
+            if (roundState === 'IN_ROUND') checkRoundEnd();
+          }
+
+          // Auto-launch when walking directly over Abyss Jumppad
+          if (MAP_LIST[currentMapIndex] === 'abyss' && abyssJumppad && !player.isDead) {
+            if (Math.abs(camera.position.x) < 2.0 && Math.abs(camera.position.z) < 2.0 && Math.abs(camera.position.y - 1.7) < 1.2) {
+              if (player.velocity.y <= 0) triggerAbyssJumppad();
+            }
           }
         }
 
