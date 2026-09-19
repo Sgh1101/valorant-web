@@ -3824,7 +3824,7 @@
     const myClientId = 'user_' + Math.random().toString(36).substring(2, 8);
     const networkChannel = new BroadcastChannel('VALORANT_5V5_NET');
 
-    const MAP_LIST = ['ascent', 'bind', 'haven', 'icebox', 'split', 'lotus', 'breeze', 'sunset', 'pearl', 'fracture', 'abyss', 'district', 'drift', 'glitch', 'kasbah', 'piazza', 'bastion', 'colosseum', 'corrode', 'sanctum', 'zenith', 'subzero', 'oasis', 'eclipse', 'magma', 'cyberia', 'overgrowth', 'aerodrome', 'catacomb', 'solarium', 'citadel', 'foundry', 'chronos', 'monsoon', 'monolith', 'aurora', 'nexus', 'mirage', 'abyssal', 'inferno', 'vortex', 'celestial', 'canyon', 'necropolis', 'zen', 'reactor', 'horizon', 'range'];
+    const MAP_LIST = ['ascent', 'bind', 'haven', 'icebox', 'split', 'lotus', 'breeze', 'sunset', 'pearl', 'fracture', 'abyss', 'district', 'drift', 'glitch', 'kasbah', 'piazza', 'bastion', 'colosseum', 'corrode', 'sanctum', 'zenith', 'subzero', 'oasis', 'eclipse', 'magma', 'cyberia', 'overgrowth', 'aerodrome', 'catacomb', 'solarium', 'citadel', 'foundry', 'chronos', 'monsoon', 'monolith', 'aurora', 'nexus', 'mirage', 'abyssal', 'inferno', 'vortex', 'celestial', 'canyon', 'necropolis', 'zen', 'reactor', 'horizon', 'valhalla', 'shangrila', 'atlantis', 'titan', 'olympus', 'matrix', 'range'];
     const MAP_NAMES = {
       ascent: 'ASCENT (어센트) - 베네치아 요새 & 전동 셔터 도어 [F]',
       bind: 'BIND (바인드) - 모로코 사막 & 차원 이동 텔레포터',
@@ -3873,6 +3873,12 @@
       zen: 'ZEN (젠) - 일본 교토 대나무 숲 & 젠 가든 사찰 & 돌풍 회오리 풍령 벤트 [F]',
       reactor: 'REACTOR (리액터) - 체르노빌 원자력 발전소 4호기 냉각탑 & 방사선 증기 냉각 벤트 [F]',
       horizon: 'HORIZON (호라이즌) - 몰디브 산호초 환초 해상 메가 플로트 시티 & 수중 제트 추진 패드 [F]',
+      valhalla: 'VALHALLA (발할라) - 노르웨이 북유럽 신화 바이킹 성채 & 발키리 룬 상승 비행 [F]',
+      shangrila: 'SHANGRILA (샹그릴라) - 히말라야 설산 신비의 공중 누각 사원 & 기도 깃발 기류 부스트 [F]',
+      atlantis: 'ATLANTIS (아틀란티스) - 심해 잃어버린 고대 아틀란티스 수중 궁전 & 포세이돈 간헐천 [F]',
+      titan: 'TITAN (타이탄) - 토성 위성 타이탄 메탄 호수 채굴 기지 & 메탄 제트 로켓 도약 [F]',
+      olympus: 'OLYMPUS (올림포스) - 그리스 판테온 공중 신전 & 제우스 번개 텔레포트 [F]',
+      matrix: 'MATRIX (매트릭스) - 네오 사이버 가상현실 데이터 정글 & 디지털 글리치 코드 터널 [F]',
       range: 'THE RANGE (사격장) - 사격 훈련장 & 봇 연습'
     };
     let currentMapIndex = 0;
@@ -4982,6 +4988,12 @@
     let zenWindChime = null;
     let reactorCoolantVent = null;
     let horizonJetPlatform = null;
+    let valhallaValkyrieFlight = null;
+    let shangrilaWindGlider = null;
+    let atlantisTritonGeyser = null;
+    let titanMethaneGeyser = null;
+    let olympusLightningWarp = null;
+    let matrixCodeDash = null;
     let isGcLockerActive = true;
     let isHardwareFrameSync = true;
     let pollingRateModeIdx = 0;
@@ -5478,6 +5490,28 @@
       const botGun = new THREE.Mesh(new THREE.BoxGeometry(0.07, 0.10, 0.55), botGunMat);
       botGun.position.set(0.22, 1.12, 0.28);
       grp.add(botGun);
+
+      // Tactical knee armor pads
+      const kneePadL = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.11, 0.14, 8), bodyMat);
+      kneePadL.position.set(-0.16, 0.45, 0.05);
+      const kneePadR = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.11, 0.14, 8), bodyMat);
+      kneePadR.position.set(0.16, 0.45, 0.05);
+      grp.add(kneePadL);
+      grp.add(kneePadR);
+
+      // Tactical reinforced boots
+      const bootMat = new THREE.MeshStandardMaterial({ color: 0x080c10, roughness: 0.8 });
+      const bootL = new THREE.Mesh(new THREE.BoxGeometry(0.15, 0.14, 0.26), bootMat);
+      bootL.position.set(-0.16, 0.07, 0.03);
+      const bootR = new THREE.Mesh(new THREE.BoxGeometry(0.15, 0.14, 0.26), bootMat);
+      bootR.position.set(0.16, 0.07, 0.03);
+      grp.add(bootL);
+      grp.add(bootR);
+
+      // Side sidearm holster on right thigh
+      const holsterMesh = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.18, 0.12), bootMat);
+      holsterMesh.position.set(0.24, 0.65, 0);
+      grp.add(holsterMesh);
 
       // Distinct 3D Visual Customizations for ALL 14 Agents
       if (agentName === 'Jett') {
@@ -6303,6 +6337,60 @@
       showToast('🏝️ [HORIZON] 해상 메가플로트 수중 제트 추진 질주! (HYDRO-JET BOOST)');
     }
 
+    function triggerValhallaValkyrieFlight() {
+      if (!valhallaValkyrieFlight || player.isDead) return;
+      sound.playTeleport();
+      player.velocity.y = 18.5;
+      player.velocity.z = (camera.position.z > 0) ? -16.0 : 16.0;
+      player.isGrounded = false;
+      showToast('⚔️ [VALHALLA] 발키리 룬 상승 비행 가동! (VALKYRIE FLIGHT)');
+    }
+
+    function triggerShangrilaWindGlider() {
+      if (!shangrilaWindGlider || player.isDead) return;
+      sound.playZipline();
+      player.velocity.z = (camera.position.z > 0) ? -32.0 : 32.0;
+      player.velocity.y = 4.5;
+      player.isGrounded = false;
+      showToast('🏔️ [SHANGRILA] 히말라야 설산 바람의 기도 깃발 활강! (WIND GLIDER)');
+    }
+
+    function triggerAtlantisTritonGeyser() {
+      if (!atlantisTritonGeyser || player.isDead) return;
+      sound.playDash();
+      player.velocity.y = 17.5;
+      player.velocity.x = (camera.position.x > 0) ? -16.0 : 16.0;
+      player.isGrounded = false;
+      showToast('🔱 [ATLANTIS] 포세이돈 수류 간헐천 분출! (TRITON GEYSER)');
+    }
+
+    function triggerTitanMethaneGeyser() {
+      if (!titanMethaneGeyser || player.isDead) return;
+      sound.playTeleport();
+      player.velocity.y = 16.0;
+      player.velocity.z = (camera.position.z > 0) ? -28.0 : 28.0;
+      player.isGrounded = false;
+      showToast('🪐 [TITAN] 타이탄 극저온 메탄 제트 로켓 도약! (METHANE ROCKET)');
+    }
+
+    function triggerOlympusLightningWarp() {
+      if (!olympusLightningWarp || player.isDead) return;
+      sound.playTeleport();
+      camera.position.x = -camera.position.x * 0.9;
+      camera.position.z = -camera.position.z * 0.9;
+      player.velocity.set(0, 3, 0);
+      showToast('⚡ [OLYMPUS] 제우스 번개 퀀텀 텔레포트 발동! (LIGHTNING WARP)');
+    }
+
+    function triggerMatrixCodeDash() {
+      if (!matrixCodeDash || player.isDead) return;
+      sound.playDash();
+      player.velocity.x = (camera.position.x > 0) ? -34.0 : 34.0;
+      player.velocity.y = 3.2;
+      player.isGrounded = false;
+      showToast('💻 [MATRIX] 디지털 글리치 코드 터널 초광속 대시! (CODE DASH)');
+    }
+
     function triggerColosseumLift() {
       if (!colosseumLift || player.isDead) return;
       sound.playDoorSlide();
@@ -6789,6 +6877,12 @@
       zenWindChime = null;
       reactorCoolantVent = null;
       horizonJetPlatform = null;
+      valhallaValkyrieFlight = null;
+      shangrilaWindGlider = null;
+      atlantisTritonGeyser = null;
+      titanMethaneGeyser = null;
+      olympusLightningWarp = null;
+      matrixCodeDash = null;
 
       if (lotusDoor && lotusDoor.mesh) {
         scene.remove(lotusDoor.mesh);
@@ -7515,6 +7609,84 @@
         sunLight.position.set(20, 95, 20);
         scene.fog.color.setHex(0x0891b2);
         scene.fog.density = 0.0055;
+      } else if (mapKey === 'valhalla') {
+        // Nordic Viking Fortress / Frosty Aurora Borealis & Runic Stone Mist
+        grad.addColorStop(0, '#030712');
+        grad.addColorStop(0.35, '#1e293b');
+        grad.addColorStop(0.7, '#475569');
+        grad.addColorStop(1, '#94a3b8');
+        ambientLight.color.setHex(0x94a3b8);
+        ambientLight.intensity = 1.15;
+        sunLight.color.setHex(0x38bdf8);
+        sunLight.intensity = 1.6;
+        sunLight.position.set(-30, 85, 30);
+        scene.fog.color.setHex(0x1e293b);
+        scene.fog.density = 0.007;
+      } else if (mapKey === 'shangrila') {
+        // Himalayan Sky Temple / Crystal Glacier Snow & Golden Serenity
+        grad.addColorStop(0, '#082f49');
+        grad.addColorStop(0.35, '#0284c7');
+        grad.addColorStop(0.7, '#38bdf8');
+        grad.addColorStop(1, '#fef08a');
+        ambientLight.color.setHex(0xfef08a);
+        ambientLight.intensity = 1.35;
+        sunLight.color.setHex(0xffedd5);
+        sunLight.intensity = 1.8;
+        sunLight.position.set(30, 95, -20);
+        scene.fog.color.setHex(0x0369a1);
+        scene.fog.density = 0.006;
+      } else if (mapKey === 'atlantis') {
+        // Submerged Sunken Palace / Bioluminescent Deep Aquamarine & Coral Glow
+        grad.addColorStop(0, '#020617');
+        grad.addColorStop(0.35, '#083344');
+        grad.addColorStop(0.7, '#0891b2');
+        grad.addColorStop(1, '#22d3ee');
+        ambientLight.color.setHex(0x67e8f9);
+        ambientLight.intensity = 1.2;
+        sunLight.color.setHex(0x06b6d4);
+        sunLight.intensity = 1.65;
+        sunLight.position.set(0, 85, 0);
+        scene.fog.color.setHex(0x083344);
+        scene.fog.density = 0.008;
+      } else if (mapKey === 'titan') {
+        // Saturn Moon Titan / Golden Photochemical Smog & Liquid Methane Lake
+        grad.addColorStop(0, '#451a03');
+        grad.addColorStop(0.35, '#78350f');
+        grad.addColorStop(0.7, '#d97706');
+        grad.addColorStop(1, '#fde047');
+        ambientLight.color.setHex(0xfde047);
+        ambientLight.intensity = 1.25;
+        sunLight.color.setHex(0xfbbf24);
+        sunLight.intensity = 1.7;
+        sunLight.position.set(-25, 90, 25);
+        scene.fog.color.setHex(0x78350f);
+        scene.fog.density = 0.007;
+      } else if (mapKey === 'olympus') {
+        // Mount Olympus Divine Clouds / Heavenly Magenta-Gold Cloudscape
+        grad.addColorStop(0, '#4a044e');
+        grad.addColorStop(0.35, '#831843');
+        grad.addColorStop(0.7, '#e11d48');
+        grad.addColorStop(1, '#fef08a');
+        ambientLight.color.setHex(0xfef08a);
+        ambientLight.intensity = 1.3;
+        sunLight.color.setHex(0xffd700);
+        sunLight.intensity = 1.85;
+        sunLight.position.set(20, 95, 20);
+        scene.fog.color.setHex(0x831843);
+        scene.fog.density = 0.006;
+      } else if (mapKey === 'matrix') {
+        // Digital Quantum Matrix / Pitch Black Terminal & Phosphor Cyber Green
+        grad.addColorStop(0, '#000000');
+        grad.addColorStop(0.35, '#052e16');
+        grad.addColorStop(0.7, '#15803d');
+        grad.addColorStop(1, '#4ade80');
+        ambientLight.color.setHex(0x86efac);
+        ambientLight.intensity = 1.2;
+        sunLight.color.setHex(0x22c55e);
+        sunLight.intensity = 1.65;
+        sunLight.position.set(0, 90, 0);
+        scene.fog.color.setHex(0x052e16);
+        scene.fog.density = 0.0085;
       } else {
         // Range: High-tech military hangar
         grad.addColorStop(0, '#080c10');
@@ -10954,6 +11126,294 @@
         addPlatform(0, 0, 42, 42, 0.5, 16, matLagoonDeck);
         addPlatform(0, 0, -42, 42, 0.5, 16, matLagoonDeck);
       }
+      else if (mapKey === 'valhalla') {
+        // ==========================================================
+        // MAP 48: VALHALLA (발할라) - 바이킹 성채 & 발키리 룬 비행 [F]
+        // ==========================================================
+        const matNorseStone = new THREE.MeshStandardMaterial({ color: 0x334155, roughness: 0.85 });
+        const matVikingWood = new THREE.MeshStandardMaterial({ color: 0x451a03, roughness: 0.8 });
+        const matRuneBlue = new THREE.MeshBasicMaterial({ color: 0x38bdf8 });
+        const matGlacierCliff = new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.7 });
+
+        addBox(0, -0.5, 0, 116, 1, 116, matNorseStone);
+        addBox(0, 7, -58, 116, 14, 2, matGlacierCliff);
+        addBox(0, 7, 58, 116, 14, 2, matGlacierCliff);
+        addBox(-58, 7, 0, 2, 14, 116, matGlacierCliff);
+        addBox(58, 7, 0, 2, 14, 116, matGlacierCliff);
+
+        // Center Valkyrie Rune Altar at (0, 0.2, 0)
+        const runeAltar = addPlatform(0, 0, 0, 7, 0.4, 7, matRuneBlue, true);
+        const runeStone1 = addPillar(-3.2, 0, 0, 0.6, 7.0, matNorseStone);
+        const runeStone2 = addPillar(3.2, 0, 0, 0.6, 7.0, matNorseStone);
+
+        addTextBillboard(0, 2.6, 0, '[F] 발키리 룬 상승 비행 (VALKYRIE FLIGHT)', 1.5, '#94a3b8');
+        valhallaValkyrieFlight = { pos: new THREE.Vector3(0, 0.2, 0), mesh: runeAltar };
+
+        addPlatform(0, 0, 14, 12, 3.8, 4, matVikingWood);
+        addPlatform(0, 0, -14, 12, 3.8, 4, matVikingWood);
+
+        // A SITE: LONGHOUSE GREAT HALL
+        addPlatform(30, 0, -20, 24, 0.5, 24, matSiteFloor);
+        spikeSiteAreas.push({ minX: 18, maxX: 42, minZ: -32, maxZ: -8, name: 'A SITE' });
+        addBox(30, 4.0, -20, 4, 8.0, 4, matVikingWood);
+        addPlatform(36, 0, -32, 12, 4.0, 10, matNorseStone);
+        addRailing(29.9, 4.0, -32, 10, 'z');
+        addStairs(36, -14, 0, 3.8, 4.0, 12, 12, 'z-');
+        addCrateStack(24, -20, 2.4);
+
+        // B SITE: MEAD ARMORY
+        addPlatform(-30, 0, -20, 24, 0.5, 24, matSiteFloor);
+        spikeSiteAreas.push({ minX: -42, maxX: -18, minZ: -32, maxZ: -8, name: 'B SITE' });
+        addBox(-30, 3.5, -20, 4, 7.0, 4, matVikingWood);
+        addPlatform(-36, 0, -32, 12, 4.0, 10, matNorseStone);
+        addRailing(-29.9, 4.0, -32, 10, 'z');
+        addStairs(-36, -14, 0, 3.8, 4.0, 12, 12, 'z-');
+        addCrateStack(-22, -20, 2.4);
+
+        addPlatform(0, 0, 42, 42, 0.5, 16, matNorseStone);
+        addPlatform(0, 0, -42, 42, 0.5, 16, matNorseStone);
+      }
+      else if (mapKey === 'shangrila') {
+        // ==========================================================
+        // MAP 49: SHANGRILA (샹그릴라) - 히말라야 설산 누각 & 바람의 깃발 [F]
+        // ==========================================================
+        const matPeakSnow = new THREE.MeshStandardMaterial({ color: 0xf8fafc, roughness: 0.2 });
+        const matTempleTimber = new THREE.MeshStandardMaterial({ color: 0x78350f, roughness: 0.7 });
+        const matGoldenRoof = new THREE.MeshStandardMaterial({ color: 0xfde047, metalness: 0.9, roughness: 0.1 });
+        const matWindCyan = new THREE.MeshBasicMaterial({ color: 0x38bdf8 });
+
+        addBox(0, -0.5, 0, 116, 1, 116, matPeakSnow);
+        addBox(0, 7, -58, 116, 14, 2, matTempleTimber);
+        addBox(0, 7, 58, 116, 14, 2, matTempleTimber);
+        addBox(-58, 7, 0, 2, 14, 116, matTempleTimber);
+        addBox(58, 7, 0, 2, 14, 116, matTempleTimber);
+
+        // Center Wind Glider Launchpad at (0, 0.2, 0)
+        const gliderPad = addPlatform(0, 0, 0, 6, 0.4, 22, matWindCyan, true);
+        const pagodaRoof = new THREE.Mesh(new THREE.ConeGeometry(5.0, 2.5, 4), matGoldenRoof);
+        pagodaRoof.position.set(0, 9.5, 0);
+        scene.add(pagodaRoof);
+        mapObjects.push(pagodaRoof);
+
+        addTextBillboard(0, 2.6, 0, '[F] 설산 바람의 기도 깃발 활강 (WIND GLIDER)', 1.5, '#fef08a');
+        shangrilaWindGlider = { pos: new THREE.Vector3(0, 0.2, 0), mesh: gliderPad };
+
+        addPlatform(0, 0, 14, 12, 3.8, 4, matTempleTimber);
+        addPlatform(0, 0, -14, 12, 3.8, 4, matTempleTimber);
+
+        // A SITE: SERENE PAGODA
+        addPlatform(30, 0, -20, 24, 0.5, 24, matSiteFloor);
+        spikeSiteAreas.push({ minX: 18, maxX: 42, minZ: -32, maxZ: -8, name: 'A SITE' });
+        addBox(30, 4.0, -20, 4, 8.0, 4, matTempleTimber);
+        addPlatform(36, 0, -32, 12, 4.0, 10, matPeakSnow);
+        addRailing(29.9, 4.0, -32, 10, 'z');
+        addStairs(36, -14, 0, 3.8, 4.0, 12, 12, 'z-');
+        addCrateStack(24, -20, 2.4);
+
+        // B SITE: MONASTERY BELL
+        addPlatform(-30, 0, -20, 24, 0.5, 24, matSiteFloor);
+        spikeSiteAreas.push({ minX: -42, maxX: -18, minZ: -32, maxZ: -8, name: 'B SITE' });
+        addBox(-30, 3.5, -20, 4, 7.0, 4, matTempleTimber);
+        addPlatform(-36, 0, -32, 12, 4.0, 10, matPeakSnow);
+        addRailing(-29.9, 4.0, -32, 10, 'z');
+        addStairs(-36, -14, 0, 3.8, 4.0, 12, 12, 'z-');
+        addCrateStack(-22, -20, 2.4);
+
+        addPlatform(0, 0, 42, 42, 0.5, 16, matPeakSnow);
+        addPlatform(0, 0, -42, 42, 0.5, 16, matPeakSnow);
+      }
+      else if (mapKey === 'atlantis') {
+        // ==========================================================
+        // MAP 50: ATLANTIS (아틀란티스) - 고대 수중 궁전 & 포세이돈 간헐천 [F]
+        // ==========================================================
+        const matCoralMarble = new THREE.MeshStandardMaterial({ color: 0x083344, roughness: 0.3 });
+        const matSunkenGold = new THREE.MeshStandardMaterial({ color: 0x22d3ee, metalness: 0.9, roughness: 0.1 });
+        const matGeyserBlue = new THREE.MeshBasicMaterial({ color: 0x06b6d4 });
+        const matAquiferWall = new THREE.MeshStandardMaterial({ color: 0x020617, roughness: 0.8 });
+
+        addBox(0, -0.5, 0, 116, 1, 116, matCoralMarble);
+        addBox(0, 7, -58, 116, 14, 2, matAquiferWall);
+        addBox(0, 7, 58, 116, 14, 2, matAquiferWall);
+        addBox(-58, 7, 0, 2, 14, 116, matAquiferWall);
+        addBox(58, 7, 0, 2, 14, 116, matAquiferWall);
+
+        // Center Triton Geyser Fountain at (0, 0.2, 0)
+        const geyserPad = addPlatform(0, 0, 0, 7, 0.4, 7, matGeyserBlue, true);
+        const tritonPillar = addPillar(0, 0, 0, 0.8, 8.0, matSunkenGold);
+
+        addTextBillboard(0, 2.6, 0, '[F] 포세이돈 수류 간헐천 (TRITON GEYSER)', 1.5, '#67e8f9');
+        atlantisTritonGeyser = { pos: new THREE.Vector3(0, 0.2, 0), mesh: geyserPad };
+
+        addPlatform(0, 0, 14, 12, 3.8, 4, matCoralMarble);
+        addPlatform(0, 0, -14, 12, 3.8, 4, matCoralMarble);
+
+        // A SITE: TRIDENT SANCTUARY
+        addPlatform(30, 0, -20, 24, 0.5, 24, matSiteFloor);
+        spikeSiteAreas.push({ minX: 18, maxX: 42, minZ: -32, maxZ: -8, name: 'A SITE' });
+        addBox(30, 4.0, -20, 4, 8.0, 4, matCoralMarble);
+        addPlatform(36, 0, -32, 12, 4.0, 10, matAquiferWall);
+        addRailing(29.9, 4.0, -32, 10, 'z');
+        addStairs(36, -14, 0, 3.8, 4.0, 12, 12, 'z-');
+        addCrateStack(24, -20, 2.4);
+
+        // B SITE: SUNKEN VAULT
+        addPlatform(-30, 0, -20, 24, 0.5, 24, matSiteFloor);
+        spikeSiteAreas.push({ minX: -42, maxX: -18, minZ: -32, maxZ: -8, name: 'B SITE' });
+        addBox(-30, 3.5, -20, 4, 7.0, 4, matCoralMarble);
+        addPlatform(-36, 0, -32, 12, 4.0, 10, matAquiferWall);
+        addRailing(-29.9, 4.0, -32, 10, 'z');
+        addStairs(-36, -14, 0, 3.8, 4.0, 12, 12, 'z-');
+        addCrateStack(-22, -20, 2.4);
+
+        addPlatform(0, 0, 42, 42, 0.5, 16, matCoralMarble);
+        addPlatform(0, 0, -42, 42, 0.5, 16, matCoralMarble);
+      }
+      else if (mapKey === 'titan') {
+        // ==========================================================
+        // MAP 51: TITAN (타이탄) - 토성 위성 메탄 호수 & 로켓 도약 [F]
+        // ==========================================================
+        const matMethaneSoil = new THREE.MeshStandardMaterial({ color: 0x78350f, roughness: 0.95 });
+        const matCryoRig = new THREE.MeshStandardMaterial({ color: 0x334155, metalness: 0.85 });
+        const matMethaneYellow = new THREE.MeshBasicMaterial({ color: 0xfde047 });
+        const matDrillPlatform = new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.4 });
+
+        addBox(0, -0.5, 0, 116, 1, 116, matMethaneSoil);
+        addBox(0, 7, -58, 116, 14, 2, matCryoRig);
+        addBox(0, 7, 58, 116, 14, 2, matCryoRig);
+        addBox(-58, 7, 0, 2, 14, 116, matCryoRig);
+        addBox(58, 7, 0, 2, 14, 116, matCryoRig);
+
+        // Center Methane Geyser Vent at (0, 0.2, 0)
+        const geyserVent = addPlatform(0, 0, 0, 7, 0.4, 7, matMethaneYellow, true);
+        const cryoPipes = new THREE.Mesh(new THREE.TorusGeometry(3.2, 0.35, 8, 20), matCryoRig);
+        cryoPipes.rotation.x = Math.PI / 2;
+        cryoPipes.position.set(0, 0.8, 0);
+        scene.add(cryoPipes);
+        mapObjects.push(cryoPipes);
+
+        addTextBillboard(0, 2.6, 0, '[F] 메탄 제트 로켓 도약 (METHANE ROCKET)', 1.5, '#fde047');
+        titanMethaneGeyser = { pos: new THREE.Vector3(0, 0.2, 0), mesh: geyserVent };
+
+        addPlatform(0, 0, 14, 12, 3.8, 4, matDrillPlatform);
+        addPlatform(0, 0, -14, 12, 3.8, 4, matDrillPlatform);
+
+        // A SITE: EXTRACTION TOWER
+        addPlatform(30, 0, -20, 24, 0.5, 24, matSiteFloor);
+        spikeSiteAreas.push({ minX: 18, maxX: 42, minZ: -32, maxZ: -8, name: 'A SITE' });
+        addBox(30, 4.0, -20, 4, 8.0, 4, matCryoRig);
+        addPlatform(36, 0, -32, 12, 4.0, 10, matMethaneSoil);
+        addRailing(29.9, 4.0, -32, 10, 'z');
+        addStairs(36, -14, 0, 3.8, 4.0, 12, 12, 'z-');
+        addCrateStack(24, -20, 2.4);
+
+        // B SITE: LIQUEFACTION PLANT
+        addPlatform(-30, 0, -20, 24, 0.5, 24, matSiteFloor);
+        spikeSiteAreas.push({ minX: -42, maxX: -18, minZ: -32, maxZ: -8, name: 'B SITE' });
+        addBox(-30, 3.5, -20, 4, 7.0, 4, matCryoRig);
+        addPlatform(-36, 0, -32, 12, 4.0, 10, matMethaneSoil);
+        addRailing(-29.9, 4.0, -32, 10, 'z');
+        addStairs(-36, -14, 0, 3.8, 4.0, 12, 12, 'z-');
+        addCrateStack(-22, -20, 2.4);
+
+        addPlatform(0, 0, 42, 42, 0.5, 16, matMethaneSoil);
+        addPlatform(0, 0, -42, 42, 0.5, 16, matMethaneSoil);
+      }
+      else if (mapKey === 'olympus') {
+        // ==========================================================
+        // MAP 52: OLYMPUS (올림포스) - 판테온 공중 신전 & 제우스 번개 [F]
+        // ==========================================================
+        const matPantheonMarble = new THREE.MeshStandardMaterial({ color: 0xfdf4ff, roughness: 0.15 });
+        const matZeusGold = new THREE.MeshStandardMaterial({ color: 0xfde047, metalness: 0.95, roughness: 0.1 });
+        const matCloudPlinth = new THREE.MeshStandardMaterial({ color: 0x831843, roughness: 0.6 });
+        const matLightningFlash = new THREE.MeshBasicMaterial({ color: 0xfffbeb });
+
+        addBox(0, -0.5, 0, 116, 1, 116, matPantheonMarble);
+        addBox(0, 7, -58, 116, 14, 2, matCloudPlinth);
+        addBox(0, 7, 58, 116, 14, 2, matCloudPlinth);
+        addBox(-58, 7, 0, 2, 14, 116, matCloudPlinth);
+        addBox(58, 7, 0, 2, 14, 116, matCloudPlinth);
+
+        // Center Zeus Lightning Altar at (0, 0.2, 0)
+        const lightningPad = addPlatform(0, 0, 0, 7, 0.4, 7, matLightningFlash, true);
+        const col1 = addPillar(-3.0, 0, -3.0, 0.6, 9.0, matPantheonMarble);
+        const col2 = addPillar(3.0, 0, -3.0, 0.6, 9.0, matPantheonMarble);
+        const col3 = addPillar(-3.0, 0, 3.0, 0.6, 9.0, matPantheonMarble);
+        const col4 = addPillar(3.0, 0, 3.0, 0.6, 9.0, matPantheonMarble);
+
+        addTextBillboard(0, 2.6, 0, '[F] 제우스 번개 퀀텀 텔레포트 (LIGHTNING WARP)', 1.5, '#fef08a');
+        olympusLightningWarp = { pos: new THREE.Vector3(0, 0.2, 0), mesh: lightningPad };
+
+        addPlatform(0, 0, 14, 12, 3.8, 4, matPantheonMarble);
+        addPlatform(0, 0, -14, 12, 3.8, 4, matPantheonMarble);
+
+        // A SITE: ATHENA TEMPLE
+        addPlatform(30, 0, -20, 24, 0.5, 24, matSiteFloor);
+        spikeSiteAreas.push({ minX: 18, maxX: 42, minZ: -32, maxZ: -8, name: 'A SITE' });
+        addBox(30, 4.0, -20, 4, 8.0, 4, matZeusGold);
+        addPlatform(36, 0, -32, 12, 4.0, 10, matPantheonMarble);
+        addRailing(29.9, 4.0, -32, 10, 'z');
+        addStairs(36, -14, 0, 3.8, 4.0, 12, 12, 'z-');
+        addCrateStack(24, -20, 2.4);
+
+        // B SITE: ARES ARMORY
+        addPlatform(-30, 0, -20, 24, 0.5, 24, matSiteFloor);
+        spikeSiteAreas.push({ minX: -42, maxX: -18, minZ: -32, maxZ: -8, name: 'B SITE' });
+        addBox(-30, 3.5, -20, 4, 7.0, 4, matZeusGold);
+        addPlatform(-36, 0, -32, 12, 4.0, 10, matPantheonMarble);
+        addRailing(-29.9, 4.0, -32, 10, 'z');
+        addStairs(-36, -14, 0, 3.8, 4.0, 12, 12, 'z-');
+        addCrateStack(-22, -20, 2.4);
+
+        addPlatform(0, 0, 42, 42, 0.5, 16, matPantheonMarble);
+        addPlatform(0, 0, -42, 42, 0.5, 16, matPantheonMarble);
+      }
+      else if (mapKey === 'matrix') {
+        // ==========================================================
+        // MAP 53: MATRIX (매트릭스) - 가상현실 데이터 정글 & 코드 터널 [F]
+        // ==========================================================
+        const matGridFloor = new THREE.MeshStandardMaterial({ color: 0x052e16, roughness: 0.1, metalness: 0.8 });
+        const matCyberBlock = new THREE.MeshStandardMaterial({ color: 0x14532d, roughness: 0.5, metalness: 0.7 });
+        const matLimeCode = new THREE.MeshBasicMaterial({ color: 0x4ade80 });
+        const matVoidBorder = new THREE.MeshStandardMaterial({ color: 0x000000, roughness: 0.9 });
+
+        addBox(0, -0.5, 0, 116, 1, 116, matGridFloor);
+        addBox(0, 7, -58, 116, 14, 2, matVoidBorder);
+        addBox(0, 7, 58, 116, 14, 2, matVoidBorder);
+        addBox(-58, 7, 0, 2, 14, 116, matVoidBorder);
+        addBox(58, 7, 0, 2, 14, 116, matVoidBorder);
+
+        // Center Digital Code Tunnel at (0, 0.2, 0)
+        const codePad = addPlatform(0, 0, 0, 24, 0.3, 5, matLimeCode, true);
+        const codeArch1 = addBox(0, 4.0, -3.0, 26, 0.5, 0.5, matLimeCode);
+        const codeArch2 = addBox(0, 4.0, 3.0, 26, 0.5, 0.5, matLimeCode);
+
+        addTextBillboard(0, 2.6, 0, '[F] 디지털 글리치 코드 터널 (CODE DASH)', 1.5, '#86efac');
+        matrixCodeDash = { pos: new THREE.Vector3(0, 0.2, 0), mesh: codePad };
+
+        addPlatform(0, 0, 14, 12, 3.8, 4, matCyberBlock);
+        addPlatform(0, 0, -14, 12, 3.8, 4, matCyberBlock);
+
+        // A SITE: MAINFRAME CORE
+        addPlatform(30, 0, -20, 24, 0.5, 24, matSiteFloor);
+        spikeSiteAreas.push({ minX: 18, maxX: 42, minZ: -32, maxZ: -8, name: 'A SITE' });
+        addBox(30, 4.0, -20, 4, 8.0, 4, matCyberBlock);
+        addPlatform(36, 0, -32, 12, 4.0, 10, matGridFloor);
+        addRailing(29.9, 4.0, -32, 10, 'z');
+        addStairs(36, -14, 0, 3.8, 4.0, 12, 12, 'z-');
+        addCrateStack(24, -20, 2.4);
+
+        // B SITE: NEURAL BUS
+        addPlatform(-30, 0, -20, 24, 0.5, 24, matSiteFloor);
+        spikeSiteAreas.push({ minX: -42, maxX: -18, minZ: -32, maxZ: -8, name: 'B SITE' });
+        addBox(-30, 3.5, -20, 4, 7.0, 4, matCyberBlock);
+        addPlatform(-36, 0, -32, 12, 4.0, 10, matGridFloor);
+        addRailing(-29.9, 4.0, -32, 10, 'z');
+        addStairs(-36, -14, 0, 3.8, 4.0, 12, 12, 'z-');
+        addCrateStack(-22, -20, 2.4);
+
+        addPlatform(0, 0, 42, 42, 0.5, 16, matGridFloor);
+        addPlatform(0, 0, -42, 42, 0.5, 16, matGridFloor);
+      }
       else if (mapKey === 'range') {
         addBox(0, -0.5, 0, 60, 1, 120, matConcrete);
         addBox(0, 7, -60, 60, 14, 2, matWallStone);
@@ -13428,6 +13888,60 @@
         }
       }
 
+      // 44. Valhalla Valkyrie Flight [F]
+      if (MAP_LIST[currentMapIndex] === 'valhalla' && valhallaValkyrieFlight) {
+        const pPos = camera.position;
+        if (pPos.distanceTo(valhallaValkyrieFlight.pos) < 5.0) {
+          triggerValhallaValkyrieFlight();
+          return;
+        }
+      }
+
+      // 45. Shangrila Wind Glider [F]
+      if (MAP_LIST[currentMapIndex] === 'shangrila' && shangrilaWindGlider) {
+        const pPos = camera.position;
+        if (pPos.distanceTo(shangrilaWindGlider.pos) < 5.0) {
+          triggerShangrilaWindGlider();
+          return;
+        }
+      }
+
+      // 46. Atlantis Triton Geyser [F]
+      if (MAP_LIST[currentMapIndex] === 'atlantis' && atlantisTritonGeyser) {
+        const pPos = camera.position;
+        if (pPos.distanceTo(atlantisTritonGeyser.pos) < 5.0) {
+          triggerAtlantisTritonGeyser();
+          return;
+        }
+      }
+
+      // 47. Titan Methane Geyser [F]
+      if (MAP_LIST[currentMapIndex] === 'titan' && titanMethaneGeyser) {
+        const pPos = camera.position;
+        if (pPos.distanceTo(titanMethaneGeyser.pos) < 5.0) {
+          triggerTitanMethaneGeyser();
+          return;
+        }
+      }
+
+      // 48. Olympus Lightning Warp [F]
+      if (MAP_LIST[currentMapIndex] === 'olympus' && olympusLightningWarp) {
+        const pPos = camera.position;
+        if (pPos.distanceTo(olympusLightningWarp.pos) < 5.0) {
+          triggerOlympusLightningWarp();
+          return;
+        }
+      }
+
+      // 49. Matrix Code Dash [F]
+      if (MAP_LIST[currentMapIndex] === 'matrix' && matrixCodeDash) {
+        const pPos = camera.position;
+        if (pPos.distanceTo(matrixCodeDash.pos) < 5.0) {
+          triggerMatrixCodeDash();
+          return;
+        }
+      }
+
       // 4. Ascent B Shutter Door
       if (!ascentDoor || ascentDoor.isDestroyed) return;
       const dist = camera.position.distanceTo(ascentDoor.switchPos);
@@ -14961,6 +15475,66 @@
         { label: 'DEF SPAWN', x: 0, z: -42, color: '#00ffaa' },
         { label: 'ATK SPAWN', x: 0, z: 42, color: '#ff4655' }
       ],
+      valhalla: [
+        { label: 'A SITE', x: 30, z: -20, color: '#38bdf8' },
+        { label: 'LONGHOUSE', x: 30, z: -20, color: '#0284c7' },
+        { label: 'B SITE', x: -30, z: -20, color: '#38bdf8' },
+        { label: 'MEAD ARMORY', x: -30, z: -20, color: '#0369a1' },
+        { label: 'VALKYRIE [F]', x: 0, z: 0, color: '#94a3b8' },
+        { label: 'RUNIC MID', x: 0, z: 0, color: '#1e293b' },
+        { label: 'DEF SPAWN', x: 0, z: -42, color: '#00ffaa' },
+        { label: 'ATK SPAWN', x: 0, z: 42, color: '#ff4655' }
+      ],
+      shangrila: [
+        { label: 'A SITE', x: 30, z: -20, color: '#fde047' },
+        { label: 'SERENE PAGODA', x: 30, z: -20, color: '#eab308' },
+        { label: 'B SITE', x: -30, z: -20, color: '#fde047' },
+        { label: 'MONASTERY', x: -30, z: -20, color: '#ca8a04' },
+        { label: 'WIND GLIDER [F]', x: 0, z: 0, color: '#fef08a' },
+        { label: 'PRAYER MID', x: 0, z: 0, color: '#78350f' },
+        { label: 'DEF SPAWN', x: 0, z: -42, color: '#00ffaa' },
+        { label: 'ATK SPAWN', x: 0, z: 42, color: '#ff4655' }
+      ],
+      atlantis: [
+        { label: 'A SITE', x: 30, z: -20, color: '#22d3ee' },
+        { label: 'TRIDENT TEMPLE', x: 30, z: -20, color: '#06b6d4' },
+        { label: 'B SITE', x: -30, z: -20, color: '#22d3ee' },
+        { label: 'SUNKEN VAULT', x: -30, z: -20, color: '#0891b2' },
+        { label: 'GEYSER [F]', x: 0, z: 0, color: '#67e8f9' },
+        { label: 'CORAL MID', x: 0, z: 0, color: '#083344' },
+        { label: 'DEF SPAWN', x: 0, z: -42, color: '#00ffaa' },
+        { label: 'ATK SPAWN', x: 0, z: 42, color: '#ff4655' }
+      ],
+      titan: [
+        { label: 'A SITE', x: 30, z: -20, color: '#fde047' },
+        { label: 'EXTRACTION TOWER', x: 30, z: -20, color: '#eab308' },
+        { label: 'B SITE', x: -30, z: -20, color: '#fde047' },
+        { label: 'METHANE PLANT', x: -30, z: -20, color: '#ca8a04' },
+        { label: 'METHANE ROCKET [F]', x: 0, z: 0, color: '#fde047' },
+        { label: 'CRYO LAKE MID', x: 0, z: 0, color: '#78350f' },
+        { label: 'DEF SPAWN', x: 0, z: -42, color: '#00ffaa' },
+        { label: 'ATK SPAWN', x: 0, z: 42, color: '#ff4655' }
+      ],
+      olympus: [
+        { label: 'A SITE', x: 30, z: -20, color: '#fde047' },
+        { label: 'ATHENA TEMPLE', x: 30, z: -20, color: '#eab308' },
+        { label: 'B SITE', x: -30, z: -20, color: '#fde047' },
+        { label: 'ARES ARMORY', x: -30, z: -20, color: '#ca8a04' },
+        { label: 'LIGHTNING [F]', x: 0, z: 0, color: '#fef08a' },
+        { label: 'CLOUD MID', x: 0, z: 0, color: '#831843' },
+        { label: 'DEF SPAWN', x: 0, z: -42, color: '#00ffaa' },
+        { label: 'ATK SPAWN', x: 0, z: 42, color: '#ff4655' }
+      ],
+      matrix: [
+        { label: 'A SITE', x: 30, z: -20, color: '#4ade80' },
+        { label: 'MAINFRAME', x: 30, z: -20, color: '#22c55e' },
+        { label: 'B SITE', x: -30, z: -20, color: '#4ade80' },
+        { label: 'NEURAL BUS', x: -30, z: -20, color: '#16a34a' },
+        { label: 'CODE DASH [F]', x: 0, z: 0, color: '#86efac' },
+        { label: 'CYBER MID', x: 0, z: 0, color: '#052e16' },
+        { label: 'DEF SPAWN', x: 0, z: -42, color: '#00ffaa' },
+        { label: 'ATK SPAWN', x: 0, z: 42, color: '#ff4655' }
+      ],
       range: [
         { label: 'TARGETS', x: 0, z: -22, color: '#00f0ff' },
         { label: 'BENCH', x: 0, z: 0, color: '#ffc83b' },
@@ -15708,6 +16282,48 @@
               triggerHorizonJetPlatform();
             }
           }
+
+          // Auto-launch when stepping onto Valhalla Valkyrie Flight
+          if (MAP_LIST[currentMapIndex] === 'valhalla' && valhallaValkyrieFlight && !player.isDead) {
+            if (Math.abs(camera.position.x) < 3.5 && Math.abs(camera.position.z) < 3.5 && Math.abs(camera.position.y - 1.7) < 1.2) {
+              if (player.velocity.y <= 0) triggerValhallaValkyrieFlight();
+            }
+          }
+
+          // Auto-launch when stepping onto Shangrila Wind Glider
+          if (MAP_LIST[currentMapIndex] === 'shangrila' && shangrilaWindGlider && !player.isDead) {
+            if (Math.abs(camera.position.x) < 3.0 && Math.abs(camera.position.z) < 11.0 && Math.abs(camera.position.y - 1.7) < 1.0) {
+              triggerShangrilaWindGlider();
+            }
+          }
+
+          // Auto-launch when stepping onto Atlantis Triton Geyser
+          if (MAP_LIST[currentMapIndex] === 'atlantis' && atlantisTritonGeyser && !player.isDead) {
+            if (Math.abs(camera.position.x) < 3.5 && Math.abs(camera.position.z) < 3.5 && Math.abs(camera.position.y - 1.7) < 1.2) {
+              if (player.velocity.y <= 0) triggerAtlantisTritonGeyser();
+            }
+          }
+
+          // Auto-launch when stepping onto Titan Methane Geyser
+          if (MAP_LIST[currentMapIndex] === 'titan' && titanMethaneGeyser && !player.isDead) {
+            if (Math.abs(camera.position.x) < 3.5 && Math.abs(camera.position.z) < 3.5 && Math.abs(camera.position.y - 1.7) < 1.2) {
+              if (player.velocity.y <= 0) triggerTitanMethaneGeyser();
+            }
+          }
+
+          // Auto-launch when stepping onto Olympus Lightning Warp
+          if (MAP_LIST[currentMapIndex] === 'olympus' && olympusLightningWarp && !player.isDead) {
+            if (Math.abs(camera.position.x) < 3.5 && Math.abs(camera.position.z) < 3.5 && Math.abs(camera.position.y - 1.7) < 1.2) {
+              triggerOlympusLightningWarp();
+            }
+          }
+
+          // Auto-launch when stepping onto Matrix Code Dash
+          if (MAP_LIST[currentMapIndex] === 'matrix' && matrixCodeDash && !player.isDead) {
+            if (Math.abs(camera.position.x) < 12.0 && Math.abs(camera.position.z) < 2.5 && Math.abs(camera.position.y - 1.7) < 1.0) {
+              triggerMatrixCodeDash();
+            }
+          }
         }
 
         const speedRatio = Math.min(player.velocity.length() / player.speed, 1.2);
@@ -16080,6 +16696,11 @@
             }
             e.mesh.rotation.y = THREE.MathUtils.lerp(e.mesh.rotation.y, targetBotYaw, Math.min(1, 10 * dt));
 
+            // Smooth bot velocity damping & natural turning pause
+            e.curSpeed = e.curSpeed || 0;
+            const targetBotSpeed = 2.2 * botSpeedMult;
+            e.curSpeed = THREE.MathUtils.lerp(e.curSpeed, targetBotSpeed, Math.min(1, 8 * dt));
+
             if (isSweep) {
               const zDir = (e.mesh.position.z > 0) ? -1 : 1;
               e.mesh.position.z += zDir * 1.5 * botSpeedMult * dt;
@@ -16087,8 +16708,14 @@
           });
           teammatesList.forEach(t => {
             if (t.isDead) return;
-            t.mesh.position.x += t.patrolDir * 1.8 * botSpeedMult * dt;
-            if (Math.abs(t.mesh.position.x) > 25) t.patrolDir *= -1;
+            t.curSpeed = t.curSpeed || 0;
+            const targetTeamSpeed = 1.8 * botSpeedMult;
+            t.curSpeed = THREE.MathUtils.lerp(t.curSpeed, targetTeamSpeed, Math.min(1, 8 * dt));
+            t.mesh.position.x += t.patrolDir * t.curSpeed * dt;
+            if (Math.abs(t.mesh.position.x) > 25) {
+              t.patrolDir *= -1;
+              t.curSpeed = 0;
+            }
             // Smooth teammate walking animation & orientation
             const walkCycleT = Math.sin(now * 0.008 * 5.5);
             if (t.legs && t.legs.length === 2) {
