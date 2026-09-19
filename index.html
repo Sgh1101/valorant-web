@@ -8540,34 +8540,64 @@
       if (e.code === 'Tab') showScoreboard(false);
     });
 
-    // Global Click Handler to Acquire Pointer Lock from Anywhere in Game Canvas
+    // Global & Canvas Click / PointerDown Handlers to Acquire Pointer Lock Instantly
+    function tryAcquirePointerLock() {
+      if (isPlayerControlActive() && !isPointerLocked) {
+        requestGamePointerLock();
+      }
+    }
+
     window.addEventListener('click', (e) => {
       if (e.target.closest('button, input, select, textarea, .modal, .val-btn, #chat-container, #radio-wheel-modal, .weapon-card, .map-card, .agent-card, .ch-preset-btn, .skin-btn')) {
         return;
       }
-      if (isPlayerControlActive() && !isPointerLocked) {
-        requestGamePointerLock();
-      }
+      tryAcquirePointerLock();
     });
+
+    if (canvas) {
+      canvas.addEventListener('click', tryAcquirePointerLock);
+      canvas.addEventListener('pointerdown', tryAcquirePointerLock);
+    }
 
     const clickPrompt = document.getElementById('click-to-play-prompt');
     if (clickPrompt) {
       clickPrompt.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        requestGamePointerLock();
+      });
+      clickPrompt.addEventListener('pointerdown', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        requestGamePointerLock();
+      });
+      clickPrompt.addEventListener('mousedown', (e) => {
+        e.preventDefault();
         e.stopPropagation();
         requestGamePointerLock();
       });
     }
 
-    document.addEventListener('pointerlockchange', () => {
-      isPointerLocked = (document.pointerLockElement === canvas);
+    function onPointerLockChange() {
+      const ple = document.pointerLockElement || document.mozPointerLockElement || document.webkitPointerLockElement;
+      isPointerLocked = Boolean(ple && (ple === canvas || ple === document.body || (canvas && ple.contains && ple.contains(canvas)) || ple.tagName === 'CANVAS'));
       if (isPointerLocked) {
-        document.getElementById('crosshair-container').style.display = 'block';
-        document.getElementById('hud').style.display = 'block';
-        document.getElementById('buy-menu').style.display = 'none';
-        document.getElementById('settings-modal').style.display = 'none';
+        const ch = document.getElementById('crosshair-container');
+        if (ch) ch.style.display = 'block';
+        const hd = document.getElementById('hud');
+        if (hd) hd.style.display = 'block';
+        const bm = document.getElementById('buy-menu');
+        if (bm) bm.style.display = 'none';
+        const sm = document.getElementById('settings-modal');
+        if (sm) sm.style.display = 'none';
+        const cp = document.getElementById('click-to-play-prompt');
+        if (cp) cp.style.display = 'none';
       }
       updatePlayPrompt();
-    });
+    }
+    document.addEventListener('pointerlockchange', onPointerLockChange);
+    document.addEventListener('mozpointerlockchange', onPointerLockChange);
+    document.addEventListener('webkitpointerlockchange', onPointerLockChange);
 
     document.getElementById('btn-resume-game').addEventListener('click', () => {
       document.getElementById('settings-modal').style.display = 'none';
@@ -8701,18 +8731,40 @@
     let lastClientX = null;
     let lastClientY = null;
 
+    let lastLockAttemptTime = 0;
     function requestGamePointerLock() {
       if (isPointerLocked) return;
+      const now = performance.now();
+      if (now - lastLockAttemptTime < 80) return;
+      lastLockAttemptTime = now;
+
       try {
-        const p = requestGamePointerLock();
-        if (p && typeof p.catch === 'function') {
-          p.catch(() => {});
+        const target = canvas || document.getElementById('game-canvas') || document.body;
+        if (!target || !target.requestPointerLock) return;
+
+        // Try raw esports unadjusted movement first (Chrome / Edge 88+)
+        const promise = target.requestPointerLock({
+          unadjustedMovement: true
+        });
+        if (promise && typeof promise.catch === 'function') {
+          promise.catch(() => {
+            // Fallback to standard pointer lock if options unsupported
+            try {
+              target.requestPointerLock();
+            } catch (err) {}
+          });
         }
-      } catch (e) {}
+      } catch (e) {
+        try {
+          if (canvas && canvas.requestPointerLock) canvas.requestPointerLock();
+          else if (document.body && document.body.requestPointerLock) document.body.requestPointerLock();
+        } catch (e2) {}
+      }
     }
 
-    document.addEventListener('pointerlockerror', () => {
-      // Handled gracefully via universal delta fallback
+    document.addEventListener('pointerlockerror', (e) => {
+      console.warn('Pointer lock state notice:', e);
+      updatePlayPrompt();
     });
 
     window.addEventListener('mousedown', (e) => {
@@ -8759,13 +8811,17 @@
       let dy = 0;
 
       if (isPointerLocked) {
-        dx = (typeof e.movementX === 'number' && !isNaN(e.movementX)) ? e.movementX : 0;
-        dy = (typeof e.movementY === 'number' && !isNaN(e.movementY)) ? e.movementY : 0;
+        dx = (typeof e.movementX === 'number' && !isNaN(e.movementX)) ? e.movementX : 
+             (typeof e.mozMovementX === 'number') ? e.mozMovementX : 
+             (typeof e.webkitMovementX === 'number') ? e.webkitMovementX : 0;
+        dy = (typeof e.movementY === 'number' && !isNaN(e.movementY)) ? e.movementY : 
+             (typeof e.mozMovementY === 'number') ? e.mozMovementY : 
+             (typeof e.webkitMovementY === 'number') ? e.webkitMovementY : 0;
       } else {
         if (lastClientX !== null && lastClientY !== null) {
           dx = e.clientX - lastClientX;
           dy = e.clientY - lastClientY;
-          if (Math.abs(dx) > 250 || Math.abs(dy) > 250) { dx = 0; dy = 0; }
+          if (Math.abs(dx) > 300 || Math.abs(dy) > 300) { dx = 0; dy = 0; }
         }
         lastClientX = e.clientX;
         lastClientY = e.clientY;
