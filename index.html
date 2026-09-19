@@ -17000,11 +17000,32 @@
       document.getElementById('shield-val').innerText = Math.max(0, Math.floor(player.shield));
       document.getElementById('shield-bar').style.width = `${(player.shield / player.maxShield) * 100}%`;
       document.getElementById('hud-credits-tag').innerText = `크레딧: ${player.credits} ¤`;
+
+      // Real-time Skill Cooldown Visual Countdowns
+      const now = performance.now() / 1000;
+      ['c', 'q', 'e'].forEach(k => {
+        const cdEl = document.getElementById(`cd-${k}`);
+        const slotEl = document.getElementById(`slot-${k}`);
+        if (!cdEl || !slotEl || !abilities[k]) return;
+        const remain = Math.max(0, (abilities[k].lastUsed + (abilities[k].cd || 0)) - now);
+        if (remain > 0 && !cheats.noCooldowns) {
+          cdEl.style.height = `${(remain / (abilities[k].cd || 1)) * 100}%`;
+          cdEl.innerText = `${Math.ceil(remain)}s`;
+          cdEl.style.display = 'flex';
+          cdEl.style.alignItems = 'center';
+          cdEl.style.justifyContent = 'center';
+          cdEl.style.fontSize = '13px';
+          cdEl.style.fontWeight = 'bold';
+          cdEl.style.color = '#fff';
+          slotEl.classList.remove('ready');
+        } else {
+          cdEl.style.height = '0%';
+          cdEl.innerText = '';
+          slotEl.classList.add('ready');
+        }
+      });
     }
 
-    /* ==========================================================
-       9. RADAR MINIMAP WITH VISION CONE & TACTICAL CALLOUTS
-       ========================================================== */
     const miniCanvas = document.getElementById('minimap-canvas');
     const miniCtx = miniCanvas.getContext('2d');
 
