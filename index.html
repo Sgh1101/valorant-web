@@ -3824,7 +3824,7 @@
     const myClientId = 'user_' + Math.random().toString(36).substring(2, 8);
     const networkChannel = new BroadcastChannel('VALORANT_5V5_NET');
 
-    const MAP_LIST = ['ascent', 'bind', 'haven', 'icebox', 'split', 'lotus', 'breeze', 'sunset', 'pearl', 'fracture', 'abyss', 'district', 'drift', 'glitch', 'kasbah', 'piazza', 'bastion', 'colosseum', 'range'];
+    const MAP_LIST = ['ascent', 'bind', 'haven', 'icebox', 'split', 'lotus', 'breeze', 'sunset', 'pearl', 'fracture', 'abyss', 'district', 'drift', 'glitch', 'kasbah', 'piazza', 'bastion', 'colosseum', 'corrode', 'sanctum', 'zenith', 'subzero', 'oasis', 'range'];
     const MAP_NAMES = {
       ascent: 'ASCENT (어센트) - 베네치아 요새 & 전동 셔터 도어 [F]',
       bind: 'BIND (바인드) - 모로코 사막 & 차원 이동 텔레포터',
@@ -3844,6 +3844,11 @@
       piazza: 'PIAZZA (피아자) - 이탈리아 토스카나 해안 광장 & 르네상스 종탑 & 수로 부스터 [F]',
       bastion: 'BASTION (바스티온) - 스위스 알프스 산악 요새 & 레이더 타워 & 지열 증기 벤트 [F]',
       colosseum: 'COLOSSEUM (콜로세움) - 로마 고대 검투 아레나 & 360도 원형 회랑 & 글래디에이터 리프트 [F]',
+      corrode: 'CORRODE (코로드) - 부식된 화학 정제소 & 녹색 독성 정화 밸브 [F] & 산성 용액 피트',
+      sanctum: 'SANCTUM (생텀) - 이집트 네오 피라미드 & 황금 오벨리스크 & 고대 모래 석문 [F]',
+      zenith: 'ZENITH (제니스) - 성층권 부유 공중 요새 & 태양광 릴레이 타워 & 기류 도약대 [F]',
+      subzero: 'SUBZERO (서브제로) - 시베리아 극지 영구동토 기지 & 냉동 동결 보안문 [F] & 얼음 동굴',
+      oasis: 'OASIS (오아시스) - 미래형 중동 바이오돔 낙원 & 발광 열대 정원 & 고속 수류 가속기 [F]',
       range: 'THE RANGE (사격장) - 사격 훈련장 & 봇 연습'
     };
     let currentMapIndex = 0;
@@ -4924,6 +4929,11 @@
     let piazzaCanalBoost = null;
     let bastionSteamVent = null;
     let colosseumLift = null;
+    let corrodeAcidValve = null;
+    let sanctumSandGate = null;
+    let zenithBoostVent = null;
+    let subzeroCryoDoor = null;
+    let oasisHydroSurge = null;
     let isGcLockerActive = true;
     let isHardwareFrameSync = true;
     let pollingRateModeIdx = 0;
@@ -5812,6 +5822,61 @@
       showToast(`⚡ GC 스터터 락 (FLUID LOCK): [${isGcLockerActive ? 'ON (초안정)' : 'OFF'}]`);
     }
 
+    function triggerCorrodeAcidValve() {
+      if (!corrodeAcidValve || player.isDead) return;
+      sound.playSteamVent();
+      player.velocity.y = 8.5;
+      player.velocity.z = (camera.position.z > 0) ? -24.0 : 24.0;
+      player.isGrounded = false;
+      showToast('🧪 [CORRODE] 고압 독성 정화 밸브 분출! (ACID PURGE VALVE)');
+    }
+
+    function triggerSanctumSandGate() {
+      if (!sanctumSandGate || player.isDead) return;
+      sound.playStoneGrind();
+      sanctumSandGate.isOpen = !sanctumSandGate.isOpen;
+      sanctumSandGate.targetY = sanctumSandGate.isOpen ? 9.5 : 3.5;
+      if (sanctumSandGate.isOpen) {
+        colliders = colliders.filter(c => c.mesh !== sanctumSandGate.mesh);
+        showToast('🏛️ [SANCTUM] 고대 모래 석문 개방! (SAND GATE OPENED)');
+      } else {
+        colliders.push({ box: new THREE.Box3().setFromObject(sanctumSandGate.mesh), mesh: sanctumSandGate.mesh });
+        showToast('🏛️ [SANCTUM] 고대 모래 석문 폐쇄! (SAND GATE CLOSED)');
+      }
+    }
+
+    function triggerZenithBoostVent() {
+      if (!zenithBoostVent || player.isDead) return;
+      sound.playDash();
+      player.velocity.y = 20.5;
+      player.velocity.z = (camera.position.z > 0) ? -16.0 : 16.0;
+      player.isGrounded = false;
+      showToast('⚡ [ZENITH] 성층권 고속 기류 분사 도약! (STRATOSPHERIC BOOST)');
+    }
+
+    function triggerSubzeroCryoDoor() {
+      if (!subzeroCryoDoor || player.isDead) return;
+      sound.playDoorWhir();
+      subzeroCryoDoor.isOpen = !subzeroCryoDoor.isOpen;
+      subzeroCryoDoor.targetY = subzeroCryoDoor.isOpen ? 9.2 : 3.5;
+      if (subzeroCryoDoor.isOpen) {
+        colliders = colliders.filter(c => c.mesh !== subzeroCryoDoor.mesh);
+        showToast('❄️ [SUBZERO] 극지 동결 보안문 개방 (CRYO DOOR OPEN)');
+      } else {
+        colliders.push({ box: new THREE.Box3().setFromObject(subzeroCryoDoor.mesh), mesh: subzeroCryoDoor.mesh });
+        showToast('❄️ [SUBZERO] 극지 동결 보안문 폐쇄 (CRYO DOOR CLOSED)');
+      }
+    }
+
+    function triggerOasisHydroSurge() {
+      if (!oasisHydroSurge || player.isDead) return;
+      sound.playDash();
+      player.velocity.y = 6.0;
+      player.velocity.z = (camera.position.z > 0) ? -28.0 : 28.0;
+      player.isGrounded = false;
+      showToast('🌊 [OASIS] 고속 수류 가속기 추진! (HYDRO SURGE)');
+    }
+
     function triggerColosseumLift() {
       if (!colosseumLift || player.isDead) return;
       sound.playDoorSlide();
@@ -6264,6 +6329,13 @@
       bastionSteamVent = null;
       if (colosseumLift && colosseumLift.liftMesh) scene.remove(colosseumLift.liftMesh);
       colosseumLift = null;
+      corrodeAcidValve = null;
+      if (sanctumSandGate && sanctumSandGate.mesh) scene.remove(sanctumSandGate.mesh);
+      sanctumSandGate = null;
+      zenithBoostVent = null;
+      if (subzeroCryoDoor && subzeroCryoDoor.mesh) scene.remove(subzeroCryoDoor.mesh);
+      subzeroCryoDoor = null;
+      oasisHydroSurge = null;
 
       if (lotusDoor && lotusDoor.mesh) {
         scene.remove(lotusDoor.mesh);
@@ -6612,6 +6684,71 @@
         sunLight.intensity = 1.5;
         sunLight.position.set(15, 80, -25);
         scene.fog.color.setHex(0x78350f);
+        scene.fog.density = 0.005;
+      } else if (mapKey === 'corrode') {
+        // Toxic Chemical Refinery / Industrial Smog Twilight
+        grad.addColorStop(0, '#062419');
+        grad.addColorStop(0.35, '#0b3d2b');
+        grad.addColorStop(0.7, '#10b981');
+        grad.addColorStop(1, '#d97706');
+        ambientLight.color.setHex(0x6ee7b7);
+        ambientLight.intensity = 1.0;
+        sunLight.color.setHex(0xa7f3d0);
+        sunLight.intensity = 1.35;
+        sunLight.position.set(-30, 85, 40);
+        scene.fog.color.setHex(0x064e3b);
+        scene.fog.density = 0.007;
+      } else if (mapKey === 'sanctum') {
+        // Egyptian Cyber-Pyramid Dusk / Sapphire & Warm Amber Solar Glow
+        grad.addColorStop(0, '#0f172a');
+        grad.addColorStop(0.35, '#1e1b4b');
+        grad.addColorStop(0.7, '#d97706');
+        grad.addColorStop(1, '#fde68a');
+        ambientLight.color.setHex(0xfde047);
+        ambientLight.intensity = 1.15;
+        sunLight.color.setHex(0xf59e0b);
+        sunLight.intensity = 1.55;
+        sunLight.position.set(50, 75, -20);
+        scene.fog.color.setHex(0x451a03);
+        scene.fog.density = 0.005;
+      } else if (mapKey === 'zenith') {
+        // Stratospheric Sky Citadel / Pure Azure Sun & High-Altitude Aurora
+        grad.addColorStop(0, '#0284c7');
+        grad.addColorStop(0.35, '#38bdf8');
+        grad.addColorStop(0.7, '#bae6fd');
+        grad.addColorStop(1, '#ffffff');
+        ambientLight.color.setHex(0xe0f2fe);
+        ambientLight.intensity = 1.25;
+        sunLight.color.setHex(0xffffff);
+        sunLight.intensity = 1.6;
+        sunLight.position.set(0, 95, -15);
+        scene.fog.color.setHex(0x7dd3fc);
+        scene.fog.density = 0.004;
+      } else if (mapKey === 'subzero') {
+        // Siberian Permafrost Glacial Vault / Deep Arctic Twilight & Ice Mist
+        grad.addColorStop(0, '#030712');
+        grad.addColorStop(0.35, '#0c4a6e');
+        grad.addColorStop(0.7, '#38bdf8');
+        grad.addColorStop(1, '#e0f2fe');
+        ambientLight.color.setHex(0x7dd3fc);
+        ambientLight.intensity = 0.95;
+        sunLight.color.setHex(0xbae6fd);
+        sunLight.intensity = 1.3;
+        sunLight.position.set(-45, 80, -35);
+        scene.fog.color.setHex(0x082f49);
+        scene.fog.density = 0.008;
+      } else if (mapKey === 'oasis') {
+        // Arabian Futuristic Biodome Paradise / Coral Sunset & Bioluminescent Emerald
+        grad.addColorStop(0, '#4c0519');
+        grad.addColorStop(0.35, '#9f1239');
+        grad.addColorStop(0.7, '#fb7185');
+        grad.addColorStop(1, '#a7f3d0');
+        ambientLight.color.setHex(0xfecdd3);
+        ambientLight.intensity = 1.1;
+        sunLight.color.setHex(0xfbbf24);
+        sunLight.intensity = 1.45;
+        sunLight.position.set(35, 85, 25);
+        scene.fog.color.setHex(0x881337);
         scene.fog.density = 0.005;
       } else {
         // Range: High-tech military hangar
@@ -8267,6 +8404,408 @@
         // ATK & DEF Arena Spawns
         addPlatform(0, 0, 40, 40, 0.5, 16, matArenaSand);
         addPlatform(0, 0, -40, 40, 0.5, 16, matArenaSand);
+      }
+      else if (mapKey === 'corrode') {
+        // ==========================================================
+        // MAP 19: CORRODE (코로드) - 침식된 화학 정제소 & 녹색 독성 정화 밸브 [F]
+        // ==========================================================
+        const matCorrodeMetal = new THREE.MeshStandardMaterial({ color: 0x1f2937, roughness: 0.6, metalness: 0.5 });
+        const matAcidVat = new THREE.MeshStandardMaterial({ color: 0x10b981, emissive: 0x059669, emissiveIntensity: 0.8, roughness: 0.2 });
+        const matRustBeam = new THREE.MeshStandardMaterial({ color: 0xb45309, roughness: 0.85, metalness: 0.3 });
+        const matGrateFloor = new THREE.MeshStandardMaterial({ color: 0x111827, roughness: 0.7, metalness: 0.6 });
+
+        // Outer Industrial Boundary (110x110m)
+        addBox(0, -0.5, 0, 110, 1, 110, matGrateFloor);
+        addBox(0, 7, -55, 110, 14, 2, matCorrodeMetal);
+        addBox(0, 7, 55, 110, 14, 2, matCorrodeMetal);
+        addBox(-55, 7, 0, 2, 14, 110, matCorrodeMetal);
+        addBox(55, 7, 0, 2, 14, 110, matCorrodeMetal);
+
+        // Center Mid Acid Purge Valve Station at (0, 0, 0)
+        const valveStand = new THREE.Mesh(new THREE.CylinderGeometry(1.8, 2.2, 0.8, 16), matRustBeam);
+        valveStand.position.set(0, 0.4, 0);
+        const valveWheel = new THREE.Mesh(new THREE.TorusGeometry(0.9, 0.15, 8, 16), matAcidVat);
+        valveWheel.position.set(0, 1.2, 0);
+        valveWheel.rotation.x = Math.PI / 2;
+        scene.add(valveStand);
+        scene.add(valveWheel);
+        mapObjects.push(valveStand);
+        mapObjects.push(valveWheel);
+
+        addTextBillboard(0, 2.4, 0, '[F] 독성 정화 밸브 (ACID PURGE VALVE)', 1.5, '#10b981');
+        corrodeAcidValve = { pos: new THREE.Vector3(0, 1.2, 0), mesh: valveWheel };
+
+        // Mid Elevated Grated Walkway at y = 3.4
+        addPlatform(0, 0, 0, 6, 3.4, 32, matGrateFloor);
+        addRailing(-2.9, 3.4, 0, 32, 'z');
+        addRailing(2.9, 3.4, 0, 32, 'z');
+        addStairs(0, 16, 0, 4.0, 3.4, 8, 8, 'z-');
+        addStairs(0, -16, 0, 4.0, 3.4, 8, 8, 'z+');
+
+        // --- A SITE: ACID VAT TANKER (x = 30, z = -20) ---
+        addPlatform(30, 0, -20, 24, 0.5, 24, matSiteFloor);
+        addTextBillboard(30, 0.2, -20, 'A SITE', 1.8);
+        spikeSiteAreas.push({ minX: 18, maxX: 42, minZ: -32, maxZ: -8, name: 'A SITE' });
+
+        // A Site Giant Chemical Vat Pool
+        const vatCylinder = new THREE.Mesh(new THREE.CylinderGeometry(6.5, 7.0, 2.2, 24), matRustBeam);
+        vatCylinder.position.set(30, 1.1, -20);
+        scene.add(vatCylinder);
+        mapObjects.push(vatCylinder);
+        colliders.push({ box: new THREE.Box3().setFromObject(vatCylinder), mesh: vatCylinder });
+
+        const vatFluid = new THREE.Mesh(new THREE.CylinderGeometry(6.2, 6.2, 0.2, 24), matAcidVat);
+        vatFluid.position.set(30, 2.1, -20);
+        scene.add(vatFluid);
+        mapObjects.push(vatFluid);
+
+        // A Heaven Balcony (y = 4.2) & Catwalk
+        addPlatform(36, 0, -32, 12, 4.2, 10, matCorrodeMetal);
+        addRailing(29.9, 4.2, -32, 10, 'z');
+        addStairs(36, -14, 0, 3.8, 4.2, 12, 12, 'z-');
+        addCrateStack(22, -22, 2.4);
+        addBox(24, 1.2, -30, 3, 2.4, 3, matRadianiteBox);
+
+        // --- B SITE: CORRODED FOUNDRY (x = -30, z = -20) ---
+        addPlatform(-30, 0, -20, 24, 0.5, 24, matSiteFloor);
+        addTextBillboard(-30, 0.2, -20, 'B SITE', 1.8);
+        spikeSiteAreas.push({ minX: -42, maxX: -18, minZ: -32, maxZ: -8, name: 'B SITE' });
+
+        // Heavy Smelting Columns & Radianite stacks
+        addBox(-30, 4.0, -20, 5, 8.0, 5, matRustBeam);
+        addPlatform(-36, 0, -30, 12, 3.8, 10, matCorrodeMetal);
+        addRailing(-29.9, 3.8, -30, 10, 'z');
+        addStairs(-36, -14, 0, 3.8, 3.8, 10, 10, 'z-');
+        addCrateStack(-24, -20, 2.4);
+        addBox(-22, 1.2, -28, 3, 2.4, 3, matRadianiteBox);
+
+        // Spawns
+        addPlatform(0, 0, 40, 40, 0.5, 16, matGrateFloor);
+        addPlatform(0, 0, -40, 40, 0.5, 16, matGrateFloor);
+      }
+      else if (mapKey === 'sanctum') {
+        // ==========================================================
+        // MAP 20: SANCTUM (생텀) - 이집트 네오 피라미드 & 황금 오벨리스크 & 모래 석문 [F]
+        // ==========================================================
+        const matSandstone = new THREE.MeshStandardMaterial({ color: 0xd4a373, roughness: 0.85 });
+        const matBasalt = new THREE.MeshStandardMaterial({ color: 0x111827, roughness: 0.4, metalness: 0.2 });
+        const matObeliskGold = new THREE.MeshStandardMaterial({ color: 0xf59e0b, emissive: 0xb45309, emissiveIntensity: 0.7 });
+
+        // Desert Sanctuary Outer Walls (115x115m)
+        addBox(0, -0.5, 0, 115, 1, 115, matDesertFloor);
+        addBox(0, 8, -57.5, 115, 16, 2, matSandstone);
+        addBox(0, 8, 57.5, 115, 16, 2, matSandstone);
+        addBox(-57.5, 8, 0, 2, 16, 115, matSandstone);
+        addBox(57.5, 8, 0, 2, 16, 115, matSandstone);
+
+        // Center Ancient Sand Gate at (0, 3.5, -10)
+        addBox(-5.5, 3.5, -10, 4, 7, 1.5, matSandstone);
+        addBox(5.5, 3.5, -10, 4, 7, 1.5, matSandstone);
+        addBox(0, 7.8, -10, 7, 1.6, 1.5, matBasalt);
+
+        const sGateGeo = new THREE.BoxGeometry(4.5, 6.8, 0.4);
+        const sGateMat = new THREE.MeshStandardMaterial({ color: 0x78350f, roughness: 0.9 });
+        const sGateMesh = new THREE.Mesh(sGateGeo, sGateMat);
+        sGateMesh.position.set(0, 3.5, -10);
+        scene.add(sGateMesh);
+        mapObjects.push(sGateMesh);
+        colliders.push({ box: new THREE.Box3().setFromObject(sGateMesh), mesh: sGateMesh });
+
+        const sSwMesh = new THREE.Mesh(new THREE.BoxGeometry(0.3, 0.4, 0.2), matObeliskGold);
+        sSwMesh.position.set(3.2, 1.6, -9.3);
+        scene.add(sSwMesh);
+        mapObjects.push(sSwMesh);
+
+        sanctumSandGate = {
+          mesh: sGateMesh,
+          switchMesh: sSwMesh,
+          isOpen: false,
+          targetY: 3.5,
+          switchPos: new THREE.Vector3(3.2, 1.6, -9.3)
+        };
+        addTextBillboard(3.2, 2.3, -9.3, '[F] 모래 석문 (SAND GATE)', 1.4, '#ffd700');
+
+        // Mid Sunken Dunes & Obelisks
+        [-10, 10].forEach(ox => {
+          const obGeo = new THREE.CylinderGeometry(0.4, 1.2, 11, 4);
+          const obMesh = new THREE.Mesh(obGeo, matObeliskGold);
+          obMesh.position.set(ox, 5.5, 0);
+          scene.add(obMesh);
+          mapObjects.push(obMesh);
+          colliders.push({ box: new THREE.Box3().setFromObject(obMesh), mesh: obMesh });
+        });
+
+        // --- A SITE: SOLAR OBELISK SANCTUARY (x = 30, z = -20) ---
+        addPlatform(30, 0, -20, 24, 0.5, 24, matSiteFloor);
+        addTextBillboard(30, 0.2, -20, 'A SITE', 1.8);
+        spikeSiteAreas.push({ minX: 18, maxX: 42, minZ: -32, maxZ: -8, name: 'A SITE' });
+
+        // 4 Corner Golden Mini-Obelisks
+        [[22, -28], [38, -28], [22, -12], [38, -12]].forEach(([px, pz]) => {
+          const mOb = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.6, 5.5, 4), matObeliskGold);
+          mOb.position.set(px, 2.75, pz);
+          scene.add(mOb);
+          mapObjects.push(mOb);
+          colliders.push({ box: new THREE.Box3().setFromObject(mOb), mesh: mOb });
+        });
+
+        addPlatform(36, 0, -32, 12, 4.0, 10, matSandstone);
+        addRailing(29.9, 4.0, -32, 10, 'z');
+        addStairs(36, -14, 0, 3.8, 4.0, 12, 12, 'z-');
+        addCrateStack(26, -20, 2.4);
+
+        // --- B SITE: PHARAOH'S SARCOPHAGUS (x = -30, z = -20) ---
+        addPlatform(-30, 0, -20, 24, 0.5, 24, matSiteFloor);
+        addTextBillboard(-30, 0.2, -20, 'B SITE', 1.8);
+        spikeSiteAreas.push({ minX: -42, maxX: -18, minZ: -32, maxZ: -8, name: 'B SITE' });
+
+        // Giant Sarcophagus Cover Box
+        addBox(-30, 1.4, -20, 4.5, 2.8, 8.0, matBasalt);
+        addBox(-30, 2.9, -20, 4.0, 0.4, 7.5, matObeliskGold);
+
+        addPlatform(-36, 0, -32, 12, 4.0, 10, matSandstone);
+        addRailing(-29.9, 4.0, -32, 10, 'z');
+        addStairs(-36, -14, 0, 3.8, 4.0, 12, 12, 'z-');
+        addCrateStack(-22, -22, 2.4);
+
+        // Spawns
+        addPlatform(0, 0, 42, 42, 0.5, 16, matDesertFloor);
+        addPlatform(0, 0, -42, 42, 0.5, 16, matDesertFloor);
+      }
+      else if (mapKey === 'zenith') {
+        // ==========================================================
+        // MAP 21: ZENITH (제니스) - 성층권 부유 공중 요새 & 기류 도약대 [F]
+        // ==========================================================
+        const matCeramicWhite = new THREE.MeshStandardMaterial({ color: 0xf8fafc, roughness: 0.3, metalness: 0.1 });
+        const matSolarPanel = new THREE.MeshStandardMaterial({ color: 0x0284c7, roughness: 0.2, metalness: 0.8 });
+        const matGlassCyan = new THREE.MeshStandardMaterial({ color: 0x00f0ff, transparent: true, opacity: 0.6, roughness: 0.1 });
+
+        // Outer Sky Citadel Perimeter (110x110m)
+        addBox(0, -0.5, 0, 110, 1, 110, matCeramicWhite);
+        addBox(0, 7, -55, 110, 14, 2, matSolarPanel);
+        addBox(0, 7, 55, 110, 14, 2, matSolarPanel);
+        addBox(-55, 7, 0, 2, 14, 110, matSolarPanel);
+        addBox(55, 7, 0, 2, 14, 110, matSolarPanel);
+
+        // Center Mid Atmospheric Wind Boost Vent at (0, 0.3, 0)
+        const ventBase = new THREE.Mesh(new THREE.CylinderGeometry(2.8, 3.4, 0.6, 16), matSolarPanel);
+        ventBase.position.set(0, 0.3, 0);
+        const ventGlow = new THREE.Mesh(new THREE.CylinderGeometry(2.2, 2.2, 0.2, 16), matGlassCyan);
+        ventGlow.position.set(0, 0.65, 0);
+        scene.add(ventBase);
+        scene.add(ventGlow);
+        mapObjects.push(ventBase);
+        mapObjects.push(ventGlow);
+
+        addTextBillboard(0, 2.2, 0, '[F] 성층권 기류 부스터 (STRATOSPHERIC BOOST)', 1.5, '#00f0ff');
+        zenithBoostVent = { pos: new THREE.Vector3(0, 0.4, 0), mesh: ventGlow };
+
+        // Elevated Sky Catwalk at y = 3.6
+        addPlatform(0, 0, 0, 6, 3.6, 30, matCeramicWhite);
+        addRailing(-2.9, 3.6, 0, 30, 'z');
+        addRailing(2.9, 3.6, 0, 30, 'z');
+        addStairs(0, 15, 0, 4.0, 3.6, 8, 8, 'z-');
+        addStairs(0, -15, 0, 4.0, 3.6, 8, 8, 'z+');
+
+        // --- A SITE: SOLAR RELAY SPIRE (x = 30, z = -20) ---
+        addPlatform(30, 0, -20, 24, 0.5, 24, matSiteFloor);
+        addTextBillboard(30, 0.2, -20, 'A SITE', 1.8);
+        spikeSiteAreas.push({ minX: 18, maxX: 42, minZ: -32, maxZ: -8, name: 'A SITE' });
+
+        // Towering Solar Energy Spire Antenna
+        const spire = new THREE.Mesh(new THREE.CylinderGeometry(0.4, 1.8, 14, 8), matSolarPanel);
+        spire.position.set(30, 7.0, -20);
+        scene.add(spire);
+        mapObjects.push(spire);
+        colliders.push({ box: new THREE.Box3().setFromObject(spire), mesh: spire });
+
+        addPlatform(36, 0, -32, 12, 4.2, 10, matCeramicWhite);
+        addRailing(29.9, 4.2, -32, 10, 'z');
+        addStairs(36, -14, 0, 3.8, 4.2, 12, 12, 'z-');
+        addCrateStack(22, -20, 2.4);
+
+        // --- B SITE: OBSERVATION RAFTERS (x = -30, z = -20) ---
+        addPlatform(-30, 0, -20, 24, 0.5, 24, matSiteFloor);
+        addTextBillboard(-30, 0.2, -20, 'B SITE', 1.8);
+        spikeSiteAreas.push({ minX: -42, maxX: -18, minZ: -32, maxZ: -8, name: 'B SITE' });
+
+        addBox(-30, 3.5, -20, 5, 7.0, 5, matCeramicWhite);
+        addPlatform(-36, 0, -32, 12, 4.2, 10, matCeramicWhite);
+        addRailing(-29.9, 4.2, -32, 10, 'z');
+        addStairs(-36, -14, 0, 3.8, 4.2, 12, 12, 'z-');
+        addCrateStack(-22, -20, 2.4);
+
+        // Spawns
+        addPlatform(0, 0, 42, 42, 0.5, 16, matCeramicWhite);
+        addPlatform(0, 0, -42, 42, 0.5, 16, matCeramicWhite);
+      }
+      else if (mapKey === 'subzero') {
+        // ==========================================================
+        // MAP 22: SUBZERO (서브제로) - 시베리아 극지 영구동토 기지 & 동결 보안문 [F]
+        // ==========================================================
+        const matGlacialIce = new THREE.MeshStandardMaterial({ color: 0x7dd3fc, roughness: 0.2, metalness: 0.2 });
+        const matFrostSteel = new THREE.MeshStandardMaterial({ color: 0x334155, roughness: 0.5, metalness: 0.7 });
+        const matCryoGlow = new THREE.MeshStandardMaterial({ color: 0x38bdf8, emissive: 0x0284c7, emissiveIntensity: 0.9 });
+
+        // Outer Permafrost Ice Vault (110x110m)
+        addBox(0, -0.5, 0, 110, 1, 110, matGlacialIce);
+        addBox(0, 7, -55, 110, 14, 2, matFrostSteel);
+        addBox(0, 7, 55, 110, 14, 2, matFrostSteel);
+        addBox(-55, 7, 0, 2, 14, 110, matFrostSteel);
+        addBox(55, 7, 0, 2, 14, 110, matFrostSteel);
+
+        // Cryo Security Blast Door at (-14, 3.5, -8)
+        addBox(-19.5, 3.5, -8, 5, 7, 1.4, matFrostSteel);
+        addBox(-8.5, 3.5, -8, 5, 7, 1.4, matFrostSteel);
+        addBox(-14, 7.8, -8, 6, 1.6, 1.4, matFrostSteel);
+
+        const cDoorGeo = new THREE.BoxGeometry(4.2, 6.8, 0.35);
+        const cDoorMat = new THREE.MeshStandardMaterial({ color: 0x0ea5e9, roughness: 0.3, metalness: 0.6 });
+        const cDoorMesh = new THREE.Mesh(cDoorGeo, cDoorMat);
+        cDoorMesh.position.set(-14, 3.5, -8);
+        scene.add(cDoorMesh);
+        mapObjects.push(cDoorMesh);
+        colliders.push({ box: new THREE.Box3().setFromObject(cDoorMesh), mesh: cDoorMesh });
+
+        const cSwMesh = new THREE.Mesh(new THREE.BoxGeometry(0.3, 0.4, 0.2), matCryoGlow);
+        cSwMesh.position.set(-11.2, 1.6, -7.3);
+        scene.add(cSwMesh);
+        mapObjects.push(cSwMesh);
+
+        subzeroCryoDoor = {
+          mesh: cDoorMesh,
+          switchMesh: cSwMesh,
+          isOpen: false,
+          targetY: 3.5,
+          switchPos: new THREE.Vector3(-11.2, 1.6, -7.3)
+        };
+        addTextBillboard(-11.2, 2.3, -7.3, '[F] 동결 보안문 (CRYO DOOR)', 1.4, '#38bdf8');
+
+        // Mid Ice Pillars & Chasm Bridge
+        [-8, 8].forEach(ix => {
+          const icePil = new THREE.Mesh(new THREE.CylinderGeometry(1.2, 1.6, 8, 8), matGlacialIce);
+          icePil.position.set(ix, 4.0, 0);
+          scene.add(icePil);
+          mapObjects.push(icePil);
+          colliders.push({ box: new THREE.Box3().setFromObject(icePil), mesh: icePil });
+        });
+
+        // --- A SITE: CRYO-STASIS CHAMBER (x = 30, z = -20) ---
+        addPlatform(30, 0, -20, 24, 0.5, 24, matSiteFloor);
+        addTextBillboard(30, 0.2, -20, 'A SITE', 1.8);
+        spikeSiteAreas.push({ minX: 18, maxX: 42, minZ: -32, maxZ: -8, name: 'A SITE' });
+
+        // Cryo Pods
+        [[24, -24], [36, -24], [24, -16], [36, -16]].forEach(([px, pz]) => {
+          const pod = new THREE.Mesh(new THREE.CylinderGeometry(0.9, 0.9, 3.6, 12), matCryoGlow);
+          pod.position.set(px, 1.8, pz);
+          scene.add(pod);
+          mapObjects.push(pod);
+          colliders.push({ box: new THREE.Box3().setFromObject(pod), mesh: pod });
+        });
+
+        addPlatform(36, 0, -32, 12, 4.0, 10, matFrostSteel);
+        addRailing(29.9, 4.0, -32, 10, 'z');
+        addStairs(36, -14, 0, 3.8, 4.0, 12, 12, 'z-');
+        addCrateStack(30, -20, 2.4);
+
+        // --- B SITE: PERMAFROST CORE DRILL (x = -30, z = -20) ---
+        addPlatform(-30, 0, -20, 24, 0.5, 24, matSiteFloor);
+        addTextBillboard(-30, 0.2, -20, 'B SITE', 1.8);
+        spikeSiteAreas.push({ minX: -42, maxX: -18, minZ: -32, maxZ: -8, name: 'B SITE' });
+
+        // Heavy Mining Drill Rig
+        const drill = new THREE.Mesh(new THREE.ConeGeometry(2.4, 7.5, 12), matFrostSteel);
+        drill.position.set(-30, 3.75, -20);
+        drill.rotation.x = Math.PI;
+        scene.add(drill);
+        mapObjects.push(drill);
+        colliders.push({ box: new THREE.Box3().setFromObject(drill), mesh: drill });
+
+        addPlatform(-36, 0, -32, 12, 4.0, 10, matFrostSteel);
+        addRailing(-29.9, 4.0, -32, 10, 'z');
+        addStairs(-36, -14, 0, 3.8, 4.0, 12, 12, 'z-');
+        addCrateStack(-22, -20, 2.4);
+
+        // Spawns
+        addPlatform(0, 0, 42, 42, 0.5, 16, matGlacialIce);
+        addPlatform(0, 0, -42, 42, 0.5, 16, matGlacialIce);
+      }
+      else if (mapKey === 'oasis') {
+        // ==========================================================
+        // MAP 23: OASIS (오아시스) - 미래형 중동 바이오돔 낙원 & 고속 수류 가속기 [F]
+        // ==========================================================
+        const matTerracotta = new THREE.MeshStandardMaterial({ color: 0xe07a5f, roughness: 0.7 });
+        const matWaterPool = new THREE.MeshStandardMaterial({ color: 0x06b6d4, roughness: 0.1, metalness: 0.4 });
+        const matBioPalm = new THREE.MeshStandardMaterial({ color: 0x10b981, emissive: 0x047857, emissiveIntensity: 0.6 });
+
+        // Outer Biodome Perimeter (112x112m)
+        addBox(0, -0.5, 0, 112, 1, 112, matTerracotta);
+        addBox(0, 7, -56, 112, 14, 2, matTerracotta);
+        addBox(0, 7, 56, 112, 14, 2, matTerracotta);
+        addBox(-56, 7, 0, 2, 14, 112, matTerracotta);
+        addBox(56, 7, 0, 2, 14, 112, matTerracotta);
+
+        // Center Mid Water Current Stream with Hydro Surge Turbine at (0, 0.2, 0)
+        const surgePool = new THREE.Mesh(new THREE.BoxGeometry(6, 0.4, 36), matWaterPool);
+        surgePool.position.set(0, 0.2, 0);
+        scene.add(surgePool);
+        mapObjects.push(surgePool);
+
+        const turbineBase = new THREE.Mesh(new THREE.CylinderGeometry(1.6, 2.0, 0.6, 16), matTerracotta);
+        turbineBase.position.set(0, 0.3, 0);
+        scene.add(turbineBase);
+        mapObjects.push(turbineBase);
+
+        addTextBillboard(0, 2.2, 0, '[F] 고속 수류 가속기 (HYDRO SURGE)', 1.5, '#06b6d4');
+        oasisHydroSurge = { pos: new THREE.Vector3(0, 0.2, 0), mesh: turbineBase };
+
+        // Mid Garden Bridges
+        addBox(0, 2.2, -6, 10, 0.5, 4, matTerracotta);
+        addBox(0, 2.2, 6, 10, 0.5, 4, matTerracotta);
+
+        // --- A SITE: BIOLUMINESCENT ARBORETUM (x = 30, z = -20) ---
+        addPlatform(30, 0, -20, 24, 0.5, 24, matSiteFloor);
+        addTextBillboard(30, 0.2, -20, 'A SITE', 1.8);
+        spikeSiteAreas.push({ minX: 18, maxX: 42, minZ: -32, maxZ: -8, name: 'A SITE' });
+
+        // Glowing Botanical Palm Columns
+        [[24, -26], [36, -26], [24, -14], [36, -14]].forEach(([px, pz]) => {
+          const palmTrunk = new THREE.Mesh(new THREE.CylinderGeometry(0.6, 0.8, 6.0, 8), matTerracotta);
+          palmTrunk.position.set(px, 3.0, pz);
+          const palmCrown = new THREE.Mesh(new THREE.ConeGeometry(2.6, 2.0, 8), matBioPalm);
+          palmCrown.position.set(px, 6.5, pz);
+          scene.add(palmTrunk);
+          scene.add(palmCrown);
+          mapObjects.push(palmTrunk);
+          mapObjects.push(palmCrown);
+          colliders.push({ box: new THREE.Box3().setFromObject(palmTrunk), mesh: palmTrunk });
+        });
+
+        addPlatform(36, 0, -32, 12, 4.0, 10, matTerracotta);
+        addRailing(29.9, 4.0, -32, 10, 'z');
+        addStairs(36, -14, 0, 3.8, 4.0, 12, 12, 'z-');
+        addCrateStack(26, -20, 2.4);
+
+        // --- B SITE: HYDROPONIC WATER BASIN (x = -30, z = -20) ---
+        addPlatform(-30, 0, -20, 24, 0.5, 24, matSiteFloor);
+        addTextBillboard(-30, 0.2, -20, 'B SITE', 1.8);
+        spikeSiteAreas.push({ minX: -42, maxX: -18, minZ: -32, maxZ: -8, name: 'B SITE' });
+
+        const bPool = new THREE.Mesh(new THREE.BoxGeometry(10, 0.3, 10), matWaterPool);
+        bPool.position.set(-30, 0.2, -20);
+        scene.add(bPool);
+        mapObjects.push(bPool);
+
+        addBox(-30, 3.5, -20, 4, 7.0, 4, matTerracotta);
+        addPlatform(-36, 0, -32, 12, 4.0, 10, matTerracotta);
+        addRailing(-29.9, 4.0, -32, 10, 'z');
+        addStairs(-36, -14, 0, 3.8, 4.0, 12, 12, 'z-');
+        addCrateStack(-22, -20, 2.4);
+
+        // Spawns
+        addPlatform(0, 0, 42, 42, 0.5, 16, matTerracotta);
+        addPlatform(0, 0, -42, 42, 0.5, 16, matTerracotta);
       }
       else if (mapKey === 'range') {
         addBox(0, -0.5, 0, 60, 1, 120, matConcrete);
@@ -10466,6 +11005,51 @@
         }
       }
 
+      // 15. Corrode Acid Purge Valve [F]
+      if (MAP_LIST[currentMapIndex] === 'corrode' && corrodeAcidValve) {
+        const pPos = camera.position;
+        if (pPos.distanceTo(corrodeAcidValve.pos) < 4.5) {
+          triggerCorrodeAcidValve();
+          return;
+        }
+      }
+
+      // 16. Sanctum Ancient Sand Gate [F]
+      if (MAP_LIST[currentMapIndex] === 'sanctum' && sanctumSandGate) {
+        const pPos = camera.position;
+        if (pPos.distanceTo(sanctumSandGate.switchPos) < 4.5) {
+          triggerSanctumSandGate();
+          return;
+        }
+      }
+
+      // 17. Zenith Stratospheric Boost Vent [F]
+      if (MAP_LIST[currentMapIndex] === 'zenith' && zenithBoostVent) {
+        const pPos = camera.position;
+        if (pPos.distanceTo(zenithBoostVent.pos) < 4.8) {
+          triggerZenithBoostVent();
+          return;
+        }
+      }
+
+      // 18. Subzero Cryo Security Door [F]
+      if (MAP_LIST[currentMapIndex] === 'subzero' && subzeroCryoDoor) {
+        const pPos = camera.position;
+        if (pPos.distanceTo(subzeroCryoDoor.switchPos) < 4.5) {
+          triggerSubzeroCryoDoor();
+          return;
+        }
+      }
+
+      // 19. Oasis Hydro Surge Booster [F]
+      if (MAP_LIST[currentMapIndex] === 'oasis' && oasisHydroSurge) {
+        const pPos = camera.position;
+        if (pPos.distanceTo(oasisHydroSurge.pos) < 4.8) {
+          triggerOasisHydroSurge();
+          return;
+        }
+      }
+
       // 4. Ascent B Shutter Door
       if (!ascentDoor || ascentDoor.isDestroyed) return;
       const dist = camera.position.distanceTo(ascentDoor.switchPos);
@@ -11709,6 +12293,56 @@
         { label: 'DEF SPAWN', x: 0, z: -40, color: '#00ffaa' },
         { label: 'ATK SPAWN', x: 0, z: 40, color: '#ff4655' }
       ],
+      corrode: [
+        { label: 'A SITE', x: 30, z: -20, color: '#10b981' },
+        { label: 'ACID VAT', x: 30, z: -20, color: '#059669' },
+        { label: 'B SITE', x: -30, z: -20, color: '#10b981' },
+        { label: 'FOUNDRY', x: -36, z: -30, color: '#b45309' },
+        { label: 'ACID VALVE [F]', x: 0, z: 0, color: '#00f0ff' },
+        { label: 'CATWALK', x: 0, z: 10, color: '#94a3b8' },
+        { label: 'DEF SPAWN', x: 0, z: -40, color: '#00ffaa' },
+        { label: 'ATK SPAWN', x: 0, z: 40, color: '#ff4655' }
+      ],
+      sanctum: [
+        { label: 'A SITE', x: 30, z: -20, color: '#f59e0b' },
+        { label: 'OBELISKS', x: 36, z: -30, color: '#ffd700' },
+        { label: 'B SITE', x: -30, z: -20, color: '#f59e0b' },
+        { label: 'SARCOPHAGUS', x: -36, z: -30, color: '#d97706' },
+        { label: 'SAND GATE [F]', x: 3.2, z: -9.3, color: '#00f0ff' },
+        { label: 'MID DUNES', x: 0, z: 0, color: '#d4a373' },
+        { label: 'DEF SPAWN', x: 0, z: -42, color: '#00ffaa' },
+        { label: 'ATK SPAWN', x: 0, z: 42, color: '#ff4655' }
+      ],
+      zenith: [
+        { label: 'A SITE', x: 30, z: -20, color: '#00f0ff' },
+        { label: 'SOLAR SPIRE', x: 30, z: -20, color: '#0284c7' },
+        { label: 'B SITE', x: -30, z: -20, color: '#00f0ff' },
+        { label: 'OBSERVATION', x: -36, z: -30, color: '#38bdf8' },
+        { label: 'BOOST VENT [F]', x: 0, z: 0, color: '#00ffaa' },
+        { label: 'SKY BRIDGE', x: 0, z: 0, color: '#bae6fd' },
+        { label: 'DEF SPAWN', x: 0, z: -42, color: '#00ffaa' },
+        { label: 'ATK SPAWN', x: 0, z: 42, color: '#ff4655' }
+      ],
+      subzero: [
+        { label: 'A SITE', x: 30, z: -20, color: '#38bdf8' },
+        { label: 'CRYO PODS', x: 30, z: -20, color: '#0ea5e9' },
+        { label: 'B SITE', x: -30, z: -20, color: '#38bdf8' },
+        { label: 'CORE DRILL', x: -30, z: -20, color: '#0284c7' },
+        { label: 'CRYO DOOR [F]', x: -11.2, z: -7.3, color: '#00ffaa' },
+        { label: 'ICE CHASM', x: 0, z: 0, color: '#7dd3fc' },
+        { label: 'DEF SPAWN', x: 0, z: -42, color: '#00ffaa' },
+        { label: 'ATK SPAWN', x: 0, z: 42, color: '#ff4655' }
+      ],
+      oasis: [
+        { label: 'A SITE', x: 30, z: -20, color: '#10b981' },
+        { label: 'ARBORETUM', x: 30, z: -20, color: '#059669' },
+        { label: 'B SITE', x: -30, z: -20, color: '#10b981' },
+        { label: 'WATER BASIN', x: -30, z: -20, color: '#06b6d4' },
+        { label: 'HYDRO SURGE [F]', x: 0, z: 0, color: '#00f0ff' },
+        { label: 'CANAL BRIDGE', x: 0, z: 0, color: '#e07a5f' },
+        { label: 'DEF SPAWN', x: 0, z: -42, color: '#00ffaa' },
+        { label: 'ATK SPAWN', x: 0, z: 42, color: '#ff4655' }
+      ],
       range: [
         { label: 'TARGETS', x: 0, z: -22, color: '#00f0ff' },
         { label: 'BENCH', x: 0, z: 0, color: '#ffc83b' },
@@ -12278,6 +12912,27 @@
               if (player.velocity.y <= 0) triggerColosseumLift();
             }
           }
+
+          // Auto-launch when stepping into Corrode Acid Valve
+          if (MAP_LIST[currentMapIndex] === 'corrode' && corrodeAcidValve && !player.isDead) {
+            if (Math.abs(camera.position.x) < 2.5 && Math.abs(camera.position.z) < 2.5 && Math.abs(camera.position.y - 1.7) < 1.2) {
+              if (player.velocity.y <= 0) triggerCorrodeAcidValve();
+            }
+          }
+
+          // Auto-launch when stepping onto Zenith Boost Vent
+          if (MAP_LIST[currentMapIndex] === 'zenith' && zenithBoostVent && !player.isDead) {
+            if (Math.abs(camera.position.x) < 3.0 && Math.abs(camera.position.z) < 3.0 && Math.abs(camera.position.y - 1.7) < 1.2) {
+              if (player.velocity.y <= 0) triggerZenithBoostVent();
+            }
+          }
+
+          // Auto-launch when stepping into Oasis Hydro Surge
+          if (MAP_LIST[currentMapIndex] === 'oasis' && oasisHydroSurge && !player.isDead) {
+            if (Math.abs(camera.position.x) < 3.0 && Math.abs(camera.position.z) < 18.0 && Math.abs(camera.position.y - 1.7) < 1.0) {
+              triggerOasisHydroSurge();
+            }
+          }
         }
 
         const speedRatio = Math.min(player.velocity.length() / player.speed, 1.2);
@@ -12740,6 +13395,26 @@
             camera.position.z += step;
             camera.position.x += (0 - camera.position.x) * 0.15;
             camera.position.y = 2.0;
+          }
+        }
+
+        // Sanctum Sand Gate Animation
+        if (sanctumSandGate && sanctumSandGate.mesh) {
+          const dy = sanctumSandGate.targetY - sanctumSandGate.mesh.position.y;
+          if (Math.abs(dy) > 0.05) {
+            sanctumSandGate.mesh.position.y += Math.sign(dy) * 4.0 * dt;
+            const c = colliders.find(col => col.mesh === sanctumSandGate.mesh);
+            if (c) c.box.setFromObject(sanctumSandGate.mesh);
+          }
+        }
+
+        // Subzero Cryo Security Door Animation
+        if (subzeroCryoDoor && subzeroCryoDoor.mesh) {
+          const dy = subzeroCryoDoor.targetY - subzeroCryoDoor.mesh.position.y;
+          if (Math.abs(dy) > 0.05) {
+            subzeroCryoDoor.mesh.position.y += Math.sign(dy) * 4.5 * dt;
+            const c = colliders.find(col => col.mesh === subzeroCryoDoor.mesh);
+            if (c) c.box.setFromObject(subzeroCryoDoor.mesh);
           }
         }
 
