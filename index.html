@@ -2162,6 +2162,9 @@
       <div class="team-roster" id="top-roster-def"></div>
 
       <div class="map-badge" id="hud-map-badge">ASCENT</div>
+      <div class="map-badge" id="hud-mode-badge" style="background: rgba(255, 70, 85, 0.2); border: 1px solid #ff4655; color: #ff4655; margin-left: 8px; cursor: pointer;" onclick="cycleGameMode()">COMPETITIVE</div>
+    </div>
+    <div id="spike-planted-banner">🔴 SPIKE PLANTED // <span id="spike-live-timer">45.0</span>s</div>
     </div>
 
     <!-- Minimap Radar with Vision Cone -->
@@ -2360,6 +2363,14 @@
       </div>
     </div>
 
+    <div id="lobby-mode-bar" style="display:flex; justify-content:center; align-items:center; gap:10px; margin: 14px 0; background:rgba(15,23,42,0.75); padding:8px 14px; border-radius:6px; border:1px solid rgba(255,255,255,0.1);">
+        <span style="font-size:13px; font-weight:bold; color:#8899a6; letter-spacing:0.5px;">GAME MODE:</span>
+        <button type="button" class="mode-btn active" onclick="setGameMode(0)" id="mode-btn-0">경쟁전 5V5</button>
+        <button type="button" class="mode-btn" onclick="setGameMode(1)" id="mode-btn-1">스파이크 돌격</button>
+        <button type="button" class="mode-btn" onclick="setGameMode(2)" id="mode-btn-2">데스매치 FFA</button>
+        <button type="button" class="mode-btn" onclick="setGameMode(3)" id="mode-btn-3">신속플레이</button>
+        <button type="button" class="mode-btn" onclick="setGameMode(4)" id="mode-btn-4">사격 훈련장</button>
+      </div>
     <div class="lobby-bottom">
       <div style="font-size: 13px; color:#8899a6;">
         내 슬롯: <b style="color:var(--val-cyan);" id="my-slot-desc">공격팀 1번 (JETT)</b>
@@ -3599,7 +3610,7 @@
     const myClientId = 'user_' + Math.random().toString(36).substring(2, 8);
     const networkChannel = new BroadcastChannel('VALORANT_5V5_NET');
 
-    const MAP_LIST = ['ascent', 'bind', 'haven', 'icebox', 'split', 'lotus', 'breeze', 'sunset', 'pearl', 'fracture', 'abyss', 'district', 'drift', 'glitch', 'kasbah', 'piazza', 'bastion', 'range'];
+    const MAP_LIST = ['ascent', 'bind', 'haven', 'icebox', 'split', 'lotus', 'breeze', 'sunset', 'pearl', 'fracture', 'abyss', 'district', 'drift', 'glitch', 'kasbah', 'piazza', 'bastion', 'colosseum', 'range'];
     const MAP_NAMES = {
       ascent: 'ASCENT (어센트) - 베네치아 요새 & 전동 셔터 도어 [F]',
       bind: 'BIND (바인드) - 모로코 사막 & 차원 이동 텔레포터',
@@ -3618,6 +3629,7 @@
       kasbah: 'KASBAH (카스바) - 모로코 사막 바틱 요새 & 2단 성벽 회랑 & 고대 기류 분수 [F]',
       piazza: 'PIAZZA (피아자) - 이탈리아 토스카나 해안 광장 & 르네상스 종탑 & 수로 부스터 [F]',
       bastion: 'BASTION (바스티온) - 스위스 알프스 산악 요새 & 레이더 타워 & 지열 증기 벤트 [F]',
+      colosseum: 'COLOSSEUM (콜로세움) - 로마 고대 검투 아레나 & 360도 원형 회랑 & 글래디에이터 리프트 [F]',
       range: 'THE RANGE (사격장) - 사격 훈련장 & 봇 연습'
     };
     let currentMapIndex = 0;
@@ -3635,7 +3647,8 @@
       Maxbot: '🤖',
       Nox: '🌑',
       Zephyr: '🌪️',
-      Veto: '💥'
+      Veto: '💥',
+      Khepri: '☀️'
     };
     const AGENT_COLORS = {
       Jett: '#00f0ff', Phoenix: '#ff6600', Reyna: '#be00ff', Sova: '#2979ff',
@@ -3652,7 +3665,8 @@
       Maxbot: '#f97316',
       Nox: '#6366f1',
       Zephyr: '#34d399',
-      Veto: '#ef4444'
+      Veto: '#ef4444',
+      Khepri: '#eab308'
     };
     const AGENT_ROLES = {
       Jett: '타격대 (Duelist)', Phoenix: '타격대 (Duelist)', Reyna: '타격대 (Duelist)', Raze: '타격대 (Duelist)',
@@ -3668,7 +3682,8 @@
       Maxbot: '감시대 (Sentinel)',
       Nox: '전략가 (Controller)',
       Zephyr: '척후대 (Initiator)',
-      Veto: '타격대 (Duelist)'
+      Veto: '타격대 (Duelist)',
+      Khepri: '감시대 (Sentinel)'
     };
 
     const lobbySlots = {
@@ -4494,7 +4509,7 @@
     /* ==========================================================
        DYNAMIC AGENT SWITCHING SYSTEM ([H] KEY TO CYCLE AGENT)
        ========================================================== */
-    const PLAYABLE_AGENTS = ['Jett', 'Phoenix', 'Reyna', 'Sova', 'Sage', 'Omen', 'Brimstone', 'Raze', 'Killjoy', 'Chamber', 'Viper', 'Cypher', 'Neon', 'Yoru', 'Fade', 'Gekko', 'Harbor', 'Iso', 'Deadlock', 'Clove', 'Vyse', 'KAY/O', 'Tejo', 'Astra', 'Breach', 'Skye', 'Waylay', 'Maxbot', 'Nox', 'Zephyr', 'Veto'];
+    const PLAYABLE_AGENTS = ['Jett', 'Phoenix', 'Reyna', 'Sova', 'Sage', 'Omen', 'Brimstone', 'Raze', 'Killjoy', 'Chamber', 'Viper', 'Cypher', 'Neon', 'Yoru', 'Fade', 'Gekko', 'Harbor', 'Iso', 'Deadlock', 'Clove', 'Vyse', 'KAY/O', 'Tejo', 'Astra', 'Breach', 'Skye', 'Waylay', 'Maxbot', 'Nox', 'Zephyr', 'Veto', 'Khepri'];
     let currentAgentIdx = 0;
 
     const AGENT_SKILL_LABELS = {
@@ -4519,7 +4534,8 @@
       Maxbot: { c: '유도 로켓 (C)', q: '전자기 펄스 EMP (Q)', e: '오버클럭 배리어 (E)', x: '맥스봇 전탄 발사 (X)' },
       Nox: { c: '공허 장막 (C)', q: '그림자 족쇄 (Q)', e: '암흑 성운 (E)', x: '심연의 포식 (X)' },
       Zephyr: { c: '돌풍 회오리 (C)', q: '폭풍 깃털 수리검 (Q)', e: '기류 정찰선 (E)', x: '템페스트 타이푼 (X)' },
-      Veto: { c: '지진 균열 (C)', q: '분쇄 충격파 (Q)', e: '피스톤 돌진 (E)', x: '대격변 그라운드 슬램 (X)' }
+      Veto: { c: '지진 균열 (C)', q: '분쇄 충격파 (Q)', e: '피스톤 돌진 (E)', x: '대격변 그라운드 슬램 (X)' },
+      Khepri: { c: '태양의 앙크 (C)', q: '스카라베 트랩 (Q)', e: '황금빛 태양 방벽 (E)', x: '새벽의 태양신 강림 (X)' }
     };
 
     let spectatorTargetIndex = 0;
@@ -4693,6 +4709,8 @@
     let kasbahFountain = null;
     let piazzaCanalBoost = null;
     let bastionSteamVent = null;
+    let colosseumLift = null;
+    let isGcLockerActive = true;
     let isHardwareFrameSync = true;
     let pollingRateModeIdx = 0;
     let isLowJitterMode = true;
@@ -4700,6 +4718,34 @@
     let weaponBarrelHeat = 0;
     let reflexMode = 'boost';
     let currentVisualFilterIdx = 0;
+    const GAME_MODES = [
+      { id: 'COMPETITIVE', name: '경쟁전 (5V5)', roundsToWin: 13, buyTime: 20, roundTime: 100 },
+      { id: 'SPIKE_RUSH', name: '스파이크 돌격 (SPIKE RUSH)', roundsToWin: 4, buyTime: 15, roundTime: 80 },
+      { id: 'DEATHMATCH', name: '데스매치 (DEATHMATCH FFA)', roundsToWin: 40, buyTime: 5, roundTime: 600 },
+      { id: 'SWIFTPLAY', name: '신속플레이 (SWIFTPLAY)', roundsToWin: 5, buyTime: 15, roundTime: 90 },
+      { id: 'RANGE', name: '사격 훈련장 (RANGE)', roundsToWin: 999, buyTime: 0, roundTime: 9999 }
+    ];
+    let currentGameModeIdx = 0;
+
+    function setGameMode(idx) {
+      currentGameModeIdx = (idx % GAME_MODES.length + GAME_MODES.length) % GAME_MODES.length;
+      const gm = GAME_MODES[currentGameModeIdx];
+      const modeBadge = document.getElementById('hud-mode-badge');
+      if (modeBadge) modeBadge.innerText = gm.id;
+      for (let i = 0; i < GAME_MODES.length; i++) {
+        const btn = document.getElementById('mode-btn-' + i);
+        if (btn) {
+          if (i === currentGameModeIdx) btn.classList.add('active');
+          else btn.classList.remove('active');
+        }
+      }
+      sound.playSwitchClick();
+      showToast(`⚡ 게임 모드 변경: [${gm.name}]`);
+    }
+
+    function cycleGameMode() {
+      setGameMode(currentGameModeIdx + 1);
+    }
     let isFTGActive = false;
     let isFlashlightActive = false;
     let tacticalFlashlight = null;
@@ -5448,6 +5494,25 @@
         const chestCore = new THREE.Mesh(new THREE.OctahedronGeometry(0.09), new THREE.MeshStandardMaterial({ color: 0xf59e0b, emissive: 0xd97706, emissiveIntensity: 1.2 }));
         chestCore.position.set(0, 1.25, 0.22);
         grp.add(chestCore);
+      } else if (agentName === 'Khepri') {
+        // Ancient Egyptian solar scarab sentinel with golden nemes and sun disc
+        const nemes = new THREE.Mesh(new THREE.ConeGeometry(0.24, 0.36, 6), new THREE.MeshStandardMaterial({ color: 0xf59e0b, metalness: 0.95, roughness: 0.2 }));
+        nemes.position.set(0, 1.95, -0.05);
+        nemes.rotation.x = -0.3;
+        grp.add(nemes);
+        const sunDisc = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.12, 0.03, 16), new THREE.MeshStandardMaterial({ color: 0xfde047, emissive: 0xf59e0b, emissiveIntensity: 1.5 }));
+        sunDisc.rotation.x = Math.PI / 2;
+        sunDisc.position.set(0, 2.15, -0.02);
+        grp.add(sunDisc);
+        const scarabL = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.22, 0.12), new THREE.MeshStandardMaterial({ color: 0xd97706, metalness: 0.9 }));
+        scarabL.position.set(-0.28, 1.05, 0.06);
+        const scarabR = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.22, 0.12), new THREE.MeshStandardMaterial({ color: 0xd97706, metalness: 0.9 }));
+        scarabR.position.set(0.28, 1.05, 0.06);
+        grp.add(scarabL);
+        grp.add(scarabR);
+        const ankhCore = new THREE.Mesh(new THREE.TorusGeometry(0.06, 0.02, 6, 12), new THREE.MeshStandardMaterial({ color: 0xfde047, emissive: 0xf59e0b, emissiveIntensity: 1.2 }));
+        ankhCore.position.set(0, 1.25, 0.22);
+        grp.add(ankhCore);
       }
 
       // Distinct tactical role underfoot glowing aura ring
@@ -5525,6 +5590,21 @@
       isHardwareFrameSync = !isHardwareFrameSync;
       sound.playSwitchClick();
       showToast(`⚡ 하드웨어 프레임 동기화 (DIRECT FLUSH): [${isHardwareFrameSync ? 'ON (초저지연)' : 'OFF'}]`);
+    }
+
+    function toggleGcInhibitor() {
+      isGcLockerActive = !isGcLockerActive;
+      sound.playSwitchClick();
+      showToast(`⚡ GC 스터터 락 (FLUID LOCK): [${isGcLockerActive ? 'ON (초안정)' : 'OFF'}]`);
+    }
+
+    function triggerColosseumLift() {
+      if (!colosseumLift || player.isDead) return;
+      sound.playDoorSlide();
+      player.velocity.y = 16.8;
+      player.velocity.z = (camera.position.z > 0) ? -18.0 : 18.0;
+      player.isGrounded = false;
+      showToast('⚡ [COLOSSEUM] 글래디에이터 유압 리프트 가동! (GLADIATOR LIFT)');
     }
 
     function triggerBastionSteamVent() {
@@ -5915,6 +5995,12 @@
       barriersList = [];
       activeSmokes.forEach(s => scene.remove(s.mesh));
       activeSmokes = [];
+      const spikeBanner = document.getElementById('spike-planted-banner');
+      if (spikeBanner) spikeBanner.style.display = 'none';
+      if (spikeState.beaconBeam) {
+        scene.remove(spikeState.beaconBeam);
+        spikeState.beaconBeam = null;
+      }
       if (spikeState.mesh) scene.remove(spikeState.mesh);
       spikeState.isPlanted = false;
       spikeState.plantProgress = 0;
@@ -5961,6 +6047,8 @@
       piazzaCanalBoost = null;
       if (bastionSteamVent && bastionSteamVent.ventMesh) scene.remove(bastionSteamVent.ventMesh);
       bastionSteamVent = null;
+      if (colosseumLift && colosseumLift.liftMesh) scene.remove(colosseumLift.liftMesh);
+      colosseumLift = null;
 
       if (lotusDoor && lotusDoor.mesh) {
         scene.remove(lotusDoor.mesh);
@@ -6296,6 +6384,19 @@
         sunLight.intensity = 1.5;
         sunLight.position.set(-20, 80, -30);
         scene.fog.color.setHex(0x1e293b);
+        scene.fog.density = 0.005;
+      } else if (mapKey === 'colosseum') {
+        // Roman Ancient Colosseum Arena / Imperial Amber Sunset & Golden Sky
+        grad.addColorStop(0, '#451a03');
+        grad.addColorStop(0.35, '#78350f');
+        grad.addColorStop(0.7, '#d97706');
+        grad.addColorStop(1, '#fde047');
+        ambientLight.color.setHex(0xfef08a);
+        ambientLight.intensity = 1.15;
+        sunLight.color.setHex(0xf59e0b);
+        sunLight.intensity = 1.5;
+        sunLight.position.set(15, 80, -25);
+        scene.fog.color.setHex(0x78350f);
         scene.fog.density = 0.005;
       } else {
         // Range: High-tech military hangar
@@ -7878,6 +7979,80 @@
         addPlatform(0, 0, 40, 40, 0.5, 16, matAlpineSnow);
         addPlatform(0, 0, -40, 40, 0.5, 16, matAlpineSnow);
       }
+      else if (mapKey === 'colosseum') {
+        // ==========================================================
+        // MAP 18: COLOSSEUM (콜로세움) - 로마 고대 검투 아레나 & 360도 원형 회랑 & 글래디에이터 리프트 [F]
+        // ==========================================================
+        const matArenaSand = new THREE.MeshStandardMaterial({ color: 0xd97706, roughness: 0.9 });
+        const matImperialMarble = new THREE.MeshStandardMaterial({ color: 0xf5f5f4, roughness: 0.4, metalness: 0.1 });
+        const matImperialGold = new THREE.MeshStandardMaterial({ color: 0xf59e0b, emissive: 0xd97706, emissiveIntensity: 0.6 });
+
+        // Outer Amphitheater Bleachers (120x120m)
+        addBox(0, -0.5, 0, 120, 1, 120, matArenaSand);
+        addBox(0, 8, -60, 120, 16, 2, matImperialMarble);
+        addBox(0, 8, 60, 120, 16, 2, matImperialMarble);
+        addBox(-60, 8, 0, 2, 16, 120, matImperialMarble);
+        addBox(60, 8, 0, 2, 16, 120, matImperialMarble);
+
+        // Center Mid Gladiator Hydraulic Lift at (0, 0, 0)
+        const liftBase = new THREE.Mesh(new THREE.CylinderGeometry(3.2, 3.8, 0.6, 16), matImperialMarble);
+        liftBase.position.set(0, 0.3, 0);
+        const liftPlate = new THREE.Mesh(new THREE.CylinderGeometry(2.6, 2.6, 0.2, 16), matImperialGold);
+        liftPlate.position.set(0, 0.65, 0);
+        scene.add(liftBase);
+        scene.add(liftPlate);
+        mapObjects.push(liftBase);
+        mapObjects.push(liftPlate);
+
+        addTextBillboard(0, 2.2, 0, '[F] 글래디에이터 승강 리프트 (GLADIATOR LIFT)', 1.5, '#ffd700');
+
+        colosseumLift = {
+          pos: new THREE.Vector3(0, 0.4, 0),
+          liftMesh: liftBase
+        };
+
+        // Mid Colosseum Stone Colonades
+        [-14, 14].forEach(cx => {
+          [-8, 8].forEach(cz => {
+            const pillar = new THREE.Mesh(new THREE.CylinderGeometry(0.6, 0.7, 7.0, 12), matImperialMarble);
+            pillar.position.set(cx, 3.5, cz);
+            scene.add(pillar);
+            mapObjects.push(pillar);
+            colliders.push({ box: new THREE.Box3().setFromObject(pillar), mesh: pillar });
+          });
+        });
+
+        // 360-degree Bleachers Balcony at y = 4.2
+        addPlatform(0, 0, 12, 42, 4.2, 6, matImperialMarble);
+        addRailing(0, 4.2, 9.1, 42, 'x');
+        addRailing(0, 4.2, 14.9, 42, 'x');
+        addStairs(18, 12, 0, 3.8, 4.2, 10, 10, 'x-');
+        addStairs(-18, 12, 0, 3.8, 4.2, 10, 10, 'x+');
+
+        // --- A SITE: IMPERIAL PODIUM & THRONE (x = 30, z = -20) ---
+        addPlatform(30, 0, -20, 24, 0.5, 24, matSiteFloor);
+        addTextBillboard(30, 0.2, -20, 'A SITE', 1.8);
+        spikeSiteAreas.push({ minX: 18, maxX: 42, minZ: -32, maxZ: -8, name: 'A SITE' });
+
+        addPlatform(36, 0, -30, 12, 4.0, 10, matImperialMarble);
+        addRailing(29.9, 4.0, -30, 10, 'z');
+        addStairs(36, -14, 0, 3.8, 4.0, 12, 12, 'z-');
+        addCrateStack(24, -20, 2.4);
+
+        // --- B SITE: GLADIATOR HYPOGEUM (x = -30, z = -20) ---
+        addPlatform(-30, 0, -20, 24, 0.5, 24, matSiteFloor);
+        addTextBillboard(-30, 0.2, -20, 'B SITE', 1.8);
+        spikeSiteAreas.push({ minX: -42, maxX: -18, minZ: -32, maxZ: -8, name: 'B SITE' });
+
+        addPlatform(-36, 0, -30, 12, 4.0, 10, matImperialMarble);
+        addRailing(-29.9, 4.0, -30, 10, 'z');
+        addStairs(-36, -14, 0, 3.8, 4.0, 12, 12, 'z-');
+        addCrateStack(-24, -20, 2.4);
+
+        // ATK & DEF Arena Spawns
+        addPlatform(0, 0, 40, 40, 0.5, 16, matArenaSand);
+        addPlatform(0, 0, -40, 40, 0.5, 16, matArenaSand);
+      }
       else if (mapKey === 'range') {
         addBox(0, -0.5, 0, 60, 1, 120, matConcrete);
         addBox(0, 7, -60, 60, 14, 2, matWallStone);
@@ -8249,6 +8424,13 @@
       if (e.code === 'F11') {
         e.preventDefault();
         toggleHardwareFrameSync();
+        return;
+      }
+
+      // [F12] Key: Quick Toggle GC Stutter Inhibitor & Buffer Pre-Cache
+      if (e.code === 'F12') {
+        e.preventDefault();
+        toggleGcInhibitor();
         return;
       }
 
@@ -10004,6 +10186,15 @@
         }
       }
 
+      // 14. Colosseum Gladiator Lift [F]
+      if (MAP_LIST[currentMapIndex] === 'colosseum' && colosseumLift) {
+        const pPos = camera.position;
+        if (pPos.distanceTo(colosseumLift.pos) < 5.0) {
+          triggerColosseumLift();
+          return;
+        }
+      }
+
       // 4. Ascent B Shutter Door
       if (!ascentDoor || ascentDoor.isDestroyed) return;
       const dist = camera.position.distanceTo(ascentDoor.switchPos);
@@ -10885,9 +11076,10 @@
       }
 
       if (!spikeState.isPlanted) {
-        if (inAnySite && myTeam === 'atk' && keys['Digit4']) {
+        const wantsPlant = (keys['Digit4'] || keys['KeyE'] || keys['KeyF']);
+        if (inAnySite && myTeam === 'atk' && wantsPlant) {
           progContainer.style.display = 'block';
-          progLabel.innerText = '스파이크 설치 중... (HOLD 4)';
+          progLabel.innerText = '스파이크 설치 중... (HOLD 4 / E / F)';
           spikeState.plantProgress += dt / 4.0;
           progFill.style.width = (spikeState.plantProgress * 100) + '%';
 
@@ -10901,6 +11093,8 @@
             radioVoice.speak('Spike planted!');
             showToast('스파이크가 설치되었습니다! (SPIKE PLANTED)');
             renderTopAgentsBar();
+            const spikeBanner = document.getElementById('spike-planted-banner');
+            if (spikeBanner) spikeBanner.style.display = 'block';
           }
         } else {
           spikeState.plantProgress = Math.max(0, spikeState.plantProgress - dt * 2);
@@ -10908,16 +11102,27 @@
         }
       } else {
         spikeState.timer -= dt;
+        const spikeBanner = document.getElementById('spike-planted-banner');
+        if (spikeBanner) {
+          spikeBanner.style.display = 'block';
+          const liveTimer = document.getElementById('spike-live-timer');
+          if (liveTimer) liveTimer.innerText = Math.max(0, spikeState.timer).toFixed(1);
+        }
+
         const beepInterval = Math.max(0.12, (spikeState.timer / 45) * 1.0);
         if (performance.now() / 1000 - spikeState.lastBeep > beepInterval) {
           spikeState.lastBeep = performance.now() / 1000;
           sound.playSpikeBeep(Math.floor((45 - spikeState.timer) / 8));
+          if (spikeState.mesh) {
+            spawnImpactSparks(spikeState.mesh.position.clone().add(new THREE.Vector3(0, 0.1, 0)), new THREE.Vector3(0, 1, 0), false);
+          }
         }
 
         const distToSpike = spikeState.mesh ? camera.position.distanceTo(spikeState.mesh.position) : 999;
-        if (distToSpike < 4 && myTeam === 'def' && keys['Digit4']) {
+        const wantsDefuse = (keys['Digit4'] || keys['KeyE'] || keys['KeyF']);
+        if (distToSpike < 4 && myTeam === 'def' && wantsDefuse) {
           progContainer.style.display = 'block';
-          progLabel.innerText = '스파이크 해체 중... (HOLD 4)';
+          progLabel.innerText = '스파이크 해체 중... (HOLD 4 / E / F)';
           const prevDefuse = spikeState.defuseProgress;
           spikeState.defuseProgress += dt / 7.0;
 
@@ -10930,6 +11135,7 @@
           progFill.style.width = (spikeState.defuseProgress * 100) + '%';
 
           if (spikeState.defuseProgress >= 1) {
+            if (spikeBanner) spikeBanner.style.display = 'none';
             triggerRoundCeremony(true, 'SPIKE DEFUSED // DEFENDERS WIN');
           }
         } else {
@@ -10942,6 +11148,7 @@
         }
 
         if (spikeState.timer <= 0) {
+          if (spikeBanner) spikeBanner.style.display = 'none';
           sound.playSpikeDetonate();
           addCameraTrauma(0.9);
           triggerRoundCeremony(myTeam === 'atk', 'SPIKE DETONATED // SITE DESTROYED');
@@ -10986,6 +11193,16 @@
 
       spikeGroup.position.set(x, 0, z);
       scene.add(spikeGroup);
+      // Skyward Radianite Beacon Beam (120m)
+      const beamGeo = new THREE.CylinderGeometry(0.14, 0.45, 120, 16);
+      const beamMat = new THREE.MeshBasicMaterial({
+        color: 0xff0044, transparent: true, opacity: 0.6, side: THREE.DoubleSide
+      });
+      const beamMesh = new THREE.Mesh(beamGeo, beamMat);
+      beamMesh.position.y = 60;
+      spikeGroup.add(beamMesh);
+      spikeState.beaconBeam = beamMesh;
+
       spikeState.mesh = spikeGroup;
       spikeState.ring1 = ring1;
       spikeState.ring2 = ring2;
@@ -11208,6 +11425,16 @@
         { label: 'CRYO BUNKER', x: -36, z: -30, color: '#64748b' },
         { label: 'STEAM VENT [F]', x: 0, z: 0, color: '#00f0ff' },
         { label: 'CATWALK', x: 0, z: 10, color: '#94a3b8' },
+        { label: 'DEF SPAWN', x: 0, z: -40, color: '#00ffaa' },
+        { label: 'ATK SPAWN', x: 0, z: 40, color: '#ff4655' }
+      ],
+      colosseum: [
+        { label: 'A SITE', x: 30, z: -20, color: '#ffd700' },
+        { label: 'IMPERIAL PODIUM', x: 36, z: -30, color: '#f59e0b' },
+        { label: 'B SITE', x: -30, z: -20, color: '#ffd700' },
+        { label: 'HYPOGEUM', x: -36, z: -30, color: '#f59e0b' },
+        { label: 'GLADIATOR LIFT [F]', x: 0, z: 0, color: '#00f0ff' },
+        { label: 'BLEACHERS', x: 0, z: 12, color: '#d97706' },
         { label: 'DEF SPAWN', x: 0, z: -40, color: '#00ffaa' },
         { label: 'ATK SPAWN', x: 0, z: 40, color: '#ff4655' }
       ],
@@ -11771,6 +11998,13 @@
           if (MAP_LIST[currentMapIndex] === 'bastion' && bastionSteamVent && !player.isDead) {
             if (Math.abs(camera.position.x) < 3.2 && Math.abs(camera.position.z) < 3.2 && Math.abs(camera.position.y - 1.7) < 1.2) {
               if (player.velocity.y <= 0) triggerBastionSteamVent();
+            }
+          }
+
+          // Auto-launch when stepping onto Colosseum Gladiator Lift
+          if (MAP_LIST[currentMapIndex] === 'colosseum' && colosseumLift && !player.isDead) {
+            if (Math.abs(camera.position.x) < 3.2 && Math.abs(camera.position.z) < 3.2 && Math.abs(camera.position.y - 1.7) < 1.2) {
+              if (player.velocity.y <= 0) triggerColosseumLift();
             }
           }
         }
