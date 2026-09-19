@@ -1553,6 +1553,152 @@
     .color-swatch:hover { transform: scale(1.15); }
     .color-swatch.active-swatch { border-color: #fff; box-shadow: 0 0 8px #fff; }
 
+    /* ══════ GRAPHICS & VISUAL SETTINGS SUITE MODAL ([F2]) ══════ */
+    #gfx-modal {
+      position: absolute;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(5, 8, 14, 0.94);
+      z-index: 60;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      backdrop-filter: blur(18px);
+    }
+    .gfx-container {
+      background: linear-gradient(180deg, rgba(14, 22, 32, 0.98) 0%, rgba(8, 12, 18, 0.99) 100%);
+      border: 1px solid rgba(0, 240, 255, 0.3);
+      border-top: 4px solid var(--val-cyan);
+      box-shadow: 0 0 60px rgba(0, 0, 0, 0.9), 0 0 35px rgba(0, 240, 255, 0.25);
+      padding: 26px 36px;
+      max-width: 880px;
+      width: 92%;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    .gfx-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+      padding-bottom: 12px;
+    }
+    .gfx-title {
+      font-family: var(--font-title);
+      font-size: 34px;
+      color: #fff;
+      letter-spacing: 2px;
+      line-height: 1;
+    }
+    .gfx-title span {
+      color: var(--val-cyan);
+    }
+    .gfx-subtitle {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: #8899a6;
+      letter-spacing: 1px;
+      margin-top: 4px;
+    }
+    .gfx-presets-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+      margin-bottom: 6px;
+    }
+    .gfx-preset-card {
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      padding: 14px 12px;
+      cursor: pointer;
+      position: relative;
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .gfx-preset-card:hover {
+      background: rgba(0, 240, 255, 0.08);
+      border-color: var(--val-cyan);
+      transform: translateY(-2px);
+    }
+    .gfx-preset-card.active {
+      background: rgba(0, 240, 255, 0.15);
+      border: 2px solid var(--val-cyan);
+      box-shadow: 0 0 16px rgba(0, 240, 255, 0.4);
+    }
+    .gpc-badge {
+      font-family: var(--font-mono);
+      font-size: 9px;
+      font-weight: 800;
+      color: var(--val-darker);
+      background: var(--val-cyan);
+      padding: 1px 6px;
+      display: inline-block;
+      align-self: flex-start;
+      letter-spacing: 0.5px;
+    }
+    .gpc-icon {
+      font-size: 24px;
+      line-height: 1;
+    }
+    .gpc-name {
+      font-family: var(--font-hud);
+      font-size: 15px;
+      font-weight: 800;
+      color: #fff;
+    }
+    .gpc-desc {
+      font-size: 11px;
+      color: #8899a6;
+      line-height: 1.3;
+    }
+    .gfx-settings-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 18px;
+      background: rgba(0, 0, 0, 0.3);
+      padding: 14px 18px;
+      border: 1px solid rgba(255, 255, 255, 0.06);
+    }
+    .gfx-col {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .gfx-row {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .gfx-label {
+      font-size: 13px;
+      font-weight: 700;
+      color: #c0cad4;
+    }
+    .gfx-select {
+      background: #080c12;
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      color: var(--val-cyan);
+      font-family: var(--font-hud);
+      font-size: 13px;
+      padding: 6px 10px;
+      outline: none;
+      cursor: pointer;
+      border-radius: 0;
+    }
+    .gfx-select:focus {
+      border-color: var(--val-cyan);
+      box-shadow: 0 0 10px rgba(0, 240, 255, 0.4);
+    }
+    .gfx-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-top: 1px solid rgba(255, 255, 255, 0.12);
+      padding-top: 14px;
+    }
+
     /* 5V5 CUSTOM GAME LOBBY - HIGH-END ESPORTS PREMIER SUITE */
     #custom-lobby {
       position: absolute;
@@ -2506,6 +2652,118 @@
     </div>
   </div>
 
+  <!-- DEDICATED GRAPHICS SETTINGS SUITE MODAL ([F2] / [⚙️ 그래픽 설정]) -->
+  <div id="gfx-modal">
+    <div class="gfx-container val-clip-tl-br">
+      <div class="gfx-header">
+        <div>
+          <div class="gfx-title">GRAPHICS & VISUAL ENGINE // <span>그래픽 품질 및 연출 설정</span></div>
+          <div class="gfx-subtitle">REAL-TIME THREE.JS SHADER, RESOLUTION, SHADOWS, PARTICLES & DYNAMIC LIGHTING</div>
+        </div>
+        <button id="gfx-close-btn" class="val-clip" onclick="closeGraphicsModal()" style="background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.2); color:#fff; padding:6px 14px; cursor:pointer; font-family:var(--font-mono); font-size:12px;">✕ 닫기 [ESC / F2]</button>
+      </div>
+
+      <!-- 4 Quick Presets -->
+      <div style="font-size:12px; color:var(--val-gold); font-weight:800; letter-spacing:1px; margin-top:6px;">⚡ 원클릭 퀵 프리셋 (ONE-CLICK PRESETS)</div>
+      <div class="gfx-presets-grid">
+        <div class="gfx-preset-card" id="gpc-potato" data-preset="potato" onclick="selectGfxPreset('potato')">
+          <div class="gpc-badge">MAX FPS</div>
+          <div class="gpc-icon">🚀</div>
+          <div class="gpc-name">감자 / 초저사양</div>
+          <div class="gpc-desc">0.7x 해상도 / 그림자 OFF / 동적조명 OFF / 240+ FPS 보장</div>
+        </div>
+        <div class="gfx-preset-card" id="gpc-esports" data-preset="esports" onclick="selectGfxPreset('esports')">
+          <div class="gpc-badge">COMPETITIVE</div>
+          <div class="gpc-icon">⚡</div>
+          <div class="gpc-name">e스포츠 표준</div>
+          <div class="gpc-desc">1.0x 네이티브 / 144Hz 락 / 입력지연 최소화 / 하이 콘트라스트</div>
+        </div>
+        <div class="gfx-preset-card" id="gpc-high" data-preset="high" onclick="selectGfxPreset('high')">
+          <div class="gpc-badge">BALANCED</div>
+          <div class="gpc-icon">✨</div>
+          <div class="gpc-name">고급 화질</div>
+          <div class="gpc-desc">1.25x 스케일 / 소프트 섀도우 / 파티클 200% / 동적 광원 ON</div>
+        </div>
+        <div class="gfx-preset-card active" id="gpc-ultra" data-preset="ultra" onclick="selectGfxPreset('ultra')">
+          <div class="gpc-badge" style="background:linear-gradient(135deg,#ff4655,#ffc83b); color:#000;">ULTRA VIVID</div>
+          <div class="gpc-icon">🔥</div>
+          <div class="gpc-name">울트라 화려함</div>
+          <div class="gpc-desc">1.5x 슈퍼샘플링 / 4096 그림자 / 파티클 300% / 풀 광원 & 룬 각인</div>
+        </div>
+      </div>
+
+      <!-- Granular Settings Grid -->
+      <div class="gfx-settings-grid">
+        <div class="gfx-col">
+          <div class="gfx-row">
+            <span class="gfx-label">렌더링 해상도 (Render Scale)</span>
+            <select id="gfx-opt-scale" class="gfx-select" onchange="updateCustomGfxSetting('renderScale', parseFloat(this.value))">
+              <option value="0.5">50% (초저사양 / 극한 프레임)</option>
+              <option value="0.75">75% (성능 우선)</option>
+              <option value="1.0">100% (네이티브 표준)</option>
+              <option value="1.25">125% (고선명 e스포츠)</option>
+              <option value="1.5" selected>150% (울트라 슈퍼샘플링)</option>
+              <option value="2.0">200% (레티나 극초고화질)</option>
+            </select>
+          </div>
+          <div class="gfx-row">
+            <span class="gfx-label">실시간 동적 조명 (Dynamic PointLights)</span>
+            <select id="gfx-opt-lights" class="gfx-select" onchange="updateCustomGfxSetting('dynamicLights', this.value === 'true')">
+              <option value="true" selected>켜짐 (ON - 스킬/폭발 시 맵 발광)</option>
+              <option value="false">꺼짐 (OFF - 프레임 절약)</option>
+            </select>
+          </div>
+          <div class="gfx-row">
+            <span class="gfx-label">파티클 폭발량 & 밀도 (Particle Density)</span>
+            <select id="gfx-opt-particles" class="gfx-select" onchange="updateCustomGfxSetting('particleDensity', parseFloat(this.value))">
+              <option value="3.0" selected>300% (울트라 파티클 분출)</option>
+              <option value="2.0">200% (풍성한 화려함)</option>
+              <option value="1.0">100% (표준)</option>
+              <option value="0.5">50% (간소화)</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="gfx-col">
+          <div class="gfx-row">
+            <span class="gfx-label">그림자 품질 (Shadow Quality)</span>
+            <select id="gfx-opt-shadows" class="gfx-select" onchange="updateCustomGfxSetting('shadows', this.value)">
+              <option value="ultra" selected>울트라 부드러운 그림자 (4096)</option>
+              <option value="soft">소프트 섀도우 (2048)</option>
+              <option value="hard">기본 그림자 (1024)</option>
+              <option value="off">그림자 끔 (OFF)</option>
+            </select>
+          </div>
+          <div class="gfx-row">
+            <span class="gfx-label">화면 진동 & 엣지 플래시 (Screen Shake/Flash)</span>
+            <select id="gfx-opt-shake" class="gfx-select" onchange="updateCustomGfxSetting('screenShake', parseFloat(this.value))">
+              <option value="1.5" selected>150% (극대화 시네마틱 타격감)</option>
+              <option value="1.0">100% (표준 타격감)</option>
+              <option value="0.5">50% (약하게)</option>
+              <option value="0.0">0% (진동 끔)</option>
+            </select>
+          </div>
+          <div class="gfx-row">
+            <span class="gfx-label">포스트 컬러 필터 (Color Profile)</span>
+            <select id="gfx-opt-color" class="gfx-select" onchange="updateCustomGfxSetting('colorProfile', this.value)">
+              <option value="cyberpunk" selected>사이버펑크 네온 (CYBERPUNK)</option>
+              <option value="esports">e스포츠 바이브런트 (VIBRANT)</option>
+              <option value="none">표준 컬러 (STANDARD)</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- Action Footer -->
+      <div class="gfx-footer">
+        <div style="font-size:12px; color:#8899a6;">
+          💡 실시간 즉시 적용됨 &bull; 단축키: <b style="color:var(--val-cyan);">[F2]</b> 누르면 언제든 즉시 호출
+        </div>
+        <button id="gfx-apply-btn" class="val-clip" onclick="closeGraphicsModal()" style="background:linear-gradient(135deg,var(--val-cyan),#0077b6); color:#000; font-weight:800; font-size:15px; padding:10px 28px; cursor:pointer; border:none;">설정 완료 (SAVE & CLOSE)</button>
+      </div>
+    </div>
+  </div>
+
   <!-- Scoreboard Overlay ([TAB]) -->
   <!-- In-Game 10-Player Tactical Scoreboard -->
   <div id="scoreboard-overlay">
@@ -2608,6 +2866,7 @@
 
       <div class="map-badge" id="hud-map-badge">ASCENT</div>
       <div class="map-badge" id="hud-mode-badge" style="background: rgba(255, 70, 85, 0.2); border: 1px solid #ff4655; color: #ff4655; margin-left: 8px; cursor: pointer;" onclick="cycleGameMode()">COMPETITIVE</div>
+      <div class="map-badge" id="hud-gfx-badge" style="background: rgba(0, 240, 255, 0.2); border: 1px solid #00f0ff; color: #00f0ff; margin-left: 8px; cursor: pointer;" onclick="openGraphicsModal()">⚙️ 그래픽 [F2]</div>
     </div>
     <div id="spike-planted-banner">🔴 SPIKE PLANTED // <span id="spike-live-timer">45.0</span>s</div>
 
@@ -2819,6 +3078,7 @@
       <div style="font-size: 13px; color:#8899a6;">
         내 슬롯: <b style="color:var(--val-cyan);" id="my-slot-desc">공격팀 1번 (JETT)</b>
       </div>
+      <button id="btn-open-graphics-modal" class="val-clip-lg" style="background:linear-gradient(135deg,#00b4d8,#0077b6); color:#fff; font-weight:bold; padding:12px 24px; cursor:pointer; margin-right:12px; font-family:'Oswald',sans-serif; letter-spacing:0.05em; border:1px solid #00f0ff; box-shadow:0 0 15px rgba(0,240,255,0.4);" onclick="openGraphicsModal()">⚙️ 그래픽 설정 (GRAPHICS)</button>
       <button id="btn-open-agent-select" class="val-clip-lg" style="background:linear-gradient(135deg,#ff4655,#cc2030); color:#fff; font-weight:bold; padding:12px 24px; cursor:pointer; margin-right:12px; font-family:'Oswald',sans-serif; letter-spacing:0.05em;">👤 요원 선택 (SELECT AGENT)</button>
         <button id="btn-start-game" class="val-clip-lg">게임 시작 (START MATCH)</button>
     </div>
@@ -12741,8 +13001,24 @@
         return;
       }
 
+      // F2 Quick Graphics Settings Hotkey
+      if (e.code === 'F2') {
+        const gfxM = document.getElementById('gfx-modal');
+        if (gfxM && gfxM.style.display === 'flex') {
+          closeGraphicsModal();
+        } else {
+          openGraphicsModal();
+        }
+        return;
+      }
+
       // Robust Escape Key Handling for All Menus & Settings
       if (e.code === 'Escape') {
+        const gfxModal = document.getElementById('gfx-modal');
+        if (gfxModal && gfxModal.style.display === 'flex') {
+          closeGraphicsModal();
+          return;
+        }
         const radioModal = document.getElementById('radio-wheel-modal');
         if (radioModal && radioModal.style.display === 'flex') {
           toggleRadioWheel();
@@ -14120,8 +14396,17 @@
       }
     }
 
-    function spawnImpactSparks(pos, normal, isFlesh = false) {
-      const count = isFlesh ? 12 : 8;
+    function spawnImpactSparks(pos, normal, isFlesh = false, isHeadshot = false) {
+      const pMult = (window.GRAPHICS_CONFIG && window.GRAPHICS_CONFIG.particleDensity) ? window.GRAPHICS_CONFIG.particleDensity : 1.0;
+      const count = Math.round((isHeadshot ? 28 : (isFlesh ? 14 : 10)) * pMult);
+
+      if (isHeadshot) {
+        spawnDynamicLight(pos, 0xffd700, 4.5, 14, 0.35);
+      } else if (isFlesh) {
+        spawnDynamicLight(pos, 0xff1e38, 2.2, 8, 0.15);
+      } else {
+        spawnDynamicLight(pos, 0xffaa22, 1.6, 6, 0.12);
+      }
       const pColor = isFlesh ? 0xff1e38 : 0xffaa22;
       const pGeo = new THREE.BoxGeometry(0.035, 0.035, 0.035);
       const pMat = new THREE.MeshBasicMaterial({ color: pColor });
@@ -14242,13 +14527,18 @@
     }
 
     function createBulletTracer(origin, direction) {
-      const tracerColor = (currentSkin && currentSkin.flashColor) ? currentSkin.flashColor : 0xffea00;
-      const tGeo = new THREE.CylinderGeometry(0.018, 0.018, 1.4, 6);
+      const tracerColor = (currentSkin && currentSkin.flashColor) ? currentSkin.flashColor : 0x00f0ff;
+      const tGeo = new THREE.CylinderGeometry(0.022, 0.022, 1.8, 8);
       const tMat = new THREE.MeshBasicMaterial({
         color: tracerColor, transparent: true, opacity: 0.95
       });
       const tracer = new THREE.Mesh(tGeo, tMat);
       tracer.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), direction);
+
+      // Glowing white laser core inside tracer
+      const coreGeo = new THREE.CylinderGeometry(0.010, 0.010, 1.9, 6);
+      const coreMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
+      tracer.add(new THREE.Mesh(coreGeo, coreMat));
 
       const spawnPos = origin.clone().add(new THREE.Vector3(0.2, -0.12, -0.45).applyQuaternion(camera.quaternion));
       tracer.position.copy(spawnPos);
@@ -14256,10 +14546,13 @@
 
       activeParticles.push({
         mesh: tracer,
-        vel: direction.clone().multiplyScalar(110),
-        life: 0.22,
-        maxLife: 0.22
+        vel: direction.clone().multiplyScalar(125),
+        life: 0.24,
+        maxLife: 0.24
       });
+
+      // Muzzle flash real-time point light
+      spawnDynamicLight(spawnPos, tracerColor, 2.0, 8, 0.09);
     }
 
     function damagePracticeBot(pBot, amount, isHeadshot) {
@@ -15901,9 +16194,36 @@
       el.classList.add('on');
       _ultCutTimer = 1.25;
       slowMo(0.35, 0.55);
-      edgeFlash(hex, 0.92);
-      screenShake(0.7);
+      edgeFlash(hex, 0.98);
+      screenShake(0.9);
       if (sound && sound.ultCast) sound.ultCast();
+
+      // Ultra Battlefield Shockwave Dome
+      if (scene) {
+        const hexInt = parseInt(hex.replace('#', ''), 16);
+        spawnDynamicLight(camera.position, hexInt, 8.5, 50, 1.6);
+        const domeGeo = new THREE.SphereGeometry(1.5, 32, 16);
+        const domeMat = new THREE.MeshBasicMaterial({
+          color: hexInt, transparent: true, opacity: 0.75, wireframe: true, depthWrite: false
+        });
+        const dome = new THREE.Mesh(domeGeo, domeMat);
+        dome.position.copy(camera.position);
+        scene.add(dome);
+
+        let domeT = 0;
+        const domeIv = setInterval(() => {
+          domeT += 0.03;
+          if (domeT >= 1.0) {
+            clearInterval(domeIv);
+            scene.remove(dome);
+            domeGeo.dispose(); domeMat.dispose();
+          } else {
+            const s = 1.0 + domeT * 32.0;
+            dome.scale.set(s, s, s);
+            domeMat.opacity = 0.75 * (1.0 - domeT);
+          }
+        }, 20);
+      }
     }
 
     let _edgeTimer = 0;
@@ -15920,8 +16240,306 @@
       addCameraTrauma(amount * 1.5);
     }
 
+    /* ══════ GRAPHICS SETTINGS & CONFIGURATION ENGINE ══════ */
+    const GFX_PRESETS = {
+      potato: {
+        id: 'potato',
+        name: '🚀 감자 / 초저사양 (POTATO 240+ FPS)',
+        renderScale: 0.7,
+        shadows: 'off',
+        particleDensity: 0.5,
+        dynamicLights: false,
+        vfxIntensity: 'low',
+        screenShake: 0.5,
+        bloom: 'off',
+        colorProfile: 'none',
+        fpsLimit: '240'
+      },
+      esports: {
+        id: 'esports',
+        name: '⚡ e스포츠 표준 (COMPETITIVE 144Hz)',
+        renderScale: 1.0,
+        shadows: 'hard',
+        particleDensity: 1.0,
+        dynamicLights: true,
+        vfxIntensity: 'medium',
+        screenShake: 1.0,
+        bloom: 'standard',
+        colorProfile: 'esports',
+        fpsLimit: '144'
+      },
+      high: {
+        id: 'high',
+        name: '✨ 고급 화질 (HIGH QUALITY)',
+        renderScale: 1.25,
+        shadows: 'soft',
+        particleDensity: 2.0,
+        dynamicLights: true,
+        vfxIntensity: 'high',
+        screenShake: 1.2,
+        bloom: 'strong',
+        colorProfile: 'esports',
+        fpsLimit: '144'
+      },
+      ultra: {
+        id: 'ultra',
+        name: '🔥 울트라 화려함 (ULTRA SPECTACULAR)',
+        renderScale: 1.5,
+        shadows: 'ultra',
+        particleDensity: 3.0,
+        dynamicLights: true,
+        vfxIntensity: 'ultra',
+        screenShake: 1.5,
+        bloom: 'ultra',
+        colorProfile: 'cyberpunk',
+        fpsLimit: '0'
+      }
+    };
+
+    let GRAPHICS_CONFIG = Object.assign({}, GFX_PRESETS.ultra);
+    try {
+      const savedGfx = localStorage.getItem('val_graphics_cfg_v2');
+      if (savedGfx) {
+        GRAPHICS_CONFIG = Object.assign(GRAPHICS_CONFIG, JSON.parse(savedGfx));
+      }
+    } catch (e) {}
+
+    function applyGraphicsConfig(config, notify = true) {
+      if (!config) return;
+      GRAPHICS_CONFIG = Object.assign(GRAPHICS_CONFIG, config);
+
+      // 1. Resolution / Pixel Ratio
+      if (renderer) {
+        const dpr = window.devicePixelRatio || 1;
+        const scale = GRAPHICS_CONFIG.renderScale || 1.0;
+        renderer.setPixelRatio(Math.min(dpr * 1.5, scale));
+      }
+
+      // 2. Shadows
+      if (renderer && renderer.shadowMap) {
+        if (GRAPHICS_CONFIG.shadows === 'off') {
+          renderer.shadowMap.enabled = false;
+        } else if (GRAPHICS_CONFIG.shadows === 'hard') {
+          renderer.shadowMap.enabled = true;
+          renderer.shadowMap.type = THREE.BasicShadowMap;
+        } else {
+          renderer.shadowMap.enabled = true;
+          renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+        }
+      }
+
+      // 3. Fog density
+      if (scene && scene.fog) {
+        scene.fog.density = (GRAPHICS_CONFIG.vfxIntensity === 'ultra') ? 0.005 : 0.009;
+      }
+
+      // 4. Color profile & bloom filter
+      if (renderer && renderer.domElement) {
+        let f = 'none';
+        if (GRAPHICS_CONFIG.colorProfile === 'cyberpunk') {
+          f = 'saturate(1.55) contrast(1.18) hue-rotate(10deg)';
+        } else if (GRAPHICS_CONFIG.colorProfile === 'esports') {
+          f = 'saturate(1.35) contrast(1.1) brightness(1.05)';
+        }
+        if (GRAPHICS_CONFIG.bloom === 'ultra') {
+          f += (f === 'none' ? '' : ' ') + 'drop-shadow(0 0 1px rgba(0,240,255,0.35))';
+        }
+        renderer.domElement.style.filter = f;
+      }
+
+      // 5. Update UI inputs
+      syncGfxModalUI();
+
+      try {
+        localStorage.setItem('val_graphics_cfg_v2', JSON.stringify(GRAPHICS_CONFIG));
+      } catch (e) {}
+
+      if (notify && typeof showToast === 'function') {
+        showToast('🎨 [그래픽 적용] ' + (GRAPHICS_CONFIG.name || '품질 설정 변경 완료'));
+      }
+    }
+
+    function syncGfxModalUI() {
+      const sScale = document.getElementById('gfx-opt-scale');
+      const sLights = document.getElementById('gfx-opt-lights');
+      const sParticles = document.getElementById('gfx-opt-particles');
+      const sShadows = document.getElementById('gfx-opt-shadows');
+      const sShake = document.getElementById('gfx-opt-shake');
+      const sColor = document.getElementById('gfx-opt-color');
+
+      const matchSelect = (sel, target) => {
+        if (!sel) return;
+        for (let i = 0; i < sel.options.length; i++) {
+          if (parseFloat(sel.options[i].value) === parseFloat(target) || sel.options[i].value === String(target)) {
+            sel.selectedIndex = i;
+            return;
+          }
+        }
+      };
+
+      matchSelect(sScale, GRAPHICS_CONFIG.renderScale);
+      if (sLights) sLights.value = String(GRAPHICS_CONFIG.dynamicLights);
+      matchSelect(sParticles, GRAPHICS_CONFIG.particleDensity);
+      if (sShadows) sShadows.value = GRAPHICS_CONFIG.shadows;
+      matchSelect(sShake, GRAPHICS_CONFIG.screenShake);
+      if (sColor) sColor.value = GRAPHICS_CONFIG.colorProfile;
+
+      // Highlight active preset card if matches
+      ['potato', 'esports', 'high', 'ultra'].forEach(k => {
+        const card = document.getElementById('gpc-' + k);
+        if (card) {
+          const match = (GRAPHICS_CONFIG.id === k);
+          card.classList.toggle('active', match);
+        }
+      });
+    }
+
+    function selectGfxPreset(presetId) {
+      if (!GFX_PRESETS[presetId]) return;
+      applyGraphicsConfig(GFX_PRESETS[presetId], true);
+      if (sound && sound.playSwitchClick) sound.playSwitchClick();
+    }
+
+    function updateCustomGfxSetting(key, val) {
+      GRAPHICS_CONFIG[key] = val;
+      GRAPHICS_CONFIG.id = 'custom';
+      applyGraphicsConfig(GRAPHICS_CONFIG, true);
+    }
+
+    function openGraphicsModal() {
+      const m = document.getElementById('gfx-modal');
+      if (!m) return;
+      syncGfxModalUI();
+      m.style.display = 'flex';
+      if (document.exitPointerLock) document.exitPointerLock();
+      if (sound && sound.playSwitchClick) sound.playSwitchClick();
+    }
+
+    function closeGraphicsModal() {
+      const m = document.getElementById('gfx-modal');
+      if (m) m.style.display = 'none';
+      const lobby = document.getElementById('custom-lobby');
+      if (lobby && lobby.style.display === 'none' && !player.isDead) {
+        requestGamePointerLock();
+      }
+      if (sound && sound.playSwitchClick) sound.playSwitchClick();
+    }
+
+    /* ══════ ULTRA SPECTACULAR VISUAL ENGINE (VFX & DYNAMIC LIGHTING) ══════ */
+    const activeDynamicLights = [];
+
+    function spawnDynamicLight(pos, colorInt = 0xff5a3c, intensity = 4.5, distance = 25, duration = 0.6) {
+      if (!GRAPHICS_CONFIG.dynamicLights || !scene) return null;
+      const light = new THREE.PointLight(colorInt, intensity, distance, 1.8);
+      light.position.copy(pos);
+      light.position.y += 0.8;
+      scene.add(light);
+      activeDynamicLights.push(light);
+
+      const startTime = performance.now();
+      const interval = setInterval(() => {
+        const elapsed = (performance.now() - startTime) / 1000;
+        const progress = elapsed / duration;
+        if (progress >= 1.0) {
+          clearInterval(interval);
+          scene.remove(light);
+          const idx = activeDynamicLights.indexOf(light);
+          if (idx !== -1) activeDynamicLights.splice(idx, 1);
+        } else {
+          const flicker = 1.0 + 0.15 * Math.sin(progress * 35);
+          light.intensity = intensity * Math.pow(1.0 - progress, 1.4) * flicker;
+        }
+      }, 20);
+      return light;
+    }
+
+    function spawnGroundRuneDecal(pos, colorInt = 0x00f0ff, scale = 3.5, duration = 1.8) {
+      if (GRAPHICS_CONFIG.particleDensity < 0.5 || !scene) return;
+      const runeGroup = new THREE.Group();
+      runeGroup.position.set(pos.x, 0.08, pos.z);
+
+      // Concentric rings with rotating magical runic geometry
+      const outerRingGeo = new THREE.RingGeometry(scale * 0.9, scale * 1.05, 32);
+      const outerMat = new THREE.MeshBasicMaterial({
+        color: colorInt, transparent: true, opacity: 0.85, side: THREE.DoubleSide, depthWrite: false
+      });
+      const outerRing = new THREE.Mesh(outerRingGeo, outerMat);
+      outerRing.rotation.x = -Math.PI / 2;
+      runeGroup.add(outerRing);
+
+      const innerRingGeo = new THREE.RingGeometry(scale * 0.45, scale * 0.55, 24);
+      const innerMat = new THREE.MeshBasicMaterial({
+        color: 0xffffff, transparent: true, opacity: 0.9, side: THREE.DoubleSide, depthWrite: false
+      });
+      const innerRing = new THREE.Mesh(innerRingGeo, innerMat);
+      innerRing.rotation.x = -Math.PI / 2;
+      runeGroup.add(innerRing);
+
+      for (let i = 0; i < 4; i++) {
+        const spokeGeo = new THREE.PlaneGeometry(scale * 0.12, scale * 1.8);
+        const spokeMat = new THREE.MeshBasicMaterial({
+          color: colorInt, transparent: true, opacity: 0.75, side: THREE.DoubleSide, depthWrite: false
+        });
+        const spoke = new THREE.Mesh(spokeGeo, spokeMat);
+        spoke.rotation.x = -Math.PI / 2;
+        spoke.rotation.z = (i * Math.PI) / 4;
+        runeGroup.add(spoke);
+      }
+
+      scene.add(runeGroup);
+
+      const startTime = performance.now();
+      const interval = setInterval(() => {
+        const elapsed = (performance.now() - startTime) / 1000;
+        const progress = elapsed / duration;
+        if (progress >= 1.0) {
+          clearInterval(interval);
+          scene.remove(runeGroup);
+          outerRingGeo.dispose(); outerMat.dispose();
+          innerRingGeo.dispose(); innerMat.dispose();
+        } else {
+          runeGroup.rotation.y += 0.035;
+          const fade = Math.pow(1.0 - progress, 1.2);
+          outerMat.opacity = 0.85 * fade;
+          innerMat.opacity = 0.9 * fade;
+          const s = 1.0 + progress * 0.25;
+          runeGroup.scale.set(s, 1.0, s);
+        }
+      }, 20);
+    }
+
+    function verticalEnergyPillar(pos, colorInt = 0x00f0ff, height = 22, duration = 0.7) {
+      if (GRAPHICS_CONFIG.particleDensity < 0.5 || !scene) return;
+      const cylGeo = new THREE.CylinderGeometry(0.35, 1.8, height, 16, 1, true);
+      const cylMat = new THREE.MeshBasicMaterial({
+        color: colorInt, transparent: true, opacity: 0.85, side: THREE.DoubleSide, depthWrite: false
+      });
+      const pillar = new THREE.Mesh(cylGeo, cylMat);
+      pillar.position.set(pos.x, height / 2, pos.z);
+      scene.add(pillar);
+
+      const startTime = performance.now();
+      const interval = setInterval(() => {
+        const elapsed = (performance.now() - startTime) / 1000;
+        const progress = elapsed / duration;
+        if (progress >= 1.0) {
+          clearInterval(interval);
+          scene.remove(pillar);
+          cylGeo.dispose(); cylMat.dispose();
+        } else {
+          const s = 1.0 + progress * 2.2;
+          pillar.scale.set(s, 1.0, s);
+          cylMat.opacity = Math.max(0, 0.85 * (1.0 - progress));
+        }
+      }, 20);
+    }
+
     // Procedural 3D Visual Bursts and Shockwaves
     function castBurst(x, z, colorInt = 0xff5a3c, scale = 1.0) {
+      const bPos = new THREE.Vector3(x, 0.15, z);
+      spawnDynamicLight(bPos, colorInt, 5.5 * scale, 26 * scale, 0.75);
+      spawnGroundRuneDecal(bPos, colorInt, 3.4 * scale, 1.8);
+      verticalEnergyPillar(bPos, colorInt, 22 * scale, 0.65);
       for (let i = 0; i < 3; i++) {
         const ringGeo = new THREE.RingGeometry(0.5, 1.1, 36);
         const ringMat = new THREE.MeshBasicMaterial({
@@ -16607,6 +17225,16 @@
     window.getAgentDef = getAgentDef;
     window.agentPortrait = agentPortrait;
     window.openAgentSelectModal = openAgentSelectModal;
+    window.openGraphicsModal = openGraphicsModal;
+    window.closeGraphicsModal = closeGraphicsModal;
+    window.selectGfxPreset = selectGfxPreset;
+    window.updateCustomGfxSetting = updateCustomGfxSetting;
+    window.applyGraphicsConfig = applyGraphicsConfig;
+    window.spawnDynamicLight = spawnDynamicLight;
+    window.spawnGroundRuneDecal = spawnGroundRuneDecal;
+    window.verticalEnergyPillar = verticalEnergyPillar;
+    window.GRAPHICS_CONFIG = GRAPHICS_CONFIG;
+    window.GFX_PRESETS = GFX_PRESETS;
     window.closeAgentSelectModal = closeAgentSelectModal;
     window.confirmAgentSelection = confirmAgentSelection;
     window.castAbility = castAbility;
@@ -16688,6 +17316,10 @@
 
     // Bind Event Listeners
     window.addEventListener('DOMContentLoaded', () => {
+      // Apply initial graphics configuration
+      if (typeof applyGraphicsConfig === 'function') {
+        applyGraphicsConfig(GRAPHICS_CONFIG, false);
+      }
       const openBtn = document.getElementById('btn-open-agent-select');
       const closeBtn = document.getElementById('sel-close-btn');
       const backBtn = document.getElementById('sel-back');
