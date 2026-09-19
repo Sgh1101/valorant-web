@@ -3824,7 +3824,7 @@
     const myClientId = 'user_' + Math.random().toString(36).substring(2, 8);
     const networkChannel = new BroadcastChannel('VALORANT_5V5_NET');
 
-    const MAP_LIST = ['ascent', 'bind', 'haven', 'icebox', 'split', 'lotus', 'breeze', 'sunset', 'pearl', 'fracture', 'abyss', 'district', 'drift', 'glitch', 'kasbah', 'piazza', 'bastion', 'colosseum', 'corrode', 'sanctum', 'zenith', 'subzero', 'oasis', 'eclipse', 'magma', 'cyberia', 'overgrowth', 'aerodrome', 'catacomb', 'solarium', 'citadel', 'foundry', 'chronos', 'monsoon', 'monolith', 'range'];
+    const MAP_LIST = ['ascent', 'bind', 'haven', 'icebox', 'split', 'lotus', 'breeze', 'sunset', 'pearl', 'fracture', 'abyss', 'district', 'drift', 'glitch', 'kasbah', 'piazza', 'bastion', 'colosseum', 'corrode', 'sanctum', 'zenith', 'subzero', 'oasis', 'eclipse', 'magma', 'cyberia', 'overgrowth', 'aerodrome', 'catacomb', 'solarium', 'citadel', 'foundry', 'chronos', 'monsoon', 'monolith', 'aurora', 'nexus', 'mirage', 'abyssal', 'inferno', 'vortex', 'range'];
     const MAP_NAMES = {
       ascent: 'ASCENT (어센트) - 베네치아 요새 & 전동 셔터 도어 [F]',
       bind: 'BIND (바인드) - 모로코 사막 & 차원 이동 텔레포터',
@@ -3861,6 +3861,12 @@
       chronos: 'CHRONOS (크로노스) - 스위스 알프스 입자 가속기 & 시공간 연구소 & 팽창 가속 필드 [F]',
       monsoon: 'MONSOON (몬순) - 베트남 메콩강 수상 사원 & 열대 정글 댐 & 수문 방류 수류 [F]',
       monolith: 'MONOLITH (모놀리스) - 아이슬란드 흑사막 & 외계 유물 모놀리스 지대 & 위상 전이 [F]',
+      aurora: 'AURORA (오로라) - 노르웨이 피오르드 빙하 & 오로라 발광 돔 & 플라즈마 리프트 [F]',
+      nexus: 'NEXUS (넥서스) - 네오 서울 100층 스카이가든 타워 & 자기부상 부스터 [F]',
+      mirage: 'MIRAGE (미라지) - 두바이 고대 사막 신기루 신전 & 모래 회오리 벤트 [F]',
+      abyssal: 'ABYSSAL (어비설) - 마리아나 해구 10,000m 심해 기지 & 수압 방출 추진기 [F]',
+      inferno: 'INFERNO (인페르노) - 이탈리아 토스카나 고성 와이너리 & 유압 화물 리프트 [F]',
+      vortex: 'VORTEX (볼텍스) - 버뮤다 삼각지대 시공간 소용돌이 부유섬 & 차원 슬링샷 [F]',
       range: 'THE RANGE (사격장) - 사격 훈련장 & 봇 연습'
     };
     let currentMapIndex = 0;
@@ -4958,6 +4964,12 @@
     let chronosTimeWarpField = null;
     let monsoonFloodGate = null;
     let monolithResonance = null;
+    let auroraPlasmaLift = null;
+    let nexusMaglevBooster = null;
+    let mirageSandTwister = null;
+    let abyssalWaterJet = null;
+    let infernoCellarLift = null;
+    let vortexSlingshot = null;
     let isGcLockerActive = true;
     let isHardwareFrameSync = true;
     let pollingRateModeIdx = 0;
@@ -5415,12 +5427,30 @@
       reactor.position.set(0, 1.25, 0.22);
       grp.add(reactor);
 
-      const legL = new THREE.Mesh(new THREE.CylinderGeometry(0.11, 0.09, 0.75, 6), bodyMat);
+      const legL = new THREE.Mesh(new THREE.CylinderGeometry(0.11, 0.09, 0.75, 8), bodyMat);
       legL.position.set(-0.16, 0.4, 0);
-      const legR = new THREE.Mesh(new THREE.CylinderGeometry(0.11, 0.09, 0.75, 6), bodyMat);
+      const legR = new THREE.Mesh(new THREE.CylinderGeometry(0.11, 0.09, 0.75, 8), bodyMat);
       legR.position.set(0.16, 0.4, 0);
       grp.add(legL);
       grp.add(legR);
+
+      // Organic rounded tactical shoulder pads
+      const shoulderL = new THREE.Mesh(new THREE.SphereGeometry(0.12, 10, 8), bodyMat);
+      shoulderL.position.set(-0.28, 1.45, 0);
+      shoulderL.scale.set(1.0, 1.3, 0.9);
+      const shoulderR = new THREE.Mesh(new THREE.SphereGeometry(0.12, 10, 8), bodyMat);
+      shoulderR.position.set(0.28, 1.45, 0);
+      shoulderR.scale.set(1.0, 1.3, 0.9);
+      grp.add(shoulderL);
+      grp.add(shoulderR);
+
+      // Articulated tactical arms with forearm armor
+      const armL = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.065, 0.65, 8), bodyMat);
+      armL.position.set(-0.28, 1.15, 0);
+      const armR = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.065, 0.65, 8), bodyMat);
+      armR.position.set(0.28, 1.15, 0);
+      grp.add(armL);
+      grp.add(armR);
 
       // Distinct 3D Visual Customizations for ALL 14 Agents
       if (agentName === 'Jett') {
@@ -5888,7 +5918,7 @@
       auraRing.position.set(0, 0.03, 0);
       grp.add(auraRing);
 
-      return { mesh: grp, head, body, legs: [legL, legR] };
+      return { mesh: grp, head, body, legs: [legL, legR], arms: [armL, armR], shoulders: [shoulderL, shoulderR] };
     }
 
     const VISUAL_FILTERS = [
@@ -6137,6 +6167,59 @@
       camera.position.z = -camera.position.z * 0.9;
       player.velocity.set(0, 2, 0);
       showToast('🔮 [MONOLITH] 외계 고대 모놀리스 공명 위상 전이! (MONOLITH PHASE SHIFT)');
+    }
+
+    function triggerAuroraPlasmaLift() {
+      if (!auroraPlasmaLift || player.isDead) return;
+      sound.playTeleport();
+      player.velocity.y = 18.0;
+      player.velocity.z = (camera.position.z > 0) ? -16.0 : 16.0;
+      player.isGrounded = false;
+      showToast('🌌 [AURORA] 오로라 플라즈마 리프트 고공 도약! (PLASMA LIFT)');
+    }
+
+    function triggerNexusMaglevBooster() {
+      if (!nexusMaglevBooster || player.isDead) return;
+      sound.playZipline();
+      player.velocity.x = (camera.position.x > 0) ? -32.0 : 32.0;
+      player.velocity.y = 3.5;
+      player.isGrounded = false;
+      showToast('🚅 [NEXUS] 자기부상 레일 초고속 부스터 추진! (MAGLEV BOOST)');
+    }
+
+    function triggerMirageSandTwister() {
+      if (!mirageSandTwister || player.isDead) return;
+      sound.playTeleport();
+      player.velocity.y = 17.5;
+      player.velocity.x = (camera.position.x > 0) ? -16.0 : 16.0;
+      player.isGrounded = false;
+      showToast('🌪️ [MIRAGE] 신기루 모래 회오리 열사 분출! (SAND TWISTER)');
+    }
+
+    function triggerAbyssalWaterJet() {
+      if (!abyssalWaterJet || player.isDead) return;
+      sound.playDash();
+      player.velocity.z = (camera.position.z > 0) ? -30.0 : 30.0;
+      player.velocity.y = 4.2;
+      player.isGrounded = false;
+      showToast('🌊 [ABYSSAL] 고압 심해 수압 제트 방출 추진! (WATER JET SURGE)');
+    }
+
+    function triggerInfernoCellarLift() {
+      if (!infernoCellarLift || player.isDead) return;
+      sound.playDoorSlide();
+      player.velocity.y = 15.5;
+      player.velocity.z = (camera.position.z > 0) ? -14.0 : 14.0;
+      player.isGrounded = false;
+      showToast('🍷 [INFERNO] 와이너리 비밀 유압 리프트 가동! (CELLAR HYDRAULIC LIFT)');
+    }
+
+    function triggerVortexSlingshot() {
+      if (!vortexSlingshot || player.isDead) return;
+      sound.playTeleport();
+      player.velocity.set((camera.position.x > 0 ? -22.0 : 22.0), 14.5, (camera.position.z > 0 ? -24.0 : 24.0));
+      player.isGrounded = false;
+      showToast('🌀 [VORTEX] 시공간 차원 소용돌이 슬링샷 사출! (DIMENSIONAL SLINGSHOT)');
     }
 
     function triggerColosseumLift() {
@@ -6613,6 +6696,12 @@
       chronosTimeWarpField = null;
       monsoonFloodGate = null;
       monolithResonance = null;
+      auroraPlasmaLift = null;
+      nexusMaglevBooster = null;
+      mirageSandTwister = null;
+      abyssalWaterJet = null;
+      infernoCellarLift = null;
+      vortexSlingshot = null;
 
       if (lotusDoor && lotusDoor.mesh) {
         scene.remove(lotusDoor.mesh);
@@ -7183,6 +7272,84 @@
         sunLight.position.set(-30, 85, 40);
         scene.fog.color.setHex(0x2e1065);
         scene.fog.density = 0.007;
+      } else if (mapKey === 'aurora') {
+        // Norwegian Fjord Aurora / Crisp Polar Twilight & Emerald Plasma Glow
+        grad.addColorStop(0, '#020f1e');
+        grad.addColorStop(0.35, '#052e2b');
+        grad.addColorStop(0.7, '#0d9488');
+        grad.addColorStop(1, '#5eead4');
+        ambientLight.color.setHex(0x99f6e4);
+        ambientLight.intensity = 1.15;
+        sunLight.color.setHex(0x2dd4bf);
+        sunLight.intensity = 1.6;
+        sunLight.position.set(20, 90, 20);
+        scene.fog.color.setHex(0x042f2e);
+        scene.fog.density = 0.007;
+      } else if (mapKey === 'nexus') {
+        // Neo-Seoul 100F Skygarden / High-tech Cyberpunk Neon Skyline
+        grad.addColorStop(0, '#050515');
+        grad.addColorStop(0.35, '#111827');
+        grad.addColorStop(0.7, '#4338ca');
+        grad.addColorStop(1, '#818cf8');
+        ambientLight.color.setHex(0xc7d2fe);
+        ambientLight.intensity = 1.2;
+        sunLight.color.setHex(0xa5b4fc);
+        sunLight.intensity = 1.65;
+        sunLight.position.set(0, 95, 30);
+        scene.fog.color.setHex(0x1e1b4b);
+        scene.fog.density = 0.0075;
+      } else if (mapKey === 'mirage') {
+        // Ancient Dubai Desert Mirage / Scorching Amber Sunset & Shimmering Gold
+        grad.addColorStop(0, '#451a03');
+        grad.addColorStop(0.35, '#9a3412');
+        grad.addColorStop(0.7, '#f59e0b');
+        grad.addColorStop(1, '#fef08a');
+        ambientLight.color.setHex(0xfef3c7);
+        ambientLight.intensity = 1.25;
+        sunLight.color.setHex(0xfde047);
+        sunLight.intensity = 1.8;
+        sunLight.position.set(30, 95, 30);
+        scene.fog.color.setHex(0x78350f);
+        scene.fog.density = 0.006;
+      } else if (mapKey === 'abyssal') {
+        // Mariana Trench Deep-Sea Base / Oceanic Cyan Bioluminescence
+        grad.addColorStop(0, '#010409');
+        grad.addColorStop(0.35, '#021422');
+        grad.addColorStop(0.7, '#0369a1');
+        grad.addColorStop(1, '#00f0ff');
+        ambientLight.color.setHex(0x38bdf8);
+        ambientLight.intensity = 1.1;
+        sunLight.color.setHex(0x00f0ff);
+        sunLight.intensity = 1.55;
+        sunLight.position.set(0, 85, 0);
+        scene.fog.color.setHex(0x021a2f);
+        scene.fog.density = 0.009;
+      } else if (mapKey === 'inferno') {
+        // Tuscan Fortress Winery / Warm Terracotta Twilight & Amber Hearth
+        grad.addColorStop(0, '#291008');
+        grad.addColorStop(0.35, '#7c2d12');
+        grad.addColorStop(0.7, '#ea580c');
+        grad.addColorStop(1, '#fed7aa');
+        ambientLight.color.setHex(0xffedd5);
+        ambientLight.intensity = 1.15;
+        sunLight.color.setHex(0xfb923c);
+        sunLight.intensity = 1.55;
+        sunLight.position.set(35, 80, 25);
+        scene.fog.color.setHex(0x431407);
+        scene.fog.density = 0.007;
+      } else if (mapKey === 'vortex') {
+        // Bermuda Triangle Void Rift / Swirling Spacetime Violet Singularity
+        grad.addColorStop(0, '#090014');
+        grad.addColorStop(0.35, '#2e1065');
+        grad.addColorStop(0.7, '#7c3aed');
+        grad.addColorStop(1, '#c084fc');
+        ambientLight.color.setHex(0xe9d5ff);
+        ambientLight.intensity = 1.2;
+        sunLight.color.setHex(0xc084fc);
+        sunLight.intensity = 1.7;
+        sunLight.position.set(-25, 90, 35);
+        scene.fog.color.setHex(0x3b0764);
+        scene.fog.density = 0.008;
       } else {
         // Range: High-tech military hangar
         grad.addColorStop(0, '#080c10');
@@ -9993,6 +10160,348 @@
         addPlatform(0, 0, 42, 42, 0.5, 16, matBlackBasalt);
         addPlatform(0, 0, -42, 42, 0.5, 16, matBlackBasalt);
       }
+      else if (mapKey === 'aurora') {
+        // ==========================================================
+        // MAP 36: AURORA (오로라) - 노르웨이 피오르드 빙하 & 오로라 발광 돔 & 플라즈마 리프트 [F]
+        // ==========================================================
+        const matGlacierIce = new THREE.MeshStandardMaterial({ color: 0x99f6e4, roughness: 0.15, metalness: 0.2 });
+        const matPolarMetal = new THREE.MeshStandardMaterial({ color: 0x334155, roughness: 0.4, metalness: 0.8 });
+        const matAuroraCyan = new THREE.MeshBasicMaterial({ color: 0x2dd4bf });
+        const matGlacierWall = new THREE.MeshStandardMaterial({ color: 0x0f766e, roughness: 0.7 });
+
+        // Outer Perimeter (116x116m)
+        addBox(0, -0.5, 0, 116, 1, 116, matGlacierIce);
+        addBox(0, 7, -58, 116, 14, 2, matGlacierWall);
+        addBox(0, 7, 58, 116, 14, 2, matGlacierWall);
+        addBox(-58, 7, 0, 2, 14, 116, matGlacierWall);
+        addBox(58, 7, 0, 2, 14, 116, matGlacierWall);
+
+        // Center Aurora Dome Observatory with Plasma Lift at (0, 0.2, 0)
+        const liftPad = addPlatform(0, 0, 0, 7, 0.4, 7, matAuroraCyan, true);
+        const domeRing = new THREE.Mesh(new THREE.TorusGeometry(3.5, 0.3, 8, 24), matPolarMetal);
+        domeRing.rotation.x = Math.PI / 2;
+        domeRing.position.set(0, 0.4, 0);
+        scene.add(domeRing);
+        mapObjects.push(domeRing);
+
+        const dishAntenna = new THREE.Mesh(new THREE.CylinderGeometry(4.0, 0.5, 1.2, 16, 1, true), matPolarMetal);
+        dishAntenna.position.set(0, 14, 0);
+        dishAntenna.rotation.x = 0.4;
+        scene.add(dishAntenna);
+        mapObjects.push(dishAntenna);
+
+        addTextBillboard(0, 2.4, 0, '[F] 오로라 플라즈마 리프트 (PLASMA LIFT)', 1.5, '#5eead4');
+        auroraPlasmaLift = { pos: new THREE.Vector3(0, 0.2, 0), mesh: liftPad };
+
+        // Elevated Glacial Catwalks
+        addPlatform(0, 0, 14, 12, 3.8, 4, matPolarMetal);
+        addPlatform(0, 0, -14, 12, 3.8, 4, matPolarMetal);
+
+        // --- A SITE: GLACIAL CORE DRILL (x = 30, z = -20) ---
+        addPlatform(30, 0, -20, 24, 0.5, 24, matSiteFloor);
+        spikeSiteAreas.push({ minX: 18, maxX: 42, minZ: -32, maxZ: -8, name: 'A SITE' });
+
+        addBox(30, 4.0, -20, 4, 8.0, 4, matPolarMetal);
+        addPlatform(36, 0, -32, 12, 4.0, 10, matGlacierIce);
+        addRailing(29.9, 4.0, -32, 10, 'z');
+        addStairs(36, -14, 0, 3.8, 4.0, 12, 12, 'z-');
+        addCrateStack(24, -20, 2.4);
+
+        // --- B SITE: MAGNETOMETER LAB (x = -30, z = -20) ---
+        addPlatform(-30, 0, -20, 24, 0.5, 24, matSiteFloor);
+        spikeSiteAreas.push({ minX: -42, maxX: -18, minZ: -32, maxZ: -8, name: 'B SITE' });
+
+        addBox(-30, 3.5, -20, 4, 7.0, 4, matPolarMetal);
+        addPlatform(-36, 0, -32, 12, 4.0, 10, matGlacierIce);
+        addRailing(-29.9, 4.0, -32, 10, 'z');
+        addStairs(-36, -14, 0, 3.8, 4.0, 12, 12, 'z-');
+        addCrateStack(-22, -20, 2.4);
+
+        // Spawns
+        addPlatform(0, 0, 42, 42, 0.5, 16, matGlacierIce);
+        addPlatform(0, 0, -42, 42, 0.5, 16, matGlacierIce);
+      }
+      else if (mapKey === 'nexus') {
+        // ==========================================================
+        // MAP 37: NEXUS (넥서스) - 네오 서울 100층 스카이가든 타워 & 자기부상 부스터 [F]
+        // ==========================================================
+        const matGlassDeck = new THREE.MeshStandardMaterial({ color: 0x0f172a, roughness: 0.1, metalness: 0.9 });
+        const matNeoNeon = new THREE.MeshBasicMaterial({ color: 0x818cf8 });
+        const matCyberTrim = new THREE.MeshStandardMaterial({ color: 0x312e81, roughness: 0.3, metalness: 0.8 });
+        const matSkyglass = new THREE.MeshStandardMaterial({ color: 0x1e1b4b, roughness: 0.5 });
+
+        // Outer Perimeter (116x116m)
+        addBox(0, -0.5, 0, 116, 1, 116, matGlassDeck);
+        addBox(0, 7, -58, 116, 14, 2, matSkyglass);
+        addBox(0, 7, 58, 116, 14, 2, matSkyglass);
+        addBox(-58, 7, 0, 2, 14, 116, matSkyglass);
+        addBox(58, 7, 0, 2, 14, 116, matSkyglass);
+
+        // Center Maglev Rail Booster Track along X-axis at (0, 0.2, 0)
+        const boosterTrack = addPlatform(0, 0, 0, 24, 0.3, 5, matNeoNeon, true);
+        addBox(0, 1.2, -3, 26, 0.8, 0.4, matCyberTrim);
+        addBox(0, 1.2, 3, 26, 0.8, 0.4, matCyberTrim);
+
+        addTextBillboard(0, 2.4, 0, '[F] 자기부상 레일 부스터 (MAGLEV BOOSTER)', 1.5, '#c7d2fe');
+        nexusMaglevBooster = { pos: new THREE.Vector3(0, 0.2, 0), mesh: boosterTrack };
+
+        // Elevated Skygarden Promenade
+        addPlatform(0, 0, 15, 12, 4.0, 4, matCyberTrim);
+        addPlatform(0, 0, -15, 12, 4.0, 4, matCyberTrim);
+
+        // --- A SITE: PENTHOUSE HELIPAD (x = 30, z = -20) ---
+        addPlatform(30, 0, -20, 24, 0.5, 24, matSiteFloor);
+        spikeSiteAreas.push({ minX: 18, maxX: 42, minZ: -32, maxZ: -8, name: 'A SITE' });
+
+        addBox(30, 4.0, -20, 4, 8.0, 4, matCyberTrim);
+        addPlatform(36, 0, -32, 12, 4.0, 10, matGlassDeck);
+        addRailing(29.9, 4.0, -32, 10, 'z');
+        addStairs(36, -14, 0, 3.8, 4.0, 12, 12, 'z-');
+        addCrateStack(24, -20, 2.4);
+
+        // --- B SITE: SKYTRAIN TERMINAL (x = -30, z = -20) ---
+        addPlatform(-30, 0, -20, 24, 0.5, 24, matSiteFloor);
+        spikeSiteAreas.push({ minX: -42, maxX: -18, minZ: -32, maxZ: -8, name: 'B SITE' });
+
+        addBox(-30, 3.5, -20, 4, 7.0, 4, matCyberTrim);
+        addPlatform(-36, 0, -32, 12, 4.0, 10, matGlassDeck);
+        addRailing(-29.9, 4.0, -32, 10, 'z');
+        addStairs(-36, -14, 0, 3.8, 4.0, 12, 12, 'z-');
+        addCrateStack(-22, -20, 2.4);
+
+        // Spawns
+        addPlatform(0, 0, 42, 42, 0.5, 16, matGlassDeck);
+        addPlatform(0, 0, -42, 42, 0.5, 16, matGlassDeck);
+      }
+      else if (mapKey === 'mirage') {
+        // ==========================================================
+        // MAP 38: MIRAGE (미라지) - 두바이 고대 사막 신기루 신전 & 모래 회오리 벤트 [F]
+        // ==========================================================
+        const matSandstone = new THREE.MeshStandardMaterial({ color: 0xd97706, roughness: 0.9 });
+        const matGoldFoil = new THREE.MeshStandardMaterial({ color: 0xfde047, metalness: 0.95, roughness: 0.1 });
+        const matTempleClay = new THREE.MeshStandardMaterial({ color: 0x92400e, roughness: 0.8 });
+        const matDuneSand = new THREE.MeshStandardMaterial({ color: 0xf59e0b, roughness: 0.95 });
+
+        // Outer Perimeter (116x116m)
+        addBox(0, -0.5, 0, 116, 1, 116, matDuneSand);
+        addBox(0, 7, -58, 116, 14, 2, matSandstone);
+        addBox(0, 7, 58, 116, 14, 2, matSandstone);
+        addBox(-58, 7, 0, 2, 14, 116, matSandstone);
+        addBox(58, 7, 0, 2, 14, 116, matSandstone);
+
+        // Center Sunken Mirage Temple with Sand Twister Vent at (0, 0.2, 0)
+        const twisterMesh = addPlatform(0, 0, 0, 6.5, 0.4, 6.5, matGoldFoil, true);
+        const pyramidion = new THREE.Mesh(new THREE.ConeGeometry(2.5, 3.5, 4), matGoldFoil);
+        pyramidion.position.set(0, 9.0, 0);
+        scene.add(pyramidion);
+        mapObjects.push(pyramidion);
+
+        addTextBillboard(0, 2.4, 0, '[F] 신기루 모래 회오리 (SAND TWISTER)', 1.5, '#fef08a');
+        mirageSandTwister = { pos: new THREE.Vector3(0, 0.2, 0), mesh: twisterMesh };
+
+        // Colonnade Pillars
+        [[-8, -8], [8, -8], [-8, 8], [8, 8]].forEach(([px, pz]) => {
+          addPillar(px, 0, pz, 1.2, 8.0, matSandstone);
+        });
+
+        // Elevated Terrace
+        addPlatform(0, 0, 14, 12, 3.8, 4, matTempleClay);
+        addPlatform(0, 0, -14, 12, 3.8, 4, matTempleClay);
+
+        // --- A SITE: ALTAR OF RA (x = 30, z = -20) ---
+        addPlatform(30, 0, -20, 24, 0.5, 24, matSiteFloor);
+        spikeSiteAreas.push({ minX: 18, maxX: 42, minZ: -32, maxZ: -8, name: 'A SITE' });
+
+        addBox(30, 4.0, -20, 4, 8.0, 4, matTempleClay);
+        addPlatform(36, 0, -32, 12, 4.0, 10, matSandstone);
+        addRailing(29.9, 4.0, -32, 10, 'z');
+        addStairs(36, -14, 0, 3.8, 4.0, 12, 12, 'z-');
+        addCrateStack(24, -20, 2.4);
+
+        // --- B SITE: OASIS CISTERN (x = -30, z = -20) ---
+        addPlatform(-30, 0, -20, 24, 0.5, 24, matSiteFloor);
+        spikeSiteAreas.push({ minX: -42, maxX: -18, minZ: -32, maxZ: -8, name: 'B SITE' });
+
+        addBox(-30, 3.5, -20, 4, 7.0, 4, matTempleClay);
+        addPlatform(-36, 0, -32, 12, 4.0, 10, matSandstone);
+        addRailing(-29.9, 4.0, -32, 10, 'z');
+        addStairs(-36, -14, 0, 3.8, 4.0, 12, 12, 'z-');
+        addCrateStack(-22, -20, 2.4);
+
+        // Spawns
+        addPlatform(0, 0, 42, 42, 0.5, 16, matDuneSand);
+        addPlatform(0, 0, -42, 42, 0.5, 16, matDuneSand);
+      }
+      else if (mapKey === 'abyssal') {
+        // ==========================================================
+        // MAP 39: ABYSSAL (어비설) - 마리아나 해구 10,000m 심해 기지 & 수압 방출 추진기 [F]
+        // ==========================================================
+        const matBasaltTrench = new THREE.MeshStandardMaterial({ color: 0x091e2b, roughness: 0.8 });
+        const matTitaniumPlate = new THREE.MeshStandardMaterial({ color: 0x334155, metalness: 0.9, roughness: 0.2 });
+        const matAbyssCyan = new THREE.MeshBasicMaterial({ color: 0x00f0ff });
+        const matDeepHull = new THREE.MeshStandardMaterial({ color: 0x06283d, metalness: 0.8, roughness: 0.4 });
+
+        // Outer Perimeter (116x116m)
+        addBox(0, -0.5, 0, 116, 1, 116, matBasaltTrench);
+        addBox(0, 7, -58, 116, 14, 2, matDeepHull);
+        addBox(0, 7, 58, 116, 14, 2, matDeepHull);
+        addBox(-58, 7, 0, 2, 14, 116, matDeepHull);
+        addBox(58, 7, 0, 2, 14, 116, matDeepHull);
+
+        // Center Geothermal Vent Reactor with High-Pressure Jet Nozzle at (0, 0.2, 0)
+        const jetNozzle = addPlatform(0, 0, 0, 6, 0.4, 18, matAbyssCyan, true);
+        const ventPipes = new THREE.Mesh(new THREE.TorusGeometry(3.0, 0.4, 8, 20), matTitaniumPlate);
+        ventPipes.rotation.x = Math.PI / 2;
+        ventPipes.position.set(0, 0.6, 0);
+        scene.add(ventPipes);
+        mapObjects.push(ventPipes);
+
+        addTextBillboard(0, 2.4, 0, '[F] 고압 수압 방출 추진기 (WATER JET SURGE)', 1.5, '#00f0ff');
+        abyssalWaterJet = { pos: new THREE.Vector3(0, 0.2, 0), mesh: jetNozzle };
+
+        // Elevated Deep-Sea Gantry
+        addPlatform(0, 0, 14, 12, 3.8, 4, matTitaniumPlate);
+        addPlatform(0, 0, -14, 12, 3.8, 4, matTitaniumPlate);
+
+        // --- A SITE: SUBMERSIBLE DOCK (x = 30, z = -20) ---
+        addPlatform(30, 0, -20, 24, 0.5, 24, matSiteFloor);
+        spikeSiteAreas.push({ minX: 18, maxX: 42, minZ: -32, maxZ: -8, name: 'A SITE' });
+
+        addBox(30, 4.0, -20, 4, 8.0, 4, matDeepHull);
+        addPlatform(36, 0, -32, 12, 4.0, 10, matTitaniumPlate);
+        addRailing(29.9, 4.0, -32, 10, 'z');
+        addStairs(36, -14, 0, 3.8, 4.0, 12, 12, 'z-');
+        addCrateStack(24, -20, 2.4);
+
+        // --- B SITE: TRENCH TURBINE ROOM (x = -30, z = -20) ---
+        addPlatform(-30, 0, -20, 24, 0.5, 24, matSiteFloor);
+        spikeSiteAreas.push({ minX: -42, maxX: -18, minZ: -32, maxZ: -8, name: 'B SITE' });
+
+        addBox(-30, 3.5, -20, 4, 7.0, 4, matDeepHull);
+        addPlatform(-36, 0, -32, 12, 4.0, 10, matTitaniumPlate);
+        addRailing(-29.9, 4.0, -32, 10, 'z');
+        addStairs(-36, -14, 0, 3.8, 4.0, 12, 12, 'z-');
+        addCrateStack(-22, -20, 2.4);
+
+        // Spawns
+        addPlatform(0, 0, 42, 42, 0.5, 16, matBasaltTrench);
+        addPlatform(0, 0, -42, 42, 0.5, 16, matBasaltTrench);
+      }
+      else if (mapKey === 'inferno') {
+        // ==========================================================
+        // MAP 40: INFERNO (인페르노) - 이탈리아 토스카나 고성 와이너리 & 유압 화물 리프트 [F]
+        // ==========================================================
+        const matTuscanStone = new THREE.MeshStandardMaterial({ color: 0x78350f, roughness: 0.85 });
+        const matTerracotta = new THREE.MeshStandardMaterial({ color: 0x9a3412, roughness: 0.75 });
+        const matOakWood = new THREE.MeshStandardMaterial({ color: 0x451a03, roughness: 0.8 });
+        const matHydraulicSteel = new THREE.MeshStandardMaterial({ color: 0x334155, metalness: 0.8, roughness: 0.3 });
+
+        // Outer Perimeter (116x116m)
+        addBox(0, -0.5, 0, 116, 1, 116, matTuscanStone);
+        addBox(0, 7, -58, 116, 14, 2, matTerracotta);
+        addBox(0, 7, 58, 116, 14, 2, matTerracotta);
+        addBox(-58, 7, 0, 2, 14, 116, matTerracotta);
+        addBox(58, 7, 0, 2, 14, 116, matTerracotta);
+
+        // Center Winery Hydraulic Freight Lift at (0, 0.2, 0)
+        const liftMesh = addPlatform(0, 0, 0, 6.5, 0.4, 6.5, matHydraulicSteel, true);
+        addPillar(-3.2, 0, -3.2, 0.5, 10.0, matHydraulicSteel);
+        addPillar(3.2, 0, -3.2, 0.5, 10.0, matHydraulicSteel);
+        addPillar(-3.2, 0, 3.2, 0.5, 10.0, matHydraulicSteel);
+        addPillar(3.2, 0, 3.2, 0.5, 10.0, matHydraulicSteel);
+
+        addTextBillboard(0, 2.4, 0, '[F] 와이너리 비밀 유압 리프트 (CELLAR LIFT)', 1.5, '#fed7aa');
+        infernoCellarLift = { pos: new THREE.Vector3(0, 0.2, 0), mesh: liftMesh };
+
+        // Elevated Terrace
+        addPlatform(0, 0, 14, 12, 3.8, 4, matTerracotta);
+        addPlatform(0, 0, -14, 12, 3.8, 4, matTerracotta);
+
+        // --- A SITE: AGING CELLAR (x = 30, z = -20) ---
+        addPlatform(30, 0, -20, 24, 0.5, 24, matSiteFloor);
+        spikeSiteAreas.push({ minX: 18, maxX: 42, minZ: -32, maxZ: -8, name: 'A SITE' });
+
+        addBox(30, 4.0, -20, 4, 8.0, 4, matOakWood);
+        addPlatform(36, 0, -32, 12, 4.0, 10, matTuscanStone);
+        addRailing(29.9, 4.0, -32, 10, 'z');
+        addStairs(36, -14, 0, 3.8, 4.0, 12, 12, 'z-');
+        addCrateStack(24, -20, 2.4);
+
+        // --- B SITE: BELL TOWER PRESS (x = -30, z = -20) ---
+        addPlatform(-30, 0, -20, 24, 0.5, 24, matSiteFloor);
+        spikeSiteAreas.push({ minX: -42, maxX: -18, minZ: -32, maxZ: -8, name: 'B SITE' });
+
+        addBox(-30, 3.5, -20, 4, 7.0, 4, matOakWood);
+        addPlatform(-36, 0, -32, 12, 4.0, 10, matTuscanStone);
+        addRailing(-29.9, 4.0, -32, 10, 'z');
+        addStairs(-36, -14, 0, 3.8, 4.0, 12, 12, 'z-');
+        addCrateStack(-22, -20, 2.4);
+
+        // Spawns
+        addPlatform(0, 0, 42, 42, 0.5, 16, matTuscanStone);
+        addPlatform(0, 0, -42, 42, 0.5, 16, matTuscanStone);
+      }
+      else if (mapKey === 'vortex') {
+        // ==========================================================
+        // MAP 41: VORTEX (볼텍스) - 버뮤다 시공간 소용돌이 부유섬 & 차원 슬링샷 [F]
+        // ==========================================================
+        const matVoidStone = new THREE.MeshStandardMaterial({ color: 0x1e1b4b, roughness: 0.9 });
+        const matRiftViolet = new THREE.MeshBasicMaterial({ color: 0xc084fc });
+        const matAnomDark = new THREE.MeshStandardMaterial({ color: 0x3b0764, roughness: 0.6, metalness: 0.7 });
+        const matFloatingChasm = new THREE.MeshStandardMaterial({ color: 0x0f0c29, roughness: 0.95 });
+
+        // Outer Perimeter (116x116m)
+        addBox(0, -0.5, 0, 116, 1, 116, matVoidStone);
+        addBox(0, 7, -58, 116, 14, 2, matAnomDark);
+        addBox(0, 7, 58, 116, 14, 2, matAnomDark);
+        addBox(-58, 7, 0, 2, 14, 116, matAnomDark);
+        addBox(58, 7, 0, 2, 14, 116, matAnomDark);
+
+        // Center Gravitational Vortex Slingshot at (0, 0.2, 0)
+        const slingshotPad = addPlatform(0, 0, 0, 7, 0.4, 7, matRiftViolet, true);
+        const riftRing1 = new THREE.Mesh(new THREE.TorusGeometry(3.6, 0.35, 8, 24), matRiftViolet);
+        riftRing1.rotation.x = Math.PI / 2.5;
+        riftRing1.position.set(0, 1.2, 0);
+        scene.add(riftRing1);
+        mapObjects.push(riftRing1);
+
+        const riftRing2 = new THREE.Mesh(new THREE.TorusGeometry(2.4, 0.25, 8, 20), matRiftViolet);
+        riftRing2.rotation.y = Math.PI / 3;
+        riftRing2.position.set(0, 2.0, 0);
+        scene.add(riftRing2);
+        mapObjects.push(riftRing2);
+
+        addTextBillboard(0, 2.8, 0, '[F] 차원 소용돌이 슬링샷 (DIMENSIONAL SLINGSHOT)', 1.5, '#e9d5ff');
+        vortexSlingshot = { pos: new THREE.Vector3(0, 0.2, 0), mesh: slingshotPad };
+
+        // Elevated Floating Platforms
+        addPlatform(0, 0, 14, 12, 3.8, 4, matAnomDark);
+        addPlatform(0, 0, -14, 12, 3.8, 4, matAnomDark);
+
+        // --- A SITE: CHRONO ANOMALY (x = 30, z = -20) ---
+        addPlatform(30, 0, -20, 24, 0.5, 24, matSiteFloor);
+        spikeSiteAreas.push({ minX: 18, maxX: 42, minZ: -32, maxZ: -8, name: 'A SITE' });
+
+        addBox(30, 4.0, -20, 4, 8.0, 4, matAnomDark);
+        addPlatform(36, 0, -32, 12, 4.0, 10, matVoidStone);
+        addRailing(29.9, 4.0, -32, 10, 'z');
+        addStairs(36, -14, 0, 3.8, 4.0, 12, 12, 'z-');
+        addCrateStack(24, -20, 2.4);
+
+        // --- B SITE: VOID FRACTURE (x = -30, z = -20) ---
+        addPlatform(-30, 0, -20, 24, 0.5, 24, matSiteFloor);
+        spikeSiteAreas.push({ minX: -42, maxX: -18, minZ: -32, maxZ: -8, name: 'B SITE' });
+
+        addBox(-30, 3.5, -20, 4, 7.0, 4, matAnomDark);
+        addPlatform(-36, 0, -32, 12, 4.0, 10, matVoidStone);
+        addRailing(-29.9, 4.0, -32, 10, 'z');
+        addStairs(-36, -14, 0, 3.8, 4.0, 12, 12, 'z-');
+        addCrateStack(-22, -20, 2.4);
+
+        // Spawns
+        addPlatform(0, 0, 42, 42, 0.5, 16, matVoidStone);
+        addPlatform(0, 0, -42, 42, 0.5, 16, matVoidStone);
+      }
       else if (mapKey === 'range') {
         addBox(0, -0.5, 0, 60, 1, 120, matConcrete);
         addBox(0, 7, -60, 60, 14, 2, matWallStone);
@@ -10029,7 +10538,7 @@
           m.mesh.position.set((idx % 2 === 0 ? 4 : -4), 0.2, zPos);
           scene.add(m.mesh);
           practiceBots.push({
-            mesh: m.mesh, head: m.head, body: m.body, legs: m.legs,
+            mesh: m.mesh, head: m.head, body: m.body, legs: m.legs, arms: m.arms, arms: m.arms, arms: m.arms,
             hp: 100, isDead: false, targetZ: zPos, distName: Math.abs(zPos) + 'm'
           });
         });
@@ -12359,6 +12868,60 @@
         }
       }
 
+      // 32. Aurora Plasma Lift [F]
+      if (MAP_LIST[currentMapIndex] === 'aurora' && auroraPlasmaLift) {
+        const pPos = camera.position;
+        if (pPos.distanceTo(auroraPlasmaLift.pos) < 5.0) {
+          triggerAuroraPlasmaLift();
+          return;
+        }
+      }
+
+      // 33. Nexus Maglev Booster [F]
+      if (MAP_LIST[currentMapIndex] === 'nexus' && nexusMaglevBooster) {
+        const pPos = camera.position;
+        if (pPos.distanceTo(nexusMaglevBooster.pos) < 5.0) {
+          triggerNexusMaglevBooster();
+          return;
+        }
+      }
+
+      // 34. Mirage Sand Twister [F]
+      if (MAP_LIST[currentMapIndex] === 'mirage' && mirageSandTwister) {
+        const pPos = camera.position;
+        if (pPos.distanceTo(mirageSandTwister.pos) < 5.0) {
+          triggerMirageSandTwister();
+          return;
+        }
+      }
+
+      // 35. Abyssal Water Jet [F]
+      if (MAP_LIST[currentMapIndex] === 'abyssal' && abyssalWaterJet) {
+        const pPos = camera.position;
+        if (pPos.distanceTo(abyssalWaterJet.pos) < 5.0) {
+          triggerAbyssalWaterJet();
+          return;
+        }
+      }
+
+      // 36. Inferno Cellar Lift [F]
+      if (MAP_LIST[currentMapIndex] === 'inferno' && infernoCellarLift) {
+        const pPos = camera.position;
+        if (pPos.distanceTo(infernoCellarLift.pos) < 5.0) {
+          triggerInfernoCellarLift();
+          return;
+        }
+      }
+
+      // 37. Vortex Slingshot [F]
+      if (MAP_LIST[currentMapIndex] === 'vortex' && vortexSlingshot) {
+        const pPos = camera.position;
+        if (pPos.distanceTo(vortexSlingshot.pos) < 5.0) {
+          triggerVortexSlingshot();
+          return;
+        }
+      }
+
       // 4. Ascent B Shutter Door
       if (!ascentDoor || ascentDoor.isDestroyed) return;
       const dist = camera.position.distanceTo(ascentDoor.switchPos);
@@ -13772,6 +14335,66 @@
         { label: 'DEF SPAWN', x: 0, z: -42, color: '#00ffaa' },
         { label: 'ATK SPAWN', x: 0, z: 42, color: '#ff4655' }
       ],
+      aurora: [
+        { label: 'A SITE', x: 30, z: -20, color: '#5eead4' },
+        { label: 'CORE DRILL', x: 30, z: -20, color: '#2dd4bf' },
+        { label: 'B SITE', x: -30, z: -20, color: '#5eead4' },
+        { label: 'MAGNETOMETER', x: -30, z: -20, color: '#14b8a6' },
+        { label: 'PLASMA LIFT [F]', x: 0, z: 0, color: '#99f6e4' },
+        { label: 'DOME MID', x: 0, z: 0, color: '#0f766e' },
+        { label: 'DEF SPAWN', x: 0, z: -42, color: '#00ffaa' },
+        { label: 'ATK SPAWN', x: 0, z: 42, color: '#ff4655' }
+      ],
+      nexus: [
+        { label: 'A SITE', x: 30, z: -20, color: '#818cf8' },
+        { label: 'HELIPAD VIP', x: 30, z: -20, color: '#6366f1' },
+        { label: 'B SITE', x: -30, z: -20, color: '#818cf8' },
+        { label: 'SKY TERMINAL', x: -30, z: -20, color: '#4f46e5' },
+        { label: 'MAGLEV BOOST [F]', x: 0, z: 0, color: '#c7d2fe' },
+        { label: 'SKY BRIDGE', x: 0, z: 0, color: '#312e81' },
+        { label: 'DEF SPAWN', x: 0, z: -42, color: '#00ffaa' },
+        { label: 'ATK SPAWN', x: 0, z: 42, color: '#ff4655' }
+      ],
+      mirage: [
+        { label: 'A SITE', x: 30, z: -20, color: '#fde047' },
+        { label: 'ALTAR OF RA', x: 30, z: -20, color: '#eab308' },
+        { label: 'B SITE', x: -30, z: -20, color: '#fde047' },
+        { label: 'OASIS CISTERN', x: -30, z: -20, color: '#ca8a04' },
+        { label: 'SAND TWISTER [F]', x: 0, z: 0, color: '#fef08a' },
+        { label: 'TEMPLE MID', x: 0, z: 0, color: '#92400e' },
+        { label: 'DEF SPAWN', x: 0, z: -42, color: '#00ffaa' },
+        { label: 'ATK SPAWN', x: 0, z: 42, color: '#ff4655' }
+      ],
+      abyssal: [
+        { label: 'A SITE', x: 30, z: -20, color: '#00f0ff' },
+        { label: 'SUB DOCK', x: 30, z: -20, color: '#0284c7' },
+        { label: 'B SITE', x: -30, z: -20, color: '#00f0ff' },
+        { label: 'TURBINE ROOM', x: -30, z: -20, color: '#0369a1' },
+        { label: 'WATER JET [F]', x: 0, z: 0, color: '#38bdf8' },
+        { label: 'TRENCH CANAL', x: 0, z: 0, color: '#075985' },
+        { label: 'DEF SPAWN', x: 0, z: -42, color: '#00ffaa' },
+        { label: 'ATK SPAWN', x: 0, z: 42, color: '#ff4655' }
+      ],
+      inferno: [
+        { label: 'A SITE', x: 30, z: -20, color: '#fb923c' },
+        { label: 'AGING CELLAR', x: 30, z: -20, color: '#ea580c' },
+        { label: 'B SITE', x: -30, z: -20, color: '#fb923c' },
+        { label: 'BELL PRESS', x: -30, z: -20, color: '#c2410c' },
+        { label: 'CELLAR LIFT [F]', x: 0, z: 0, color: '#fed7aa' },
+        { label: 'VILLA MID', x: 0, z: 0, color: '#78350f' },
+        { label: 'DEF SPAWN', x: 0, z: -42, color: '#00ffaa' },
+        { label: 'ATK SPAWN', x: 0, z: 42, color: '#ff4655' }
+      ],
+      vortex: [
+        { label: 'A SITE', x: 30, z: -20, color: '#c084fc' },
+        { label: 'CHRONO ANOMALY', x: 30, z: -20, color: '#a855f7' },
+        { label: 'B SITE', x: -30, z: -20, color: '#c084fc' },
+        { label: 'VOID FRACTURE', x: -30, z: -20, color: '#9333ea' },
+        { label: 'SLINGSHOT [F]', x: 0, z: 0, color: '#e9d5ff' },
+        { label: 'SINGULARITY MID', x: 0, z: 0, color: '#3b0764' },
+        { label: 'DEF SPAWN', x: 0, z: -42, color: '#00ffaa' },
+        { label: 'ATK SPAWN', x: 0, z: 42, color: '#ff4655' }
+      ],
       range: [
         { label: 'TARGETS', x: 0, z: -22, color: '#00f0ff' },
         { label: 'BENCH', x: 0, z: 0, color: '#ffc83b' },
@@ -14224,11 +14847,13 @@
             if (keys['KeyD']) moveDir.x += 1;
           }
 
-          // Pre-calculate vertical ground height to fix Temporal Dead Zone ReferenceError
-          const targetEyeH = player.isCrouching ? 1.0 : 1.7;
+          // Smooth AAA-grade camera crouch descent & ascent interpolation
+          if (typeof player.currentEyeH === 'undefined') player.currentEyeH = 1.7;
+          const targetEyeH = player.isCrouching ? 1.05 : 1.7;
+          player.currentEyeH = THREE.MathUtils.lerp(player.currentEyeH, targetEyeH, Math.min(1, 14 * dt));
           let nextY = camera.position.y + player.velocity.y * dt;
-          const curFloorY = groundAt(camera.position.x, camera.position.z, nextY - targetEyeH);
-          const minEyeY = curFloorY + targetEyeH;
+          const curFloorY = groundAt(camera.position.x, camera.position.z, nextY - player.currentEyeH);
+          const minEyeY = curFloorY + player.currentEyeH;
 
           if (moveDir.lengthSq() > 0) {
             moveDir.normalize().applyAxisAngle(new THREE.Vector3(0, 1, 0), yaw);
@@ -14423,6 +15048,48 @@
           if (MAP_LIST[currentMapIndex] === 'monolith' && monolithResonance && !player.isDead) {
             if (Math.abs(camera.position.x) < 3.5 && Math.abs(camera.position.z) < 3.5 && Math.abs(camera.position.y - 1.7) < 1.2) {
               triggerMonolithResonance();
+            }
+          }
+
+          // Auto-launch when stepping onto Aurora Plasma Lift
+          if (MAP_LIST[currentMapIndex] === 'aurora' && auroraPlasmaLift && !player.isDead) {
+            if (Math.abs(camera.position.x) < 3.5 && Math.abs(camera.position.z) < 3.5 && Math.abs(camera.position.y - 1.7) < 1.2) {
+              if (player.velocity.y <= 0) triggerAuroraPlasmaLift();
+            }
+          }
+
+          // Auto-launch when stepping onto Nexus Maglev Booster
+          if (MAP_LIST[currentMapIndex] === 'nexus' && nexusMaglevBooster && !player.isDead) {
+            if (Math.abs(camera.position.x) < 12.0 && Math.abs(camera.position.z) < 2.5 && Math.abs(camera.position.y - 1.7) < 1.0) {
+              triggerNexusMaglevBooster();
+            }
+          }
+
+          // Auto-launch when stepping onto Mirage Sand Twister
+          if (MAP_LIST[currentMapIndex] === 'mirage' && mirageSandTwister && !player.isDead) {
+            if (Math.abs(camera.position.x) < 3.2 && Math.abs(camera.position.z) < 3.2 && Math.abs(camera.position.y - 1.7) < 1.2) {
+              if (player.velocity.y <= 0) triggerMirageSandTwister();
+            }
+          }
+
+          // Auto-launch when stepping onto Abyssal Water Jet
+          if (MAP_LIST[currentMapIndex] === 'abyssal' && abyssalWaterJet && !player.isDead) {
+            if (Math.abs(camera.position.x) < 3.0 && Math.abs(camera.position.z) < 9.0 && Math.abs(camera.position.y - 1.7) < 1.0) {
+              triggerAbyssalWaterJet();
+            }
+          }
+
+          // Auto-launch when stepping onto Inferno Cellar Lift
+          if (MAP_LIST[currentMapIndex] === 'inferno' && infernoCellarLift && !player.isDead) {
+            if (Math.abs(camera.position.x) < 3.2 && Math.abs(camera.position.z) < 3.2 && Math.abs(camera.position.y - 1.7) < 1.2) {
+              if (player.velocity.y <= 0) triggerInfernoCellarLift();
+            }
+          }
+
+          // Auto-launch when stepping onto Vortex Slingshot
+          if (MAP_LIST[currentMapIndex] === 'vortex' && vortexSlingshot && !player.isDead) {
+            if (Math.abs(camera.position.x) < 3.5 && Math.abs(camera.position.z) < 3.5 && Math.abs(camera.position.y - 1.7) < 1.2) {
+              triggerVortexSlingshot();
             }
           }
         }
@@ -14645,10 +15312,15 @@
             }
           }
 
-          // Composite weapon rotation: muzzle rise from recoil + sway pitch/yaw (Always returns to 0!)
+          // Organic idle weapon breathing oscillation
+          const idleBreathe = Math.sin(now * 0.0025) * 0.002;
+          baseGunPos.y += idleBreathe;
+
+          // Composite weapon rotation: muzzle rise from recoil + sway pitch/yaw + strafe roll banking
+          const strafeTilt = THREE.MathUtils.clamp(-player.velocity.x * 0.006, -0.07, 0.07);
           gunGroup.rotation.x = gunRecoilRotX + gunSwayPitch;
           gunGroup.rotation.y = gunSwayYaw;
-          gunGroup.rotation.z = gunSwayYaw * 0.35;
+          gunGroup.rotation.z = (gunSwayYaw * 0.35) + strafeTilt;
         }
       } // End if (!player.isDead)
 
@@ -14769,11 +15441,18 @@
             e.mesh.position.x += e.patrolDir * 2.2 * botSpeedMult * dt;
             if (Math.abs(e.mesh.position.x) > 30) e.patrolDir *= -1;
 
-            // Realistic 3D Procedural Walking Leg/Arm Oscillation
+            // Organic Procedural Walking Leg/Arm Oscillation & Body Stride Bob
+            const walkCycle = Math.sin(now * 0.008 * 6);
             if (e.legs && e.legs.length === 2) {
-              const walkCycle = Math.sin(now * 0.008 * 6);
-              e.legs[0].rotation.x = walkCycle * 0.4;
-              e.legs[1].rotation.x = -walkCycle * 0.4;
+              e.legs[0].rotation.x = walkCycle * 0.45;
+              e.legs[1].rotation.x = -walkCycle * 0.45;
+            }
+            if (e.arms && e.arms.length === 2) {
+              e.arms[0].rotation.x = -walkCycle * 0.38;
+              e.arms[1].rotation.x = walkCycle * 0.38;
+            }
+            if (e.body) {
+              e.body.position.y = 1.15 + Math.abs(Math.sin(walkCycle * 2)) * 0.028;
             }
             if (isSweep) {
               const zDir = (e.mesh.position.z > 0) ? -1 : 1;
@@ -14784,6 +15463,19 @@
             if (t.isDead) return;
             t.mesh.position.x += t.patrolDir * 1.8 * botSpeedMult * dt;
             if (Math.abs(t.mesh.position.x) > 25) t.patrolDir *= -1;
+            // Smooth teammate walking animation
+            const walkCycleT = Math.sin(now * 0.008 * 5.5);
+            if (t.legs && t.legs.length === 2) {
+              t.legs[0].rotation.x = walkCycleT * 0.42;
+              t.legs[1].rotation.x = -walkCycleT * 0.42;
+            }
+            if (t.arms && t.arms.length === 2) {
+              t.arms[0].rotation.x = -walkCycleT * 0.35;
+              t.arms[1].rotation.x = walkCycleT * 0.35;
+            }
+            if (t.body) {
+              t.body.position.y = 1.15 + Math.abs(Math.sin(walkCycleT * 2)) * 0.025;
+            }
             if (isSweep) {
               const zDir = (t.mesh.position.z > 0) ? -1 : 1;
               t.mesh.position.z += zDir * 1.5 * botSpeedMult * dt;
