@@ -13224,8 +13224,11 @@
             name: slotInfo ? slotInfo.name : `AI Ally #${i + 1}`,
             agent: slotInfo ? slotInfo.agent : 'Jett',
             hp: 100, maxHp: 100,
-            mesh: m.mesh, head: m.head, body: m.body, legs: m.legs,
+            mesh: m.mesh, head: m.head, body: m.body, legs: m.legs, arms: m.arms,
             isDead: false, patrolDir: 1,
+            role: i === 0 ? 'escort' : (i === 1 ? 'siteA' : (i === 2 ? 'siteB' : 'flex')),
+            lastShotTime: 0,
+            isDefusing: false,
             targetSite: (mapKey === 'haven') ? (i % 3 === 0 ? 'A' : (i % 3 === 1 ? 'B' : 'C')) : (i % 2 === 0 ? 'A' : 'B')
           });
         }
@@ -13244,8 +13247,10 @@
             name: slotInfo ? slotInfo.name : `Enemy #${i + 1}`,
             agent: slotInfo ? slotInfo.agent : 'Omen',
             hp: 100, maxHp: 100,
-            mesh: m.mesh, head: m.head, body: m.body, legs: m.legs,
+            mesh: m.mesh, head: m.head, body: m.body, legs: m.legs, arms: m.arms,
             isDead: false, patrolDir: -1,
+            role: i < 2 ? 'siteA' : (i < 4 ? 'siteB' : 'lurker'),
+            lastShotTime: 0,
             targetSite: (mapKey === 'haven') ? (i % 3 === 0 ? 'A' : (i % 3 === 1 ? 'B' : 'C')) : (i % 2 === 0 ? 'A' : 'B')
           });
         }
@@ -19859,214 +19864,463 @@
 
       // Match Simulation (Runs as long as custom-lobby is closed)
       if (document.getElementById('custom-lobby').style.display === 'none') {
-        // Enemy AI Tactical Fire: Balanced, human-like reaction time & 50% reduced damage
-        if (roundState === 'IN_ROUND' && !cheats.freezeAI && now - enemyShotTimer > 2400) {
-          enemyShotTimer = now + (Math.random() * 800 - 400);
-          const aliveEnemies = enemiesList.filter(e => !e.isDead);
-          if (aliveEnemies.length > 0) {
-            const shooter = aliveEnemies[Math.floor(Math.random() * aliveEnemies.length)];
-            shooter.mesh.lookAt(camera.position.x, shooter.mesh.position.y, camera.position.z);
+        // ══════════════════════════════════════════════════════════════
+        // AUTONOMOUS TACTICAL 5v5 BOT AI (TEAMMATES & ENEMIES)
+        // ══════════════════════════════════════════════════════════════
+        if (!cheats.freezeAI) {
+          const isDeathmatch = (GAME_MODES[currentGameModeIdx] && GAME_MODES[currentGameModeIdx].isDeathmatch);
+          const isSweep = player.isDead;
+          const speedMult = isSweep ? 1.8 : 1.0;
 
-            // Tactical Jiggle Peek: strafe slightly before burst
-            const strafeDir = (Math.random() < 0.5 ? -1 : 1);
-            shooter.mesh.position.x += strafeDir * 0.45;
-            sound.playSpatialFootstep(shooter.mesh.position, 'stone');
-            setTimeout(() => {
-              if (!shooter.isDead && shooter.mesh) shooter.mesh.position.x -= strafeDir * 0.45;
-            }, 650);
+          // Tactical bomb site centers
+          let siteAPos = new THREE.Vector3(26, 0, -18);
+          let siteBPos = new THREE.Vector3(-26, 0, -18);
+          let midPos = new THREE.Vector3(0, 0, 8);
 
-            // Tactical Crouch during spray
-            shooter.mesh.position.y = -0.2;
-            setTimeout(() => { if (shooter.mesh) shooter.mesh.position.y = 0; }, 600);
-
-            // 3-Round Burst with relaxed timing
-            for (let b = 0; b < 3; b++) {
-              setTimeout(() => {
-                if (shooter.isDead) return;
-                const toPlayer = _vToPlayer.subVectors(camera.position, shooter.mesh.position).normalize();
-                createBulletTracer(shooter.mesh.position, toPlayer);
-                sound.playGunshot('vandal');
-
-                const distToPlayer = camera.position.distanceTo(shooter.mesh.position);
-                if (distToPlayer < 35) {
-                  setTimeout(() => sound.playBulletWhiz(), 35 + Math.random() * 40);
-                }
-
-                // Strict Line-of-Sight Check: Bots CANNOT shoot through walls or barriers!
-                const losDir = _vToPlayer.subVectors(camera.position, shooter.mesh.position).normalize();
-                const losDist = camera.position.distanceTo(shooter.mesh.position);
-                const losRay = new THREE.Raycaster(shooter.mesh.position, losDir, 0.5, losDist);
-                const losBlockers = [...colliders.map(c => (c.mesh || (c.isObject3D ? c : null))), ...activeBarriers.filter(b => !b.isDestroyed).map(b => b.mesh)].filter(m => m && m.isObject3D);
-                const losHits = losRay.intersectObjects(losBlockers);
-                const isLosBlocked = (losHits.length > 0 && losHits[0].distance < (losDist - 0.6));
-
-                if (isLosBlocked) {
-                  // Bot bullet hits obstacle/wall between shooter and player
-                  const hitP = losHits[0];
-                  spawnImpactSparks(hitP.point, hitP.face ? hitP.face.normal : losDir.clone().negate(), false);
-                  createBulletHoleDecal(hitP.point, hitP.face ? hitP.face.normal : new THREE.Vector3(0, 1, 0));
-                  return; // BLOCKED by wall or barrier! Does NOT hit player!
-                }
-
-                // AI accuracy check when unobstructed
-                if (losDist < 45 && Math.random() < 0.22) {
-                  if (!cheats.godMode) {
-                    const isEnemyHeadshot = (Math.random() < 0.08); // Reduced headshot rate
-                    // AI Damage Reduced by 50%: Headshot 55 -> 27, Bodyshot 18 -> 9
-                    const baseIncoming = isEnemyHeadshot ? 27 : 9;
-                    const prevPlayerShield = player.shield;
-                    const dealtToShield = Math.min(player.shield, isEnemyHeadshot ? 12 : 6);
-                    player.shield -= dealtToShield;
-                    const remainder = baseIncoming - dealtToShield;
-                    player.hp -= remainder;
-                    player.lastDamageTime = performance.now() / 1000;
-
-                    if (prevPlayerShield > 0 && player.shield === 0) {
-                      sound.playShieldBreak();
-                      spawnShieldBreakParticles(camera.position);
-                      showToast('⚠️ 실드 파괴됨! (SHIELD BROKEN)');
-                    }
-
-                    if (!roundCombatData.taken[shooter.id]) {
-                      roundCombatData.taken[shooter.id] = {
-                        id: shooter.id,
-                        name: shooter.name,
-                        agent: shooter.agent,
-                        head: 0,
-                        body: 0,
-                        leg: 0,
-                        totalDmg: 0,
-                        weapon: 'VANDAL'
-                      };
-                    }
-                    const cTaken = roundCombatData.taken[shooter.id];
-                    cTaken.totalDmg += (dealtToShield + remainder);
-                    if (isEnemyHeadshot) cTaken.head++;
-                    else cTaken.body++;
-
-                    if (isEnemyHeadshot) sound.playHeadshot();
-                    else sound.playBodyHit();
-
-                    showDamageIndicator();
-                    addCameraTrauma(isEnemyHeadshot ? 0.75 : 0.42);
-                    showToast(isEnemyHeadshot ? '⚠️ 치명타 헤드샷 피격! (CRITICAL)' : '피격 경고! 적 점사 피격');
-                    updateHUD();
-                    if (player.hp <= 0) onPlayerDeath();
-                  }
-                }
-              }, b * 110);
-            }
+          if (typeof spikeSiteAreas !== 'undefined' && spikeSiteAreas.length > 0) {
+            const areaA = spikeSiteAreas.find(s => s.name.includes('A')) || spikeSiteAreas[0];
+            if (areaA) siteAPos.set((areaA.minX + areaA.maxX) / 2, 0, (areaA.minZ + areaA.maxZ) / 2);
+            const areaB = spikeSiteAreas.find(s => s.name.includes('B')) || (spikeSiteAreas.length > 1 ? spikeSiteAreas[1] : null);
+            if (areaB) siteBPos.set((areaB.minX + areaB.maxX) / 2, 0, (areaB.minZ + areaB.maxZ) / 2);
           }
-        }
 
-        // AI Tactical Navigation & Autonomous Spike Planting
-        if (roundState === 'IN_ROUND') {
-          if (myTeam === 'def' && !spikeState.isPlanted && enemiesList.length > 0) {
-            const carrierBot = enemiesList.find(e => !e.isDead);
-            if (carrierBot && spikeSiteAreas.length > 0) {
-              const targetSite = spikeSiteAreas[0];
-              const siteCenter = _vSiteCenter.set((targetSite.minX + targetSite.maxX) / 2, 0, (targetSite.minZ + targetSite.maxZ) / 2);
-              const dirToSite = _vDirToSite.subVectors(siteCenter, carrierBot.mesh.position);
-              if (dirToSite.length() > 2) {
-                dirToSite.normalize();
-                carrierBot.mesh.position.addScaledVector(dirToSite, 2.5 * dt);
+          // Blocker meshes for Line-of-Sight & Obstacle raycasts
+          const losBlockers = colliders
+            .map(c => (c.mesh || (c.isObject3D ? c : null)))
+            .concat(activeBarriers.filter(b => !b.isDestroyed).map(b => b.mesh))
+            .filter(m => m && m.isObject3D);
+
+          // Line of Sight Helper
+          function checkLOS(fromPos, toPos) {
+            const f = fromPos.clone(); f.y = 1.35;
+            const t = toPos.clone(); t.y = 1.35;
+            const dir = new THREE.Vector3().subVectors(t, f);
+            const dist = dir.length();
+            if (dist > 44) return false;
+            dir.normalize();
+            const r = new THREE.Raycaster(f, dir, 0.4, dist);
+            const hits = r.intersectObjects(losBlockers);
+            return (hits.length === 0 || hits[0].distance >= dist - 0.6);
+          }
+
+          // Dedicated Bot Movement with AABB Wall & Barrier Collision (Ignores floor & steps < 0.6m)
+          function advanceBot(bot, targetPos, baseSpeed) {
+            if (!bot.mesh || bot.isDead) return false;
+            if (bot.root > 0) {
+              bot.root -= dt;
+              return false; // Root debuff active
+            }
+            let effSpeed = baseSpeed * speedMult;
+            if (bot.slow > 0) {
+              effSpeed *= (1.0 - Math.min(0.85, bot.slow));
+            }
+
+            const cur = bot.mesh.position;
+            const dx = targetPos.x - cur.x;
+            const dz = targetPos.z - cur.z;
+            const dist = Math.hypot(dx, dz);
+
+            if (dist < 1.0) {
+              bot.curSpeed = THREE.MathUtils.lerp(bot.curSpeed || 0, 0, Math.min(1, 8 * dt));
+              return false;
+            }
+
+            const moveDir = new THREE.Vector3(dx, 0, dz).normalize();
+            const deltaX = moveDir.x * effSpeed * dt;
+            const deltaZ = moveDir.z * effSpeed * dt;
+
+            // Dedicated Wall Collision for Bots
+            const pRad = 0.4;
+            let nX = cur.x + deltaX;
+            let nZ = cur.z + deltaZ;
+            const testMinY = 0.6;
+            const testMaxY = 2.0;
+
+            const minX_X = nX - pRad, maxX_X = nX + pRad;
+            const minZ_X = cur.z - pRad, maxZ_X = cur.z + pRad;
+            for (let i = 0; i < colliders.length; i++) {
+              const c = colliders[i];
+              if (c.mesh && c.mesh.visible === false) continue;
+              const b = c.box;
+              if (b.max.y < testMinY) continue;
+              if (maxX_X >= b.min.x && minX_X <= b.max.x &&
+                  testMaxY >= b.min.y && testMinY <= b.max.y &&
+                  maxZ_X >= b.min.z && minZ_X <= b.max.z) {
+                nX = cur.x;
+                break;
+              }
+            }
+
+            const minX_Z = nX - pRad, maxX_Z = nX + pRad;
+            const minZ_Z = nZ - pRad, maxZ_Z = nZ + pRad;
+            for (let i = 0; i < colliders.length; i++) {
+              const c = colliders[i];
+              if (c.mesh && c.mesh.visible === false) continue;
+              const b = c.box;
+              if (b.max.y < testMinY) continue;
+              if (maxX_Z >= b.min.x && minX_Z <= b.max.x &&
+                  testMaxY >= b.min.y && testMinY <= b.max.y &&
+                  maxZ_Z >= b.min.z && minZ_Z <= b.max.z) {
+                nZ = cur.z;
+                break;
+              }
+            }
+
+            cur.x = THREE.MathUtils.clamp(nX, -46, 46);
+            cur.z = THREE.MathUtils.clamp(nZ, -46, 46);
+            cur.y = (typeof groundAt === 'function') ? groundAt(cur.x, cur.z, 0) : 0;
+
+            const targetYaw = Math.atan2(moveDir.x, moveDir.z);
+            bot.mesh.rotation.y = THREE.MathUtils.lerp(bot.mesh.rotation.y, targetYaw, Math.min(1, 10 * dt));
+
+            // Organic walking limb oscillation
+            const walkCycle = Math.sin(now * 0.008 * 6);
+            if (bot.legs && bot.legs.length === 2) {
+              bot.legs[0].rotation.x = walkCycle * 0.45;
+              bot.legs[1].rotation.x = -walkCycle * 0.45;
+            }
+            if (bot.arms && bot.arms.length === 2) {
+              bot.arms[0].rotation.x = -walkCycle * 0.38;
+              bot.arms[1].rotation.x = walkCycle * 0.38;
+            }
+            if (bot.body) {
+              bot.body.position.y = cur.y + 1.15 + Math.abs(Math.sin(walkCycle * 2)) * 0.028;
+            }
+            return true;
+          }
+
+          const playerIsAtk = (myTeam === 'atk');
+
+          // ─── 1. TEAMMATES TACTICAL NAVIGATION & DEFUSE / PLANT ────────
+          teammatesList.forEach((t, i) => {
+            if (t.isDead || !t.mesh) return;
+
+            // In BUY_PHASE: advance towards spawn barrier and take ready posture
+            if (roundState === 'BUY_PHASE') {
+              const readyZ = playerIsAtk ? 18 : -8;
+              const readyX = [-14, -5, 5, 14][i % 4];
+              advanceBot(t, new THREE.Vector3(readyX, 0, readyZ), 2.2);
+              return;
+            }
+
+            if (roundState !== 'IN_ROUND') return;
+
+            // A) If Spike is Planted
+            if (spikeState.isPlanted && spikeState.mesh) {
+              const sPos = spikeState.mesh.position;
+              if (myTeam === 'def') {
+                // DEFENDERS: Defuse or Cover
+                const dSpike = t.mesh.position.distanceTo(sPos);
+                const isPlayerDefusing = (keys['Digit4'] || keys['KeyE'] || keys['KeyF']) && camera.position.distanceTo(sPos) < 3.2;
+                const aliveDefenders = teammatesList.filter(tm => !tm.isDead);
+                const isDesignatedDefuser = (aliveDefenders[0] === t);
+
+                if (!isPlayerDefusing && isDesignatedDefuser && dSpike < 2.8) {
+                  t.isDefusing = true;
+                  t.mesh.lookAt(sPos.x, t.mesh.position.y, sPos.z);
+                  t.mesh.position.y = -0.15;
+                  updateSpikeTether(true, sPos.clone().setY(0.6), 0x00f0ff);
+                  spikeState.defuseProgress += dt / 7.0;
+
+                  if (spikeState.defuseProgress >= 0.5 && !t._halfDing) {
+                    t._halfDing = true;
+                    sound.playDefuseHalf();
+                    showToast(`[아군] ${t.name} 요원이 스파이크 절반 해체 성공! (HALF DEFUSED)`);
+                  }
+                  if (spikeState.defuseProgress >= 1.0) {
+                    triggerRoundCeremony(true, 'SPIKE DEFUSED // DEFENDERS WIN');
+                    showToast(`🎉 [해체 완료] ${t.name} 요원이 스파이크를 해체하여 승리했습니다!`);
+                  }
+                  return;
+                } else {
+                  t.isDefusing = false;
+                  if (t.mesh.position.y < 0) t.mesh.position.y = 0;
+                  const guardAngle = (i * Math.PI / 2);
+                  const guardPos = new THREE.Vector3(sPos.x + Math.cos(guardAngle) * 7.5, 0, sPos.z + Math.sin(guardAngle) * 7.5);
+                  advanceBot(t, guardPos, 3.0);
+                  return;
+                }
               } else {
+                // ATTACKERS: Post-plant site perimeter hold
+                const postAngle = i * 1.5;
+                const postPos = new THREE.Vector3(sPos.x + Math.cos(postAngle) * 9.5, 0, sPos.z + Math.sin(postAngle) * 9.5);
+                advanceBot(t, postPos, 2.4);
+                return;
+              }
+            }
+
+            // B) Spike is NOT Planted
+            let targetPos = new THREE.Vector3();
+            if (isDeathmatch) {
+              if (!t._dmWay || t.mesh.position.distanceTo(t._dmWay) < 2) {
+                t._dmWay = new THREE.Vector3((Math.random() - 0.5) * 60, 0, (Math.random() - 0.5) * 60);
+              }
+              targetPos.copy(t._dmWay);
+            } else if (playerIsAtk) {
+              // ATTACKERS:
+              if (i === 0) {
+                // Escort: Moves alongside player
+                const offsetSide = (mySlotIdx % 2 === 0 ? -4.5 : 4.5);
+                targetPos.set(camera.position.x + offsetSide, 0, camera.position.z + 3.0);
+              } else if (i === 1) {
+                targetPos.copy(siteAPos);
+              } else if (i === 2) {
+                targetPos.copy(siteBPos);
+              } else {
+                targetPos.copy(midPos);
+              }
+
+              // Autonomous Spike Plant by Attacker Teammates
+              const distA = t.mesh.position.distanceTo(siteAPos);
+              const distB = t.mesh.position.distanceTo(siteBPos);
+              if (!spikeState.isPlanted && (distA < 4.0 || distB < 4.0)) {
+                const plantSite = (distA < 4.0) ? siteAPos : siteBPos;
                 spikeState.isPlanted = true;
-                plantSpikeProp(carrierBot.mesh.position.x, 0, carrierBot.mesh.position.z);
+                plantSpikeProp(plantSite.x, 0, plantSite.z);
+                sound.playSpikeBeep(1);
+                radioVoice.speak('Spike planted!');
+                showToast(`[아군 설치] ${t.name} 요원이 ${distA < 4.0 ? 'A' : 'B'} 사이트에 스파이크를 설치했습니다!`);
+                renderTopAgentsBar();
+              }
+            } else {
+              // DEFENDERS: Hold Sites
+              if (i < 2) {
+                const angle = now * 0.001 + i;
+                targetPos.set(siteAPos.x + Math.cos(angle) * 5.0, 0, siteAPos.z + Math.sin(angle) * 5.0);
+              } else {
+                const angle = now * 0.001 + i;
+                targetPos.set(siteBPos.x + Math.cos(angle) * 5.0, 0, siteBPos.z + Math.sin(angle) * 5.0);
+              }
+            }
+
+            advanceBot(t, targetPos, 2.8);
+          });
+
+          // ─── 2. TEAMMATE COMBAT: ENGAGE & SHOOT HOSTILE ENEMIES ───────
+          teammatesList.forEach(t => {
+            if (t.isDead || !t.mesh || t.isDefusing) return;
+            if (roundState !== 'IN_ROUND') return;
+
+            const aliveEnemies = enemiesList.filter(e => !e.isDead && e.mesh);
+            let closestEnemy = null;
+            let closestDist = 38;
+
+            aliveEnemies.forEach(e => {
+              const d = t.mesh.position.distanceTo(e.mesh.position);
+              if (d < closestDist && checkLOS(t.mesh.position, e.mesh.position)) {
+                closestDist = d;
+                closestEnemy = e;
+              }
+            });
+
+            if (closestEnemy) {
+              t.mesh.lookAt(closestEnemy.mesh.position.x, t.mesh.position.y, closestEnemy.mesh.position.z);
+              t.lastShotTime = t.lastShotTime || 0;
+              const fireDelay = (aiDifficulty === 'hard' ? 1200 : (aiDifficulty === 'easy' ? 2200 : 1600));
+
+              if (now - t.lastShotTime > fireDelay) {
+                t.lastShotTime = now + (Math.random() * 400 - 200);
+
+                for (let b = 0; b < 2; b++) {
+                  setTimeout(() => {
+                    if (t.isDead || closestEnemy.isDead || !closestEnemy.mesh) return;
+                    const toE = new THREE.Vector3().subVectors(closestEnemy.mesh.position, t.mesh.position).normalize();
+                    createBulletTracer(t.mesh.position, toE);
+                    sound.playGunshot('vandal');
+
+                    const hitRate = (aiDifficulty === 'hard' ? 0.50 : (aiDifficulty === 'easy' ? 0.22 : 0.35));
+                    if (Math.random() < hitRate) {
+                      const isHs = Math.random() < 0.18;
+                      closestEnemy.hp -= (isHs ? 45 : 22);
+                      spawnImpactSparks(closestEnemy.mesh.position.clone().setY(isHs ? 1.7 : 1.1), toE.clone().negate(), false, isHs);
+
+                      if (closestEnemy.hp <= 0 && !closestEnemy.isDead) {
+                        closestEnemy.isDead = true;
+                        closestEnemy.isCollapsing = true;
+                        closestEnemy.collapseTimer = 0;
+                        t.kills = (t.kills || 0) + 1;
+                        addKillFeedEntry(t.name, closestEnemy.name, isHs);
+                        renderTopAgentsBar();
+                        sound.playKillSound();
+                        showToast(`🎯 [아군 사격] ${t.name} 요원이 ${closestEnemy.name}을(를) 처치했습니다!`);
+
+                        const rem = enemiesList.filter(e => !e.isDead).length;
+                        if (rem === 1) radioVoice.speak('One enemy remaining!');
+                        else if (rem === 0) {
+                          triggerRoundCeremony(true, 'ENEMY TEAM WIPED // ALL HOSTILES DOWN');
+                        }
+                      }
+                    }
+                  }, b * 110);
+                }
+              }
+            }
+          });
+
+          // ─── 3. ENEMY AI: NAVIGATION & TARGET ACQUISITION (PLAYER & TEAM) 
+          enemiesList.forEach((e, idx) => {
+            if (e.isDead || !e.mesh) return;
+
+            if (roundState === 'BUY_PHASE') {
+              const readyZ = playerIsAtk ? -8 : 18;
+              const readyX = [-14, -5, 5, 14, 0][idx % 5];
+              advanceBot(e, new THREE.Vector3(readyX, 0, readyZ), 2.2);
+              return;
+            }
+
+            if (roundState !== 'IN_ROUND') return;
+
+            // Enemy Navigation
+            if (spikeState.isPlanted && spikeState.mesh) {
+              const sPos = spikeState.mesh.position;
+              if (myTeam === 'atk') {
+                // ENEMY DEFENDERS: Rotate to defuse spike
+                const dSpike = e.mesh.position.distanceTo(sPos);
+                if (dSpike < 2.6 && !spikeState.detonated) {
+                  e.mesh.lookAt(sPos.x, e.mesh.position.y, sPos.z);
+                  e.mesh.position.y = -0.15;
+                  updateSpikeTether(true, sPos.clone().setY(0.6), 0xff2244);
+                  spikeState.defuseProgress += dt / 8.0;
+                  if (spikeState.defuseProgress >= 1.0) {
+                    triggerRoundCeremony(false, 'SPIKE DEFUSED // ENEMY DEFUSED');
+                    showToast('⚠️ 적군이 스파이크를 해체했습니다!');
+                  }
+                  return;
+                } else {
+                  advanceBot(e, sPos, 3.0);
+                  return;
+                }
+              } else {
+                // ENEMY ATTACKERS: Post-plant defense
+                const angle = idx * 1.3;
+                const guardPos = new THREE.Vector3(sPos.x + Math.cos(angle) * 8.5, 0, sPos.z + Math.sin(angle) * 8.5);
+                advanceBot(e, guardPos, 2.5);
+                return;
+              }
+            }
+
+            // Spike not planted:
+            let targetPos = new THREE.Vector3();
+            if (isDeathmatch) {
+              if (!e._dmWay || e.mesh.position.distanceTo(e._dmWay) < 2) {
+                e._dmWay = new THREE.Vector3((Math.random() - 0.5) * 60, 0, (Math.random() - 0.5) * 60);
+              }
+              targetPos.copy(e._dmWay);
+            } else if (myTeam === 'def') {
+              // ENEMY ATTACKERS: Push Site A or Site B & Plant
+              if (idx < 3) targetPos.copy(siteAPos);
+              else targetPos.copy(siteBPos);
+
+              const distA = e.mesh.position.distanceTo(siteAPos);
+              const distB = e.mesh.position.distanceTo(siteBPos);
+              if (!spikeState.isPlanted && (distA < 4.0 || distB < 4.0)) {
+                const plantP = (distA < 4.0) ? siteAPos : siteBPos;
+                spikeState.isPlanted = true;
+                plantSpikeProp(plantP.x, 0, plantP.z);
                 sound.playSpikeBeep(1);
                 radioVoice.speak('Spike planted!');
                 showToast('적군이 스파이크를 설치했습니다! (ENEMY PLANTED SPIKE)');
                 renderTopAgentsBar();
               }
+            } else {
+              // ENEMY DEFENDERS: Hold Site A & B
+              if (idx < 3) {
+                const angle = now * 0.001 + idx;
+                targetPos.set(siteAPos.x + Math.cos(angle) * 5.5, 0, siteAPos.z + Math.sin(angle) * 5.5);
+              } else {
+                const angle = now * 0.001 + idx;
+                targetPos.set(siteBPos.x + Math.cos(angle) * 5.5, 0, siteBPos.z + Math.sin(angle) * 5.5);
+              }
             }
-          }
 
-          // Sweep Mode: When player is dead, accelerate bots to clash quickly without stalling
-          const isSweep = player.isDead;
-          const botSpeedMult = isSweep ? 2.2 : 1.0;
+            advanceBot(e, targetPos, 2.5);
 
-          // Patrol & Tactical sweep movements
-          enemiesList.forEach(e => {
-            if (e.isDead) return;
-            // Respect Root (Immobilized: speed = 0) and Slow Debuffs
-            if (e.root > 0) {
-              e.root -= dt;
-              return; // Completely rooted/frozen!
-            }
-            let debuffMult = 1.0;
-            if (e.slow > 0) {
-              debuffMult *= (1.0 - Math.min(0.85, e.slow));
-            }
-            e.mesh.position.x += e.patrolDir * 2.2 * botSpeedMult * debuffMult * dt;
-            if (Math.abs(e.mesh.position.x) > 45) e.patrolDir *= -1;
+            // ENEMY COMBAT: Target Player OR Teammate
+            e.lastShotTime = e.lastShotTime || 0;
+            const enemyDelay = (aiDifficulty === 'hard' ? 1400 : (aiDifficulty === 'easy' ? 2600 : 1900));
 
-            // Organic Procedural Walking Leg/Arm Oscillation & Body Stride Bob
-            const walkCycle = Math.sin(now * 0.008 * 6);
-            if (e.legs && e.legs.length === 2) {
-              e.legs[0].rotation.x = walkCycle * 0.45;
-              e.legs[1].rotation.x = -walkCycle * 0.45;
-            }
-            if (e.arms && e.arms.length === 2) {
-              e.arms[0].rotation.x = -walkCycle * 0.38;
-              e.arms[1].rotation.x = walkCycle * 0.38;
-            }
-            if (e.body) {
-              e.body.position.y = 1.15 + Math.abs(Math.sin(walkCycle * 2)) * 0.028;
-            }
-            // Smooth enemy aim orientation towards player or movement
-            const dxP = camera.position.x - e.mesh.position.x;
-            const dzP = camera.position.z - e.mesh.position.z;
-            const distToPlayer = Math.hypot(dxP, dzP);
-            let targetBotYaw = (e.patrolDir > 0) ? (Math.PI / 2) : (-Math.PI / 2);
-            if (distToPlayer < 28 && !player.isDead) {
-              targetBotYaw = Math.atan2(dxP, dzP);
-            }
-            e.mesh.rotation.y = THREE.MathUtils.lerp(e.mesh.rotation.y, targetBotYaw, Math.min(1, 10 * dt));
+            if (now - e.lastShotTime > enemyDelay) {
+              let target = null;
+              let minD = 38;
 
-            // Smooth bot velocity damping & natural turning pause
-            e.curSpeed = e.curSpeed || 0;
-            const targetBotSpeed = 2.2 * botSpeedMult;
-            e.curSpeed = THREE.MathUtils.lerp(e.curSpeed, targetBotSpeed, Math.min(1, 8 * dt));
+              if (!player.isDead && checkLOS(e.mesh.position, camera.position)) {
+                const dp = e.mesh.position.distanceTo(camera.position);
+                if (dp < minD) {
+                  minD = dp;
+                  target = { isPlayer: true, pos: camera.position };
+                }
+              }
 
-            if (isSweep) {
-              const zDir = (e.mesh.position.z > 0) ? -1 : 1;
-              e.mesh.position.z += zDir * 1.5 * botSpeedMult * dt;
-            }
-          });
-          teammatesList.forEach(t => {
-            if (t.isDead) return;
-            t.curSpeed = t.curSpeed || 0;
-            const targetTeamSpeed = 1.8 * botSpeedMult;
-            t.curSpeed = THREE.MathUtils.lerp(t.curSpeed, targetTeamSpeed, Math.min(1, 8 * dt));
-            t.mesh.position.x += t.patrolDir * t.curSpeed * dt;
-            if (Math.abs(t.mesh.position.x) > 40) {
-              t.patrolDir *= -1;
-              t.curSpeed = 0;
-            }
-            // Smooth teammate walking animation & orientation
-            const walkCycleT = Math.sin(now * 0.008 * 5.5);
-            if (t.legs && t.legs.length === 2) {
-              t.legs[0].rotation.x = walkCycleT * 0.42;
-              t.legs[1].rotation.x = -walkCycleT * 0.42;
-            }
-            if (t.arms && t.arms.length === 2) {
-              t.arms[0].rotation.x = -walkCycleT * 0.35;
-              t.arms[1].rotation.x = walkCycleT * 0.35;
-            }
-            if (t.body) {
-              t.body.position.y = 1.15 + Math.abs(Math.sin(walkCycleT * 2)) * 0.025;
-            }
-            const targetTeamYaw = (t.patrolDir > 0) ? (Math.PI / 2) : (-Math.PI / 2);
-            t.mesh.rotation.y = THREE.MathUtils.lerp(t.mesh.rotation.y, targetTeamYaw, Math.min(1, 8 * dt));
+              teammatesList.forEach(t => {
+                if (!t.isDead && t.mesh && checkLOS(e.mesh.position, t.mesh.position)) {
+                  const dtp = e.mesh.position.distanceTo(t.mesh.position);
+                  if (dtp < minD) {
+                    minD = dtp;
+                    target = { isPlayer: false, teammate: t, pos: t.mesh.position };
+                  }
+                }
+              });
 
-            if (isSweep) {
-              const zDir = (t.mesh.position.z > 0) ? -1 : 1;
-              t.mesh.position.z += zDir * 1.5 * botSpeedMult * dt;
+              if (target) {
+                e.lastShotTime = now + (Math.random() * 400 - 200);
+                e.mesh.lookAt(target.pos.x, e.mesh.position.y, target.pos.z);
+
+                for (let b = 0; b < 3; b++) {
+                  setTimeout(() => {
+                    if (e.isDead || !e.mesh) return;
+                    const toT = new THREE.Vector3().subVectors(target.pos, e.mesh.position).normalize();
+                    createBulletTracer(e.mesh.position, toT);
+                    sound.playGunshot('vandal');
+
+                    const acc = (aiDifficulty === 'hard' ? 0.38 : (aiDifficulty === 'easy' ? 0.16 : 0.25));
+                    if (Math.random() < acc) {
+                      if (target.isPlayer) {
+                        if (!cheats.godMode) {
+                          const isHs = Math.random() < 0.1;
+                          const baseInc = isHs ? 27 : 9;
+                          const dealtToShield = Math.min(player.shield, isHs ? 12 : 6);
+                          player.shield -= dealtToShield;
+                          player.hp -= (baseInc - dealtToShield);
+                          player.lastDamageTime = performance.now() / 1000;
+                          if (isHs) sound.playHeadshot();
+                          else sound.playBodyHit();
+                          showDamageIndicator();
+                          addCameraTrauma(isHs ? 0.6 : 0.3);
+                          updateHUD();
+                          if (player.hp <= 0) onPlayerDeath();
+                        }
+                      } else if (target.teammate && !target.teammate.isDead) {
+                        const tm = target.teammate;
+                        tm.hp -= 20;
+                        spawnImpactSparks(tm.mesh.position.clone().setY(1.2), toT.clone().negate(), false);
+
+                        if (tm.hp <= 0 && !tm.isDead) {
+                          tm.isDead = true;
+                          tm.isCollapsing = true;
+                          tm.collapseTimer = 0;
+                          e.kills = (e.kills || 0) + 1;
+                          addKillFeedEntry(e.name, tm.name, false);
+                          renderTopAgentsBar();
+                          showToast(`⚠️ [아군 전사] ${tm.name} 요원이 쓰러졌습니다!`);
+                          radioVoice.speak('Ally down.');
+
+                          if (player.isDead) {
+                            const remAllies = teammatesList.filter(t => !t.isDead).length;
+                            if (remAllies === 0) {
+                              triggerRoundCeremony(false, 'TEAM ELIMINATED // ROUND LOST');
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }, b * 110);
+                }
+              }
             }
           });
         }
 
-        // Breeze A-Hall Chute Sliding Detection
+                // Breeze A-Hall Chute Sliding Detection
         if (MAP_LIST[currentMapIndex] === 'breeze' && !player.isDead) {
           if (Math.abs(camera.position.x - 16) < 2.0 && Math.abs(camera.position.z - (-8)) < 2.0) {
             camera.position.set(26, 1.4, -18);
@@ -20289,6 +20543,15 @@
             if (e.collapseTimer < 0.45) {
               e.mesh.rotation.x = -Math.PI / 2 * (e.collapseTimer / 0.45);
               e.mesh.position.y = Math.max(0.18, 1.0 - (e.collapseTimer / 0.45) * 0.82);
+            }
+          }
+        });
+        teammatesList.forEach(t => {
+          if (t.isCollapsing) {
+            t.collapseTimer = (t.collapseTimer || 0) + dt;
+            if (t.collapseTimer < 0.45) {
+              t.mesh.rotation.x = -Math.PI / 2 * (t.collapseTimer / 0.45);
+              t.mesh.position.y = Math.max(0.18, 1.0 - (t.collapseTimer / 0.45) * 0.82);
             }
           }
         });
