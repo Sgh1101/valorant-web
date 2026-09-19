@@ -2101,7 +2101,7 @@
       <div style="display: flex; justify-content: space-between; align-items: flex-end; border-bottom: 2px solid var(--val-border); padding-bottom: 10px; margin-bottom: 14px;">
         <div>
           <h3 style="font-family: var(--font-title); font-size: 34px; letter-spacing: 2px; color: #fff; line-height: 1;">TACTICAL SCOREBOARD // 5V5 MATCH</h3>
-          <div style="font-size: 12px; color: #8899a6;">PRESS [TAB] TO TOGGLE | [Y] INSPECT | [G] SKINS | [H] AGENTS | [M] MAPS | [L] LASER | [J] FLASH | [U] CHARM | [3] MELEE | [F5] TURBO | [F6] FTG | [F7] FX</div>
+          <div style="font-size: 12px; color: #8899a6;">PRESS [TAB] TO TOGGLE | [Y] INSPECT | [G] SKINS | [H] AGENTS | [M] MAPS | [L] LASER | [J] FLASH | [U] CHARM | [3] MELEE | [F5] TURBO | [F6] FTG | [F7] FX | [F8] REFLEX</div>
         </div>
         <div style="display: flex; gap: 16px; font-family: var(--font-title); font-size: 28px;">
           <span style="color: var(--val-cyan);">ATK <span id="sb-score-atk">0</span></span>
@@ -3599,7 +3599,7 @@
     const myClientId = 'user_' + Math.random().toString(36).substring(2, 8);
     const networkChannel = new BroadcastChannel('VALORANT_5V5_NET');
 
-    const MAP_LIST = ['ascent', 'bind', 'haven', 'icebox', 'split', 'lotus', 'breeze', 'sunset', 'pearl', 'fracture', 'abyss', 'district', 'range'];
+    const MAP_LIST = ['ascent', 'bind', 'haven', 'icebox', 'split', 'lotus', 'breeze', 'sunset', 'pearl', 'fracture', 'abyss', 'district', 'drift', 'range'];
     const MAP_NAMES = {
       ascent: 'ASCENT (어센트) - 베네치아 요새 & 전동 셔터 도어 [F]',
       bind: 'BIND (바인드) - 모로코 사막 & 차원 이동 텔레포터',
@@ -3613,6 +3613,7 @@
       fracture: 'FRACTURE (프랙처) - 산타페 기밀 연구소 & H자형 듀얼 스폰 & 협곡 고속 집라인 [F]',
       abyss: 'ABYSS (어비스) - 스발바르 무저갱 심연 유적 & 낙사 절벽 & 미드 도약대 [F]',
       district: 'DISTRICT (디스트릭트) - 서울 도심 네오 골목 & 사이버펑크 홀로그램 빌보드 & 고속 점프패드 [F]',
+      drift: 'DRIFT (드리프트) - 태국 열대 리조트 & 부유 방갈로 & 오션 짚라인 [F]',
       range: 'THE RANGE (사격장) - 사격 훈련장 & 봇 연습'
     };
     let currentMapIndex = 0;
@@ -3625,7 +3626,8 @@
       Tejo: '🦅',
       Astra: '🌌',
       Breach: '🔨',
-      Skye: '🌿'
+      Skye: '🌿',
+      Waylay: '⚡'
     };
     const AGENT_COLORS = {
       Jett: '#00f0ff', Phoenix: '#ff6600', Reyna: '#be00ff', Sova: '#2979ff',
@@ -3637,7 +3639,8 @@
       Tejo: '#10b981',
       Astra: '#9c27b0',
       Breach: '#f59e0b',
-      Skye: '#84cc16'
+      Skye: '#84cc16',
+      Waylay: '#38bdf8'
     };
     const AGENT_ROLES = {
       Jett: '타격대 (Duelist)', Phoenix: '타격대 (Duelist)', Reyna: '타격대 (Duelist)', Raze: '타격대 (Duelist)',
@@ -3648,7 +3651,8 @@
       Tejo: '척후대 (Initiator)',
       Astra: '전략가 (Controller)',
       Breach: '척후대 (Initiator)',
-      Skye: '척후대 (Initiator)'
+      Skye: '척후대 (Initiator)',
+      Waylay: '타격대 (Duelist)'
     };
 
     const lobbySlots = {
@@ -4466,7 +4470,7 @@
     /* ==========================================================
        DYNAMIC AGENT SWITCHING SYSTEM ([H] KEY TO CYCLE AGENT)
        ========================================================== */
-    const PLAYABLE_AGENTS = ['Jett', 'Phoenix', 'Reyna', 'Sova', 'Sage', 'Omen', 'Brimstone', 'Raze', 'Killjoy', 'Chamber', 'Viper', 'Cypher', 'Neon', 'Yoru', 'Fade', 'Gekko', 'Harbor', 'Iso', 'Deadlock', 'Clove', 'Vyse', 'KAY/O', 'Tejo', 'Astra', 'Breach', 'Skye'];
+    const PLAYABLE_AGENTS = ['Jett', 'Phoenix', 'Reyna', 'Sova', 'Sage', 'Omen', 'Brimstone', 'Raze', 'Killjoy', 'Chamber', 'Viper', 'Cypher', 'Neon', 'Yoru', 'Fade', 'Gekko', 'Harbor', 'Iso', 'Deadlock', 'Clove', 'Vyse', 'KAY/O', 'Tejo', 'Astra', 'Breach', 'Skye', 'Waylay'];
     let currentAgentIdx = 0;
 
     const AGENT_SKILL_LABELS = {
@@ -4486,7 +4490,8 @@
       Iso: { c: '응징 사격 (C)', q: '취약 사쇄 (Q)', e: '더블 탭 실드 (E)', x: '결투 영역 (X)' },
       Astra: { c: '중력 샘 (C)', q: '신경 파동 (Q)', e: '성운 연막 (E)', x: '우주 장벽 (X)' },
       Breach: { c: '여진 (C)', q: '눈먼 길 (Q)', e: '균열 (E)', x: '지진 강타 (X)' },
-      Skye: { c: '재생 (C)', q: '정향 폭발 (Q)', e: '인도하는 빛 (E)', x: '추적자 (X)' }
+      Skye: { c: '재생 (C)', q: '정향 폭발 (Q)', e: '인도하는 빛 (E)', x: '추적자 (X)' },
+      Waylay: { c: '광자 굴절 (C)', q: '차원 가속 (Q)', e: '빛의 도약 (E)', x: '프리즘 오버드라이브 (X)' }
     };
 
     let spectatorTargetIndex = 0;
@@ -4655,6 +4660,8 @@
     let fractureZipline = null;
     let abyssJumppad = null;
     let districtJumppad = null;
+    let driftZipline = null;
+    let reflexMode = 'boost';
     let currentVisualFilterIdx = 0;
     let isFTGActive = false;
     let isFlashlightActive = false;
@@ -5315,6 +5322,19 @@
         const floralVest = new THREE.Mesh(new THREE.BoxGeometry(0.36, 0.34, 0.16), new THREE.MeshStandardMaterial({ color: 0x3f6212 }));
         floralVest.position.set(0, 1.25, 0.06);
         grp.add(floralVest);
+      } else if (agentName === 'Waylay') {
+        // Dimensional photon duelist with prismatic energy wings and refractive visor
+        const wingL = new THREE.Mesh(new THREE.OctahedronGeometry(0.14), new THREE.MeshStandardMaterial({ color: 0x38bdf8, emissive: 0x0284c7, emissiveIntensity: 0.85 }));
+        wingL.position.set(-0.25, 1.4, -0.15);
+        wingL.scale.set(0.4, 1.2, 1.6);
+        grp.add(wingL);
+        const wingR = new THREE.Mesh(new THREE.OctahedronGeometry(0.14), new THREE.MeshStandardMaterial({ color: 0x38bdf8, emissive: 0x0284c7, emissiveIntensity: 0.85 }));
+        wingR.position.set(0.25, 1.4, -0.15);
+        wingR.scale.set(0.4, 1.2, 1.6);
+        grp.add(wingR);
+        const visorBeam = new THREE.Mesh(new THREE.BoxGeometry(0.26, 0.06, 0.05), new THREE.MeshBasicMaterial({ color: 0x00f0ff }));
+        visorBeam.position.set(0, 1.80, 0.18);
+        grp.add(visorBeam);
       }
 
       // Distinct tactical role underfoot glowing aura ring
@@ -5350,6 +5370,22 @@
       if (cvs) cvs.style.filter = f.css;
       sound.playSwitchClick();
       showToast(`🎨 [VISUAL FX] 화면 컬러 프로파일: [${f.name}]`);
+    }
+
+    function startDriftZiplineRide() {
+      if (!driftZipline) return;
+      driftZipline.isRiding = true;
+      driftZipline.targetZ = (camera.position.z > 0) ? -34 : 34;
+      sound.playZipline();
+      showToast('⚡ [DRIFT] 열대 오션 짚라인에 탑승했습니다! [Space] 하차');
+    }
+
+    function toggleReflexMode() {
+      if (reflexMode === 'off') reflexMode = 'on';
+      else if (reflexMode === 'on') reflexMode = 'boost';
+      else reflexMode = 'off';
+      sound.playSwitchClick();
+      showToast(`⚡ [REFLEX] 초저지연 모드: [${reflexMode.toUpperCase()}]`);
     }
 
     function triggerDistrictJumppad() {
@@ -5727,6 +5763,8 @@
       fractureZipline = null;
       abyssJumppad = null;
       districtJumppad = null;
+      if (driftZipline && driftZipline.cable) scene.remove(driftZipline.cable);
+      driftZipline = null;
 
       if (lotusDoor && lotusDoor.mesh) {
         scene.remove(lotusDoor.mesh);
@@ -5998,6 +6036,19 @@
         sunLight.position.set(-20, 60, -30);
         scene.fog.color.setHex(0x130a21);
         scene.fog.density = 0.0065;
+      } else if (mapKey === 'drift') {
+        // Thailand Tropical Resort Island / Turquoise Waters & Sunny Skies
+        grad.addColorStop(0, '#0284c7');
+        grad.addColorStop(0.35, '#38bdf8');
+        grad.addColorStop(0.7, '#06b6d4');
+        grad.addColorStop(1, '#fde047');
+        ambientLight.color.setHex(0xe0f2fe);
+        ambientLight.intensity = 1.0;
+        sunLight.color.setHex(0xfef08a);
+        sunLight.intensity = 1.45;
+        sunLight.position.set(30, 80, -30);
+        scene.fog.color.setHex(0x0284c7);
+        scene.fog.density = 0.005;
       } else {
         // Range: High-tech military hangar
         grad.addColorStop(0, '#080c10');
@@ -7263,6 +7314,71 @@
           colliders.push({ box: new THREE.Box3().setFromObject(col), mesh: col });
         });
       }
+      else if (mapKey === 'drift') {
+        // ==========================================================
+        // MAP 13: DRIFT (드리프트) - 태국 열대 리조트 & 부유 방갈로 & 오션 짚라인 [F]
+        // ==========================================================
+        const matTropicalWater = new THREE.MeshStandardMaterial({ color: 0x06b6d4, roughness: 0.1, transparent: true, opacity: 0.8 });
+        const matTeakWood = new THREE.MeshStandardMaterial({ color: 0x854d0e, roughness: 0.65 });
+        const matBungalowTrim = new THREE.MeshStandardMaterial({ color: 0x78350f, roughness: 0.5 });
+        const matZiplineGold = new THREE.MeshStandardMaterial({ color: 0xf59e0b, emissive: 0xd97706, emissiveIntensity: 0.6 });
+
+        // Outer Tropical Boundaries & Water Floor (120x120m)
+        addBox(0, -0.8, 0, 120, 0.8, 120, matTropicalWater);
+        addBox(0, 8, -60, 120, 16, 2, matBungalowTrim);
+        addBox(0, 8, 60, 120, 16, 2, matBungalowTrim);
+        addBox(-60, 8, 0, 2, 16, 120, matBungalowTrim);
+        addBox(60, 8, 0, 2, 16, 120, matBungalowTrim);
+
+        // Central Mid Lagoon Boardwalk Pier
+        addPlatform(0, 0, 0, 16, 0.5, 24, matTeakWood);
+        addRailing(-7.9, 0.5, 0, 24, 'z');
+        addRailing(7.9, 0.5, 0, 24, 'z');
+
+        // Central Ocean Zipline Steel Cable spanning North to South (z = -34 to z = 34)
+        const zipGeo = new THREE.CylinderGeometry(0.04, 0.04, 72, 8);
+        const zipCable = new THREE.Mesh(zipGeo, matZiplineGold);
+        zipCable.rotation.x = Math.PI / 2;
+        zipCable.position.set(0, 3.2, 0);
+        scene.add(zipCable);
+        mapObjects.push(zipCable);
+
+        addTextBillboard(0, 2.2, -34, '[F] 열대 오션 짚라인 (DRIFT ZIPLINE)', 1.4, '#ffd700');
+        addTextBillboard(0, 2.2, 34, '[F] 열대 오션 짚라인 (DRIFT ZIPLINE)', 1.4, '#ffd700');
+
+        driftZipline = {
+          northPos: new THREE.Vector3(0, 1.2, -34),
+          southPos: new THREE.Vector3(0, 1.2, 34),
+          cable: zipCable,
+          isRiding: false,
+          targetZ: 0,
+          speed: 25.0
+        };
+
+        // --- A SITE: A FLOATING BUNGALOW & PIER (x = 30, z = -20) ---
+        addPlatform(30, 0, -20, 24, 0.6, 24, matSiteFloor);
+        addTextBillboard(30, 0.2, -20, 'A SITE', 1.8);
+        spikeSiteAreas.push({ minX: 18, maxX: 42, minZ: -32, maxZ: -8, name: 'A SITE' });
+
+        addPlatform(36, 0, -30, 12, 4.0, 10, matTeakWood);
+        addRailing(29.9, 4.0, -30, 10, 'z');
+        addStairs(36, -14, 0, 3.8, 4.0, 12, 12, 'z-');
+        addCrateStack(24, -20, 2.4);
+
+        // --- B SITE: B RESORT PAVILION (x = -30, z = -20) ---
+        addPlatform(-30, 0, -20, 24, 0.6, 24, matSiteFloor);
+        addTextBillboard(-30, 0.2, -20, 'B SITE', 1.8);
+        spikeSiteAreas.push({ minX: -42, maxX: -18, minZ: -32, maxZ: -8, name: 'B SITE' });
+
+        addPlatform(-36, 0, -30, 12, 4.0, 10, matTeakWood);
+        addRailing(-29.9, 4.0, -30, 10, 'z');
+        addStairs(-36, -14, 0, 3.8, 4.0, 12, 12, 'z-');
+        addCrateStack(-24, -20, 2.4);
+
+        // ATK & DEF Boardwalk Spawns
+        addPlatform(0, 0, 38, 44, 0.6, 16, matTeakWood);
+        addPlatform(0, 0, -38, 44, 0.6, 16, matTeakWood);
+      }
       else if (mapKey === 'range') {
         addBox(0, -0.5, 0, 60, 1, 120, matConcrete);
         addBox(0, 7, -60, 60, 14, 2, matWallStone);
@@ -7598,6 +7714,13 @@
       if (e.code === 'F7') {
         e.preventDefault();
         toggleVisualFilter();
+        return;
+      }
+
+      // [F8] Key: Quick Toggle Low Latency Reflex Mode
+      if (e.code === 'F8') {
+        e.preventDefault();
+        toggleReflexMode();
         return;
       }
 
@@ -9304,6 +9427,17 @@
         }
       }
 
+      // 9. Drift Ocean Zipline [F]
+      if (MAP_LIST[currentMapIndex] === 'drift' && driftZipline && !driftZipline.isRiding) {
+        const pPos = camera.position;
+        const dNorth = pPos.distanceTo(driftZipline.northPos);
+        const dSouth = pPos.distanceTo(driftZipline.southPos);
+        if (dNorth < 5.0 || dSouth < 5.0 || (Math.abs(pPos.x) < 3.5 && Math.abs(pPos.z) <= 34)) {
+          startDriftZiplineRide();
+          return;
+        }
+      }
+
       // 4. Ascent B Shutter Door
       if (!ascentDoor || ascentDoor.isDestroyed) return;
       const dist = camera.position.distanceTo(ascentDoor.switchPos);
@@ -10462,6 +10596,16 @@
         { label: 'DEF SPAWN', x: 0, z: -40, color: '#00ffaa' },
         { label: 'ATK SPAWN', x: 0, z: 40, color: '#ff4655' }
       ],
+      drift: [
+        { label: 'A SITE', x: 30, z: -20, color: '#00f0ff' },
+        { label: 'A BUNGALOW', x: 36, z: -30, color: '#88a0b8' },
+        { label: 'B SITE', x: -30, z: -20, color: '#00f0ff' },
+        { label: 'B PAVILION', x: -36, z: -30, color: '#88a0b8' },
+        { label: 'MID LAGOON', x: 0, z: 0, color: '#06b6d4' },
+        { label: 'ZIPLINE [F]', x: 0, z: 2, color: '#ffd700' },
+        { label: 'DEF SPAWN', x: 0, z: -40, color: '#00ffaa' },
+        { label: 'ATK SPAWN', x: 0, z: 40, color: '#ff4655' }
+      ],
       range: [
         { label: 'TARGETS', x: 0, z: -22, color: '#00f0ff' },
         { label: 'BENCH', x: 0, z: 0, color: '#ffc83b' },
@@ -11427,6 +11571,22 @@
             fractureZipline.isRiding = false;
             sound.playFootstep();
             showToast('🏁 [FRACTURE] 협곡 반대편 터미널에 도착했습니다!');
+          } else {
+            camera.position.z += step;
+            camera.position.x += (0 - camera.position.x) * 0.15;
+            camera.position.y = 2.0;
+          }
+        }
+
+        // Drift Ocean Zipline Motion Update
+        if (driftZipline && driftZipline.isRiding) {
+          const dz = driftZipline.targetZ - camera.position.z;
+          const step = Math.sign(dz) * driftZipline.speed * dt;
+          if (Math.abs(dz) <= Math.abs(step)) {
+            camera.position.z = driftZipline.targetZ;
+            driftZipline.isRiding = false;
+            sound.playFootstep();
+            showToast('🏁 [DRIFT] 오션 짚라인 반대편 리조트에 도착했습니다!');
           } else {
             camera.position.z += step;
             camera.position.x += (0 - camera.position.x) * 0.15;
