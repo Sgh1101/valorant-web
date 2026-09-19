@@ -3599,7 +3599,7 @@
     const myClientId = 'user_' + Math.random().toString(36).substring(2, 8);
     const networkChannel = new BroadcastChannel('VALORANT_5V5_NET');
 
-    const MAP_LIST = ['ascent', 'bind', 'haven', 'icebox', 'split', 'lotus', 'breeze', 'sunset', 'pearl', 'fracture', 'abyss', 'district', 'drift', 'range'];
+    const MAP_LIST = ['ascent', 'bind', 'haven', 'icebox', 'split', 'lotus', 'breeze', 'sunset', 'pearl', 'fracture', 'abyss', 'district', 'drift', 'glitch', 'range'];
     const MAP_NAMES = {
       ascent: 'ASCENT (어센트) - 베네치아 요새 & 전동 셔터 도어 [F]',
       bind: 'BIND (바인드) - 모로코 사막 & 차원 이동 텔레포터',
@@ -3614,6 +3614,7 @@
       abyss: 'ABYSS (어비스) - 스발바르 무저갱 심연 유적 & 낙사 절벽 & 미드 도약대 [F]',
       district: 'DISTRICT (디스트릭트) - 서울 도심 네오 골목 & 사이버펑크 홀로그램 빌보드 & 고속 점프패드 [F]',
       drift: 'DRIFT (드리프트) - 태국 열대 리조트 & 부유 방갈로 & 오션 짚라인 [F]',
+      glitch: 'GLITCH (글리치) - 가상 시뮬레이션 매트릭스 & 양자 점프 게이트 [F] & 글리치 포털',
       range: 'THE RANGE (사격장) - 사격 훈련장 & 봇 연습'
     };
     let currentMapIndex = 0;
@@ -3627,7 +3628,8 @@
       Astra: '🌌',
       Breach: '🔨',
       Skye: '🌿',
-      Waylay: '⚡'
+      Waylay: '⚡',
+      Maxbot: '🤖'
     };
     const AGENT_COLORS = {
       Jett: '#00f0ff', Phoenix: '#ff6600', Reyna: '#be00ff', Sova: '#2979ff',
@@ -3640,7 +3642,8 @@
       Astra: '#9c27b0',
       Breach: '#f59e0b',
       Skye: '#84cc16',
-      Waylay: '#38bdf8'
+      Waylay: '#38bdf8',
+      Maxbot: '#f97316'
     };
     const AGENT_ROLES = {
       Jett: '타격대 (Duelist)', Phoenix: '타격대 (Duelist)', Reyna: '타격대 (Duelist)', Raze: '타격대 (Duelist)',
@@ -3652,7 +3655,8 @@
       Astra: '전략가 (Controller)',
       Breach: '척후대 (Initiator)',
       Skye: '척후대 (Initiator)',
-      Waylay: '타격대 (Duelist)'
+      Waylay: '타격대 (Duelist)',
+      Maxbot: '감시대 (Sentinel)'
     };
 
     const lobbySlots = {
@@ -3892,6 +3896,14 @@
     muzzlePointLight = new THREE.PointLight(0xffaa22, 0, 14, 1.8);
     muzzlePointLight.position.set(0, 0.02, -0.8);
     gunGroup.add(muzzlePointLight);
+
+    const matBarrelHeat = new THREE.MeshStandardMaterial({
+      color: 0xff3300, emissive: 0xff1100, emissiveIntensity: 0, roughness: 0.3, transparent: true, opacity: 0.9
+    });
+    const barrelHeatMesh = new THREE.Mesh(new THREE.CylinderGeometry(0.032, 0.032, 0.16, 8), matBarrelHeat);
+    barrelHeatMesh.rotation.x = Math.PI / 2;
+    barrelHeatMesh.position.set(0, 0.02, -0.72);
+    gunGroup.add(barrelHeatMesh);
 
     // Upgraded Tactical Hands & Carbon Knuckle Protectors
     const rightArm = new THREE.Mesh(new THREE.CylinderGeometry(0.055, 0.065, 0.4, 8), matSleeve);
@@ -4470,7 +4482,7 @@
     /* ==========================================================
        DYNAMIC AGENT SWITCHING SYSTEM ([H] KEY TO CYCLE AGENT)
        ========================================================== */
-    const PLAYABLE_AGENTS = ['Jett', 'Phoenix', 'Reyna', 'Sova', 'Sage', 'Omen', 'Brimstone', 'Raze', 'Killjoy', 'Chamber', 'Viper', 'Cypher', 'Neon', 'Yoru', 'Fade', 'Gekko', 'Harbor', 'Iso', 'Deadlock', 'Clove', 'Vyse', 'KAY/O', 'Tejo', 'Astra', 'Breach', 'Skye', 'Waylay'];
+    const PLAYABLE_AGENTS = ['Jett', 'Phoenix', 'Reyna', 'Sova', 'Sage', 'Omen', 'Brimstone', 'Raze', 'Killjoy', 'Chamber', 'Viper', 'Cypher', 'Neon', 'Yoru', 'Fade', 'Gekko', 'Harbor', 'Iso', 'Deadlock', 'Clove', 'Vyse', 'KAY/O', 'Tejo', 'Astra', 'Breach', 'Skye', 'Waylay', 'Maxbot'];
     let currentAgentIdx = 0;
 
     const AGENT_SKILL_LABELS = {
@@ -4491,7 +4503,8 @@
       Astra: { c: '중력 샘 (C)', q: '신경 파동 (Q)', e: '성운 연막 (E)', x: '우주 장벽 (X)' },
       Breach: { c: '여진 (C)', q: '눈먼 길 (Q)', e: '균열 (E)', x: '지진 강타 (X)' },
       Skye: { c: '재생 (C)', q: '정향 폭발 (Q)', e: '인도하는 빛 (E)', x: '추적자 (X)' },
-      Waylay: { c: '광자 굴절 (C)', q: '차원 가속 (Q)', e: '빛의 도약 (E)', x: '프리즘 오버드라이브 (X)' }
+      Waylay: { c: '광자 굴절 (C)', q: '차원 가속 (Q)', e: '빛의 도약 (E)', x: '프리즘 오버드라이브 (X)' },
+      Maxbot: { c: '유도 로켓 (C)', q: '전자기 펄스 EMP (Q)', e: '오버클럭 배리어 (E)', x: '맥스봇 전탄 발사 (X)' }
     };
 
     let spectatorTargetIndex = 0;
@@ -4661,6 +4674,9 @@
     let abyssJumppad = null;
     let districtJumppad = null;
     let driftZipline = null;
+    let glitchJumpGate = null;
+    let currentDrsModeIdx = 0;
+    let weaponBarrelHeat = 0;
     let reflexMode = 'boost';
     let currentVisualFilterIdx = 0;
     let isFTGActive = false;
@@ -5335,6 +5351,24 @@
         const visorBeam = new THREE.Mesh(new THREE.BoxGeometry(0.26, 0.06, 0.05), new THREE.MeshBasicMaterial({ color: 0x00f0ff }));
         visorBeam.position.set(0, 1.80, 0.18);
         grp.add(visorBeam);
+      } else if (agentName === 'Maxbot') {
+        // RAD-BOT prototype heavy combat android with cyclops optic sensor & shoulder pods
+        const chassis = new THREE.Mesh(new THREE.BoxGeometry(0.38, 0.44, 0.28), new THREE.MeshStandardMaterial({ color: 0x1e293b, metalness: 0.9, roughness: 0.2 }));
+        chassis.position.set(0, 1.25, 0.05);
+        grp.add(chassis);
+        const eyeOptic = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.06, 0.06, 12), new THREE.MeshStandardMaterial({ color: 0xf97316, emissive: 0xff5500, emissiveIntensity: 1.5 }));
+        eyeOptic.rotation.x = Math.PI / 2;
+        eyeOptic.position.set(0, 1.78, 0.16);
+        grp.add(eyeOptic);
+        const podL = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.14, 0.22), new THREE.MeshStandardMaterial({ color: 0xd97706, metalness: 0.8 }));
+        podL.position.set(-0.28, 1.55, -0.02);
+        const podR = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.14, 0.22), new THREE.MeshStandardMaterial({ color: 0xd97706, metalness: 0.8 }));
+        podR.position.set(0.28, 1.55, -0.02);
+        grp.add(podL);
+        grp.add(podR);
+        const hazardPlate = new THREE.Mesh(new THREE.BoxGeometry(0.24, 0.08, 0.04), new THREE.MeshStandardMaterial({ color: 0xfacc15 }));
+        hazardPlate.position.set(0, 1.15, 0.2);
+        grp.add(hazardPlate);
       }
 
       // Distinct tactical role underfoot glowing aura ring
@@ -5370,6 +5404,38 @@
       if (cvs) cvs.style.filter = f.css;
       sound.playSwitchClick();
       showToast(`🎨 [VISUAL FX] 화면 컬러 프로파일: [${f.name}]`);
+    }
+
+    const DRS_MODES = [
+      { name: '네이티브 100% (NATIVE 1.0X)', scale: 1.0 },
+      { name: 'FSR 울트라 퀄리티 (ULTRA QUALITY 0.85X)', scale: 0.85 },
+      { name: 'DLSS 밸런스드 (BALANCED 0.75X)', scale: 0.75 },
+      { name: '초고주사율 퍼포먼스 (PERFORMANCE 0.65X)', scale: 0.65 }
+    ];
+
+    function toggleDrsMode() {
+      currentDrsModeIdx = (currentDrsModeIdx + 1) % DRS_MODES.length;
+      const m = DRS_MODES[currentDrsModeIdx];
+      const w = window.innerWidth;
+      const h = window.innerHeight;
+      renderer.setSize(Math.floor(w * m.scale), Math.floor(h * m.scale), false);
+      const cvs = renderer.domElement;
+      if (cvs) {
+        cvs.style.width = '100vw';
+        cvs.style.height = '100vh';
+        cvs.style.imageRendering = (m.scale < 1.0) ? 'pixelated' : 'auto';
+      }
+      sound.playSwitchClick();
+      showToast(`⚡ DRS / 해상도 업스케일러: [${m.name}]`);
+    }
+
+    function triggerGlitchJumpGate() {
+      if (!glitchJumpGate || player.isDead) return;
+      sound.playTeleport();
+      player.velocity.y = 18.0;
+      player.velocity.z = (camera.position.z > 0) ? -26.0 : 26.0;
+      player.isGrounded = false;
+      showToast('⚡ [GLITCH] 양자 점프 게이트 통과! (QUANTUM WARP)');
     }
 
     function startDriftZiplineRide() {
@@ -5765,6 +5831,8 @@
       districtJumppad = null;
       if (driftZipline && driftZipline.cable) scene.remove(driftZipline.cable);
       driftZipline = null;
+      if (glitchJumpGate && glitchJumpGate.rings) glitchJumpGate.rings.forEach(r => scene.remove(r));
+      glitchJumpGate = null;
 
       if (lotusDoor && lotusDoor.mesh) {
         scene.remove(lotusDoor.mesh);
@@ -6049,6 +6117,19 @@
         sunLight.position.set(30, 80, -30);
         scene.fog.color.setHex(0x0284c7);
         scene.fog.density = 0.005;
+      } else if (mapKey === 'glitch') {
+        // Glitch Arena Simulation Matrix / Digital Ultraviolet Void & Glitch Magenta
+        grad.addColorStop(0, '#0f051d');
+        grad.addColorStop(0.35, '#2e1065');
+        grad.addColorStop(0.7, '#083344');
+        grad.addColorStop(1, '#ec4899');
+        ambientLight.color.setHex(0xc084fc);
+        ambientLight.intensity = 1.05;
+        sunLight.color.setHex(0x38bdf8);
+        sunLight.intensity = 1.4;
+        sunLight.position.set(0, 80, -20);
+        scene.fog.color.setHex(0x130d24);
+        scene.fog.density = 0.006;
       } else {
         // Range: High-tech military hangar
         grad.addColorStop(0, '#080c10');
@@ -7379,6 +7460,73 @@
         addPlatform(0, 0, 38, 44, 0.6, 16, matTeakWood);
         addPlatform(0, 0, -38, 44, 0.6, 16, matTeakWood);
       }
+      else if (mapKey === 'glitch') {
+        // ==========================================================
+        // MAP 14: GLITCH (글리치) - 가상 시뮬레이션 매트릭스 & 양자 점프 게이트 [F]
+        // ==========================================================
+        const matGlitchFloor = new THREE.MeshStandardMaterial({ color: 0x0f172a, roughness: 0.2, metalness: 0.8 });
+        const matGlitchWall = new THREE.MeshStandardMaterial({ color: 0x1e1b4b, roughness: 0.3, metalness: 0.85 });
+        const matCyanGrid = new THREE.MeshStandardMaterial({ color: 0x06b6d4, emissive: 0x0891b2, emissiveIntensity: 0.65 });
+        const matMagentaGrid = new THREE.MeshStandardMaterial({ color: 0xec4899, emissive: 0xdb2777, emissiveIntensity: 0.7 });
+
+        // Outer Cyber Matrix Hologram Walls (120x120m)
+        addBox(0, -0.5, 0, 120, 1, 120, matGlitchFloor);
+        addBox(0, 8, -60, 120, 16, 2, matGlitchWall);
+        addBox(0, 8, 60, 120, 16, 2, matGlitchWall);
+        addBox(-60, 8, 0, 2, 16, 120, matGlitchWall);
+        addBox(60, 8, 0, 2, 16, 120, matGlitchWall);
+
+        // Center Mid Quantum Jump Gate at (0, 0, 0)
+        const gateRing1 = new THREE.Mesh(new THREE.TorusGeometry(2.4, 0.12, 8, 24), matCyanGrid);
+        gateRing1.position.set(0, 2.5, 0);
+        const gateRing2 = new THREE.Mesh(new THREE.TorusGeometry(3.0, 0.12, 8, 24), matMagentaGrid);
+        gateRing2.position.set(0, 2.5, 0);
+        gateRing2.rotation.y = Math.PI / 2;
+        scene.add(gateRing1);
+        scene.add(gateRing2);
+        mapObjects.push(gateRing1);
+        mapObjects.push(gateRing2);
+
+        addPlatform(0, 0, 0, 8, 0.4, 8, matCyanGrid);
+        addTextBillboard(0, 5.4, 0, '[F] 양자 점프 게이트 (QUANTUM JUMP GATE)', 1.5, '#00f0ff');
+
+        glitchJumpGate = {
+          pos: new THREE.Vector3(0, 0.2, 0),
+          rings: [gateRing1, gateRing2]
+        };
+
+        // Floating Radianite Matrix Core hovering at (0, 7.5, 0)
+        const radCore = new THREE.Mesh(new THREE.OctahedronGeometry(1.6), new THREE.MeshStandardMaterial({ color: 0x38bdf8, emissive: 0x0284c7, emissiveIntensity: 1.2 }));
+        radCore.position.set(0, 7.5, 0);
+        scene.add(radCore);
+        mapObjects.push(radCore);
+
+        // --- A SITE: MATRIX PAGODA (x = 30, z = -20) ---
+        addPlatform(30, 0, -20, 24, 0.5, 24, matSiteFloor);
+        addTextBillboard(30, 0.2, -20, 'A SITE', 1.8);
+        spikeSiteAreas.push({ minX: 18, maxX: 42, minZ: -32, maxZ: -8, name: 'A SITE' });
+
+        addArch(30, 0, -20, 8, 6.5, 1.8, matMagentaGrid);
+        addPlatform(36, 0, -30, 12, 4.2, 10, matGlitchWall);
+        addRailing(29.9, 4.2, -30, 10, 'z');
+        addStairs(36, -14, 0, 3.8, 4.2, 12, 12, 'z-');
+        addCrateStack(24, -20, 2.4);
+
+        // --- B SITE: CYBER BOBA CAFE (x = -30, z = -20) ---
+        addPlatform(-30, 0, -20, 24, 0.5, 24, matSiteFloor);
+        addTextBillboard(-30, 0.2, -20, 'B SITE', 1.8);
+        spikeSiteAreas.push({ minX: -42, maxX: -18, minZ: -32, maxZ: -8, name: 'B SITE' });
+
+        addArch(-30, 0, -20, 8, 6.5, 1.8, matCyanGrid);
+        addPlatform(-36, 0, -30, 12, 4.2, 10, matGlitchWall);
+        addRailing(-29.9, 4.2, -30, 10, 'z');
+        addStairs(-36, -14, 0, 3.8, 4.2, 12, 12, 'z-');
+        addCrateStack(-24, -20, 2.4);
+
+        // ATK & DEF Holographic Spawns
+        addPlatform(0, 0, 40, 40, 0.5, 16, matGlitchFloor);
+        addPlatform(0, 0, -40, 40, 0.5, 16, matGlitchFloor);
+      }
       else if (mapKey === 'range') {
         addBox(0, -0.5, 0, 60, 1, 120, matConcrete);
         addBox(0, 7, -60, 60, 14, 2, matWallStone);
@@ -7721,6 +7869,13 @@
       if (e.code === 'F8') {
         e.preventDefault();
         toggleReflexMode();
+        return;
+      }
+
+      // [F9] Key: Quick Toggle Dynamic Resolution Scaling (DRS) & DLSS / FSR Upscaler
+      if (e.code === 'F9') {
+        e.preventDefault();
+        toggleDrsMode();
         return;
       }
 
@@ -8751,7 +8906,9 @@
       sound.playGunshot(currentWeaponKey);
 
       flashMat.opacity = 1;
-      muzzlePointLight.intensity = 3.5;
+      muzzlePointLight.intensity = currentWeapon.isSilenced ? 1.2 : 3.5;
+      muzzlePointLight.color.setHex(currentWeapon.isSilenced ? 0x38bdf8 : 0xffaa22);
+      weaponBarrelHeat = Math.min(1.0, weaponBarrelHeat + (currentWeapon.category === 'heavy' ? 0.08 : 0.05));
       setTimeout(() => {
         flashMat.opacity = 0;
         muzzlePointLight.intensity = 0;
@@ -9434,6 +9591,15 @@
         const dSouth = pPos.distanceTo(driftZipline.southPos);
         if (dNorth < 5.0 || dSouth < 5.0 || (Math.abs(pPos.x) < 3.5 && Math.abs(pPos.z) <= 34)) {
           startDriftZiplineRide();
+          return;
+        }
+      }
+
+      // 10. Glitch Quantum Jump Gate [F]
+      if (MAP_LIST[currentMapIndex] === 'glitch' && glitchJumpGate) {
+        const pPos = camera.position;
+        if (pPos.distanceTo(glitchJumpGate.pos) < 5.0) {
+          triggerGlitchJumpGate();
           return;
         }
       }
@@ -10606,6 +10772,15 @@
         { label: 'DEF SPAWN', x: 0, z: -40, color: '#00ffaa' },
         { label: 'ATK SPAWN', x: 0, z: 40, color: '#ff4655' }
       ],
+      glitch: [
+        { label: 'A SITE', x: 30, z: -20, color: '#ec4899' },
+        { label: 'A PAGODA', x: 36, z: -30, color: '#a855f7' },
+        { label: 'B SITE', x: -30, z: -20, color: '#06b6d4' },
+        { label: 'B CAFE', x: -36, z: -30, color: '#38bdf8' },
+        { label: 'QUANTUM GATE [F]', x: 0, z: 0, color: '#00f0ff' },
+        { label: 'DEF SPAWN', x: 0, z: -40, color: '#00ffaa' },
+        { label: 'ATK SPAWN', x: 0, z: 40, color: '#ff4655' }
+      ],
       range: [
         { label: 'TARGETS', x: 0, z: -22, color: '#00f0ff' },
         { label: 'BENCH', x: 0, z: 0, color: '#ffc83b' },
@@ -11140,6 +11315,13 @@
               if (player.velocity.y <= 0) triggerDistrictJumppad();
             }
           }
+
+          // Auto-launch when stepping on Glitch Quantum Jump Gate
+          if (MAP_LIST[currentMapIndex] === 'glitch' && glitchJumpGate && !player.isDead) {
+            if (Math.abs(camera.position.x) < 2.4 && Math.abs(camera.position.z) < 2.4 && Math.abs(camera.position.y - 1.7) < 1.0) {
+              if (player.velocity.y <= 0) triggerGlitchJumpGate();
+            }
+          }
         }
 
         const speedRatio = Math.min(player.velocity.length() / player.speed, 1.2);
@@ -11148,6 +11330,15 @@
         document.getElementById('ch-b').style.transform = `translateY(${spreadOffset}px)`;
         document.getElementById('ch-l').style.transform = `translateX(${-spreadOffset}px)`;
         document.getElementById('ch-r').style.transform = `translateX(${spreadOffset}px)`;
+
+        // Dynamic Barrel Heat Dissipation
+        if (weaponBarrelHeat > 0) {
+          weaponBarrelHeat = Math.max(0, weaponBarrelHeat - dt * 0.35);
+          if (typeof matBarrelHeat !== 'undefined' && matBarrelHeat) {
+            matBarrelHeat.emissiveIntensity = weaponBarrelHeat * 2.5;
+            matBarrelHeat.opacity = 0.3 + weaponBarrelHeat * 0.7;
+          }
+        }
 
         // Active Shell Casings Physics Update
         for (let i = activeShellCasings.length - 1; i >= 0; i--) {
