@@ -288,20 +288,22 @@
       display: none;
     }
 
-    /* TOP 10-AGENT LIVE ROSTER & SCORE BAR */
+    /* TOP 10-AGENT LIVE ROSTER & SCORE BAR (Phase 33 AAA Glassmorphic Esports Bar) */
     #top-bar {
       position: absolute;
-      top: 10px; left: 50%;
+      top: 8px; left: 50%;
       transform: translateX(-50%);
       display: flex;
       align-items: center;
-      background: rgba(10, 16, 22, 0.92);
-      border: 1px solid var(--val-border);
-      border-radius: 3px;
-      backdrop-filter: blur(12px);
-      box-shadow: 0 4px 30px rgba(0, 0, 0, 0.7);
-      padding: 4px 14px;
-      gap: 12px;
+      background: linear-gradient(180deg, rgba(12, 19, 28, 0.9) 0%, rgba(6, 10, 16, 0.95) 100%);
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      border-bottom: 2px solid rgba(0, 240, 255, 0.5);
+      clip-path: polygon(0 0, 100% 0, calc(100% - 12px) 100%, 12px 100%);
+      backdrop-filter: blur(18px) saturate(180%);
+      -webkit-backdrop-filter: blur(18px) saturate(180%);
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.8), inset 0 1px 0 rgba(255, 255, 255, 0.15), 0 0 20px rgba(0, 240, 255, 0.15);
+      padding: 4px 18px;
+      gap: 14px;
     }
     .team-roster {
       display: flex;
@@ -309,21 +311,35 @@
       gap: 6px;
     }
     .agent-head-icon {
-      width: 34px; height: 40px;
-      background: rgba(22, 33, 44, 0.85);
-      border: 1px solid rgba(255, 255, 255, 0.2);
+      width: 36px; height: 42px;
+      background: linear-gradient(180deg, rgba(22, 34, 48, 0.85) 0%, rgba(12, 18, 26, 0.95) 100%);
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      border-radius: 3px;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
       position: relative;
       overflow: hidden;
-      transition: all 0.2s;
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+    }
+    .agent-head-icon:hover {
+      transform: translateY(-1px);
+      border-color: rgba(255, 255, 255, 0.4);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.6);
+    }
+    .team-roster:first-child .agent-head-icon {
+      box-shadow: inset 0 -3px 0 var(--val-cyan);
+    }
+    .team-roster:last-child .agent-head-icon {
+      box-shadow: inset 0 -3px 0 var(--val-red);
     }
     .agent-head-icon.dead {
-      opacity: 0.35;
+      opacity: 0.3;
       filter: grayscale(100%);
-      border-color: rgba(255, 70, 85, 0.4);
+      border-color: rgba(255, 70, 85, 0.3);
+      box-shadow: none !important;
     }
     .agent-head-icon.dead::after {
       content: '✕';
@@ -331,91 +347,107 @@
       top: 50%; left: 50%;
       transform: translate(-50%, -50%);
       color: var(--val-red);
-      font-size: 24px;
-      font-weight: 800;
-      text-shadow: 0 0 6px #000;
+      font-size: 26px;
+      font-weight: 900;
+      text-shadow: 0 0 8px #000;
     }
     .agent-head-icon.has-spike::before {
       content: '⚡';
       position: absolute;
-      top: -2px; right: 0;
+      top: -2px; right: 1px;
       font-size: 11px;
       color: var(--val-gold);
-      text-shadow: 0 0 4px #000;
+      text-shadow: 0 0 6px rgba(255, 200, 59, 0.8);
     }
-    .agent-head-icon .agent-icon-emoji { font-size: 16px; }
-    .agent-head-icon .agent-icon-name { font-size: 9px; font-weight: 800; letter-spacing: 0.5px; color: #8899a6; }
+    .agent-head-icon .agent-icon-emoji { font-size: 17px; filter: drop-shadow(0 1px 2px rgba(0,0,0,0.5)); }
+    .agent-head-icon .agent-icon-name { font-size: 9px; font-weight: 800; letter-spacing: 0.8px; color: #a0aec0; }
 
     .score-center-cluster {
       display: flex;
       align-items: center;
       gap: 12px;
-      padding: 0 10px;
-      border-left: 1px solid rgba(255, 255, 255, 0.1);
-      border-right: 1px solid rgba(255, 255, 255, 0.1);
+      padding: 0 12px;
+      border-left: 1px solid rgba(255, 255, 255, 0.12);
+      border-right: 1px solid rgba(255, 255, 255, 0.12);
     }
     .score-box {
       font-family: var(--font-title);
-      font-size: 38px;
+      font-size: 40px;
       font-weight: 800;
       line-height: 1;
-      padding: 0 4px;
+      padding: 0 5px;
+      letter-spacing: 1px;
     }
-    .score-atk { color: var(--val-green); }
-    .score-def { color: var(--val-red); }
+    .score-atk {
+      color: #00f0ff;
+      text-shadow: 0 0 14px rgba(0, 240, 255, 0.55);
+    }
+    .score-def {
+      color: #ff4655;
+      text-shadow: 0 0 14px rgba(255, 70, 85, 0.55);
+    }
     .round-timer-box {
       display: flex;
       flex-direction: column;
       align-items: center;
-      min-width: 68px;
+      min-width: 70px;
     }
     #round-timer {
       font-family: var(--font-title);
       font-size: 34px;
       font-weight: 800;
-      color: #fff;
+      color: #ffffff;
       line-height: 1;
       text-align: center;
+      text-shadow: 0 0 12px rgba(255, 255, 255, 0.35);
     }
     .round-sub {
       font-size: 9px;
-      color: #8899a6;
-      letter-spacing: 1.5px;
-      font-weight: 700;
+      color: #94a3b8;
+      letter-spacing: 2px;
+      font-weight: 800;
       text-transform: uppercase;
     }
     .map-badge {
-      background: rgba(255, 70, 85, 0.15);
-      border: 1px solid var(--val-red);
+      background: linear-gradient(135deg, rgba(255, 70, 85, 0.2) 0%, rgba(255, 70, 85, 0.08) 100%);
+      border: 1px solid rgba(255, 70, 85, 0.7);
+      border-radius: 9999px;
       color: #ff9ca4;
-      font-size: 12px;
-      font-weight: 700;
-      padding: 3px 8px;
-      letter-spacing: 1.5px;
+      font-size: 11px;
+      font-weight: 800;
+      padding: 2px 10px;
+      letter-spacing: 1.8px;
+      box-shadow: 0 0 10px rgba(255, 70, 85, 0.25);
     }
 
-    /* Radar Minimap */
+    /* Radar Minimap (Phase 33 Futuristic Radar Ring) */
     #minimap-card {
       position: absolute;
-      top: 25px; left: 25px;
+      top: 20px; left: 20px;
       width: 190px; height: 190px;
-      background: rgba(12, 19, 26, 0.88);
-      border: 2px solid rgba(255, 255, 255, 0.25);
+      background: radial-gradient(circle, rgba(10, 18, 28, 0.8) 0%, rgba(6, 10, 16, 0.94) 100%);
+      border: 2px solid rgba(0, 240, 255, 0.45);
       border-radius: 50%;
       overflow: hidden;
-      box-shadow: 0 6px 25px rgba(0,0,0,0.6);
-      backdrop-filter: blur(8px);
+      box-shadow: 0 8px 32px rgba(0,0,0,0.75), 0 0 20px rgba(0, 240, 255, 0.25), inset 0 0 15px rgba(0, 0, 0, 0.5);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
     }
     #minimap-canvas { width: 100%; height: 100%; }
     #map-name-tag {
       position: absolute;
-      bottom: -22px; left: 50%;
+      bottom: -24px; left: 50%;
       transform: translateX(-50%);
       font-size: 11px;
-      color: #8899a6;
+      color: #cbd5e1;
+      background: rgba(8, 14, 22, 0.8);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 9999px;
+      padding: 1px 10px;
       letter-spacing: 2px;
-      font-weight: 700;
+      font-weight: 800;
       white-space: nowrap;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.6);
     }
 
     #kill-feed {
@@ -427,16 +459,19 @@
       align-items: flex-end;
     }
     .feed-item {
-      background: rgba(12, 20, 28, 0.92);
+      background: linear-gradient(135deg, rgba(14, 22, 34, 0.88) 0%, rgba(8, 14, 22, 0.94) 100%);
+      border: 1px solid rgba(255, 255, 255, 0.1);
       border-right: 4px solid var(--val-red);
-      padding: 5px 14px;
+      padding: 6px 16px;
       font-size: 13px;
       font-weight: 700;
       display: flex;
       align-items: center;
       gap: 10px;
-      border-radius: 2px;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.5);
+      border-radius: 4px;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.6);
+      backdrop-filter: blur(14px) saturate(180%);
+      -webkit-backdrop-filter: blur(14px) saturate(180%);
       animation: feedSlide 0.25s ease-out;
     }
     @keyframes feedSlide {
@@ -445,49 +480,88 @@
     }
     .feed-hs { color: var(--val-red); font-size: 12px; }
 
+    /* Tactical Health, Skills & Weapon Panels (Phase 33 Angled Cyberpunk Glass) */
     #health-panel {
       position: absolute;
-      bottom: 26px; left: 32px;
+      bottom: 28px; left: 32px;
       display: flex;
       align-items: flex-end;
       gap: 12px;
     }
     .stat-cluster {
-      background: linear-gradient(135deg, rgba(14, 22, 32, 0.9) 0%, rgba(8, 12, 18, 0.96) 100%);
-      border: 1px solid rgba(255, 255, 255, 0.1);
+      background: linear-gradient(135deg, rgba(10, 18, 28, 0.88) 0%, rgba(6, 12, 20, 0.96) 100%);
+      border: 1px solid rgba(255, 255, 255, 0.14);
       border-left: 4px solid var(--val-cyan);
       border-radius: 4px;
-      padding: 8px 20px;
+      padding: 8px 22px;
       display: flex;
       flex-direction: column;
-      min-width: 135px;
-      backdrop-filter: blur(12px);
-      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+      min-width: 140px;
+      transform: skewX(-8deg);
+      backdrop-filter: blur(16px) saturate(180%);
+      -webkit-backdrop-filter: blur(16px) saturate(180%);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.65), inset 0 1px 0 rgba(255, 255, 255, 0.12);
+      transition: all 0.2s ease-out;
     }
-    .stat-cluster.shield-cluster { border-left-color: #38bdf8; }
-    .stat-label { font-size: 11px; font-weight: 800; color: #94a3b8; letter-spacing: 2px; }
-    .stat-value { font-family: var(--font-title); font-size: 46px; font-weight: 800; color: #fff; line-height: 0.92; text-shadow: 0 0 15px rgba(255,255,255,0.25); }
-    .stat-bar { width: 100%; height: 5px; background: rgba(255,255,255,0.08); margin-top: 6px; border-radius: 2px; overflow: hidden; }
-    .stat-bar-fill { height: 100%; background: linear-gradient(90deg, #00f0ff, #00d2df); box-shadow: 0 0 8px var(--val-cyan); transition: width 0.18s ease-out; }
-    .shield-fill { background: linear-gradient(90deg, #38bdf8, #2563eb); box-shadow: 0 0 8px #38bdf8; }
+    .stat-cluster > * {
+      transform: skewX(8deg);
+    }
+    .stat-cluster.shield-cluster {
+      border-left-color: #38bdf8;
+    }
+    .stat-label {
+      font-size: 11px;
+      font-weight: 800;
+      color: #94a3b8;
+      letter-spacing: 2.2px;
+      text-transform: uppercase;
+    }
+    .stat-value {
+      font-family: var(--font-title);
+      font-size: 48px;
+      font-weight: 800;
+      color: #ffffff;
+      line-height: 0.9;
+      text-shadow: 0 0 18px rgba(0, 240, 255, 0.4);
+    }
+    .stat-bar {
+      width: 100%;
+      height: 6px;
+      background: rgba(255, 255, 255, 0.08);
+      margin-top: 6px;
+      border-radius: 3px;
+      overflow: hidden;
+      box-shadow: inset 0 1px 2px rgba(0,0,0,0.5);
+    }
+    .stat-bar-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #00f0ff 0%, #00ff88 100%);
+      box-shadow: 0 0 12px rgba(0, 240, 255, 0.8);
+      transition: width 0.18s ease-out;
+    }
+    .shield-fill {
+      background: linear-gradient(90deg, #38bdf8 0%, #6366f1 100%);
+      box-shadow: 0 0 12px rgba(56, 189, 248, 0.8);
+    }
 
     #skills-panel {
       position: absolute;
-      bottom: 42px; left: 50%;
+      bottom: 38px; left: 50%;
       transform: translateX(-50%);
       display: flex;
       gap: 12px;
-      background: linear-gradient(180deg, rgba(14, 22, 32, 0.88) 0%, rgba(8, 12, 18, 0.94) 100%);
-      padding: 8px 18px;
-      border: 1px solid rgba(255, 255, 255, 0.12);
-      border-radius: 4px;
-      backdrop-filter: blur(14px);
-      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+      background: linear-gradient(180deg, rgba(12, 19, 28, 0.88) 0%, rgba(6, 10, 16, 0.95) 100%);
+      padding: 8px 20px;
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      border-radius: 6px;
+      backdrop-filter: blur(18px) saturate(180%);
+      -webkit-backdrop-filter: blur(18px) saturate(180%);
+      box-shadow: 0 10px 36px rgba(0, 0, 0, 0.75), inset 0 1px 0 rgba(255, 255, 255, 0.12);
     }
     .skill-slot {
-      width: 68px; height: 78px;
-      background: linear-gradient(135deg, rgba(20, 32, 46, 0.7) 0%, rgba(12, 20, 30, 0.85) 100%);
-      border: 1px solid rgba(255, 255, 255, 0.12);
+      width: 70px; height: 80px;
+      background: linear-gradient(135deg, rgba(20, 32, 48, 0.7) 0%, rgba(10, 18, 28, 0.9) 100%);
+      border: 1px solid rgba(255, 255, 255, 0.14);
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -496,37 +570,42 @@
       position: relative;
       overflow: hidden;
       cursor: pointer;
-      border-radius: 3px;
-      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+      border-radius: 4px;
+      transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
     }
     .skill-slot:hover {
-      border-color: rgba(255, 255, 255, 0.4);
-      transform: translateY(-2px);
+      border-color: rgba(255, 255, 255, 0.5);
+      transform: translateY(-3px);
+      box-shadow: 0 6px 18px rgba(0, 0, 0, 0.6);
     }
-    .skill-slot.ready { border-color: rgba(255, 255, 255, 0.35); box-shadow: 0 0 10px rgba(255,255,255,0.08); }
+    .skill-slot.ready {
+      border-color: rgba(0, 240, 255, 0.4);
+      box-shadow: 0 0 12px rgba(0, 240, 255, 0.15);
+    }
     .skill-slot.ult {
       border-color: var(--val-gold);
-      background: linear-gradient(135deg, rgba(255, 200, 59, 0.15) 0%, rgba(18, 26, 38, 0.85) 100%);
-      box-shadow: 0 0 15px rgba(255, 200, 59, 0.25);
+      background: linear-gradient(135deg, rgba(255, 200, 59, 0.18) 0%, rgba(18, 26, 38, 0.9) 100%);
+      box-shadow: 0 0 18px rgba(255, 200, 59, 0.3);
     }
     .skill-slot.ult.active {
-      box-shadow: 0 0 25px var(--val-gold);
+      box-shadow: 0 0 30px var(--val-gold);
       border-color: #fff;
       animation: ultPulse 1.2s infinite alternate ease-in-out;
     }
     @keyframes ultPulse {
-      from { box-shadow: 0 0 12px var(--val-gold); }
-      to { box-shadow: 0 0 28px rgba(255, 200, 59, 0.9), inset 0 0 12px rgba(255, 200, 59, 0.3); }
+      from { box-shadow: 0 0 14px var(--val-gold); }
+      to { box-shadow: 0 0 32px rgba(255, 200, 59, 0.95), inset 0 0 14px rgba(255, 200, 59, 0.35); }
     }
     .skill-key {
       font-family: var(--font-mono);
-      font-size: 11px; font-weight: 800; color: #e2e8f0;
-      background: rgba(0,0,0,0.7);
-      padding: 2px 8px; border-radius: 3px;
-      border: 1px solid rgba(255,255,255,0.1);
+      font-size: 11px; font-weight: 800; color: #f1f5f9;
+      background: rgba(0, 0, 0, 0.75);
+      padding: 2px 8px; border-radius: 4px;
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      box-shadow: 0 1px 3px rgba(0,0,0,0.5);
     }
-    .skill-icon { font-size: 24px; margin: 1px 0; }
-    .skill-name { font-size: 10px; font-weight: 700; letter-spacing: 0.5px; color: #94a3b8; }
+    .skill-icon { font-size: 24px; margin: 1px 0; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5)); }
+    .skill-name { font-size: 10px; font-weight: 700; letter-spacing: 0.6px; color: #94a3b8; }
     .cooldown-overlay {
       position: absolute;
       top: 0; left: 0; width: 100%; height: 0%;
@@ -543,22 +622,52 @@
 
     #ammo-panel {
       position: absolute;
-      bottom: 26px; right: 32px;
-      background: linear-gradient(135deg, rgba(14, 22, 32, 0.9) 0%, rgba(8, 12, 18, 0.96) 100%);
-      border: 1px solid rgba(255, 255, 255, 0.1);
+      bottom: 28px; right: 32px;
+      background: linear-gradient(135deg, rgba(10, 18, 28, 0.88) 0%, rgba(6, 12, 20, 0.96) 100%);
+      border: 1px solid rgba(255, 255, 255, 0.14);
       border-right: 4px solid var(--val-red);
       border-radius: 4px;
       padding: 8px 24px;
       display: flex;
       flex-direction: column;
       align-items: flex-end;
-      backdrop-filter: blur(12px);
-      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+      transform: skewX(8deg);
+      backdrop-filter: blur(16px) saturate(180%);
+      -webkit-backdrop-filter: blur(16px) saturate(180%);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.65), inset 0 1px 0 rgba(255, 255, 255, 0.12);
+      transition: all 0.2s ease-out;
     }
-    .weapon-name { font-size: 14px; font-weight: 800; letter-spacing: 2.5px; color: var(--val-red); text-shadow: 0 0 10px rgba(255,70,85,0.4); }
-    .ammo-numbers { font-family: var(--font-title); font-size: 48px; font-weight: 800; color: #fff; line-height: 0.88; text-shadow: 0 0 16px rgba(255,255,255,0.25); }
-    .ammo-reserve { font-family: var(--font-title); font-size: 26px; color: #94a3b8; }
-    .credits-tag { font-family: var(--font-mono); font-size: 13px; color: var(--val-gold); font-weight: 700; letter-spacing: 1px; }
+    #ammo-panel > * {
+      transform: skewX(-8deg);
+    }
+    .weapon-name {
+      font-size: 14px;
+      font-weight: 800;
+      letter-spacing: 2.8px;
+      color: #ff4655;
+      text-shadow: 0 0 12px rgba(255, 70, 85, 0.5);
+    }
+    .ammo-numbers {
+      font-family: var(--font-title);
+      font-size: 50px;
+      font-weight: 800;
+      color: #ffffff;
+      line-height: 0.86;
+      text-shadow: 0 0 18px rgba(255, 255, 255, 0.3);
+    }
+    .ammo-reserve {
+      font-family: var(--font-title);
+      font-size: 26px;
+      color: #94a3b8;
+    }
+    .credits-tag {
+      font-family: var(--font-mono);
+      font-size: 13px;
+      color: var(--val-gold);
+      font-weight: 700;
+      letter-spacing: 1.2px;
+      text-shadow: 0 0 8px rgba(255, 200, 59, 0.3);
+    }
 
     /* Enhanced Kill Banner with Valorant Skull & Multi-Kill Tiers */
     #kill-banner {
@@ -790,7 +899,7 @@
       font-weight: 800;
     }
 
-    /* HUD Keybinds Bar */
+    /* HUD Keybinds Bar (Phase 33 Aerodynamic Glass Badge) */
     #keybinds-bar {
       position: absolute;
       bottom: 8px; left: 50%;
@@ -798,37 +907,38 @@
       display: flex;
       align-items: center;
       gap: 16px;
-      background: linear-gradient(135deg, rgba(14, 22, 34, 0.92) 0%, rgba(8, 14, 20, 0.96) 100%);
-      padding: 5px 22px;
-      border-radius: 20px;
-      border: 1px solid rgba(255, 255, 255, 0.12);
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.6);
-      backdrop-filter: blur(10px);
+      background: linear-gradient(135deg, rgba(8, 14, 24, 0.85) 0%, rgba(4, 8, 14, 0.94) 100%);
+      padding: 5px 24px;
+      border-radius: 9999px;
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      box-shadow: 0 6px 24px rgba(0, 0, 0, 0.65), inset 0 1px 0 rgba(255, 255, 255, 0.12);
+      backdrop-filter: blur(16px) saturate(180%);
+      -webkit-backdrop-filter: blur(16px) saturate(180%);
       pointer-events: none;
       z-index: 10;
       white-space: nowrap;
     }
     .kb-item {
       font-size: 11px;
-      color: #94a3b8;
+      color: #cbd5e1;
       font-weight: 700;
-      letter-spacing: 0.5px;
+      letter-spacing: 0.6px;
       display: inline-flex;
       align-items: center;
       white-space: nowrap;
-      gap: 4px;
+      gap: 5px;
     }
     .kb-item kbd {
-      background: linear-gradient(180deg, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0.08) 100%);
-      color: #fff;
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.22) 0%, rgba(255, 255, 255, 0.08) 100%);
+      color: #ffffff;
       padding: 2px 7px;
-      border-radius: 3px;
+      border-radius: 4px;
       font-family: var(--font-mono);
       font-size: 10px;
       font-weight: 800;
       margin-right: 3px;
-      border: 1px solid rgba(255, 255, 255, 0.25);
-      box-shadow: 0 1px 4px rgba(0,0,0,0.5);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      box-shadow: 0 1px 3px rgba(0,0,0,0.4);
     }
 
     /* Weapon Skin Buttons */
@@ -1797,32 +1907,34 @@
       transform: scale(1.02);
       border-color: var(--val-cyan);
     }
-    /* Tactical Click to Play / Aim Lock Notification Banner */
+    /* Tactical Click to Play / Aim Lock Notification Banner (Phase 33 Aerodynamic Pill) */
     #click-to-play-prompt {
       display: none;
+      clip-path: none !important;
       position: fixed;
-      top: 18%; left: 50%;
+      top: 8%; left: 50%;
       transform: translateX(-50%);
       z-index: 95;
       flex-direction: column;
       align-items: center;
       pointer-events: auto;
       cursor: pointer;
-      background: linear-gradient(135deg, rgba(12, 22, 34, 0.94) 0%, rgba(6, 12, 18, 0.98) 100%);
-      border: 1px solid rgba(0, 240, 255, 0.55);
-      border-radius: 6px;
-      padding: 10px 36px;
-      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.85), 0 0 24px rgba(0, 240, 255, 0.3);
+      background: linear-gradient(135deg, rgba(8, 14, 24, 0.85) 0%, rgba(4, 8, 14, 0.94) 100%);
+      border: 1px solid rgba(0, 240, 255, 0.45);
+      border-radius: 9999px;
+      padding: 8px 30px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.7), 0 0 20px rgba(0, 240, 255, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.15);
       text-align: center;
-      backdrop-filter: blur(12px);
+      backdrop-filter: blur(20px) saturate(180%);
+      -webkit-backdrop-filter: blur(20px) saturate(180%);
       user-select: none;
       white-space: nowrap;
-      transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
     }
     #click-to-play-prompt:hover {
-      transform: translateX(-50%) translateY(-2px);
-      border-color: var(--val-cyan);
-      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.9), 0 0 35px rgba(0, 240, 255, 0.55);
+      transform: translateX(-50%) translateY(-2px) scale(1.02);
+      border-color: rgba(0, 240, 255, 0.9);
+      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.85), 0 0 32px rgba(0, 240, 255, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.25);
     }
     .ctp-top {
       display: flex;
@@ -1832,34 +1944,34 @@
       white-space: nowrap;
     }
     .ctp-pulse-dot {
-      width: 8px; height: 8px;
+      width: 7px; height: 7px;
       border-radius: 50%;
       background: var(--val-cyan);
       box-shadow: 0 0 10px var(--val-cyan);
-      animation: ctpBlink 1.2s infinite ease-in-out;
+      animation: ctpBlink 1.4s infinite ease-in-out;
     }
     @keyframes ctpBlink {
       0%, 100% { opacity: 0.4; transform: scale(0.85); }
-      50% { opacity: 1; transform: scale(1.3); box-shadow: 0 0 16px var(--val-cyan); }
+      50% { opacity: 1; transform: scale(1.35); box-shadow: 0 0 14px var(--val-cyan); }
     }
     .ctp-title {
       font-family: var(--font-title);
-      font-size: 22px;
+      font-size: 16px;
       font-weight: 800;
-      color: var(--val-cyan);
-      letter-spacing: 2.5px;
-      text-shadow: 0 0 14px rgba(0, 240, 255, 0.45);
+      color: #00f0ff;
+      letter-spacing: 2px;
+      text-shadow: 0 0 12px rgba(0, 240, 255, 0.5);
       white-space: nowrap;
     }
     .ctp-sub {
-      font-size: 12px;
+      font-size: 11px;
       color: #94a3b8;
       font-family: var(--font-mono);
-      letter-spacing: 0.6px;
-      margin-top: 3px;
+      letter-spacing: 0.8px;
+      margin-top: 2px;
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 8px;
       white-space: nowrap;
     }
     .ctp-gold {
@@ -1891,7 +2003,7 @@
   <div id="tp-flash-overlay"></div>
 
   <!-- Tactical Click to Play / Aim Lock Notification Banner -->
-  <div id="click-to-play-prompt" class="val-clip">
+  <div id="click-to-play-prompt">
     <div class="ctp-top">
       <span class="ctp-pulse-dot"></span>
       <span class="ctp-title">[ 화면을 클릭하여 조준 고정 // CLICK TO PLAY ]</span>
@@ -4102,6 +4214,9 @@
     renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.25));
     renderer.shadowMap.enabled = true;
     renderer.shadowMap.type = THREE.PCFShadowMap; // Hardware-accelerated PCF comparison (3x faster than PCFSoftShadowMap)
+    // AAA Cinematic Tone Mapping & Filmic Color Grading
+    renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    renderer.toneMappingExposure = 1.15;
 
     const scene = new THREE.Scene();
     scene.background = new THREE.Color(0x101720);
@@ -12155,14 +12270,20 @@
           promise.catch(() => {
             // Fallback to standard pointer lock if options unsupported
             try {
-              target.requestPointerLock();
+              const p2 = target.requestPointerLock();
+              if (p2 && typeof p2.catch === 'function') p2.catch(() => {});
             } catch (err) {}
           });
         }
       } catch (e) {
         try {
-          if (canvas && canvas.requestPointerLock) canvas.requestPointerLock();
-          else if (document.body && document.body.requestPointerLock) document.body.requestPointerLock();
+          if (canvas && canvas.requestPointerLock) {
+            const p3 = canvas.requestPointerLock();
+            if (p3 && typeof p3.catch === 'function') p3.catch(() => {});
+          } else if (document.body && document.body.requestPointerLock) {
+            const p4 = document.body.requestPointerLock();
+            if (p4 && typeof p4.catch === 'function') p4.catch(() => {});
+          }
         } catch (e2) {}
       }
     }
