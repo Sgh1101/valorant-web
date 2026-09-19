@@ -2034,6 +2034,7 @@
             <option value="360">360 FPS (Apex 최상위 360Hz)</option>
             <option value="480">480 FPS (e스포츠 극한 주사율 480Hz)</option>
             <option value="500">500 FPS (최상위 초고속 500Hz)</option>
+            <option value="1000">1000 FPS (Apex Ultra 1000Hz / Sub-1ms)</option>
           </select>
         </div>
         <div class="settings-row">
@@ -3355,6 +3356,22 @@
         osc.start(now);
         osc.stop(now + 0.09);
       }
+
+      playSteamVent() {
+        if (!this.ctx) return;
+        const now = this.ctx.currentTime;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(280, now);
+        osc.frequency.exponentialRampToValueAtTime(70, now + 0.55);
+        gain.gain.setValueAtTime(0.25, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.65);
+        osc.connect(gain);
+        gain.connect(this.dest);
+        osc.start(now);
+        osc.stop(now + 0.7);
+      }
     }
 
     const activeShellCasings = [];
@@ -3528,7 +3545,7 @@
     const myClientId = 'user_' + Math.random().toString(36).substring(2, 8);
     const networkChannel = new BroadcastChannel('VALORANT_5V5_NET');
 
-    const MAP_LIST = ['ascent', 'bind', 'haven', 'icebox', 'split', 'lotus', 'breeze', 'sunset', 'range'];
+    const MAP_LIST = ['ascent', 'bind', 'haven', 'icebox', 'split', 'lotus', 'breeze', 'sunset', 'pearl', 'range'];
     const MAP_NAMES = {
       ascent: 'ASCENT (어센트) - 베네치아 요새 & 전동 셔터 도어 [F]',
       bind: 'BIND (바인드) - 모로코 사막 & 차원 이동 텔레포터',
@@ -3538,6 +3555,7 @@
       lotus: 'LOTUS (로터스) - 인도 고대 유적 & 3대 폭파 지점(A/B/C) & 360° 회전 석문 [F]',
       breeze: 'BREEZE (브리즈) - 버뮤다 카리브해 열대 섬 & A 듀얼 피라미드 & A 홀 낙하 슛 [CHUTE] & B 해적 요새 포대',
       sunset: 'SUNSET (선셋) - LA 도심 골든아워 & A 보바 카페 & B 마켓 전동 차단문 [F] & 타코 푸드트럭',
+      pearl: 'PEARL (펄) - 리스본 심해 수중 돔 & B 롱 해저 파노라마 & 아줄레주 분수대 & 에어락 [F]',
       range: 'THE RANGE (사격장) - 사격 훈련장 & 봇 연습'
     };
     let currentMapIndex = 0;
@@ -3546,7 +3564,8 @@
       Jett: '💨', Phoenix: '🔥', Reyna: '👁️', Sova: '🏹', Sage: '❄️', Omen: '🌑', Brimstone: '☄️', Raze: '💣',
       Killjoy: '🤖', Chamber: '👓', Viper: '🧪', Cypher: '🕵️', Neon: '⚡', Yoru: '👹',
       Fade: '🧿', Gekko: '🦎', Harbor: '🌊', Iso: '🔮',
-      Deadlock: '🕸️', Clove: '🦋', Vyse: '🥀', 'KAY/O': '⚙️'
+      Deadlock: '🕸️', Clove: '🦋', Vyse: '🥀', 'KAY/O': '⚙️',
+      Tejo: '🦅'
     };
     const AGENT_COLORS = {
       Jett: '#00f0ff', Phoenix: '#ff6600', Reyna: '#be00ff', Sova: '#2979ff',
@@ -3554,14 +3573,16 @@
       Killjoy: '#ffeb3b', Chamber: '#e6c35c', Viper: '#00e676', Cypher: '#e0e0e0',
       Neon: '#00e5ff', Yoru: '#3d5afe',
       Fade: '#5c6b73', Gekko: '#a3e635', Harbor: '#06b6d4', Iso: '#8b5cf6',
-      Deadlock: '#cbd5e1', Clove: '#f472b6', Vyse: '#94a3b8', 'KAY/O': '#38bdf8'
+      Deadlock: '#cbd5e1', Clove: '#f472b6', Vyse: '#94a3b8', 'KAY/O': '#38bdf8',
+      Tejo: '#10b981'
     };
     const AGENT_ROLES = {
       Jett: '타격대 (Duelist)', Phoenix: '타격대 (Duelist)', Reyna: '타격대 (Duelist)', Raze: '타격대 (Duelist)',
       Yoru: '타격대 (Duelist)', Neon: '타격대 (Duelist)', Iso: '타격대 (Duelist)',
       Sova: '척후대 (Initiator)', Fade: '척후대 (Initiator)', Gekko: '척후대 (Initiator)', 'KAY/O': '척후대 (Initiator)',
       Omen: '전략가 (Controller)', Brimstone: '전략가 (Controller)', Viper: '전략가 (Controller)', Harbor: '전략가 (Controller)', Clove: '전략가 (Controller)',
-      Sage: '감시대 (Sentinel)', Cypher: '감시대 (Sentinel)', Killjoy: '감시대 (Sentinel)', Chamber: '감시대 (Sentinel)', Deadlock: '감시대 (Sentinel)', Vyse: '감시대 (Sentinel)'
+      Sage: '감시대 (Sentinel)', Cypher: '감시대 (Sentinel)', Killjoy: '감시대 (Sentinel)', Chamber: '감시대 (Sentinel)', Deadlock: '감시대 (Sentinel)', Vyse: '감시대 (Sentinel)',
+      Tejo: '척후대 (Initiator)'
     };
 
     const lobbySlots = {
@@ -3901,6 +3922,18 @@
       showToast('🎨 무기 스킨 장착: ' + currentSkin.name);
       rebuildWeaponModel(currentWeaponKey);
     }
+
+    // 3D Gun Buddy / Weapon Charm System ([U] key)
+    const GUN_BUDDIES = [
+      { id: 'champions', name: '챔피언스 골드 트로피 (Champions Trophy)', color: 0xffd700, geo: 'cylinder' },
+      { id: 'radiant', name: '라디언트 에센스 큐브 (Radiant Cube)', color: 0x00f0ff, geo: 'box' },
+      { id: 'tactibear', name: '택티컬 테디베어 (Tactibear)', color: 0x8b5a2b, geo: 'sphere' },
+      { id: 'dan', name: '펭귄 댄 (Penguin Dan)', color: 0x1e293b, geo: 'sphere' },
+      { id: 'star', name: '네온 스타 (Neon Star)', color: 0xff007f, geo: 'star' }
+    ];
+    let currentBuddyIdx = 0;
+    let activeBuddyMesh = null;
+    let buddySwayAngle = 0;
 
     function rebuildWeaponModel(wpnKey) {
       if (weaponSubMesh) gunGroup.remove(weaponSubMesh);
@@ -4299,9 +4332,52 @@
         weaponSubMesh.add(curvedBlade);
       }
 
+      // Attach Active 3D Gun Buddy (Weapon Charm)
+      attachActiveGunBuddy(weaponSubMesh);
+
       gunGroup.add(weaponSubMesh);
     }
     rebuildWeaponModel(currentWeaponKey);
+
+    function cycleGunBuddy() {
+      currentBuddyIdx = (currentBuddyIdx + 1) % GUN_BUDDIES.length;
+      const b = GUN_BUDDIES[currentBuddyIdx];
+      sound.playSwitchClick();
+      showToast(`🧸 [GUN BUDDY] 총기 장식: [${b.name}]`);
+      rebuildWeaponModel(currentWeaponKey);
+    }
+
+    function attachActiveGunBuddy(parentGroup) {
+      if (!parentGroup) return;
+      const b = GUN_BUDDIES[currentBuddyIdx];
+      const buddyGrp = new THREE.Group();
+      buddyGrp.position.set(-0.045, 0.02, -0.06);
+
+      // Chain Ring
+      const chainRing = new THREE.Mesh(
+        new THREE.TorusGeometry(0.012, 0.003, 6, 10),
+        new THREE.MeshStandardMaterial({ color: 0xd4af37, metalness: 0.9 })
+      );
+      buddyGrp.add(chainRing);
+
+      // Charm Body
+      const charmMat = new THREE.MeshStandardMaterial({ color: b.color, metalness: 0.7, roughness: 0.3 });
+      let charmMesh;
+      if (b.geo === 'box') {
+        charmMesh = new THREE.Mesh(new THREE.BoxGeometry(0.025, 0.025, 0.025), charmMat);
+      } else if (b.geo === 'cylinder') {
+        charmMesh = new THREE.Mesh(new THREE.CylinderGeometry(0.015, 0.01, 0.03, 8), charmMat);
+      } else if (b.geo === 'star') {
+        charmMesh = new THREE.Mesh(new THREE.OctahedronGeometry(0.018), charmMat);
+      } else {
+        charmMesh = new THREE.Mesh(new THREE.SphereGeometry(0.016, 8, 8), charmMat);
+      }
+      charmMesh.position.set(0, -0.026, 0);
+      buddyGrp.add(charmMesh);
+
+      parentGroup.add(buddyGrp);
+      activeBuddyMesh = buddyGrp;
+    }
 
     const DEFAULT_GUN_POS = new THREE.Vector3(0.24, -0.22, -0.42);
     const ADS_GUN_POS = new THREE.Vector3(0.0, -0.122, -0.32);
@@ -4319,7 +4395,7 @@
     /* ==========================================================
        DYNAMIC AGENT SWITCHING SYSTEM ([H] KEY TO CYCLE AGENT)
        ========================================================== */
-    const PLAYABLE_AGENTS = ['Jett', 'Phoenix', 'Reyna', 'Sova', 'Sage', 'Omen', 'Brimstone', 'Raze', 'Killjoy', 'Chamber', 'Viper', 'Cypher', 'Neon', 'Yoru', 'Fade', 'Gekko', 'Harbor', 'Iso', 'Deadlock', 'Clove', 'Vyse', 'KAY/O'];
+    const PLAYABLE_AGENTS = ['Jett', 'Phoenix', 'Reyna', 'Sova', 'Sage', 'Omen', 'Brimstone', 'Raze', 'Killjoy', 'Chamber', 'Viper', 'Cypher', 'Neon', 'Yoru', 'Fade', 'Gekko', 'Harbor', 'Iso', 'Deadlock', 'Clove', 'Vyse', 'KAY/O', 'Tejo'];
     let currentAgentIdx = 0;
 
     const AGENT_SKILL_LABELS = {
@@ -4501,6 +4577,7 @@
     let ascentDoor = null;
     let lotusDoor = null;
     let sunsetMarketDoor = null;
+    let pearlAirlock = null;
     let isLaserActive = false;
     let laserBeamMesh = null;
     let laserDotMesh = null;
@@ -5084,7 +5161,6 @@
         metalCuirass.position.set(0, 1.25, 0.05);
         grp.add(metalCuirass);
       } else if (agentName === 'KAY/O') {
-        // Robot war machine head with cyan digital visor
         const robotHead = new THREE.Mesh(new THREE.BoxGeometry(0.32, 0.32, 0.32), new THREE.MeshStandardMaterial({ color: 0x1e293b, metalness: 0.85 }));
         robotHead.position.set(0, 1.76, 0);
         grp.add(robotHead);
@@ -5095,6 +5171,18 @@
         chestReactor.rotation.x = Math.PI / 2;
         chestReactor.position.set(0, 1.25, 0.22);
         grp.add(chestReactor);
+      } else if (agentName === 'Tejo') {
+        // Colombian tactical specialist with blast goggles and shield vest
+        const goggles = new THREE.Mesh(new THREE.BoxGeometry(0.28, 0.07, 0.08), new THREE.MeshStandardMaterial({ color: 0x10b981, emissive: 0x059669, emissiveIntensity: 0.6 }));
+        goggles.position.set(0, 1.82, 0.2);
+        grp.add(goggles);
+        const camoScarf = new THREE.Mesh(new THREE.TorusGeometry(0.24, 0.05, 6, 14), new THREE.MeshStandardMaterial({ color: 0x064e3b }));
+        camoScarf.rotation.x = Math.PI / 2;
+        camoScarf.position.set(0, 1.62, 0);
+        grp.add(camoScarf);
+        const shieldVest = new THREE.Mesh(new THREE.BoxGeometry(0.36, 0.35, 0.16), new THREE.MeshStandardMaterial({ color: 0x065f46, metalness: 0.8 }));
+        shieldVest.position.set(0, 1.25, 0.08);
+        grp.add(shieldVest);
       }
 
       return { mesh: grp, head, body, legs: [legL, legR] };
@@ -5625,6 +5713,19 @@
         sunLight.position.set(50, 60, -60);
         scene.fog.color.setHex(0xa855f7);
         scene.fog.density = 0.006;
+      } else if (mapKey === 'pearl') {
+        // Lisbon Underwater Geodesic Dome / Deep Ocean Bioluminescence
+        grad.addColorStop(0, '#001220');
+        grad.addColorStop(0.35, '#002845');
+        grad.addColorStop(0.7, '#006494');
+        grad.addColorStop(1, '#0582ca');
+        ambientLight.color.setHex(0x80d8ff);
+        ambientLight.intensity = 0.95;
+        sunLight.color.setHex(0x00e5ff);
+        sunLight.intensity = 1.35;
+        sunLight.position.set(0, 95, 0);
+        scene.fog.color.setHex(0x003554);
+        scene.fog.density = 0.0065;
       } else {
         // Range: High-tech military hangar
         grad.addColorStop(0, '#080c10');
@@ -6514,6 +6615,106 @@
           colliders.push({ box: new THREE.Box3().setFromObject(mTrunk), mesh: mTrunk });
         });
       }
+      else if (mapKey === 'pearl') {
+        // ==========================================================
+        // MAP 9: PEARL (펄) - 리스본 심해 수중 돔 & B 롱 해저 파노라마 & 아줄레주 분수 & 에어락 [F]
+        // ==========================================================
+        const matPearlAzulejo = new THREE.MeshStandardMaterial({ color: 0x023e8a, roughness: 0.3 });
+        const matPearlFloor = new THREE.MeshStandardMaterial({ color: 0xdce3eb, roughness: 0.75 });
+        const matPearlWall = new THREE.MeshStandardMaterial({ color: 0x94a3b8, roughness: 0.8 });
+        const matPearlGlass = new THREE.MeshStandardMaterial({ color: 0x00b4d8, roughness: 0.1, transparent: true, opacity: 0.55 });
+        const matPearlGold = new THREE.MeshStandardMaterial({ color: 0xd4af37, metalness: 0.9, roughness: 0.2 });
+
+        // Outer Dome Submerged Boundaries
+        addBox(0, -0.5, 0, 120, 1, 120, matPearlFloor);
+        addBox(0, 7, -60, 120, 14, 2, matPearlWall);
+        addBox(0, 7, 60, 120, 14, 2, matPearlWall);
+        addBox(-60, 7, 0, 2, 14, 120, matPearlWall);
+        addBox(60, 7, 0, 2, 14, 120, matPearlWall);
+
+        // Submerged Dome Glass Overhead Ring
+        const domeRing = new THREE.Mesh(new THREE.TorusGeometry(48, 1.2, 8, 24), matPearlGlass);
+        domeRing.rotation.x = Math.PI / 2;
+        domeRing.position.set(0, 13, 0);
+        scene.add(domeRing);
+        mapObjects.push(domeRing);
+
+        // --- A SITE: A ART GALLERY, A RESTAURANT & AZULEJO PLAZA ---
+        addBox(30, 0.05, -24, 22, 0.05, 22, matSiteFloor, false);
+        addTextBillboard(30, 0.2, -24, 'A SITE', 1.8);
+        spikeSiteAreas.push({ minX: 18, maxX: 42, minZ: -35, maxZ: -13, name: 'A SITE' });
+
+        // A Art Gallery Stone Colonnade (4 pillars)
+        [-4, 4].forEach(ox => {
+          [-4, 4].forEach(oz => {
+            const col = new THREE.Mesh(new THREE.CylinderGeometry(0.5, 0.6, 6.0, 10), matPearlWall);
+            col.position.set(30 + ox, 3.0, -24 + oz);
+            scene.add(col);
+            mapObjects.push(col);
+            colliders.push({ box: new THREE.Box3().setFromObject(col), mesh: col });
+          });
+        });
+
+        // A Restaurant 2F Balcony Terrace (y = 4.2)
+        addPlatform(36, 0, -32, 12, 4.2, 10, matPearlWall);
+        addRailing(29.9, 4.2, -32, 10, 'z');
+        addStairs(36, -14, 0, 3.8, 4.2, 12, 12, 'z-');
+        addCrateStack(24, -22, 2.4);
+
+        // --- B SITE: B LONG PANORAMIC OCEAN GLASS & B TOWER ---
+        addBox(-30, 0.05, -24, 22, 0.05, 22, matSiteFloor, false);
+        addTextBillboard(-30, 0.2, -24, 'B SITE', 1.8);
+        spikeSiteAreas.push({ minX: -42, maxX: -18, minZ: -35, maxZ: -13, name: 'B SITE' });
+
+        // B Long Massive Panoramic Glass Windows overlooking deep ocean
+        const bGlass = new THREE.Mesh(new THREE.BoxGeometry(1.2, 8.0, 24), matPearlGlass);
+        bGlass.position.set(-42, 4.0, -24);
+        scene.add(bGlass);
+        mapObjects.push(bGlass);
+        colliders.push({ box: new THREE.Box3().setFromObject(bGlass), mesh: bGlass });
+
+        // B Screen Central Pillar & Radianite Cover
+        addBox(-28, 3.5, -24, 4.0, 7.0, 4.0, matPearlWall);
+        addCrateStack(-22, -28, 2.4);
+
+        // --- MID PLAZA: PORTUGUESE AZULEJO FOUNTAIN & AIRLOCK [F] ---
+        // Classical Azulejo 3-Tier Fountain at Mid (x = 0, z = -4)
+        const fBase = new THREE.Mesh(new THREE.CylinderGeometry(3.2, 3.6, 0.8, 16), matPearlAzulejo);
+        fBase.position.set(0, 0.4, -4);
+        scene.add(fBase);
+        mapObjects.push(fBase);
+        colliders.push({ box: new THREE.Box3().setFromObject(fBase), mesh: fBase });
+
+        const fPillar = new THREE.Mesh(new THREE.CylinderGeometry(0.8, 1.0, 3.0, 10), matPearlWall);
+        fPillar.position.set(0, 1.9, -4);
+        scene.add(fPillar);
+        mapObjects.push(fPillar);
+
+        const fWater = new THREE.Mesh(new THREE.CylinderGeometry(2.8, 2.8, 0.1, 14), matPearlGlass);
+        fWater.position.set(0, 0.75, -4);
+        scene.add(fWater);
+        mapObjects.push(fWater);
+
+        // Interactive Undersea Pressure Airlock Valve [F] at (x = 0, z = 8)
+        const vBase = new THREE.Mesh(new THREE.BoxGeometry(1.6, 1.2, 1.2), matPearlWall);
+        vBase.position.set(0, 0.6, 8);
+        scene.add(vBase);
+        mapObjects.push(vBase);
+        colliders.push({ box: new THREE.Box3().setFromObject(vBase), mesh: vBase });
+
+        const vWheel = new THREE.Mesh(new THREE.TorusGeometry(0.35, 0.06, 6, 12), matPearlGold);
+        vWheel.position.set(0, 1.3, 8);
+        scene.add(vWheel);
+        mapObjects.push(vWheel);
+
+        addTextBillboard(0, 2.0, 8, '[F] 심해 에어락 감압 밸브 (AIRLOCK)', 1.4, '#00f0ff');
+
+        pearlAirlock = {
+          wheelMesh: vWheel,
+          isSpinning: false,
+          pos: new THREE.Vector3(0, 1.3, 8)
+        };
+      }
       else if (mapKey === 'range') {
         addBox(0, -0.5, 0, 60, 1, 120, matConcrete);
         addBox(0, 7, -60, 60, 14, 2, matWallStone);
@@ -6809,7 +7010,7 @@
         e.preventDefault();
         const fpsSel = document.getElementById('cfg-fps-limit');
         if (fpsSel) {
-          const presets = ['144', '240', '360', '480', '500', 'auto', '0'];
+          const presets = ['144', '240', '360', '480', '500', '1000', 'auto', '0'];
           let curIdx = presets.indexOf(fpsSel.value);
           const nextIdx = (curIdx + 1) % presets.length;
           fpsSel.value = presets[nextIdx];
@@ -6822,6 +7023,12 @@
       // [L] Key: Tactical Underbarrel Laser Sight Toggle
       if (e.code === 'KeyL') {
         toggleLaserSight();
+        return;
+      }
+
+      // [U] Key: Cycle 3D Gun Buddy (Weapon Charm)
+      if (e.code === 'KeyU') {
+        cycleGunBuddy();
         return;
       }
 
@@ -8456,6 +8663,18 @@
           sunsetMarketDoor.isOpen = !sunsetMarketDoor.isOpen;
           sunsetMarketDoor.targetY = sunsetMarketDoor.isOpen ? 8.4 : 3.2;
           showToast(`⚙️ [SUNSET] 마켓 메탈 차단문 ${sunsetMarketDoor.isOpen ? '개방 (OPEN)' : '폐쇄 (CLOSE)'}!`);
+          return;
+        }
+      }
+
+      // 5. Pearl Undersea Airlock Valve [F]
+      if (pearlAirlock && pearlAirlock.wheelMesh && !pearlAirlock.isSpinning) {
+        const distToPearl = camera.position.distanceTo(pearlAirlock.pos);
+        if (distToPearl < 4.0) {
+          sound.playSteamVent();
+          pearlAirlock.isSpinning = true;
+          setTimeout(() => { if (pearlAirlock) pearlAirlock.isSpinning = false; }, 1200);
+          showToast('💨 [PEARL] 심해 에어락 감압 밸브가 작동했습니다! (AIRLOCK VENT ACTIVATED)');
           return;
         }
       }
