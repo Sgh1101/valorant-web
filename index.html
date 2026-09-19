@@ -3824,7 +3824,7 @@
     const myClientId = 'user_' + Math.random().toString(36).substring(2, 8);
     const networkChannel = new BroadcastChannel('VALORANT_5V5_NET');
 
-    const MAP_LIST = ['ascent', 'bind', 'haven', 'icebox', 'split', 'lotus', 'breeze', 'sunset', 'pearl', 'fracture', 'abyss', 'district', 'drift', 'glitch', 'kasbah', 'piazza', 'bastion', 'colosseum', 'corrode', 'sanctum', 'zenith', 'subzero', 'oasis', 'range'];
+    const MAP_LIST = ['ascent', 'bind', 'haven', 'icebox', 'split', 'lotus', 'breeze', 'sunset', 'pearl', 'fracture', 'abyss', 'district', 'drift', 'glitch', 'kasbah', 'piazza', 'bastion', 'colosseum', 'corrode', 'sanctum', 'zenith', 'subzero', 'oasis', 'eclipse', 'magma', 'cyberia', 'overgrowth', 'aerodrome', 'catacomb', 'range'];
     const MAP_NAMES = {
       ascent: 'ASCENT (어센트) - 베네치아 요새 & 전동 셔터 도어 [F]',
       bind: 'BIND (바인드) - 모로코 사막 & 차원 이동 텔레포터',
@@ -3849,6 +3849,12 @@
       zenith: 'ZENITH (제니스) - 성층권 부유 공중 요새 & 태양광 릴레이 타워 & 기류 도약대 [F]',
       subzero: 'SUBZERO (서브제로) - 시베리아 극지 영구동토 기지 & 냉동 동결 보안문 [F] & 얼음 동굴',
       oasis: 'OASIS (오아시스) - 미래형 중동 바이오돔 낙원 & 발광 열대 정원 & 고속 수류 가속기 [F]',
+      eclipse: 'ECLIPSE (이클립스) - 달 기지 루나 스테이션 & 운석 돔 & 반중력 퀀텀 도약대 [F]',
+      magma: 'MAGMA (마그마) - 활화산 칼데라 지열 발전소 & 용암 피트 & 용암 간헐천 기류 [F]',
+      cyberia: 'CYBERIA (사이버리아) - 네오 도쿄 지하 데이터센터 & 서버 랙 타워 & 홀로그램 브릿지 [F]',
+      overgrowth: 'OVERGROWTH (오버그로스) - 아마존 밀림 기밀 바이오 연구소 & 수목 캐노피 & 덩굴 엘리베이터 [F]',
+      aerodrome: 'AERODROME (에어로드롬) - 초대형 핵추진 항공모함 갑판 & 아일랜드 타워 & 사출 캐터펄트 [F]',
+      catacomb: 'CATACOMB (카타콤) - 중세 유럽 지하 지하묘지 & 아치형 고딕 묘실 & 비밀 회전 석벽 [F]',
       range: 'THE RANGE (사격장) - 사격 훈련장 & 봇 연습'
     };
     let currentMapIndex = 0;
@@ -4934,6 +4940,12 @@
     let zenithBoostVent = null;
     let subzeroCryoDoor = null;
     let oasisHydroSurge = null;
+    let eclipseGravityVent = null;
+    let magmaGeyser = null;
+    let cyberiaHoloBridge = null;
+    let overgrowthVineElevator = null;
+    let aerodromeCatapult = null;
+    let catacombSecretWall = null;
     let isGcLockerActive = true;
     let isHardwareFrameSync = true;
     let pollingRateModeIdx = 0;
@@ -5232,6 +5244,93 @@
       mapObjects.push(mesh);
       if (collidable) colliders.push({ box: new THREE.Box3().setFromObject(mesh), mesh });
       return mesh;
+    }
+
+    function addSiteDecal(x, z, label, size = 22, color = '#ffc83b') {
+      const half = size / 2;
+      const thick = 0.18;
+      const hexColor = (color === '#ffc83b' || color === '#ffd700') ? 0xffc83b : (color === '#00ffaa' ? 0x00ffaa : 0x00f0ff);
+      const borderMat = new THREE.MeshBasicMaterial({ color: hexColor, transparent: true, opacity: 0.85 });
+
+      // 4 Glowing Site Border Lines
+      addBox(x, 0.06, z - half, size, 0.05, thick, borderMat, false);
+      addBox(x, 0.06, z + half, size, 0.05, thick, borderMat, false);
+      addBox(x - half, 0.06, z, thick, 0.05, size, borderMat, false);
+      addBox(x + half, 0.06, z, thick, 0.05, size, borderMat, false);
+
+      // 4 Corner Hazard Brackets
+      const arm = 2.4;
+      [[-half, -half], [half, -half], [-half, half], [half, half]].forEach(([cx, cz]) => {
+        const cornerGlow = new THREE.Mesh(new THREE.BoxGeometry(arm, 0.07, arm), borderMat);
+        cornerGlow.position.set(x + cx, 0.06, z + cz);
+        scene.add(cornerGlow);
+        mapObjects.push(cornerGlow);
+      });
+
+      // Tactical Site Ambient Glow Light
+      const sLight = new THREE.PointLight(hexColor, 0.75, 24);
+      sLight.position.set(x, 3.8, z);
+      scene.add(sLight);
+      mapObjects.push(sLight);
+    }
+
+    function addSecurityCamera(x, y, z, rotY = 0) {
+      const grp = new THREE.Group();
+      grp.position.set(x, y, z);
+      grp.rotation.y = rotY;
+
+      const bMat = new THREE.MeshStandardMaterial({ color: 0x1f2937, roughness: 0.5, metalness: 0.8 });
+      const bMesh = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.16, 0.28, 8), bMat);
+      bMesh.rotation.x = Math.PI / 2;
+      grp.add(bMesh);
+
+      const cMat = new THREE.MeshStandardMaterial({ color: 0xd1d5db, roughness: 0.3, metalness: 0.5 });
+      const cMesh = new THREE.Mesh(new THREE.BoxGeometry(0.22, 0.22, 0.45), cMat);
+      cMesh.position.set(0, -0.05, 0.22);
+      grp.add(cMesh);
+
+      const ledMat = new THREE.MeshBasicMaterial({ color: 0xff0044 });
+      const ledMesh = new THREE.Mesh(new THREE.SphereGeometry(0.045, 8, 8), ledMat);
+      ledMesh.position.set(0.07, 0.05, 0.46);
+      grp.add(ledMesh);
+
+      scene.add(grp);
+      mapObjects.push(grp);
+      return grp;
+    }
+
+    function addTacticalSign(x, y, z, rotY, text, color = '#00f0ff') {
+      const plane = addTextBillboard(x, y, z, text, 1.4, color);
+      plane.rotation.y = rotY;
+      return plane;
+    }
+
+    function addOverheadCables(x1, y1, z1, x2, y2, z2) {
+      const curve = new THREE.QuadraticBezierCurve3(
+        new THREE.Vector3(x1, y1, z1),
+        new THREE.Vector3((x1 + x2) / 2, Math.min(y1, y2) - 1.2, (z1 + z2) / 2),
+        new THREE.Vector3(x2, y2, z2)
+      );
+      const points = curve.getPoints(16);
+      const cGeo = new THREE.BufferGeometry().setFromPoints(points);
+      const cMat = new THREE.LineBasicMaterial({ color: 0x111827 });
+      const cable = new THREE.Line(cGeo, cMat);
+      scene.add(cable);
+      mapObjects.push(cable);
+      return cable;
+    }
+
+    function addServerRack(x, y, z, h = 4.2) {
+      const rack = addBox(x, y + h / 2, z, 1.8, h, 1.2, matConcrete, true);
+      for (let r = 0; r < 4; r++) {
+        const ledGeo = new THREE.BoxGeometry(1.4, 0.08, 0.05);
+        const ledMat = new THREE.MeshBasicMaterial({ color: r % 2 === 0 ? 0x00ffaa : 0x00f0ff });
+        const led = new THREE.Mesh(ledGeo, ledMat);
+        led.position.set(x, y + 0.8 + r * 0.9, z + 0.62);
+        scene.add(led);
+        mapObjects.push(led);
+      }
+      return rack;
     }
 
     function addTextBillboard(x, y, z, text, size = 1.2, color = '#ffc83b') {
@@ -5877,6 +5976,73 @@
       showToast('🌊 [OASIS] 고속 수류 가속기 추진! (HYDRO SURGE)');
     }
 
+    function triggerEclipseGravityVent() {
+      if (!eclipseGravityVent || player.isDead) return;
+      sound.playTeleport();
+      player.velocity.y = 19.5;
+      player.velocity.z = (camera.position.z > 0) ? -16.0 : 16.0;
+      player.isGrounded = false;
+      showToast('🌙 [ECLIPSE] 반중력 퀀텀 게이트 도약! (LOW-GRAV SURGE)');
+    }
+
+    function triggerMagmaGeyser() {
+      if (!magmaGeyser || player.isDead) return;
+      sound.playDash();
+      player.velocity.y = 21.0;
+      player.velocity.z = (camera.position.z > 0) ? -14.0 : 14.0;
+      player.isGrounded = false;
+      showToast('🌋 [MAGMA] 지열 용암 간헐천 분출! (MAGMA GEYSER)');
+    }
+
+    function triggerCyberiaHoloBridge() {
+      if (!cyberiaHoloBridge || player.isDead) return;
+      sound.playDoorSlide();
+      cyberiaHoloBridge.isActive = !cyberiaHoloBridge.isActive;
+      cyberiaHoloBridge.bridgeMesh.visible = cyberiaHoloBridge.isActive;
+      if (cyberiaHoloBridge.isActive) {
+        colliders.push({ box: new THREE.Box3().setFromObject(cyberiaHoloBridge.bridgeMesh), mesh: cyberiaHoloBridge.bridgeMesh });
+        walkableSurfaces.push({ minX: -4, maxX: 4, minZ: -18, maxZ: 18, topY: 3.2 });
+        showToast('🌐 [CYBERIA] 홀로그램 사이버 브릿지 활성화 (HOLO BRIDGE ON)');
+      } else {
+        colliders = colliders.filter(c => c.mesh !== cyberiaHoloBridge.bridgeMesh);
+        const idx = walkableSurfaces.findIndex(w => w.topY === 3.2 && w.minX === -4);
+        if (idx !== -1) walkableSurfaces.splice(idx, 1);
+        showToast('🌐 [CYBERIA] 홀로그램 사이버 브릿지 비활성화 (HOLO BRIDGE OFF)');
+      }
+    }
+
+    function triggerOvergrowthVineElevator() {
+      if (!overgrowthVineElevator || player.isDead) return;
+      sound.playZipline();
+      player.velocity.y = 18.2;
+      player.velocity.z = (camera.position.z > 0) ? -16.0 : 16.0;
+      player.isGrounded = false;
+      showToast('🌿 [OVERGROWTH] 고대 덩굴 엘리베이터 승강! (VINE ELEVATOR)');
+    }
+
+    function triggerAerodromeCatapult() {
+      if (!aerodromeCatapult || player.isDead) return;
+      sound.playDash();
+      player.velocity.z = (camera.position.z > 0) ? -32.0 : 32.0;
+      player.velocity.y = 5.2;
+      player.isGrounded = false;
+      showToast('✈️ [AERODROME] 전투기 사출 캐터펄트 초고속 발사! (CATAPULT BOOST)');
+    }
+
+    function triggerCatacombSecretWall() {
+      if (!catacombSecretWall || player.isDead) return;
+      sound.playDoorSlide();
+      catacombSecretWall.isOpen = !catacombSecretWall.isOpen;
+      catacombSecretWall.targetY = catacombSecretWall.isOpen ? 8.5 : 3.5;
+      if (catacombSecretWall.isOpen) {
+        colliders = colliders.filter(c => c.mesh !== catacombSecretWall.mesh);
+        showToast('🗝️ [CATACOMB] 비밀 묘실 회전 석벽 개방 (SECRET WALL OPEN)');
+      } else {
+        colliders.push({ box: new THREE.Box3().setFromObject(catacombSecretWall.mesh), mesh: catacombSecretWall.mesh });
+        showToast('🗝️ [CATACOMB] 비밀 묘실 회전 석벽 폐쇄 (SECRET WALL CLOSED)');
+      }
+    }
+
     function triggerColosseumLift() {
       if (!colosseumLift || player.isDead) return;
       sound.playDoorSlide();
@@ -6336,6 +6502,14 @@
       if (subzeroCryoDoor && subzeroCryoDoor.mesh) scene.remove(subzeroCryoDoor.mesh);
       subzeroCryoDoor = null;
       oasisHydroSurge = null;
+      eclipseGravityVent = null;
+      magmaGeyser = null;
+      if (cyberiaHoloBridge && cyberiaHoloBridge.bridgeMesh) scene.remove(cyberiaHoloBridge.bridgeMesh);
+      cyberiaHoloBridge = null;
+      overgrowthVineElevator = null;
+      aerodromeCatapult = null;
+      if (catacombSecretWall && catacombSecretWall.mesh) scene.remove(catacombSecretWall.mesh);
+      catacombSecretWall = null;
 
       if (lotusDoor && lotusDoor.mesh) {
         scene.remove(lotusDoor.mesh);
@@ -6750,6 +6924,84 @@
         sunLight.position.set(35, 85, 25);
         scene.fog.color.setHex(0x881337);
         scene.fog.density = 0.005;
+      } else if (mapKey === 'eclipse') {
+        // Lunar Space Station Crater / Deep Cosmic Void & Intense Solar Flare
+        grad.addColorStop(0, '#000000');
+        grad.addColorStop(0.35, '#050510');
+        grad.addColorStop(0.7, '#1e1b4b');
+        grad.addColorStop(1, '#312e81');
+        ambientLight.color.setHex(0x818cf8);
+        ambientLight.intensity = 0.85;
+        sunLight.color.setHex(0xffffff);
+        sunLight.intensity = 1.7;
+        sunLight.position.set(20, 95, 20);
+        scene.fog.color.setHex(0x0f172a);
+        scene.fog.density = 0.004;
+      } else if (mapKey === 'magma') {
+        // Volcanic Caldera / Smoldering Ash Twilight & Fiery Magma Glow
+        grad.addColorStop(0, '#1c1917');
+        grad.addColorStop(0.35, '#450a0a');
+        grad.addColorStop(0.7, '#b91c1c');
+        grad.addColorStop(1, '#f97316');
+        ambientLight.color.setHex(0xf87171);
+        ambientLight.intensity = 1.05;
+        sunLight.color.setHex(0xfba442);
+        sunLight.intensity = 1.5;
+        sunLight.position.set(40, 70, 30);
+        scene.fog.color.setHex(0x450a0a);
+        scene.fog.density = 0.009;
+      } else if (mapKey === 'cyberia') {
+        // Neo Tokyo Underground Datacenter / Cyberpunk Deep Indigo & Neon Pink Glow
+        grad.addColorStop(0, '#030712');
+        grad.addColorStop(0.35, '#1e1b4b');
+        grad.addColorStop(0.7, '#4338ca');
+        grad.addColorStop(1, '#ec4899');
+        ambientLight.color.setHex(0xa5b4fc);
+        ambientLight.intensity = 0.95;
+        sunLight.color.setHex(0x38bdf8);
+        sunLight.intensity = 1.4;
+        sunLight.position.set(-30, 85, -20);
+        scene.fog.color.setHex(0x18181b);
+        scene.fog.density = 0.007;
+      } else if (mapKey === 'overgrowth') {
+        // Amazon Canopy Secret Bio-Vault / Tropical Emerald Mist & Golden Sunbeams
+        grad.addColorStop(0, '#064e3b');
+        grad.addColorStop(0.35, '#047857');
+        grad.addColorStop(0.7, '#10b981');
+        grad.addColorStop(1, '#fef08a');
+        ambientLight.color.setHex(0xa7f3d0);
+        ambientLight.intensity = 1.0;
+        sunLight.color.setHex(0xfef9c3);
+        sunLight.intensity = 1.45;
+        sunLight.position.set(45, 90, -10);
+        scene.fog.color.setHex(0x064e3b);
+        scene.fog.density = 0.0065;
+      } else if (mapKey === 'aerodrome') {
+        // Supercarrier Flight Deck / Open Ocean Twilight Storm & Flight Runway Beacons
+        grad.addColorStop(0, '#0f172a');
+        grad.addColorStop(0.35, '#1e293b');
+        grad.addColorStop(0.7, '#334155');
+        grad.addColorStop(1, '#0284c7');
+        ambientLight.color.setHex(0x94a3b8);
+        ambientLight.intensity = 0.9;
+        sunLight.color.setHex(0xe2e8f0);
+        sunLight.intensity = 1.35;
+        sunLight.position.set(-55, 80, 40);
+        scene.fog.color.setHex(0x1e293b);
+        scene.fog.density = 0.006;
+      } else if (mapKey === 'catacomb') {
+        // Gothic Crypt Subterranean / Dim Torchlight & Ancient Stone Mist
+        grad.addColorStop(0, '#0a0a0a');
+        grad.addColorStop(0.4, '#171717');
+        grad.addColorStop(0.75, '#78350f');
+        grad.addColorStop(1, '#d97706');
+        ambientLight.color.setHex(0xfde68a);
+        ambientLight.intensity = 0.75;
+        sunLight.color.setHex(0xf59e0b);
+        sunLight.intensity = 1.15;
+        sunLight.position.set(0, 60, 0);
+        scene.fog.color.setHex(0x1c1917);
+        scene.fog.density = 0.012;
       } else {
         // Range: High-tech military hangar
         grad.addColorStop(0, '#080c10');
@@ -8807,6 +9059,398 @@
         addPlatform(0, 0, 42, 42, 0.5, 16, matTerracotta);
         addPlatform(0, 0, -42, 42, 0.5, 16, matTerracotta);
       }
+      else if (mapKey === 'eclipse') {
+        // ==========================================================
+        // MAP 24: ECLIPSE (이클립스) - 달 기지 루나 스테이션 & 반중력 퀀텀 도약대 [F]
+        // ==========================================================
+        const matLunarFloor = new THREE.MeshStandardMaterial({ color: 0x334155, roughness: 0.9, metalness: 0.2 });
+        const matLunarWall = new THREE.MeshStandardMaterial({ color: 0x64748b, roughness: 0.5, metalness: 0.4 });
+        const matSolarPanel = new THREE.MeshStandardMaterial({ color: 0x1e1b4b, emissive: 0x312e81, emissiveIntensity: 0.5, metalness: 0.9 });
+        const matQuantumGlow = new THREE.MeshBasicMaterial({ color: 0x818cf8 });
+
+        // Outer Lunar Dome Perimeter (114x114m)
+        addBox(0, -0.5, 0, 114, 1, 114, matLunarFloor);
+        addBox(0, 7, -57, 114, 14, 2, matLunarWall);
+        addBox(0, 7, 57, 114, 14, 2, matLunarWall);
+        addBox(-57, 7, 0, 2, 14, 114, matLunarWall);
+        addBox(57, 7, 0, 2, 14, 114, matLunarWall);
+
+        // Center Low-Grav Quantum Gate at (0, 0.2, 0)
+        const qRing = new THREE.Mesh(new THREE.TorusGeometry(3.2, 0.4, 16, 32), matQuantumGlow);
+        qRing.rotation.x = Math.PI / 2;
+        qRing.position.set(0, 0.2, 0);
+        scene.add(qRing);
+        mapObjects.push(qRing);
+
+        const qCore = new THREE.Mesh(new THREE.CylinderGeometry(2.2, 2.6, 0.5, 16), matSolarPanel);
+        qCore.position.set(0, 0.25, 0);
+        scene.add(qCore);
+        mapObjects.push(qCore);
+
+        addTextBillboard(0, 2.2, 0, '[F] 반중력 퀀텀 도약대 (LOW-GRAV GATE)', 1.5, '#818cf8');
+        eclipseGravityVent = { pos: new THREE.Vector3(0, 0.2, 0), mesh: qCore };
+
+        // Geodesic Mid Catwalks & Overhead Cables
+        addPlatform(0, 0, 8, 10, 3.2, 4, matLunarWall);
+        addPlatform(0, 0, -8, 10, 3.2, 4, matLunarWall);
+        addOverheadCables(-20, 7, -8, 20, 7, -8);
+        addOverheadCables(-20, 7, 8, 20, 7, 8);
+
+        // --- A SITE: LUNAR MINING RIG (x = 30, z = -20) ---
+        addPlatform(30, 0, -20, 24, 0.5, 24, matSiteFloor);
+        addSiteDecal(30, -20, 'A SITE', 24, '#818cf8');
+        spikeSiteAreas.push({ minX: 18, maxX: 42, minZ: -32, maxZ: -8, name: 'A SITE' });
+
+        // Mining Drill Tower & Regolith Tanks
+        addBox(30, 4.0, -20, 4, 8.0, 4, matSolarPanel);
+        addPillar(22, 0, -24, 1.8, 6.0, matLunarWall);
+        addPillar(38, 0, -24, 1.8, 6.0, matLunarWall);
+        addPlatform(36, 0, -32, 12, 4.2, 10, matLunarWall);
+        addRailing(29.9, 4.2, -32, 10, 'z');
+        addStairs(36, -14, 0, 3.8, 4.2, 12, 12, 'z-');
+        addCrateStack(24, -18, 2.4);
+        addSecurityCamera(42, 6.5, -20, -Math.PI / 2);
+
+        // --- B SITE: SOLAR ARRAY HUB (x = -30, z = -20) ---
+        addPlatform(-30, 0, -20, 24, 0.5, 24, matSiteFloor);
+        addSiteDecal(-30, -20, 'B SITE', 24, '#818cf8');
+        spikeSiteAreas.push({ minX: -42, maxX: -18, minZ: -32, maxZ: -8, name: 'B SITE' });
+
+        // Angled Solar Arrays
+        [[-24, -26], [-36, -26], [-24, -14], [-36, -14]].forEach(([sx, sz]) => {
+          const panel = new THREE.Mesh(new THREE.BoxGeometry(4.0, 0.2, 3.0), matSolarPanel);
+          panel.position.set(sx, 2.0, sz);
+          panel.rotation.x = 0.35;
+          scene.add(panel);
+          mapObjects.push(panel);
+          colliders.push({ box: new THREE.Box3().setFromObject(panel), mesh: panel });
+        });
+
+        addPlatform(-36, 0, -32, 12, 4.2, 10, matLunarWall);
+        addRailing(-29.9, 4.2, -32, 10, 'z');
+        addStairs(-36, -14, 0, 3.8, 4.2, 12, 12, 'z-');
+        addCrateStack(-22, -18, 2.4);
+        addSecurityCamera(-42, 6.5, -20, Math.PI / 2);
+
+        // Spawns
+        addPlatform(0, 0, 42, 42, 0.5, 16, matLunarFloor);
+        addPlatform(0, 0, -42, 42, 0.5, 16, matLunarFloor);
+      }
+      else if (mapKey === 'magma') {
+        // ==========================================================
+        // MAP 25: MAGMA (마그마) - 활화산 칼데라 지열 발전소 & 용암 간헐천 기류 [F]
+        // ==========================================================
+        const matBasaltFloor = new THREE.MeshStandardMaterial({ color: 0x1c1917, roughness: 0.95 });
+        const matObsidianWall = new THREE.MeshStandardMaterial({ color: 0x292524, roughness: 0.4, metalness: 0.5 });
+        const matLava = new THREE.MeshStandardMaterial({ color: 0xf97316, emissive: 0xef4444, emissiveIntensity: 0.8, roughness: 0.2 });
+        const matSteelGrate = new THREE.MeshStandardMaterial({ color: 0x78716c, metalness: 0.9, roughness: 0.3 });
+
+        // Outer Caldera Perimeter (112x112m)
+        addBox(0, -0.5, 0, 112, 1, 112, matBasaltFloor);
+        addBox(0, 7, -56, 112, 14, 2, matObsidianWall);
+        addBox(0, 7, 56, 112, 14, 2, matObsidianWall);
+        addBox(-56, 7, 0, 2, 14, 112, matObsidianWall);
+        addBox(56, 7, 0, 2, 14, 112, matObsidianWall);
+
+        // Central Molten Lava Pit with Geyser Vent at (0, 0.2, 0)
+        const lavaPit = new THREE.Mesh(new THREE.BoxGeometry(10, 0.3, 24), matLava);
+        lavaPit.position.set(0, 0.15, 0);
+        scene.add(lavaPit);
+        mapObjects.push(lavaPit);
+
+        const geyserBase = new THREE.Mesh(new THREE.CylinderGeometry(1.8, 2.4, 0.6, 16), matSteelGrate);
+        geyserBase.position.set(0, 0.3, 0);
+        scene.add(geyserBase);
+        mapObjects.push(geyserBase);
+
+        addTextBillboard(0, 2.2, 0, '[F] 지열 용암 간헐천 (MAGMA GEYSER)', 1.5, '#f97316');
+        magmaGeyser = { pos: new THREE.Vector3(0, 0.2, 0), mesh: geyserBase };
+
+        // Heat-shield Steel Catwalks across Mid
+        addPlatform(0, 0, -8, 12, 3.5, 4, matSteelGrate);
+        addPlatform(0, 0, 8, 12, 3.5, 4, matSteelGrate);
+        addRailing(0, 3.5, -6.1, 12, 'x');
+        addRailing(0, 3.5, 6.1, 12, 'x');
+
+        // --- A SITE: GEOTHERMAL TURBINE (x = 30, z = -20) ---
+        addPlatform(30, 0, -20, 24, 0.5, 24, matSiteFloor);
+        addSiteDecal(30, -20, 'A SITE', 24, '#f97316');
+        spikeSiteAreas.push({ minX: 18, maxX: 42, minZ: -32, maxZ: -8, name: 'A SITE' });
+
+        // Heavy Industrial Turbine & Lava Conduit
+        addPillar(30, 0, -20, 2.4, 7.0, matSteelGrate);
+        addPlatform(36, 0, -32, 12, 4.0, 10, matObsidianWall);
+        addRailing(29.9, 4.0, -32, 10, 'z');
+        addStairs(36, -14, 0, 3.8, 4.0, 12, 12, 'z-');
+        addCrateStack(24, -20, 2.4);
+
+        // --- B SITE: OBSIDIAN QUARRY (x = -30, z = -20) ---
+        addPlatform(-30, 0, -20, 24, 0.5, 24, matSiteFloor);
+        addSiteDecal(-30, -20, 'B SITE', 24, '#f97316');
+        spikeSiteAreas.push({ minX: -42, maxX: -18, minZ: -32, maxZ: -8, name: 'B SITE' });
+
+        addBox(-30, 3.5, -20, 5, 7.0, 5, matObsidianWall);
+        addPlatform(-36, 0, -32, 12, 4.0, 10, matObsidianWall);
+        addRailing(-29.9, 4.0, -32, 10, 'z');
+        addStairs(-36, -14, 0, 3.8, 4.0, 12, 12, 'z-');
+        addCrateStack(-22, -20, 2.4);
+
+        // Spawns
+        addPlatform(0, 0, 42, 42, 0.5, 16, matBasaltFloor);
+        addPlatform(0, 0, -42, 42, 0.5, 16, matBasaltFloor);
+      }
+      else if (mapKey === 'cyberia') {
+        // ==========================================================
+        // MAP 26: CYBERIA (사이버리아) - 네오 도쿄 지하 데이터센터 & 홀로그램 브릿지 [F]
+        // ==========================================================
+        const matDarkServer = new THREE.MeshStandardMaterial({ color: 0x0f172a, roughness: 0.4, metalness: 0.8 });
+        const matCyanHolo = new THREE.MeshStandardMaterial({ color: 0x06b6d4, emissive: 0x0891b2, emissiveIntensity: 0.8, transparent: true, opacity: 0.65 });
+        const matChasm = new THREE.MeshStandardMaterial({ color: 0x020617, roughness: 0.9 });
+
+        // Outer Vault Perimeter (110x110m)
+        addBox(0, -0.5, 0, 110, 1, 110, matDarkServer);
+        addBox(0, 7, -55, 110, 14, 2, matDarkServer);
+        addBox(0, 7, 55, 110, 14, 2, matDarkServer);
+        addBox(-55, 7, 0, 2, 14, 110, matDarkServer);
+        addBox(55, 7, 0, 2, 14, 110, matDarkServer);
+
+        // Mid Digital Chasm (Drop zone)
+        addBox(0, -1.0, 0, 16, 1.0, 36, matChasm, false);
+
+        // Central Holographic Energy Bridge Mesh at (0, 3.2, 0)
+        const hBridge = new THREE.Mesh(new THREE.BoxGeometry(6, 0.4, 32), matCyanHolo);
+        hBridge.position.set(0, 3.2, 0);
+        scene.add(hBridge);
+        mapObjects.push(hBridge);
+        colliders.push({ box: new THREE.Box3().setFromObject(hBridge), mesh: hBridge });
+        walkableSurfaces.push({ minX: -3, maxX: 3, minZ: -16, maxZ: 16, topY: 3.4 });
+
+        // Bridge Control Console at (5, 0.8, 0)
+        const bSwitch = addBox(5, 0.8, 0, 1.2, 1.6, 0.8, matCyanHolo);
+        addTextBillboard(5, 2.2, 0, '[F] 홀로그램 브릿지 전환 (HOLO BRIDGE)', 1.4, '#06b6d4');
+        cyberiaHoloBridge = { switchPos: new THREE.Vector3(5, 0.8, 0), bridgeMesh: hBridge, isActive: true };
+
+        // Mid Server Racks
+        addServerRack(-12, 0, -8);
+        addServerRack(-12, 0, 8);
+        addServerRack(12, 0, -8);
+        addServerRack(12, 0, 8);
+
+        // --- A SITE: QUANTUM CORE (x = 28, z = -22) ---
+        addPlatform(28, 0, -22, 22, 0.5, 22, matSiteFloor);
+        addSiteDecal(28, -22, 'A SITE', 22, '#06b6d4');
+        spikeSiteAreas.push({ minX: 17, maxX: 39, minZ: -33, maxZ: -11, name: 'A SITE' });
+
+        addBox(28, 3.5, -22, 4, 7.0, 4, matCyanHolo);
+        addPlatform(34, 0, -32, 12, 4.0, 10, matDarkServer);
+        addRailing(27.9, 4.0, -32, 10, 'z');
+        addStairs(34, -14, 0, 3.8, 4.0, 12, 12, 'z-');
+        addCrateStack(22, -22, 2.4);
+
+        // --- B SITE: FIBER NETWORK HUB (x = -28, z = -22) ---
+        addPlatform(-28, 0, -22, 22, 0.5, 22, matSiteFloor);
+        addSiteDecal(-28, -22, 'B SITE', 22, '#06b6d4');
+        spikeSiteAreas.push({ minX: -39, maxX: -17, minZ: -33, maxZ: -11, name: 'B SITE' });
+
+        addServerRack(-28, 0, -22, 6.0);
+        addPlatform(-34, 0, -32, 12, 4.0, 10, matDarkServer);
+        addRailing(-27.9, 4.0, -32, 10, 'z');
+        addStairs(-34, -14, 0, 3.8, 4.0, 12, 12, 'z-');
+        addCrateStack(-22, -22, 2.4);
+
+        // Spawns
+        addPlatform(0, 0, 40, 40, 0.5, 16, matDarkServer);
+        addPlatform(0, 0, -40, 40, 0.5, 16, matDarkServer);
+      }
+      else if (mapKey === 'overgrowth') {
+        // ==========================================================
+        // MAP 27: OVERGROWTH (오버그로스) - 아마존 밀림 바이오 연구소 & 덩굴 엘리베이터 [F]
+        // ==========================================================
+        const matTempleStone = new THREE.MeshStandardMaterial({ color: 0x475569, roughness: 0.9 });
+        const matJungleFoliage = new THREE.MeshStandardMaterial({ color: 0x15803d, roughness: 0.7 });
+        const matBioVine = new THREE.MeshStandardMaterial({ color: 0x22c55e, emissive: 0x16a34a, emissiveIntensity: 0.6 });
+
+        // Outer Ancient Stone Perimeter (112x112m)
+        addBox(0, -0.5, 0, 112, 1, 112, matTempleStone);
+        addBox(0, 7, -56, 112, 14, 2, matTempleStone);
+        addBox(0, 7, 56, 112, 14, 2, matTempleStone);
+        addBox(-56, 7, 0, 2, 14, 112, matTempleStone);
+        addBox(56, 7, 0, 2, 14, 112, matTempleStone);
+
+        // Central Ancient Tree with Bio-Vine Elevator at (0, 0.2, 0)
+        const trunk = new THREE.Mesh(new THREE.CylinderGeometry(2.4, 3.2, 14.0, 12), matTempleStone);
+        trunk.position.set(0, 7.0, 0);
+        scene.add(trunk);
+        mapObjects.push(trunk);
+        colliders.push({ box: new THREE.Box3().setFromObject(trunk), mesh: trunk });
+
+        const canopy = new THREE.Mesh(new THREE.ConeGeometry(8.5, 5.0, 12), matJungleFoliage);
+        canopy.position.set(0, 14.0, 0);
+        scene.add(canopy);
+        mapObjects.push(canopy);
+
+        const vineLift = new THREE.Mesh(new THREE.TorusGeometry(3.0, 0.35, 12, 24), matBioVine);
+        vineLift.rotation.x = Math.PI / 2;
+        vineLift.position.set(0, 0.25, 0);
+        scene.add(vineLift);
+        mapObjects.push(vineLift);
+
+        addTextBillboard(0, 2.2, 0, '[F] 덩굴 엘리베이터 (VINE ELEVATOR)', 1.5, '#22c55e');
+        overgrowthVineElevator = { pos: new THREE.Vector3(0, 0.2, 0), mesh: vineLift };
+
+        // Canopy Skybridges
+        addPlatform(0, 0, 10, 12, 3.8, 4, matTempleStone);
+        addPlatform(0, 0, -10, 12, 3.8, 4, matTempleStone);
+
+        // --- A SITE: SEED VAULT (x = 30, z = -20) ---
+        addPlatform(30, 0, -20, 24, 0.5, 24, matSiteFloor);
+        addSiteDecal(30, -20, 'A SITE', 24, '#22c55e');
+        spikeSiteAreas.push({ minX: 18, maxX: 42, minZ: -32, maxZ: -8, name: 'A SITE' });
+
+        addBox(30, 3.5, -20, 4, 7.0, 4, matTempleStone);
+        addPlatform(36, 0, -32, 12, 4.0, 10, matTempleStone);
+        addRailing(29.9, 4.0, -32, 10, 'z');
+        addStairs(36, -14, 0, 3.8, 4.0, 12, 12, 'z-');
+        addCrateStack(24, -20, 2.4);
+
+        // --- B SITE: HYDROPONIC VIVARIUM (x = -30, z = -20) ---
+        addPlatform(-30, 0, -20, 24, 0.5, 24, matSiteFloor);
+        addSiteDecal(-30, -20, 'B SITE', 24, '#22c55e');
+        spikeSiteAreas.push({ minX: -42, maxX: -18, minZ: -32, maxZ: -8, name: 'B SITE' });
+
+        addBox(-30, 3.5, -20, 4, 7.0, 4, matTempleStone);
+        addPlatform(-36, 0, -32, 12, 4.0, 10, matTempleStone);
+        addRailing(-29.9, 4.0, -32, 10, 'z');
+        addStairs(-36, -14, 0, 3.8, 4.0, 12, 12, 'z-');
+        addCrateStack(-22, -20, 2.4);
+
+        // Spawns
+        addPlatform(0, 0, 42, 42, 0.5, 16, matTempleStone);
+        addPlatform(0, 0, -42, 42, 0.5, 16, matTempleStone);
+      }
+      else if (mapKey === 'aerodrome') {
+        // ==========================================================
+        // MAP 28: AERODROME (에어로드롬) - 초대형 핵추진 항공모함 갑판 & 사출 캐터펄트 [F]
+        // ==========================================================
+        const matFlightDeck = new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.85 });
+        const matCarrierIsland = new THREE.MeshStandardMaterial({ color: 0x475569, roughness: 0.6, metalness: 0.6 });
+        const matRunwayStripe = new THREE.MeshBasicMaterial({ color: 0xfacc15 });
+        const matCatapultGlow = new THREE.MeshBasicMaterial({ color: 0x38bdf8 });
+
+        // Flight Deck (116x116m)
+        addBox(0, -0.5, 0, 116, 1, 116, matFlightDeck);
+        addBox(0, 7, -58, 116, 14, 2, matCarrierIsland);
+        addBox(0, 7, 58, 116, 14, 2, matCarrierIsland);
+        addBox(-58, 7, 0, 2, 14, 116, matCarrierIsland);
+        addBox(58, 7, 0, 2, 14, 116, matCarrierIsland);
+
+        // Center Runway Catapult Launch Rail (0, 0.2, 0)
+        const catRail = new THREE.Mesh(new THREE.BoxGeometry(4, 0.2, 42), matCatapultGlow);
+        catRail.position.set(0, 0.15, 0);
+        scene.add(catRail);
+        mapObjects.push(catRail);
+
+        addTextBillboard(0, 2.2, 0, '[F] 전투기 사출 캐터펄트 (CATAPULT BOOST)', 1.5, '#38bdf8');
+        aerodromeCatapult = { pos: new THREE.Vector3(0, 0.2, 0), mesh: catRail };
+
+        // Island Superstructure (Carrier Tower) at (36, 7.0, 0)
+        const antPillar = addPillar(38, 14.0, 0, 0.4, 4.0, matCarrierIsland);
+        const dishMesh = new THREE.Mesh(new THREE.ConeGeometry(1.4, 0.6, 12), matCarrierIsland);
+        dishMesh.rotation.x = Math.PI / 4;
+        dishMesh.position.set(38, 17.5, 0);
+        scene.add(dishMesh);
+        mapObjects.push(dishMesh);
+
+        // Runway Yellow Stripe Decals
+        [-12, -6, 6, 12].forEach(rz => {
+          const s = new THREE.Mesh(new THREE.BoxGeometry(20, 0.05, 0.4), matRunwayStripe);
+          s.position.set(0, 0.06, rz);
+          scene.add(s);
+          mapObjects.push(s);
+        });
+
+        // --- A SITE: FORWARD FLIGHT BOW (x = 24, z = -24) ---
+        addPlatform(24, 0, -24, 22, 0.5, 22, matSiteFloor);
+        addSiteDecal(24, -24, 'A SITE', 22, '#38bdf8');
+        spikeSiteAreas.push({ minX: 13, maxX: 35, minZ: -35, maxZ: -13, name: 'A SITE' });
+
+        addPlatform(24, 0, -34, 10, 3.8, 8, matCarrierIsland);
+        addRailing(18.9, 3.8, -34, 8, 'z');
+        addStairs(24, -18, 0, 3.6, 3.8, 10, 10, 'z-');
+        addCrateStack(20, -22, 2.4);
+
+        // --- B SITE: STERN ARRESTING WIRE (x = -24, z = -24) ---
+        addPlatform(-24, 0, -24, 22, 0.5, 22, matSiteFloor);
+        addSiteDecal(-24, -24, 'B SITE', 22, '#38bdf8');
+        spikeSiteAreas.push({ minX: -35, maxX: -13, minZ: -35, maxZ: -13, name: 'B SITE' });
+
+        addPlatform(-24, 0, -34, 10, 3.8, 8, matCarrierIsland);
+        addRailing(-18.9, 3.8, -34, 8, 'z');
+        addStairs(-24, -18, 0, 3.6, 3.8, 10, 10, 'z-');
+        addCrateStack(-20, -22, 2.4);
+
+        // Spawns
+        addPlatform(0, 0, 44, 44, 0.5, 16, matFlightDeck);
+        addPlatform(0, 0, -44, 44, 0.5, 16, matFlightDeck);
+      }
+      else if (mapKey === 'catacomb') {
+        // ==========================================================
+        // MAP 29: CATACOMB (카타콤) - 중세 유럽 지하 지하묘지 & 비밀 회전 석벽 [F]
+        // ==========================================================
+        const matCryptStone = new THREE.MeshStandardMaterial({ color: 0x3f3f46, roughness: 0.95 });
+        const matArchStone = new THREE.MeshStandardMaterial({ color: 0x52525b, roughness: 0.8 });
+        const matTorchGold = new THREE.MeshBasicMaterial({ color: 0xf59e0b });
+
+        // Outer Crypt Vault (108x108m)
+        addBox(0, -0.5, 0, 108, 1, 108, matCryptStone);
+        addBox(0, 7, -54, 108, 14, 2, matCryptStone);
+        addBox(0, 7, 54, 108, 14, 2, matCryptStone);
+        addBox(-54, 7, 0, 2, 14, 108, matCryptStone);
+        addBox(54, 7, 0, 2, 14, 108, matCryptStone);
+
+        // Central Mid Secret Crypt Wall at (-8.0, 3.5, 0)
+        const secWall = addBox(-8.0, 3.5, 0, 1.2, 7.0, 8.0, matArchStone, true);
+        const secSwitch = addBox(-5.8, 1.2, 0, 0.6, 1.4, 0.6, matTorchGold);
+        addTextBillboard(-5.8, 2.4, 0, '[F] 비밀 묘지 회전 석벽 (SECRET WALL)', 1.4, '#f59e0b');
+        catacombSecretWall = { switchPos: new THREE.Vector3(-5.8, 1.2, 0), mesh: secWall, isOpen: false, targetY: 3.5 };
+
+        // Gothic Arches & Sarcophagus Rows
+        addArch(0, 0, 0, 8, 6.5, 2.5, matArchStone);
+        addArch(0, 0, -12, 8, 6.5, 2.5, matArchStone);
+        addArch(0, 0, 12, 8, 6.5, 2.5, matArchStone);
+
+        // Torch Wall Sconces
+        [[-16, 2.5, -8], [16, 2.5, -8], [-16, 2.5, 8], [16, 2.5, 8]].forEach(([tx, ty, tz]) => {
+          addLantern(tx, 0, tz, 0xf59e0b);
+        });
+
+        // --- A SITE: ROYAL TOMB (x = 28, z = -22) ---
+        addPlatform(28, 0, -22, 22, 0.5, 22, matSiteFloor);
+        addSiteDecal(28, -22, 'A SITE', 22, '#f59e0b');
+        spikeSiteAreas.push({ minX: 17, maxX: 39, minZ: -33, maxZ: -11, name: 'A SITE' });
+
+        // Royal Sarcophagus
+        addBox(28, 1.0, -22, 3.5, 2.0, 6.0, matArchStone);
+        addPlatform(34, 0, -32, 12, 4.0, 10, matCryptStone);
+        addRailing(27.9, 4.0, -32, 10, 'z');
+        addStairs(34, -14, 0, 3.8, 4.0, 12, 12, 'z-');
+        addCrateStack(22, -22, 2.4);
+
+        // --- B SITE: OSSUARY RELIQUARY (x = -28, z = -22) ---
+        addPlatform(-28, 0, -22, 22, 0.5, 22, matSiteFloor);
+        addSiteDecal(-28, -22, 'B SITE', 22, '#f59e0b');
+        spikeSiteAreas.push({ minX: -39, maxX: -17, minZ: -33, maxZ: -11, name: 'B SITE' });
+
+        addBox(-28, 3.5, -22, 4, 7.0, 4, matCryptStone);
+        addPlatform(-34, 0, -32, 12, 4.0, 10, matCryptStone);
+        addRailing(-27.9, 4.0, -32, 10, 'z');
+        addStairs(-34, -14, 0, 3.8, 4.0, 12, 12, 'z-');
+        addCrateStack(-22, -22, 2.4);
+
+        // Spawns
+        addPlatform(0, 0, 40, 40, 0.5, 16, matCryptStone);
+        addPlatform(0, 0, -40, 40, 0.5, 16, matCryptStone);
+      }
       else if (mapKey === 'range') {
         addBox(0, -0.5, 0, 60, 1, 120, matConcrete);
         addBox(0, 7, -60, 60, 14, 2, matWallStone);
@@ -8846,6 +9490,21 @@
             mesh: m.mesh, head: m.head, body: m.body, legs: m.legs,
             hp: 100, isDead: false, targetZ: zPos, distName: Math.abs(zPos) + 'm'
           });
+        });
+      }
+
+      // AUTOMATIC TACTICAL SITE DECALS & BOUNDARY LINES FOR ALL SITES
+      if (spikeSiteAreas && spikeSiteAreas.length > 0) {
+        spikeSiteAreas.forEach(site => {
+          const cx = (site.minX + site.maxX) / 2;
+          const cz = (site.minZ + site.maxZ) / 2;
+          const w = site.maxX - site.minX;
+          const d = site.maxZ - site.minZ;
+          const siteCol = site.name.includes('A') ? '#00f0ff' : (site.name.includes('B') ? '#ffc83b' : '#00ffaa');
+          const hasExistingDecal = mapObjects.some(obj => obj.isPointLight && Math.abs(obj.position.x - cx) < 2 && Math.abs(obj.position.z - cz) < 2);
+          if (!hasExistingDecal) {
+            addSiteDecal(cx, cz, site.name, Math.max(w, d), siteCol);
+          }
         });
       }
 
@@ -11050,6 +11709,60 @@
         }
       }
 
+      // 20. Eclipse Low-Grav Gate [F]
+      if (MAP_LIST[currentMapIndex] === 'eclipse' && eclipseGravityVent) {
+        const pPos = camera.position;
+        if (pPos.distanceTo(eclipseGravityVent.pos) < 4.8) {
+          triggerEclipseGravityVent();
+          return;
+        }
+      }
+
+      // 21. Magma Geyser [F]
+      if (MAP_LIST[currentMapIndex] === 'magma' && magmaGeyser) {
+        const pPos = camera.position;
+        if (pPos.distanceTo(magmaGeyser.pos) < 4.8) {
+          triggerMagmaGeyser();
+          return;
+        }
+      }
+
+      // 22. Cyberia Holo Bridge [F]
+      if (MAP_LIST[currentMapIndex] === 'cyberia' && cyberiaHoloBridge) {
+        const pPos = camera.position;
+        if (pPos.distanceTo(cyberiaHoloBridge.switchPos) < 4.5) {
+          triggerCyberiaHoloBridge();
+          return;
+        }
+      }
+
+      // 23. Overgrowth Vine Elevator [F]
+      if (MAP_LIST[currentMapIndex] === 'overgrowth' && overgrowthVineElevator) {
+        const pPos = camera.position;
+        if (pPos.distanceTo(overgrowthVineElevator.pos) < 4.8) {
+          triggerOvergrowthVineElevator();
+          return;
+        }
+      }
+
+      // 24. Aerodrome Catapult [F]
+      if (MAP_LIST[currentMapIndex] === 'aerodrome' && aerodromeCatapult) {
+        const pPos = camera.position;
+        if (pPos.distanceTo(aerodromeCatapult.pos) < 5.0) {
+          triggerAerodromeCatapult();
+          return;
+        }
+      }
+
+      // 25. Catacomb Secret Wall [F]
+      if (MAP_LIST[currentMapIndex] === 'catacomb' && catacombSecretWall) {
+        const pPos = camera.position;
+        if (pPos.distanceTo(catacombSecretWall.switchPos) < 4.5) {
+          triggerCatacombSecretWall();
+          return;
+        }
+      }
+
       // 4. Ascent B Shutter Door
       if (!ascentDoor || ascentDoor.isDestroyed) return;
       const dist = camera.position.distanceTo(ascentDoor.switchPos);
@@ -12343,6 +13056,66 @@
         { label: 'DEF SPAWN', x: 0, z: -42, color: '#00ffaa' },
         { label: 'ATK SPAWN', x: 0, z: 42, color: '#ff4655' }
       ],
+      eclipse: [
+        { label: 'A SITE', x: 30, z: -20, color: '#818cf8' },
+        { label: 'MINING RIG', x: 30, z: -20, color: '#6366f1' },
+        { label: 'B SITE', x: -30, z: -20, color: '#818cf8' },
+        { label: 'SOLAR ARRAY', x: -30, z: -20, color: '#4f46e5' },
+        { label: 'LOW-GRAV [F]', x: 0, z: 0, color: '#00f0ff' },
+        { label: 'CRATER DOME', x: 0, z: 0, color: '#c7d2fe' },
+        { label: 'DEF SPAWN', x: 0, z: -42, color: '#00ffaa' },
+        { label: 'ATK SPAWN', x: 0, z: 42, color: '#ff4655' }
+      ],
+      magma: [
+        { label: 'A SITE', x: 30, z: -20, color: '#f97316' },
+        { label: 'TURBINE HALL', x: 30, z: -20, color: '#ea580c' },
+        { label: 'B SITE', x: -30, z: -20, color: '#f97316' },
+        { label: 'OBSIDIAN', x: -30, z: -20, color: '#c2410c' },
+        { label: 'GEYSER [F]', x: 0, z: 0, color: '#ef4444' },
+        { label: 'LAVA PIT', x: 0, z: 0, color: '#fb923c' },
+        { label: 'DEF SPAWN', x: 0, z: -42, color: '#00ffaa' },
+        { label: 'ATK SPAWN', x: 0, z: 42, color: '#ff4655' }
+      ],
+      cyberia: [
+        { label: 'A SITE', x: 28, z: -22, color: '#06b6d4' },
+        { label: 'QUANTUM CORE', x: 28, z: -22, color: '#0891b2' },
+        { label: 'B SITE', x: -28, z: -22, color: '#06b6d4' },
+        { label: 'SERVER RACKS', x: -28, z: -22, color: '#0284c7' },
+        { label: 'HOLO BRIDGE [F]', x: 5, z: 0, color: '#00f0ff' },
+        { label: 'CHASM', x: 0, z: 0, color: '#38bdf8' },
+        { label: 'DEF SPAWN', x: 0, z: -40, color: '#00ffaa' },
+        { label: 'ATK SPAWN', x: 0, z: 40, color: '#ff4655' }
+      ],
+      overgrowth: [
+        { label: 'A SITE', x: 30, z: -20, color: '#22c55e' },
+        { label: 'SEED VAULT', x: 30, z: -20, color: '#16a34a' },
+        { label: 'B SITE', x: -30, z: -20, color: '#22c55e' },
+        { label: 'VIVARIUM', x: -30, z: -20, color: '#15803d' },
+        { label: 'VINE LIFT [F]', x: 0, z: 0, color: '#4ade80' },
+        { label: 'CANOPY', x: 0, z: 0, color: '#86efac' },
+        { label: 'DEF SPAWN', x: 0, z: -42, color: '#00ffaa' },
+        { label: 'ATK SPAWN', x: 0, z: 42, color: '#ff4655' }
+      ],
+      aerodrome: [
+        { label: 'A SITE', x: 24, z: -24, color: '#38bdf8' },
+        { label: 'RUNWAY BOW', x: 24, z: -24, color: '#0284c7' },
+        { label: 'B SITE', x: -24, z: -24, color: '#38bdf8' },
+        { label: 'STERN LIFT', x: -24, z: -24, color: '#0369a1' },
+        { label: 'CATAPULT [F]', x: 0, z: 0, color: '#facc15' },
+        { label: 'ISLAND TOWER', x: 38, z: 0, color: '#94a3b8' },
+        { label: 'DEF SPAWN', x: 0, z: -44, color: '#00ffaa' },
+        { label: 'ATK SPAWN', x: 0, z: 44, color: '#ff4655' }
+      ],
+      catacomb: [
+        { label: 'A SITE', x: 28, z: -22, color: '#f59e0b' },
+        { label: 'ROYAL TOMB', x: 28, z: -22, color: '#d97706' },
+        { label: 'B SITE', x: -28, z: -22, color: '#f59e0b' },
+        { label: 'OSSUARY', x: -28, z: -22, color: '#b45309' },
+        { label: 'SECRET WALL [F]', x: -5.8, z: 0, color: '#ffd700' },
+        { label: 'GOTHIC MID', x: 0, z: 0, color: '#a1a1aa' },
+        { label: 'DEF SPAWN', x: 0, z: -40, color: '#00ffaa' },
+        { label: 'ATK SPAWN', x: 0, z: 40, color: '#ff4655' }
+      ],
       range: [
         { label: 'TARGETS', x: 0, z: -22, color: '#00f0ff' },
         { label: 'BENCH', x: 0, z: 0, color: '#ffc83b' },
@@ -12933,6 +13706,34 @@
               triggerOasisHydroSurge();
             }
           }
+
+          // Auto-launch when stepping onto Eclipse Low-Grav Gate
+          if (MAP_LIST[currentMapIndex] === 'eclipse' && eclipseGravityVent && !player.isDead) {
+            if (Math.abs(camera.position.x) < 3.0 && Math.abs(camera.position.z) < 3.0 && Math.abs(camera.position.y - 1.7) < 1.2) {
+              if (player.velocity.y <= 0) triggerEclipseGravityVent();
+            }
+          }
+
+          // Auto-launch when stepping onto Magma Geyser
+          if (MAP_LIST[currentMapIndex] === 'magma' && magmaGeyser && !player.isDead) {
+            if (Math.abs(camera.position.x) < 2.8 && Math.abs(camera.position.z) < 2.8 && Math.abs(camera.position.y - 1.7) < 1.2) {
+              if (player.velocity.y <= 0) triggerMagmaGeyser();
+            }
+          }
+
+          // Auto-launch when stepping onto Overgrowth Vine Elevator
+          if (MAP_LIST[currentMapIndex] === 'overgrowth' && overgrowthVineElevator && !player.isDead) {
+            if (Math.abs(camera.position.x) < 3.0 && Math.abs(camera.position.z) < 3.0 && Math.abs(camera.position.y - 1.7) < 1.2) {
+              if (player.velocity.y <= 0) triggerOvergrowthVineElevator();
+            }
+          }
+
+          // Auto-launch when stepping onto Aerodrome Catapult
+          if (MAP_LIST[currentMapIndex] === 'aerodrome' && aerodromeCatapult && !player.isDead) {
+            if (Math.abs(camera.position.x) < 2.5 && Math.abs(camera.position.z) < 20.0 && Math.abs(camera.position.y - 1.7) < 1.0) {
+              triggerAerodromeCatapult();
+            }
+          }
         }
 
         const speedRatio = Math.min(player.velocity.length() / player.speed, 1.2);
@@ -13415,6 +14216,16 @@
             subzeroCryoDoor.mesh.position.y += Math.sign(dy) * 4.5 * dt;
             const c = colliders.find(col => col.mesh === subzeroCryoDoor.mesh);
             if (c) c.box.setFromObject(subzeroCryoDoor.mesh);
+          }
+        }
+
+        // Catacomb Secret Crypt Wall Animation
+        if (catacombSecretWall && catacombSecretWall.mesh) {
+          const dy = catacombSecretWall.targetY - catacombSecretWall.mesh.position.y;
+          if (Math.abs(dy) > 0.05) {
+            catacombSecretWall.mesh.position.y += Math.sign(dy) * 4.0 * dt;
+            const c = colliders.find(col => col.mesh === catacombSecretWall.mesh);
+            if (c) c.box.setFromObject(catacombSecretWall.mesh);
           }
         }
 
