@@ -2023,10 +2023,32 @@
           <span>최대 프레임 레이트 (FPS Limit)</span>
           <select id="cfg-fps-limit" style="background:#070b10; border:1px solid var(--val-border); color:var(--val-cyan); font-family:var(--font-hud); font-size:14px; padding:3px 8px; outline:none; cursor:pointer;">
             <option value="0">무제한 (UNCAPPED)</option>
-            <option value="60">60 FPS (절전/안정)</option>
-            <option value="120">120 FPS (고주사율)</option>
-            <option value="144" selected>144 FPS (e스포츠 표준)</option>
-            <option value="240">240 FPS (초고속 프로)</option>
+            <option value="30">30 FPS (절전 / 배터리 세이버)</option>
+            <option value="60">60 FPS (표준 60Hz)</option>
+            <option value="90">90 FPS (부드러운 90Hz)</option>
+            <option value="120">120 FPS (고주사율 120Hz)</option>
+            <option value="144" selected>144 FPS (e스포츠 표준 144Hz)</option>
+            <option value="165">165 FPS (게이밍 모니터 165Hz)</option>
+            <option value="240">240 FPS (초고속 프로 240Hz)</option>
+            <option value="360">360 FPS (Apex 최상위 360Hz)</option>
+          </select>
+        </div>
+        <div class="settings-row">
+          <span>렌더링 해상도 스케일 (Render Scale)</span>
+          <select id="cfg-render-scale" style="background:#070b10; border:1px solid var(--val-border); color:var(--val-cyan); font-family:var(--font-hud); font-size:14px; padding:3px 8px; outline:none; cursor:pointer;">
+            <option value="0.5">0.50x (초저사양 / 최대 FPS)</option>
+            <option value="0.75">0.75x (성능 우선)</option>
+            <option value="1.0" selected>1.00x (네이티브 표준 100%)</option>
+            <option value="1.25">1.25x (고화질 선명도)</option>
+            <option value="1.5">1.50x (초고화질 슈퍼샘플링)</option>
+          </select>
+        </div>
+        <div class="settings-row">
+          <span>퍼포먼스 HUD (Performance HUD)</span>
+          <select id="cfg-perf-hud" style="background:#070b10; border:1px solid var(--val-border); color:var(--val-cyan); font-family:var(--font-hud); font-size:14px; padding:3px 8px; outline:none; cursor:pointer;">
+            <option value="full" selected>전체 표시 (FPS + Latency + Res + Map)</option>
+            <option value="simple">간단히 (FPS만)</option>
+            <option value="off">숨기기 (OFF)</option>
           </select>
         </div>
         <div class="settings-row">
@@ -3240,6 +3262,13 @@
       }
     }
 
+    const activeShellCasings = [];
+    const activeSmokePuffs = [];
+    const matBrassCasing = new THREE.MeshStandardMaterial({ color: 0xd4af37, metalness: 0.9, roughness: 0.2 });
+    const geoBrassCasing = new THREE.CylinderGeometry(0.009, 0.009, 0.03, 8);
+    const matSmokePuff = new THREE.MeshBasicMaterial({ color: 0xdddddd, transparent: true, opacity: 0.45 });
+    const geoSmokePuff = new THREE.SphereGeometry(0.06, 8, 8);
+
     const sound = new SoundEngine();
 
     /* BROWSER NATIVE TACTICAL RADIO VOICE */
@@ -3404,22 +3433,26 @@
     const myClientId = 'user_' + Math.random().toString(36).substring(2, 8);
     const networkChannel = new BroadcastChannel('VALORANT_5V5_NET');
 
-    const MAP_LIST = ['ascent', 'bind', 'haven', 'icebox', 'range'];
+    const MAP_LIST = ['ascent', 'bind', 'haven', 'icebox', 'split', 'range'];
     const MAP_NAMES = {
       ascent: 'ASCENT (어센트) - 베네치아 요새 & 전동 셔터 도어 [F]',
       bind: 'BIND (바인드) - 모로코 사막 & 차원 이동 텔레포터',
       haven: 'HAVEN (헤이븐) - 부탄 수도원 & 3대 폭파 지점(A/B/C) + 중앙 범종',
       icebox: 'ICEBOX (아이스박스) - 북극 비밀 연구 기지 & 선적 컨테이너 & 집라인',
+      split: 'SPLIT (스플릿) - 도쿄 네오 신주쿠 & A/B 고지대 타워 & 환기구 벤트 & 지하철역',
       range: 'THE RANGE (사격장) - 사격 훈련장 & 봇 연습'
     };
     let currentMapIndex = 0;
 
     const AGENT_EMOJIS = {
-      Jett: '💨', Phoenix: '🔥', Reyna: '👁️', Sova: '🏹', Sage: '❄️', Omen: '🌑', Brimstone: '☄️', Raze: '💣'
+      Jett: '💨', Phoenix: '🔥', Reyna: '👁️', Sova: '🏹', Sage: '❄️', Omen: '🌑', Brimstone: '☄️', Raze: '💣',
+      Killjoy: '🤖', Chamber: '👓', Viper: '🧪', Cypher: '🕵️', Neon: '⚡', Yoru: '👹'
     };
     const AGENT_COLORS = {
       Jett: '#00f0ff', Phoenix: '#ff6600', Reyna: '#be00ff', Sova: '#2979ff',
-      Sage: '#00e676', Omen: '#536dfe', Brimstone: '#ff9100', Raze: '#ffd600'
+      Sage: '#00e676', Omen: '#536dfe', Brimstone: '#ff9100', Raze: '#ffd600',
+      Killjoy: '#ffeb3b', Chamber: '#e6c35c', Viper: '#00e676', Cypher: '#e0e0e0',
+      Neon: '#00e5ff', Yoru: '#3d5afe'
     };
 
     const lobbySlots = {
@@ -3767,15 +3800,25 @@
       const matGold = new THREE.MeshStandardMaterial({ color: 0xf5c518, metalness: 0.9, roughness: 0.2 });
       const matChamberWood = new THREE.MeshStandardMaterial({ color: 0x4a2c11, roughness: 0.5 });
       const matHeavyMetal = new THREE.MeshStandardMaterial({ color: 0x1f242b, metalness: 0.8, roughness: 0.3 });
+      const matRail = new THREE.MeshStandardMaterial({ color: 0x11161d, metalness: 0.85, roughness: 0.25 });
+      const matRadianitePower = new THREE.MeshStandardMaterial({ color: 0x00f0ff, emissive: 0x00f0ff, emissiveIntensity: 0.8 });
+      const matHoloSight = new THREE.MeshBasicMaterial({ color: 0xff3344, transparent: true, opacity: 0.85 });
+      const matScopeGlass = new THREE.MeshStandardMaterial({ color: 0x002244, metalness: 0.95, roughness: 0.1 });
 
       if (wpnKey === 'classic') {
         const frame = new THREE.Mesh(new THREE.BoxGeometry(0.048, 0.075, 0.24), matReceiver);
         frame.position.set(0, 0.02, -0.05);
         weaponSubMesh.add(frame);
+        const slide = new THREE.Mesh(new THREE.BoxGeometry(0.046, 0.035, 0.23), matHeavyMetal);
+        slide.position.set(0, 0.058, -0.05);
+        weaponSubMesh.add(slide);
         const grip = new THREE.Mesh(new THREE.BoxGeometry(0.044, 0.13, 0.065), matCarbonTrim);
         grip.position.set(0, -0.07, 0.05);
         grip.rotation.x = -0.3;
         weaponSubMesh.add(grip);
+        const sightFront = new THREE.Mesh(new THREE.BoxGeometry(0.008, 0.015, 0.012), matRadianitePower);
+        sightFront.position.set(0, 0.08, -0.15);
+        weaponSubMesh.add(sightFront);
       } else if (wpnKey === 'shorty') {
         const body = new THREE.Mesh(new THREE.BoxGeometry(0.065, 0.08, 0.22), matChamberWood);
         body.position.set(0, 0.01, 0);
@@ -3792,6 +3835,9 @@
         grip.position.set(0, -0.07, 0.08);
         grip.rotation.x = -0.35;
         weaponSubMesh.add(grip);
+        const bead = new THREE.Mesh(new THREE.SphereGeometry(0.006, 6, 6), matGold);
+        bead.position.set(0, 0.04, -0.3);
+        weaponSubMesh.add(bead);
       } else if (wpnKey === 'frenzy') {
         const rec = new THREE.Mesh(new THREE.BoxGeometry(0.052, 0.09, 0.25), matReceiver);
         rec.position.set(0, 0.02, -0.04);
@@ -3803,6 +3849,9 @@
         mag.position.set(0, -0.1, 0.05);
         mag.rotation.x = -0.28;
         weaponSubMesh.add(mag);
+        const holo = new THREE.Mesh(new THREE.BoxGeometry(0.03, 0.03, 0.06), matRail);
+        holo.position.set(0, 0.075, -0.02);
+        weaponSubMesh.add(holo);
       } else if (wpnKey === 'ghost') {
         const frame = new THREE.Mesh(new THREE.BoxGeometry(0.046, 0.075, 0.26), matReceiver);
         frame.position.set(0, 0.02, -0.04);
@@ -3815,6 +3864,9 @@
         grip.position.set(0, -0.07, 0.06);
         grip.rotation.x = -0.28;
         weaponSubMesh.add(grip);
+        const sight = new THREE.Mesh(new THREE.BoxGeometry(0.008, 0.015, 0.01), matRadianitePower);
+        sight.position.set(0, 0.075, -0.12);
+        weaponSubMesh.add(sight);
       } else if (wpnKey === 'sheriff') {
         const frame = new THREE.Mesh(new THREE.BoxGeometry(0.05, 0.08, 0.32), matReceiver);
         frame.position.set(0, 0.02, -0.05);
@@ -3823,6 +3875,9 @@
         cylinder.rotation.x = Math.PI / 2;
         cylinder.position.set(0, 0.01, -0.05);
         weaponSubMesh.add(cylinder);
+        const rail = new THREE.Mesh(new THREE.BoxGeometry(0.025, 0.015, 0.18), matRail);
+        rail.position.set(0, 0.07, -0.12);
+        weaponSubMesh.add(rail);
         const grip = new THREE.Mesh(new THREE.BoxGeometry(0.046, 0.14, 0.07), matCarbonTrim);
         grip.position.set(0, -0.08, 0.06);
         grip.rotation.x = -0.3;
@@ -3841,6 +3896,9 @@
         const mag = new THREE.Mesh(new THREE.BoxGeometry(0.036, 0.18, 0.05), matCarbonTrim);
         mag.position.set(0, -0.1, 0.03);
         weaponSubMesh.add(mag);
+        const wireStock = new THREE.Mesh(new THREE.BoxGeometry(0.03, 0.06, 0.14), matRail);
+        wireStock.position.set(0, 0.02, 0.16);
+        weaponSubMesh.add(wireStock);
       } else if (wpnKey === 'spectre') {
         const rec = new THREE.Mesh(new THREE.BoxGeometry(0.055, 0.09, 0.34), matReceiver);
         rec.position.set(0, 0.01, -0.05);
@@ -3856,6 +3914,9 @@
         const stock = new THREE.Mesh(new THREE.BoxGeometry(0.04, 0.07, 0.18), matCarbonTrim);
         stock.position.set(0, -0.01, 0.18);
         weaponSubMesh.add(stock);
+        const rail = new THREE.Mesh(new THREE.BoxGeometry(0.03, 0.015, 0.16), matRail);
+        rail.position.set(0, 0.065, -0.06);
+        weaponSubMesh.add(rail);
       } else if (wpnKey === 'bucky') {
         const rec = new THREE.Mesh(new THREE.BoxGeometry(0.065, 0.095, 0.44), matReceiver);
         rec.position.set(0, 0.01, -0.08);
@@ -3875,6 +3936,10 @@
         const stock = new THREE.Mesh(new THREE.BoxGeometry(0.05, 0.10, 0.26), matCarbonTrim);
         stock.position.set(0, -0.03, 0.22);
         weaponSubMesh.add(stock);
+        const sideShell = new THREE.Mesh(new THREE.CylinderGeometry(0.01, 0.01, 0.06, 6), new THREE.MeshBasicMaterial({ color: 0xff2233 }));
+        sideShell.rotation.z = Math.PI / 2;
+        sideShell.position.set(0.04, 0.02, -0.05);
+        weaponSubMesh.add(sideShell);
       } else if (wpnKey === 'judge') {
         const rec = new THREE.Mesh(new THREE.BoxGeometry(0.07, 0.11, 0.42), matReceiver);
         rec.position.set(0, 0.02, -0.06);
@@ -3890,6 +3955,9 @@
         const stock = new THREE.Mesh(new THREE.BoxGeometry(0.055, 0.10, 0.22), matCarbonTrim);
         stock.position.set(0, -0.02, 0.22);
         weaponSubMesh.add(stock);
+        const carryHandle = new THREE.Mesh(new THREE.BoxGeometry(0.03, 0.04, 0.22), matRail);
+        carryHandle.position.set(0, 0.09, -0.06);
+        weaponSubMesh.add(carryHandle);
       } else if (wpnKey === 'bulldog') {
         const rec = new THREE.Mesh(new THREE.BoxGeometry(0.062, 0.11, 0.44), matReceiver);
         rec.position.set(0, 0.01, -0.06);
@@ -3906,6 +3974,10 @@
         grip.position.set(0, -0.09, -0.06);
         grip.rotation.x = -0.35;
         weaponSubMesh.add(grip);
+        const optic = new THREE.Mesh(new THREE.CylinderGeometry(0.024, 0.024, 0.16, 8), matRail);
+        optic.rotation.x = Math.PI / 2;
+        optic.position.set(0, 0.09, -0.06);
+        weaponSubMesh.add(optic);
       } else if (wpnKey === 'guardian') {
         const rec = new THREE.Mesh(new THREE.BoxGeometry(0.06, 0.11, 0.52), matReceiver);
         rec.position.set(0, 0.01, -0.08);
@@ -3921,6 +3993,9 @@
         const stock = new THREE.Mesh(new THREE.BoxGeometry(0.05, 0.10, 0.26), matChamberWood);
         stock.position.set(0, -0.03, 0.26);
         weaponSubMesh.add(stock);
+        const cell = new THREE.Mesh(new THREE.BoxGeometry(0.02, 0.02, 0.08), matRadianitePower);
+        cell.position.set(0.035, 0.03, -0.05);
+        weaponSubMesh.add(cell);
       } else if (wpnKey === 'phantom') {
         const rec = new THREE.Mesh(new THREE.BoxGeometry(0.065, 0.11, 0.46), matReceiver);
         rec.position.set(0, 0.01, -0.1);
@@ -3940,6 +4015,12 @@
         const stock = new THREE.Mesh(new THREE.BoxGeometry(0.05, 0.09, 0.24), matCarbonTrim);
         stock.position.set(0, -0.02, 0.22);
         weaponSubMesh.add(stock);
+        const reflex = new THREE.Mesh(new THREE.BoxGeometry(0.038, 0.04, 0.12), matRail);
+        reflex.position.set(0, 0.085, -0.1);
+        weaponSubMesh.add(reflex);
+        const dot = new THREE.Mesh(new THREE.SphereGeometry(0.005, 6, 6), matHoloSight);
+        dot.position.set(0, 0.095, -0.1);
+        weaponSubMesh.add(dot);
       } else if (wpnKey === 'vandal') {
         const rec = new THREE.Mesh(new THREE.BoxGeometry(0.065, 0.11, 0.46), matReceiver);
         rec.position.set(0, 0.01, -0.1);
@@ -3948,9 +4029,12 @@
         barrel.rotation.x = Math.PI / 2;
         barrel.position.set(0, 0.015, -0.42);
         weaponSubMesh.add(barrel);
-        const mag = new THREE.Mesh(new THREE.BoxGeometry(0.045, 0.22, 0.08), matCarbonTrim);
-        mag.position.set(0, -0.13, -0.06);
-        mag.rotation.x = 0.25;
+        const brake = new THREE.Mesh(new THREE.BoxGeometry(0.04, 0.04, 0.06), matHeavyMetal);
+        brake.position.set(0, 0.015, -0.65);
+        weaponSubMesh.add(brake);
+        const mag = new THREE.Mesh(new THREE.BoxGeometry(0.045, 0.24, 0.085), matCarbonTrim);
+        mag.position.set(0, -0.14, -0.06);
+        mag.rotation.x = 0.3;
         weaponSubMesh.add(mag);
         const grip = new THREE.Mesh(new THREE.BoxGeometry(0.048, 0.16, 0.06), matCarbonTrim);
         grip.position.set(0, -0.1, 0.08);
@@ -3959,6 +4043,9 @@
         const stock = new THREE.Mesh(new THREE.BoxGeometry(0.05, 0.09, 0.24), matCarbonTrim);
         stock.position.set(0, -0.02, 0.22);
         weaponSubMesh.add(stock);
+        const frontSight = new THREE.Mesh(new THREE.BoxGeometry(0.01, 0.03, 0.02), matHeavyMetal);
+        frontSight.position.set(0, 0.045, -0.58);
+        weaponSubMesh.add(frontSight);
       } else if (wpnKey === 'marshal') {
         const rec = new THREE.Mesh(new THREE.BoxGeometry(0.055, 0.095, 0.54), matReceiver);
         rec.position.set(0, 0.01, -0.1);
@@ -3974,6 +4061,10 @@
         const stock = new THREE.Mesh(new THREE.BoxGeometry(0.048, 0.11, 0.32), matChamberWood);
         stock.position.set(0, -0.03, 0.26);
         weaponSubMesh.add(stock);
+        const bolt = new THREE.Mesh(new THREE.CylinderGeometry(0.008, 0.008, 0.08, 6), matGold);
+        bolt.rotation.z = Math.PI / 2.5;
+        bolt.position.set(0.04, 0.04, 0.02);
+        weaponSubMesh.add(bolt);
       } else if (wpnKey === 'outlaw') {
         const rec = new THREE.Mesh(new THREE.BoxGeometry(0.075, 0.12, 0.52), matReceiver);
         rec.position.set(0, 0.01, -0.08);
@@ -3993,6 +4084,10 @@
         const stock = new THREE.Mesh(new THREE.BoxGeometry(0.058, 0.11, 0.30), matCarbonTrim);
         stock.position.set(0, -0.03, 0.28);
         weaponSubMesh.add(stock);
+        const hinge = new THREE.Mesh(new THREE.CylinderGeometry(0.015, 0.015, 0.08, 8), matGold);
+        hinge.rotation.z = Math.PI / 2;
+        hinge.position.set(0, -0.02, -0.16);
+        weaponSubMesh.add(hinge);
       } else if (wpnKey === 'operator') {
         const rec = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.13, 0.62), matReceiver);
         rec.position.set(0, 0.01, -0.1);
@@ -4008,6 +4103,9 @@
         scope.rotation.x = Math.PI / 2;
         scope.position.set(0, 0.11, -0.1);
         weaponSubMesh.add(scope);
+        const lens = new THREE.Mesh(new THREE.CircleGeometry(0.035, 12), matScopeGlass);
+        lens.position.set(0, 0.11, -0.28);
+        weaponSubMesh.add(lens);
         const bipodL = new THREE.Mesh(new THREE.CylinderGeometry(0.008, 0.008, 0.28, 6), matBarrel);
         bipodL.position.set(-0.06, -0.12, -0.4);
         bipodL.rotation.z = -0.3;
@@ -4033,6 +4131,9 @@
         const stock = new THREE.Mesh(new THREE.BoxGeometry(0.06, 0.11, 0.26), matCarbonTrim);
         stock.position.set(0, -0.02, 0.28);
         weaponSubMesh.add(stock);
+        const handle = new THREE.Mesh(new THREE.BoxGeometry(0.025, 0.06, 0.14), matRail);
+        handle.position.set(0, 0.1, -0.18);
+        weaponSubMesh.add(handle);
       } else if (wpnKey === 'odin') {
         const rec = new THREE.Mesh(new THREE.BoxGeometry(0.088, 0.14, 0.62), matHeavyMetal);
         rec.position.set(0, 0.01, -0.12);
@@ -4055,6 +4156,9 @@
         const stock = new THREE.Mesh(new THREE.BoxGeometry(0.07, 0.13, 0.32), matCarbonTrim);
         stock.position.set(0, -0.02, 0.30);
         weaponSubMesh.add(stock);
+        const feedPlate = new THREE.Mesh(new THREE.BoxGeometry(0.04, 0.02, 0.1), matGold);
+        feedPlate.position.set(0.06, -0.04, -0.08);
+        weaponSubMesh.add(feedPlate);
       } else if (wpnKey === 'knife') {
         const handle = new THREE.Mesh(new THREE.CylinderGeometry(0.022, 0.025, 0.18, 8), matCarbonTrim);
         handle.position.set(0, -0.04, 0.08);
@@ -4067,6 +4171,10 @@
         blade.position.set(0, 0.18, 0.01);
         blade.rotation.x = -0.3;
         weaponSubMesh.add(blade);
+        const sawSpine = new THREE.Mesh(new THREE.BoxGeometry(0.01, 0.18, 0.015), matHeavyMetal);
+        sawSpine.position.set(0, 0.16, 0.025);
+        sawSpine.rotation.x = -0.3;
+        weaponSubMesh.add(sawSpine);
       } else if (wpnKey === 'karambit') {
         const handle = new THREE.Mesh(new THREE.TorusGeometry(0.06, 0.018, 8, 16, Math.PI * 0.8), matCarbonTrim);
         handle.position.set(0, -0.02, 0.06);
@@ -4102,14 +4210,20 @@
     /* ==========================================================
        DYNAMIC AGENT SWITCHING SYSTEM ([H] KEY TO CYCLE AGENT)
        ========================================================== */
-    const PLAYABLE_AGENTS = ['Jett', 'Phoenix', 'Reyna', 'Omen'];
+    const PLAYABLE_AGENTS = ['Jett', 'Phoenix', 'Reyna', 'Omen', 'Viper', 'Cypher', 'Neon', 'Yoru', 'Chamber', 'Killjoy'];
     let currentAgentIdx = 0;
 
     const AGENT_SKILL_LABELS = {
       Jett: { c: '연막 폭발 (C)', q: '상승기류 (Q)', e: '순풍 대시 (E)', x: '칼날 폭풍 (X)' },
       Phoenix: { c: '화염 장벽 (C)', q: '커브볼 섬광 (Q)', e: '뜨거운 손 (E)', x: '역습 궁극기 (X)' },
       Reyna: { c: '눈총 실명 (C)', q: '포식 회복 (Q)', e: '무시 무적 (E)', x: '여제 각성 (X)' },
-      Omen: { c: '어둠의 발자국 (C)', q: '피해망상 (Q)', e: '어둠의 장막 (E)', x: '그림자 습격 (X)' }
+      Omen: { c: '어둠의 발자국 (C)', q: '피해망상 (Q)', e: '어둠의 장막 (E)', x: '그림자 습격 (X)' },
+      Viper: { c: '독사 이빨 (C)', q: '독가스 구름 (Q)', e: '독성 장막 (E)', x: '독사의 구덩이 (X)' },
+      Cypher: { c: '함정 와이어 (C)', q: '사이버 감옥 (Q)', e: '스파이캠 (E)', x: '신경 절도 (X)' },
+      Neon: { c: '릴레이 볼트 (C)', q: '고속도로 (Q)', e: '하이 기어 스프린트 (E)', x: '오버드라이브 (X)' },
+      Yoru: { c: '기만 분신 (C)', q: '기습 섬광 (Q)', e: '차원 표류 구슬 (E)', x: '차원 이동 (X)' },
+      Chamber: { c: '상표 트랩 (C)', q: '헤드헌터 권총 (Q)', e: '랑데부 앵커 (E)', x: '역작 저격총 (X)' },
+      Killjoy: { c: '나노스웜 (C)', q: '알람봇 (Q)', e: '포탑 배터리 (E)', x: '봉쇄 락다운 (X)' }
     };
 
     let spectatorTargetIndex = 0;
@@ -4163,6 +4277,12 @@
       if (agentName === 'Phoenix') radioVoice.speak('Get ready!');
       else if (agentName === 'Reyna') radioVoice.speak('They will cower!');
       else if (agentName === 'Omen') radioVoice.speak('Scatter!');
+      else if (agentName === 'Viper') radioVoice.speak('Don\'t get in my way.');
+      else if (agentName === 'Cypher') radioVoice.speak('I see everything.');
+      else if (agentName === 'Neon') radioVoice.speak('Watch this speed!');
+      else if (agentName === 'Yoru') radioVoice.speak('I\'ll handle this.');
+      else if (agentName === 'Chamber') radioVoice.speak('Custom tailored, just for you.');
+      else if (agentName === 'Killjoy') radioVoice.speak('Relax, I have a plan.');
       else radioVoice.speak('Watch this!');
 
       showToast(`⚡ 요원 변경: [${agentName.toUpperCase()}] ${AGENT_EMOJIS[agentName]} (스킬 세트 교체 완료)`);
@@ -4498,7 +4618,7 @@
       return plane;
     }
 
-    /* DISTINCT PROCEDURAL 3D AGENT MODELING FOR ALL 8 AGENTS */
+    /* DISTINCT PROCEDURAL 3D AGENT MODELING FOR ALL 14 AGENTS */
     function createAgentModel(isTeammate, agentName = 'Jett') {
       const grp = new THREE.Group();
       const glowColor = isTeammate ? 0x00ffaa : 0xff2244;
@@ -4532,64 +4652,203 @@
       grp.add(legL);
       grp.add(legR);
 
-      // Distinct 3D Visual Customizations for all Agents
+      // Distinct 3D Visual Customizations for ALL 14 Agents
       if (agentName === 'Jett') {
-        const hair = new THREE.Mesh(new THREE.SphereGeometry(0.12, 8, 8), new THREE.MeshStandardMaterial({ color: 0xffffff }));
-        hair.position.set(0, 1.95, -0.16);
+        const hair = new THREE.Mesh(new THREE.SphereGeometry(0.13, 8, 8), new THREE.MeshStandardMaterial({ color: 0xf0f4f8 }));
+        hair.position.set(0, 1.96, -0.16);
         grp.add(hair);
+        const ponytail = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.01, 0.24, 6), new THREE.MeshStandardMaterial({ color: 0xf0f4f8 }));
+        ponytail.position.set(0, 2.05, -0.28);
+        ponytail.rotation.x = -0.5;
+        grp.add(ponytail);
+        const scarf = new THREE.Mesh(new THREE.TorusGeometry(0.24, 0.045, 6, 14), new THREE.MeshStandardMaterial({ color: 0x00f0ff, emissive: 0x0099bb, emissiveIntensity: 0.4 }));
+        scarf.rotation.x = Math.PI / 2;
+        scarf.position.set(0, 1.66, 0);
+        grp.add(scarf);
         const kunaiPouch = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.16, 0.05), new THREE.MeshStandardMaterial({ color: 0x00f0ff }));
         kunaiPouch.position.set(0.22, 1.1, 0);
         grp.add(kunaiPouch);
       } else if (agentName === 'Phoenix') {
-        const flame = new THREE.Mesh(new THREE.ConeGeometry(0.1, 0.28, 6), new THREE.MeshBasicMaterial({ color: 0xff6600 }));
-        flame.position.set(0, 2.05, 0);
+        const flame = new THREE.Mesh(new THREE.ConeGeometry(0.12, 0.32, 6), new THREE.MeshBasicMaterial({ color: 0xff6600 }));
+        flame.position.set(0, 2.06, 0);
         grp.add(flame);
-        const collar = new THREE.Mesh(new THREE.TorusGeometry(0.24, 0.04, 6, 12, Math.PI), new THREE.MeshStandardMaterial({ color: 0xffeedd }));
+        const collar = new THREE.Mesh(new THREE.TorusGeometry(0.24, 0.05, 6, 12, Math.PI), new THREE.MeshStandardMaterial({ color: 0xffa040, emissive: 0xff5500, emissiveIntensity: 0.7 }));
         collar.rotation.x = Math.PI / 2;
-        collar.position.set(0, 1.62, -0.06);
+        collar.position.set(0, 1.64, -0.06);
         grp.add(collar);
+        const chain = new THREE.Mesh(new THREE.TorusGeometry(0.16, 0.015, 6, 12), new THREE.MeshStandardMaterial({ color: 0xffd700, metalness: 0.9, roughness: 0.2 }));
+        chain.rotation.x = Math.PI / 2.3;
+        chain.position.set(0, 1.55, 0.08);
+        grp.add(chain);
       } else if (agentName === 'Reyna') {
-        const crystalL = new THREE.Mesh(new THREE.ConeGeometry(0.06, 0.22, 5), new THREE.MeshStandardMaterial({ color: 0xaa00ff, emissive: 0x8800cc, emissiveIntensity: 0.6 }));
+        const crystalL = new THREE.Mesh(new THREE.ConeGeometry(0.07, 0.24, 5), new THREE.MeshStandardMaterial({ color: 0xaa00ff, emissive: 0x8800cc, emissiveIntensity: 0.7 }));
         crystalL.position.set(-0.28, 1.55, 0);
         crystalL.rotation.z = 0.5;
         grp.add(crystalL);
-        const crystalR = new THREE.Mesh(new THREE.ConeGeometry(0.06, 0.22, 5), new THREE.MeshStandardMaterial({ color: 0xaa00ff, emissive: 0x8800cc, emissiveIntensity: 0.6 }));
+        const crystalR = new THREE.Mesh(new THREE.ConeGeometry(0.07, 0.24, 5), new THREE.MeshStandardMaterial({ color: 0xaa00ff, emissive: 0x8800cc, emissiveIntensity: 0.7 }));
         crystalR.position.set(0.28, 1.55, 0);
         crystalR.rotation.z = -0.5;
         grp.add(crystalR);
+        const voidCore = new THREE.Mesh(new THREE.SphereGeometry(0.06, 8, 8), new THREE.MeshStandardMaterial({ color: 0xcc00ff, emissive: 0xee00ff, emissiveIntensity: 0.9 }));
+        voidCore.position.set(0.24, 1.05, 0.12);
+        grp.add(voidCore);
       } else if (agentName === 'Omen') {
-        const hood = new THREE.Mesh(new THREE.ConeGeometry(0.32, 0.38, 8), new THREE.MeshStandardMaterial({ color: 0x0a0e18, roughness: 0.8 }));
-        hood.position.set(0, 1.94, -0.04);
+        const hood = new THREE.Mesh(new THREE.ConeGeometry(0.34, 0.42, 8), new THREE.MeshStandardMaterial({ color: 0x0a0e18, roughness: 0.9 }));
+        hood.position.set(0, 1.96, -0.04);
         grp.add(hood);
         [-0.05, 0, 0.05].forEach((xOff) => {
-          const slit = new THREE.Mesh(new THREE.BoxGeometry(0.02, 0.06, 0.02), new THREE.MeshBasicMaterial({ color: 0x00ffff }));
+          const slit = new THREE.Mesh(new THREE.BoxGeometry(0.022, 0.06, 0.02), new THREE.MeshBasicMaterial({ color: 0x00ffff }));
           slit.position.set(xOff, 1.80, 0.22);
           grp.add(slit);
         });
+        const mantle = new THREE.Mesh(new THREE.BoxGeometry(0.48, 0.14, 0.24), new THREE.MeshStandardMaterial({ color: 0x080b12, roughness: 0.9 }));
+        mantle.position.set(0, 1.52, 0);
+        grp.add(mantle);
       } else if (agentName === 'Brimstone') {
-        const beret = new THREE.Mesh(new THREE.CylinderGeometry(0.26, 0.22, 0.08, 10), new THREE.MeshStandardMaterial({ color: 0x5d4037 }));
-        beret.rotation.z = 0.2;
-        beret.position.set(0.04, 1.95, 0);
+        const beret = new THREE.Mesh(new THREE.CylinderGeometry(0.26, 0.22, 0.09, 10), new THREE.MeshStandardMaterial({ color: 0xd96b27 }));
+        beret.rotation.z = 0.22;
+        beret.position.set(0.04, 1.96, 0);
         grp.add(beret);
-        const radioPack = new THREE.Mesh(new THREE.BoxGeometry(0.2, 0.24, 0.1), new THREE.MeshStandardMaterial({ color: 0x223322 }));
+        const radioPack = new THREE.Mesh(new THREE.BoxGeometry(0.22, 0.26, 0.12), new THREE.MeshStandardMaterial({ color: 0x223322 }));
         radioPack.position.set(0, 1.3, -0.2);
         grp.add(radioPack);
+        const antenna = new THREE.Mesh(new THREE.CylinderGeometry(0.01, 0.01, 0.35, 6), new THREE.MeshStandardMaterial({ color: 0x111111 }));
+        antenna.position.set(0.08, 1.56, -0.22);
+        grp.add(antenna);
+        const gauntlet = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.16, 0.14), new THREE.MeshStandardMaterial({ color: 0x3a4a58 }));
+        gauntlet.position.set(-0.28, 1.05, 0.1);
+        grp.add(gauntlet);
       } else if (agentName === 'Sova') {
-        const cape = new THREE.Mesh(new THREE.BoxGeometry(0.44, 0.7, 0.04), new THREE.MeshStandardMaterial({ color: 0x1b3b5f }));
+        const hair = new THREE.Mesh(new THREE.ConeGeometry(0.16, 0.24, 6), new THREE.MeshStandardMaterial({ color: 0xedd68a }));
+        hair.position.set(0.06, 1.95, -0.05);
+        hair.rotation.z = -0.3;
+        grp.add(hair);
+        const cape = new THREE.Mesh(new THREE.BoxGeometry(0.44, 0.72, 0.04), new THREE.MeshStandardMaterial({ color: 0x1b3b5f }));
         cape.position.set(0, 1.1, -0.22);
         cape.rotation.x = -0.15;
         grp.add(cape);
-        const bow = new THREE.Mesh(new THREE.TorusGeometry(0.32, 0.02, 6, 12, Math.PI), new THREE.MeshStandardMaterial({ color: 0xd4af37 }));
-        bow.position.set(0, 1.25, -0.25);
-        bow.rotation.z = Math.PI / 4;
-        grp.add(bow);
+        const opticEye = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, 0.04, 8), new THREE.MeshBasicMaterial({ color: 0x00f0ff }));
+        opticEye.rotation.x = Math.PI / 2;
+        opticEye.position.set(0.08, 1.80, 0.24);
+        grp.add(opticEye);
+        const quiver = new THREE.Mesh(new THREE.CylinderGeometry(0.07, 0.05, 0.45, 8), new THREE.MeshStandardMaterial({ color: 0x2c1d11 }));
+        quiver.position.set(-0.14, 1.3, -0.22);
+        quiver.rotation.z = 0.35;
+        grp.add(quiver);
       } else if (agentName === 'Sage') {
-        const braid = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.02, 0.65, 6), new THREE.MeshStandardMaterial({ color: 0x050505 }));
-        braid.position.set(0, 1.4, -0.22);
+        const braid = new THREE.Mesh(new THREE.CylinderGeometry(0.045, 0.02, 0.75, 6), new THREE.MeshStandardMaterial({ color: 0x080808 }));
+        braid.position.set(0, 1.38, -0.22);
         grp.add(braid);
-        const orb = new THREE.Mesh(new THREE.SphereGeometry(0.08, 10, 10), new THREE.MeshStandardMaterial({ color: 0x00ffaa, emissive: 0x00dd88, emissiveIntensity: 0.8 }));
+        const prayerBeads = new THREE.Mesh(new THREE.TorusGeometry(0.24, 0.025, 8, 16), new THREE.MeshStandardMaterial({ color: 0x00ffaa, emissive: 0x00dd88, emissiveIntensity: 0.8 }));
+        prayerBeads.rotation.x = Math.PI / 2.2;
+        prayerBeads.position.set(0, 1.58, 0.04);
+        grp.add(prayerBeads);
+        const orb = new THREE.Mesh(new THREE.SphereGeometry(0.09, 10, 10), new THREE.MeshStandardMaterial({ color: 0x00ffaa, emissive: 0x00dd88, emissiveIntensity: 0.8 }));
         orb.position.set(0.2, 0.95, 0.12);
         grp.add(orb);
+      } else if (agentName === 'Raze') {
+        const helmet = new THREE.Mesh(new THREE.SphereGeometry(0.26, 12, 10), new THREE.MeshStandardMaterial({ color: 0xffbb00, roughness: 0.4 }));
+        helmet.position.set(0, 1.82, -0.02);
+        grp.add(helmet);
+        const visorLip = new THREE.Mesh(new THREE.BoxGeometry(0.28, 0.05, 0.12), new THREE.MeshStandardMaterial({ color: 0x1a2028 }));
+        visorLip.position.set(0, 1.86, 0.2);
+        grp.add(visorLip);
+        const nade1 = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, 0.12, 6), new THREE.MeshStandardMaterial({ color: 0xff4655 }));
+        nade1.position.set(-0.12, 1.32, 0.22);
+        grp.add(nade1);
+        const nade2 = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, 0.12, 6), new THREE.MeshStandardMaterial({ color: 0xffbb00 }));
+        nade2.position.set(0.12, 1.32, 0.22);
+        grp.add(nade2);
+        const boomPack = new THREE.Mesh(new THREE.BoxGeometry(0.24, 0.22, 0.12), new THREE.MeshStandardMaterial({ color: 0x334455 }));
+        boomPack.position.set(0, 1.25, -0.22);
+        grp.add(boomPack);
+      } else if (agentName === 'Killjoy') {
+        const beanie = new THREE.Mesh(new THREE.SphereGeometry(0.26, 12, 10), new THREE.MeshStandardMaterial({ color: 0xffea00, roughness: 0.7 }));
+        beanie.position.set(0, 1.84, -0.04);
+        grp.add(beanie);
+        const pompom = new THREE.Mesh(new THREE.SphereGeometry(0.06, 8, 8), new THREE.MeshStandardMaterial({ color: 0xffea00 }));
+        pompom.position.set(0, 2.08, -0.08);
+        grp.add(pompom);
+        const glasses = new THREE.Mesh(new THREE.TorusGeometry(0.05, 0.012, 6, 12), new THREE.MeshBasicMaterial({ color: 0x00e676 }));
+        glasses.position.set(-0.06, 1.78, 0.24);
+        grp.add(glasses);
+        const glasses2 = new THREE.Mesh(new THREE.TorusGeometry(0.05, 0.012, 6, 12), new THREE.MeshBasicMaterial({ color: 0x00e676 }));
+        glasses2.position.set(0.06, 1.78, 0.24);
+        grp.add(glasses2);
+        const pufferJacket = new THREE.Mesh(new THREE.TorusGeometry(0.26, 0.06, 6, 14), new THREE.MeshStandardMaterial({ color: 0x2e7d32 }));
+        pufferJacket.rotation.x = Math.PI / 2;
+        pufferJacket.position.set(0, 1.58, 0);
+        grp.add(pufferJacket);
+      } else if (agentName === 'Chamber') {
+        const suitLapel = new THREE.Mesh(new THREE.BoxGeometry(0.28, 0.4, 0.06), new THREE.MeshStandardMaterial({ color: 0x141e30, metalness: 0.3 }));
+        suitLapel.position.set(0, 1.35, 0.2);
+        grp.add(suitLapel);
+        const tieClip = new THREE.Mesh(new THREE.BoxGeometry(0.06, 0.015, 0.02), new THREE.MeshStandardMaterial({ color: 0xffd700, metalness: 0.95, roughness: 0.1 }));
+        tieClip.position.set(0, 1.38, 0.24);
+        grp.add(tieClip);
+        const goldWatch = new THREE.Mesh(new THREE.TorusGeometry(0.05, 0.012, 6, 12), new THREE.MeshStandardMaterial({ color: 0xffd700, metalness: 0.95 }));
+        goldWatch.position.set(-0.28, 0.95, 0.05);
+        grp.add(goldWatch);
+        const goldGlasses = new THREE.Mesh(new THREE.BoxGeometry(0.22, 0.04, 0.03), new THREE.MeshStandardMaterial({ color: 0xffd700, metalness: 0.9 }));
+        goldGlasses.position.set(0, 1.80, 0.22);
+        grp.add(goldGlasses);
+      } else if (agentName === 'Viper') {
+        const gasMask = new THREE.Mesh(new THREE.BoxGeometry(0.2, 0.12, 0.14), new THREE.MeshStandardMaterial({ color: 0x11161d }));
+        gasMask.position.set(0, 1.70, 0.2);
+        grp.add(gasMask);
+        const filterL = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.05, 0.06, 8), new THREE.MeshStandardMaterial({ color: 0x00e676, emissive: 0x00aa44, emissiveIntensity: 0.6 }));
+        filterL.rotation.z = Math.PI / 2;
+        filterL.position.set(-0.14, 1.68, 0.18);
+        grp.add(filterL);
+        const filterR = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.05, 0.06, 8), new THREE.MeshStandardMaterial({ color: 0x00e676, emissive: 0x00aa44, emissiveIntensity: 0.6 }));
+        filterR.rotation.z = Math.PI / 2;
+        filterR.position.set(0.14, 1.68, 0.18);
+        grp.add(filterR);
+        const toxinTanks = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.06, 0.44, 8), new THREE.MeshStandardMaterial({ color: 0x00e676, emissive: 0x00aa44, emissiveIntensity: 0.5 }));
+        toxinTanks.position.set(-0.1, 1.25, -0.22);
+        grp.add(toxinTanks);
+        const toxinTanks2 = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.06, 0.44, 8), new THREE.MeshStandardMaterial({ color: 0x00e676, emissive: 0x00aa44, emissiveIntensity: 0.5 }));
+        toxinTanks2.position.set(0.1, 1.25, -0.22);
+        grp.add(toxinTanks2);
+      } else if (agentName === 'Cypher') {
+        const fedoraBrim = new THREE.Mesh(new THREE.CylinderGeometry(0.38, 0.38, 0.02, 14), new THREE.MeshStandardMaterial({ color: 0xe0e6ed, roughness: 0.6 }));
+        fedoraBrim.position.set(0, 1.90, 0);
+        fedoraBrim.rotation.x = -0.1;
+        grp.add(fedoraBrim);
+        const fedoraCrown = new THREE.Mesh(new THREE.CylinderGeometry(0.24, 0.22, 0.14, 12), new THREE.MeshStandardMaterial({ color: 0xd0d8e2, roughness: 0.6 }));
+        fedoraCrown.position.set(0, 1.98, -0.02);
+        fedoraCrown.rotation.x = -0.1;
+        grp.add(fedoraCrown);
+        const spyCamEye = new THREE.Mesh(new THREE.CylinderGeometry(0.038, 0.038, 0.05, 8), new THREE.MeshBasicMaterial({ color: 0x00f0ff }));
+        spyCamEye.rotation.x = Math.PI / 2;
+        spyCamEye.position.set(-0.07, 1.80, 0.24);
+        grp.add(spyCamEye);
+        const coatCollar = new THREE.Mesh(new THREE.BoxGeometry(0.42, 0.25, 0.2), new THREE.MeshStandardMaterial({ color: 0xc8d0dc }));
+        coatCollar.position.set(0, 1.55, 0);
+        grp.add(coatCollar);
+      } else if (agentName === 'Neon') {
+        const pigtailL = new THREE.Mesh(new THREE.ConeGeometry(0.08, 0.38, 6), new THREE.MeshBasicMaterial({ color: 0x00e5ff }));
+        pigtailL.position.set(-0.24, 1.92, -0.1);
+        pigtailL.rotation.z = 0.55;
+        grp.add(pigtailL);
+        const pigtailR = new THREE.Mesh(new THREE.ConeGeometry(0.08, 0.38, 6), new THREE.MeshBasicMaterial({ color: 0x00e5ff }));
+        pigtailR.position.set(0.24, 1.92, -0.1);
+        pigtailR.rotation.z = -0.55;
+        grp.add(pigtailR);
+        const batteryPack = new THREE.Mesh(new THREE.BoxGeometry(0.18, 0.3, 0.12), new THREE.MeshStandardMaterial({ color: 0x00e5ff, emissive: 0x00aacc, emissiveIntensity: 0.7 }));
+        batteryPack.position.set(0, 1.25, -0.22);
+        grp.add(batteryPack);
+      } else if (agentName === 'Yoru') {
+        const spikedHair = new THREE.Mesh(new THREE.ConeGeometry(0.15, 0.38, 6), new THREE.MeshStandardMaterial({ color: 0x1a237e }));
+        spikedHair.position.set(0, 2.05, -0.04);
+        grp.add(spikedHair);
+        const oniMask = new THREE.Mesh(new THREE.BoxGeometry(0.14, 0.18, 0.08), new THREE.MeshStandardMaterial({ color: 0xd50000, roughness: 0.4 }));
+        oniMask.position.set(-0.24, 1.05, 0.08);
+        oniMask.rotation.y = 0.4;
+        grp.add(oniMask);
+        const riftGloves = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.12, 0.12), new THREE.MeshStandardMaterial({ color: 0x3d5afe, emissive: 0x2979ff, emissiveIntensity: 0.6 }));
+        riftGloves.position.set(0.28, 0.95, 0.05);
+        grp.add(riftGloves);
       }
 
       return { mesh: grp, head, body, legs: [legL, legR] };
@@ -5034,6 +5293,19 @@
         sunLight.position.set(-60, 75, -45);
         scene.fog.color.setHex(0x13273d);
         scene.fog.density = 0.011;
+      } else if (mapKey === 'split') {
+        // Tokyo Neo-Shinjuku Twilight / Kingdom K-SEC Neon Glow
+        grad.addColorStop(0, '#0a0818');
+        grad.addColorStop(0.4, '#1b1233');
+        grad.addColorStop(0.75, '#ff2a70');
+        grad.addColorStop(1, '#00e5ff');
+        ambientLight.color.setHex(0xb580ff);
+        ambientLight.intensity = 0.95;
+        sunLight.color.setHex(0xff77aa);
+        sunLight.intensity = 1.35;
+        sunLight.position.set(40, 85, -30);
+        scene.fog.color.setHex(0x180d2b);
+        scene.fog.density = 0.009;
       } else {
         // Range: High-tech military hangar
         grad.addColorStop(0, '#080c10');
@@ -5416,6 +5688,117 @@
 
         // Mid Boiler Room Archway
         addArch(0, 0, -12, 6.0, 5.2, 2.4, matIceWall);
+      }
+      // ==========================================================
+      // MAP 5: SPLIT (스플릿) - 도쿄 네오 신주쿠 & A/B 고지대 타워 & 벤트 환기구 & 지하철역
+      // ==========================================================
+      else if (mapKey === 'split') {
+        const matSplitAsphalt = new THREE.MeshStandardMaterial({ color: 0x181c24, roughness: 0.45, metalness: 0.3 });
+        const matSplitConcrete = new THREE.MeshStandardMaterial({ color: 0x323a48, roughness: 0.65 });
+        const matSplitWood = new THREE.MeshStandardMaterial({ color: 0x3e2723, roughness: 0.7 });
+        const matNeonCyan = new THREE.MeshBasicMaterial({ color: 0x00e5ff });
+        const matNeonPink = new THREE.MeshBasicMaterial({ color: 0xff007f });
+        const matNeonYellow = new THREE.MeshBasicMaterial({ color: 0xffea00 });
+
+        // Outer Modern Tokyo City Walls & Wet Asphalt Floor
+        addBox(0, -0.5, 0, 115, 1, 115, matSplitAsphalt);
+        addBox(0, 7, -57, 115, 14, 2, matSplitConcrete);
+        addBox(0, 7, 57, 115, 14, 2, matSplitConcrete);
+        addBox(-57, 7, 0, 2, 14, 115, matSplitConcrete);
+        addBox(57, 7, 0, 2, 14, 115, matSplitConcrete);
+
+        // --- A SITE: A TOWER (HEAVEN), A RAMP, A SCREENS & SAKURA ---
+        addBox(26, 0.05, -24, 22, 0.05, 22, matSiteFloor, false);
+        addTextBillboard(26, 0.2, -24, 'A SITE', 1.8);
+        spikeSiteAreas.push({ minX: 15, maxX: 37, minZ: -35, maxZ: -13, name: 'A SITE' });
+
+        // A Tower / Heaven High Defense Perch (y = 5.2)
+        addPlatform(32, 0, -32, 14, 5.2, 10, matSplitConcrete);
+        addRailing(25, 5.2, -32, 10, 'z');
+        addRailing(32, 5.2, -27, 14, 'x');
+
+        // A Heaven Staircase leading up from A Back
+        addStairs(32, -14, 0, 3.6, 5.2, 16, 14, 'z-');
+
+        // A Ramp Approach from A Lobby (y = 2.6)
+        addPlatform(34, 0, 2, 6, 2.6, 18, matSplitConcrete);
+        addRailing(31, 2.6, 2, 18, 'z');
+        addStairs(34, 14, 0, 3.8, 2.6, 8, 8, 'z-');
+
+        // A Screens - Cybernetic Digital Billboard
+        addBox(18, 4.0, -22, 0.4, 3.2, 6.0, matSplitConcrete);
+        addTextBillboard(18.3, 4.2, -22, 'KINGDOM K-SEC // A SCREENS', 1.4, '#00e5ff');
+
+        // A Site Japanese Sakura Cherry Blossom Tree
+        const sakuraTrunk = new THREE.Mesh(new THREE.CylinderGeometry(0.24, 0.32, 4.5, 8), matSplitWood);
+        sakuraTrunk.position.set(24, 2.25, -16);
+        scene.add(sakuraTrunk);
+        mapObjects.push(sakuraTrunk);
+        colliders.push({ box: new THREE.Box3().setFromObject(sakuraTrunk), mesh: sakuraTrunk });
+
+        const sakuraCanopy = new THREE.Mesh(new THREE.SphereGeometry(2.2, 10, 8), new THREE.MeshStandardMaterial({ color: 0xffb7c5, roughness: 0.8 }));
+        sakuraCanopy.position.set(24, 4.8, -16);
+        scene.add(sakuraCanopy);
+        mapObjects.push(sakuraCanopy);
+
+        // A Site Radianite Defense Crates
+        addCrateStack(20, -28, 2.4);
+        addBox(28, 1.2, -20, 2.4, 2.4, 2.4, matRadianiteBox);
+
+        // --- B SITE: B TOWER (HEAVEN), B GARAGE & PILLAR ---
+        addBox(-26, 0.05, -24, 22, 0.05, 22, matSiteFloor, false);
+        addTextBillboard(-26, 0.2, -24, 'B SITE', 1.8);
+        spikeSiteAreas.push({ minX: -37, maxX: -15, minZ: -35, maxZ: -13, name: 'B SITE' });
+
+        // B Tower / B Heaven Elevated Platform (y = 4.8)
+        addPlatform(-32, 0, -32, 14, 4.8, 10, matSplitConcrete);
+        addRailing(-25, 4.8, -32, 10, 'z');
+        addRailing(-32, 4.8, -27, 14, 'x');
+        addStairs(-32, -14, 0, 3.6, 4.8, 16, 14, 'z-');
+
+        // B Site Center Support Pillar
+        addBox(-26, 3.0, -24, 4.0, 6.0, 4.0, matSplitConcrete);
+
+        // B Garage / Back Connector Tunnel
+        addBox(-26, 2.8, -2, 8.0, 5.6, 16, matSplitConcrete);
+        addArch(-26, 0, 6, 4.8, 4.8, 2.0, matSplitConcrete);
+        addArch(-26, 0, -10, 4.8, 4.8, 2.0, matSplitConcrete);
+
+        // B Site Defensive Radianite Box Stack
+        addCrateStack(-20, -26, 2.4);
+
+        // --- MID LANE, MID VENTS & TOKYO SUBWAY STATION ---
+        // Mid Vent Room (Elevated Ventilation Duct Connector at y = 4.0)
+        addPlatform(12, 0, -8, 8.0, 4.0, 12, matSplitConcrete);
+        addRailing(8.0, 4.0, -8, 12, 'z');
+        addStairs(12, 2, 0, 3.5, 4.0, 10, 10, 'z-');
+
+        // Ventilation Fan Housing & Spinning Blade in Mid Vent
+        const ventGeo = new THREE.CylinderGeometry(1.2, 1.2, 0.3, 16);
+        const ventMesh = new THREE.Mesh(ventGeo, matSplitConcrete);
+        ventMesh.rotation.x = Math.PI / 2;
+        ventMesh.position.set(12, 5.6, -14);
+        scene.add(ventMesh);
+        mapObjects.push(ventMesh);
+
+        // Mid Subway Station Entrance
+        addPlatform(0, 0, 6, 8.0, 1.4, 10, matSplitConcrete);
+        addTextBillboard(0, 4.5, 6, '地下鉄 新宿 // TOKYO METRO SHINJUKU', 1.6, '#00e5ff');
+        addArch(0, 0, 11, 4.8, 4.5, 1.6, matSplitConcrete);
+
+        // Japanese Neon Signs across Mid
+        // 1. Ramen shop sign
+        addBox(-8, 3.8, 0, 0.3, 1.8, 4.0, matSplitConcrete);
+        addTextBillboard(-7.8, 3.8, 0, 'RAMEN ラーメン // 24H OPEN', 1.2, '#ffea00');
+
+        // 2. Cyberpunk Izakaya sign
+        addBox(6, 3.8, 4, 0.3, 1.8, 4.0, matSplitConcrete);
+        addTextBillboard(6.2, 3.8, 4, '居酒屋 IZAKAYA // K-SEC NEON', 1.2, '#ff007f');
+
+        // Street Lanterns with Cyberpunk Neon glow
+        addLantern(10, 0, 10, 0x00e5ff);
+        addLantern(-10, 0, 10, 0xff007f);
+        addLantern(0, 0, -18, 0xffea00);
       }
       else if (mapKey === 'range') {
         addBox(0, -0.5, 0, 60, 1, 120, matConcrete);
@@ -6670,6 +7053,46 @@
 
       flashMat.opacity = 1;
       setTimeout(() => { flashMat.opacity = 0; }, 40);
+
+      // Eject Brass Shell Casing with 3D Physics
+      if (!currentWeapon.isKnife && activeShellCasings.length < 24) {
+        const shell = new THREE.Mesh(geoBrassCasing, matBrassCasing);
+        const camDir = camera.getWorldDirection(new THREE.Vector3());
+        const rightDir = new THREE.Vector3(1, 0, 0).applyQuaternion(camera.quaternion);
+        const spawnPos = camera.position.clone()
+          .add(camDir.clone().multiplyScalar(0.42))
+          .add(rightDir.clone().multiplyScalar(0.16))
+          .add(new THREE.Vector3(0, -0.09, 0));
+        shell.position.copy(spawnPos);
+        const casingVel = rightDir.clone().multiplyScalar(1.5 + Math.random() * 0.7)
+          .add(new THREE.Vector3(0, 1.2 + Math.random() * 0.5, 0))
+          .add(camDir.clone().multiplyScalar(-0.3 + Math.random() * 0.4));
+        scene.add(shell);
+        activeShellCasings.push({
+          mesh: shell,
+          vel: casingVel,
+          rotAxis: new THREE.Vector3(Math.random() - 0.5, Math.random() - 0.5, Math.random() - 0.5).normalize(),
+          rotSpeed: 16 + Math.random() * 12,
+          life: 1.8
+        });
+      }
+
+      // Muzzle Smoke Particle Puff
+      if (!currentWeapon.isKnife && activeSmokePuffs.length < 24) {
+        const smoke = new THREE.Mesh(geoSmokePuff, matSmokePuff.clone());
+        const camDir = camera.getWorldDirection(new THREE.Vector3());
+        const muzzlePos = camera.position.clone()
+          .add(camDir.clone().multiplyScalar(0.65))
+          .add(new THREE.Vector3(0.12, -0.07, 0).applyQuaternion(camera.quaternion));
+        smoke.position.copy(muzzlePos);
+        scene.add(smoke);
+        activeSmokePuffs.push({
+          mesh: smoke,
+          vel: new THREE.Vector3((Math.random() - 0.5) * 0.12, 0.35 + Math.random() * 0.25, (Math.random() - 0.5) * 0.12),
+          life: 0.5,
+          maxLife: 0.5
+        });
+      }
 
       // Punchy recoil impulse with zero accumulated arm rotation
       gunRecoilKickZ = Math.min(gunRecoilKickZ + 0.045, 0.12);
@@ -8262,6 +8685,30 @@
         { label: 'DEF SPAWN', x: 0, z: -48, color: '#00ffaa' },
         { label: 'ATK SPAWN', x: 0, z: 46, color: '#ff4655' }
       ],
+      icebox: [
+        { label: 'A SITE', x: 28, z: -24, color: '#00f0ff' },
+        { label: 'A PIPES', x: 32, z: -28, color: '#88a0b8' },
+        { label: 'A NEST', x: 36, z: -14, color: '#00ffaa' },
+        { label: 'B SITE', x: -28, z: -24, color: '#00f0ff' },
+        { label: 'B YELLOW', x: -24, z: -18, color: '#ffc83b' },
+        { label: 'KITCHEN', x: -16, z: -4, color: '#88a0b8' },
+        { label: 'BOILER', x: 0, z: -12, color: '#ff4655' },
+        { label: 'DEF SPAWN', x: 0, z: -48, color: '#00ffaa' },
+        { label: 'ATK SPAWN', x: 0, z: 46, color: '#ff4655' }
+      ],
+      split: [
+        { label: 'A SITE', x: 26, z: -24, color: '#00f0ff' },
+        { label: 'A TOWER', x: 32, z: -32, color: '#00ffaa' },
+        { label: 'A RAMP', x: 34, z: 0, color: '#88a0b8' },
+        { label: 'A SCREENS', x: 18, z: -22, color: '#ff007f' },
+        { label: 'B SITE', x: -26, z: -24, color: '#00f0ff' },
+        { label: 'B TOWER', x: -32, z: -32, color: '#00ffaa' },
+        { label: 'B GARAGE', x: -26, z: -2, color: '#88a0b8' },
+        { label: 'MID VENTS', x: 12, z: -10, color: '#ffc83b' },
+        { label: 'SUBWAY', x: 0, z: 6, color: '#00f0ff' },
+        { label: 'DEF SPAWN', x: 0, z: -48, color: '#00ffaa' },
+        { label: 'ATK SPAWN', x: 0, z: 46, color: '#ff4655' }
+      ],
       range: [
         { label: 'TARGETS', x: 0, z: -22, color: '#00f0ff' },
         { label: 'BENCH', x: 0, z: 0, color: '#ffc83b' },
@@ -8542,7 +8989,19 @@
         fpsLastSec = now;
         const perfElem = document.getElementById('perf-hud');
         if (perfElem) {
-          perfElem.innerText = `${fpsDisplayVal} FPS // ${frameTimeMsVal}ms`;
+          const perfMode = document.getElementById('cfg-perf-hud') ? document.getElementById('cfg-perf-hud').value : 'full';
+          if (perfMode === 'off') {
+            perfElem.style.display = 'none';
+          } else {
+            perfElem.style.display = 'block';
+            if (perfMode === 'simple') {
+              perfElem.innerText = `${fpsDisplayVal} FPS`;
+            } else {
+              const rScale = document.getElementById('cfg-render-scale') ? document.getElementById('cfg-render-scale').value : '1.0';
+              const curMapKey = (MAP_LIST && MAP_LIST[currentMapIndex]) ? MAP_LIST[currentMapIndex].toUpperCase() : 'ASCENT';
+              perfElem.innerText = `${fpsDisplayVal} FPS // ${frameTimeMsVal}ms // ${rScale}x RES // ${curMapKey}`;
+            }
+          }
         }
       }
 
@@ -8700,6 +9159,8 @@
               let stepSurface = 'stone';
               if (currentMapKey === 'bind') stepSurface = 'sand';
               else if (currentMapKey === 'haven') stepSurface = 'wood';
+              else if (currentMapKey === 'icebox') stepSurface = 'stone';
+              else if (currentMapKey === 'split') stepSurface = 'stone';
               if (curFloorY > 0.3) stepSurface = 'metal';
               sound.playFootstep(stepSurface);
             }
@@ -8747,49 +9208,105 @@
         document.getElementById('ch-l').style.transform = `translateX(${-spreadOffset}px)`;
         document.getElementById('ch-r').style.transform = `translateX(${spreadOffset}px)`;
 
+        // Active Shell Casings Physics Update
+        for (let i = activeShellCasings.length - 1; i >= 0; i--) {
+          const c = activeShellCasings[i];
+          c.life -= dt;
+          c.vel.y -= 9.8 * dt; // Gravity
+          c.mesh.position.addScaledVector(c.vel, dt);
+          c.mesh.rotateOnAxis(c.rotAxis, c.rotSpeed * dt);
+          if (c.mesh.position.y <= 0.02) {
+            c.mesh.position.y = 0.02;
+            c.vel.y = -c.vel.y * 0.35;
+            c.vel.x *= 0.6;
+            c.vel.z *= 0.6;
+          }
+          if (c.life <= 0) {
+            scene.remove(c.mesh);
+            activeShellCasings.splice(i, 1);
+          }
+        }
+
+        // Active Smoke Puffs Update
+        for (let i = activeSmokePuffs.length - 1; i >= 0; i--) {
+          const s = activeSmokePuffs[i];
+          s.life -= dt;
+          s.mesh.position.addScaledVector(s.vel, dt);
+          const p = Math.max(0, s.life / s.maxLife);
+          s.mesh.material.opacity = p * 0.45;
+          const sc = 1.0 + (1.0 - p) * 1.5;
+          s.mesh.scale.set(sc, sc, sc);
+          if (s.life <= 0) {
+            scene.remove(s.mesh);
+            activeSmokePuffs.splice(i, 1);
+          }
+        }
+
         // Smooth per-frame recoil impulse & weapon sway recovery (Damps back to 0)
         gunRecoilKickZ = THREE.MathUtils.lerp(gunRecoilKickZ, 0, Math.min(1, 20 * dt));
         gunRecoilRotX = THREE.MathUtils.lerp(gunRecoilRotX, 0, Math.min(1, 18 * dt));
         gunSwayYaw = THREE.MathUtils.lerp(gunSwayYaw, 0, Math.min(1, 14 * dt));
         gunSwayPitch = THREE.MathUtils.lerp(gunSwayPitch, 0, Math.min(1, 14 * dt));
 
-        // Inspect Weapon Motion (Multi-phase cinematic inspection)
+        // Inspect Weapon Motion (Multi-phase cinematic inspection + Karambit 720° spin)
         if (isInspecting) {
           const elapsed = (now - inspectTimer) / 1000;
-          const totalDuration = 2.4;
-          if (elapsed < totalDuration) {
-            const p = elapsed / totalDuration;
-            let rx = 0, ry = 0, rz = 0;
-            let px = DEFAULT_GUN_POS.x, py = DEFAULT_GUN_POS.y, pz = DEFAULT_GUN_POS.z;
-            if (p < 0.35) {
-              const t = Math.sin((p / 0.35) * (Math.PI / 2));
-              ry = THREE.MathUtils.lerp(0, 0.75, t);
-              rz = THREE.MathUtils.lerp(0, 0.45, t);
-              rx = THREE.MathUtils.lerp(0, -0.25, t);
-              px = THREE.MathUtils.lerp(DEFAULT_GUN_POS.x, DEFAULT_GUN_POS.x - 0.12, t);
-              py = THREE.MathUtils.lerp(DEFAULT_GUN_POS.y, DEFAULT_GUN_POS.y + 0.04, t);
-            } else if (p < 0.72) {
-              const t = (p - 0.35) / 0.37;
-              ry = THREE.MathUtils.lerp(0.75, -0.5, t);
-              rz = THREE.MathUtils.lerp(0.45, -0.25, t);
-              rx = THREE.MathUtils.lerp(-0.25, 0.18, t);
-              px = THREE.MathUtils.lerp(DEFAULT_GUN_POS.x - 0.12, DEFAULT_GUN_POS.x + 0.06, t);
-              py = THREE.MathUtils.lerp(DEFAULT_GUN_POS.y + 0.04, DEFAULT_GUN_POS.y - 0.02, t);
+          if (currentWeaponKey === 'karambit') {
+            const totalDuration = 2.0;
+            if (elapsed < totalDuration) {
+              const p = elapsed / totalDuration;
+              const spinAngle = Math.PI * 4 * Math.sin(p * Math.PI * 0.5);
+              gunGroup.rotation.set(
+                Math.sin(p * Math.PI * 2) * 0.15,
+                Math.sin(p * Math.PI) * 0.35,
+                spinAngle
+              );
+              gunGroup.position.set(
+                DEFAULT_GUN_POS.x - 0.08 * Math.sin(p * Math.PI),
+                DEFAULT_GUN_POS.y + 0.06 * Math.sin(p * Math.PI),
+                DEFAULT_GUN_POS.z
+              );
             } else {
-              const t = (p - 0.72) / 0.28;
-              const ease = 1 - Math.pow(1 - t, 3);
-              ry = THREE.MathUtils.lerp(-0.5, 0, ease);
-              rz = THREE.MathUtils.lerp(-0.25, 0, ease);
-              rx = THREE.MathUtils.lerp(0.18, 0, ease);
-              px = THREE.MathUtils.lerp(DEFAULT_GUN_POS.x + 0.06, DEFAULT_GUN_POS.x, ease);
-              py = THREE.MathUtils.lerp(DEFAULT_GUN_POS.y - 0.02, DEFAULT_GUN_POS.y, ease);
+              isInspecting = false;
+              gunGroup.position.copy(DEFAULT_GUN_POS);
+              gunGroup.rotation.set(0, 0, 0);
             }
-            gunGroup.rotation.set(rx, ry, rz);
-            gunGroup.position.set(px, py, pz);
           } else {
-            isInspecting = false;
-            gunGroup.position.copy(DEFAULT_GUN_POS);
-            gunGroup.rotation.set(0, 0, 0);
+            const totalDuration = 2.4;
+            if (elapsed < totalDuration) {
+              const p = elapsed / totalDuration;
+              let rx = 0, ry = 0, rz = 0;
+              let px = DEFAULT_GUN_POS.x, py = DEFAULT_GUN_POS.y, pz = DEFAULT_GUN_POS.z;
+              if (p < 0.35) {
+                const t = Math.sin((p / 0.35) * (Math.PI / 2));
+                ry = THREE.MathUtils.lerp(0, 0.75, t);
+                rz = THREE.MathUtils.lerp(0, 0.45, t);
+                rx = THREE.MathUtils.lerp(0, -0.25, t);
+                px = THREE.MathUtils.lerp(DEFAULT_GUN_POS.x, DEFAULT_GUN_POS.x - 0.12, t);
+                py = THREE.MathUtils.lerp(DEFAULT_GUN_POS.y + 0.04, DEFAULT_GUN_POS.y - 0.02, t);
+              } else if (p < 0.72) {
+                const t = (p - 0.35) / 0.37;
+                ry = THREE.MathUtils.lerp(0.75, -0.5, t);
+                rz = THREE.MathUtils.lerp(0.45, -0.25, t);
+                rx = THREE.MathUtils.lerp(-0.25, 0.18, t);
+                px = THREE.MathUtils.lerp(DEFAULT_GUN_POS.x - 0.12, DEFAULT_GUN_POS.x + 0.06, t);
+                py = THREE.MathUtils.lerp(DEFAULT_GUN_POS.y + 0.04, DEFAULT_GUN_POS.y - 0.02, t);
+              } else {
+                const t = (p - 0.72) / 0.28;
+                const ease = 1 - Math.pow(1 - t, 3);
+                ry = THREE.MathUtils.lerp(-0.5, 0, ease);
+                rz = THREE.MathUtils.lerp(-0.25, 0, ease);
+                rx = THREE.MathUtils.lerp(0.18, 0, ease);
+                px = THREE.MathUtils.lerp(DEFAULT_GUN_POS.x + 0.06, DEFAULT_GUN_POS.x, ease);
+                py = THREE.MathUtils.lerp(DEFAULT_GUN_POS.y - 0.02, DEFAULT_GUN_POS.y, ease);
+              }
+              gunGroup.rotation.set(rx, ry, rz);
+              gunGroup.position.set(px, py, pz);
+            } else {
+              isInspecting = false;
+              gunGroup.position.copy(DEFAULT_GUN_POS);
+              gunGroup.rotation.set(0, 0, 0);
+            }
           }
         } else {
           const isMoving = (player.velocity.lengthSq() > 0.01 && player.isGrounded);
@@ -9134,8 +9651,21 @@
     window.addEventListener('resize', () => {
       camera.aspect = window.innerWidth / window.innerHeight;
       camera.updateProjectionMatrix();
+      const rScale = document.getElementById('cfg-render-scale') ? parseFloat(document.getElementById('cfg-render-scale').value) || 1.0 : 1.0;
+      renderer.setPixelRatio((window.devicePixelRatio || 1) * rScale);
       renderer.setSize(window.innerWidth, window.innerHeight);
     });
+
+    // Real-Time Render Resolution Scaler Listener
+    const renderScaleSelect = document.getElementById('cfg-render-scale');
+    if (renderScaleSelect) {
+      renderScaleSelect.addEventListener('change', () => {
+        const scale = parseFloat(renderScaleSelect.value) || 1.0;
+        renderer.setPixelRatio((window.devicePixelRatio || 1) * scale);
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        showToast(`⚡ 렌더링 스케일 적용: ${scale.toFixed(2)}x (${Math.round(window.innerWidth * scale)}x${Math.round(window.innerHeight * scale)})`);
+      });
+    }
 
     renderLobbySlots();
     applyCrosshairSettings();
