@@ -1729,42 +1729,150 @@
         <h2 style="font-family: var(--font-title); font-size: 38px; color: #fff;">무기 및 방어구 상점 // ARSENAL (BUY MENU)</h2>
         <span style="font-family: var(--font-mono); color: var(--val-gold); font-size: 16px;" id="buy-credits-display">크레딧: 9,000 ¤</span>
       </div>
-      <div class="buy-grid">
-        <div class="weapon-card val-clip active-weapon" data-wpn="vandal">
-          <div style="font-size:11px; color:#8899a6;">돌격소총 // RIFLE</div>
-          <div style="font-family:var(--font-title); font-size:26px; color:#fff;">VANDAL (밴달)</div>
-          <div style="color:var(--val-gold); font-size:13px;">2,900 ¤</div>
-          <div style="font-size:11px; color:#b0bec5; margin-top:4px;">헤드 160 (모든 거리 원탭)<br>25발 탄창 / 고위력 정밀 소총</div>
+      <div class="buy-grid" style="grid-template-columns: repeat(5, 1fr); gap: 12px; max-height: 66vh; overflow-y: auto; padding-right: 6px;">
+        <!-- 1. SIDEARMS -->
+        <div style="background: rgba(15,25,35,0.7); border: 1px solid var(--val-border); padding: 10px; border-radius: 4px; display:flex; flex-direction:column; gap:8px;">
+          <div style="font-family:var(--font-hud); font-size:13px; font-weight:800; color:var(--val-cyan); border-bottom:1px solid var(--val-border); padding-bottom:4px; letter-spacing:1px;">1. SIDEARMS</div>
+          <div class="weapon-card val-clip" data-wpn="classic" onclick="buyWeapon('classic')">
+            <div style="font-size:10px; color:#8899a6;">권총 // PISTOL</div>
+            <div style="font-family:var(--font-title); font-size:18px; color:#fff;">CLASSIC</div>
+            <div style="color:var(--val-gold); font-size:12px;">0 ¤ (FREE)</div>
+            <div style="font-size:10px; color:#b0bec5;">12발 / 우클릭 3점사</div>
+          </div>
+          <div class="weapon-card val-clip" data-wpn="shorty" onclick="buyWeapon('shorty')">
+            <div style="font-size:10px; color:#8899a6;">보조 산탄총 // SHOTGUN</div>
+            <div style="font-family:var(--font-title); font-size:18px; color:#fff;">SHORTY</div>
+            <div style="color:var(--val-gold); font-size:12px;">300 ¤</div>
+            <div style="font-size:10px; color:#b0bec5;">2발 더블배럴 산탄</div>
+          </div>
+          <div class="weapon-card val-clip" data-wpn="frenzy" onclick="buyWeapon('frenzy')">
+            <div style="font-size:10px; color:#8899a6;">자동권총 // AUTO PISTOL</div>
+            <div style="font-family:var(--font-title); font-size:18px; color:#fff;">FRENZY</div>
+            <div style="color:var(--val-gold); font-size:12px;">450 ¤</div>
+            <div style="font-size:10px; color:#b0bec5;">13발 전자동 머신피스톨</div>
+          </div>
+          <div class="weapon-card val-clip" data-wpn="ghost" onclick="buyWeapon('ghost')">
+            <div style="font-size:10px; color:#8899a6;">소음 권총 // SILENCED</div>
+            <div style="font-family:var(--font-title); font-size:18px; color:#fff;">GHOST</div>
+            <div style="color:var(--val-gold); font-size:12px;">500 ¤</div>
+            <div style="font-size:10px; color:#b0bec5;">15발 소음 정밀 권총</div>
+          </div>
+          <div class="weapon-card val-clip" data-wpn="sheriff" onclick="buyWeapon('sheriff')">
+            <div style="font-size:10px; color:#8899a6;">매그넘 // REVOLVER</div>
+            <div style="font-family:var(--font-title); font-size:18px; color:#fff;">SHERIFF</div>
+            <div style="color:var(--val-gold); font-size:12px;">800 ¤</div>
+            <div style="font-size:10px; color:#b0bec5;">6발 고위력 헤드 159</div>
+          </div>
         </div>
-        <div class="weapon-card val-clip" data-wpn="phantom">
-          <div style="font-size:11px; color:#8899a6;">돌격소총 // SILENCED</div>
-          <div style="font-family:var(--font-title); font-size:26px; color:#fff;">PHANTOM (팬텀)</div>
-          <div style="color:var(--val-gold); font-size:13px;">2,900 ¤</div>
-          <div style="font-size:11px; color:#b0bec5; margin-top:4px;">소음기 장착 / 빠른 11rps<br>30발 탄창 / 안정적 반동제어</div>
+
+        <!-- 2. SMGS & SHOTGUNS -->
+        <div style="background: rgba(15,25,35,0.7); border: 1px solid var(--val-border); padding: 10px; border-radius: 4px; display:flex; flex-direction:column; gap:8px;">
+          <div style="font-family:var(--font-hud); font-size:13px; font-weight:800; color:var(--val-cyan); border-bottom:1px solid var(--val-border); padding-bottom:4px; letter-spacing:1px;">2. SMG & SHOTGUNS</div>
+          <div class="weapon-card val-clip" data-wpn="stinger" onclick="buyWeapon('stinger')">
+            <div style="font-size:10px; color:#8899a6;">속사 SMG // RAPID SMG</div>
+            <div style="font-family:var(--font-title); font-size:18px; color:#fff;">STINGER</div>
+            <div style="color:var(--val-gold); font-size:12px;">1,100 ¤</div>
+            <div style="font-size:10px; color:#b0bec5;">20발 초고속 18rps</div>
+          </div>
+          <div class="weapon-card val-clip" data-wpn="spectre" onclick="buyWeapon('spectre')">
+            <div style="font-size:10px; color:#8899a6;">소음 SMG // SILENCED</div>
+            <div style="font-family:var(--font-title); font-size:18px; color:#fff;">SPECTRE</div>
+            <div style="color:var(--val-gold); font-size:12px;">1,600 ¤</div>
+            <div style="font-size:10px; color:#b0bec5;">30발 무소음 기동사격</div>
+          </div>
+          <div class="weapon-card val-clip" data-wpn="bucky" onclick="buyWeapon('bucky')">
+            <div style="font-size:10px; color:#8899a6;">펌프 산탄총 // SHOTGUN</div>
+            <div style="font-family:var(--font-title); font-size:18px; color:#fff;">BUCKY</div>
+            <div style="color:var(--val-gold); font-size:12px;">850 ¤</div>
+            <div style="font-size:10px; color:#b0bec5;">5발 근접 15펠릿 분쇄</div>
+          </div>
+          <div class="weapon-card val-clip" data-wpn="judge" onclick="buyWeapon('judge')">
+            <div style="font-size:10px; color:#8899a6;">연사 산탄총 // AUTO SHOTGUN</div>
+            <div style="font-family:var(--font-title); font-size:18px; color:#fff;">JUDGE</div>
+            <div style="color:var(--val-gold); font-size:12px;">1,850 ¤</div>
+            <div style="font-size:10px; color:#b0bec5;">7발 드럼탄창 연사 산탄</div>
+          </div>
         </div>
-        <div class="weapon-card val-clip" data-wpn="operator">
-          <div style="font-size:11px; color:#8899a6;">저격소총 // SNIPER</div>
-          <div style="font-family:var(--font-title); font-size:26px; color:#fff;">OPERATOR (오퍼레이터)</div>
-          <div style="color:var(--val-gold); font-size:13px;">4,700 ¤</div>
-          <div style="font-size:11px; color:#b0bec5; margin-top:4px;">몸통 150 / 헤드 255 (즉사)<br>2단계 고배율 정밀 스코프</div>
+
+        <!-- 3. RIFLES -->
+        <div style="background: rgba(15,25,35,0.7); border: 1px solid var(--val-border); padding: 10px; border-radius: 4px; display:flex; flex-direction:column; gap:8px;">
+          <div style="font-family:var(--font-hud); font-size:13px; font-weight:800; color:var(--val-cyan); border-bottom:1px solid var(--val-border); padding-bottom:4px; letter-spacing:1px;">3. RIFLES</div>
+          <div class="weapon-card val-clip" data-wpn="bulldog" onclick="buyWeapon('bulldog')">
+            <div style="font-size:10px; color:#8899a6;">돌격소총 // BURST RIFLE</div>
+            <div style="font-family:var(--font-title); font-size:18px; color:#fff;">BULLDOG</div>
+            <div style="color:var(--val-gold); font-size:12px;">2,050 ¤</div>
+            <div style="font-size:10px; color:#b0bec5;">24발 줌인 3점사/연사</div>
+          </div>
+          <div class="weapon-card val-clip" data-wpn="guardian" onclick="buyWeapon('guardian')">
+            <div style="font-size:10px; color:#8899a6;">지정사수소총 // DMR</div>
+            <div style="font-family:var(--font-title); font-size:18px; color:#fff;">GUARDIAN</div>
+            <div style="color:var(--val-gold); font-size:12px;">2,250 ¤</div>
+            <div style="font-size:10px; color:#b0bec5;">12발 헤드 195 관통</div>
+          </div>
+          <div class="weapon-card val-clip" data-wpn="phantom" onclick="buyWeapon('phantom')">
+            <div style="font-size:10px; color:#8899a6;">소음 돌격소총 // SILENCED</div>
+            <div style="font-family:var(--font-title); font-size:18px; color:#fff;">PHANTOM</div>
+            <div style="color:var(--val-gold); font-size:12px;">2,900 ¤</div>
+            <div style="font-size:10px; color:#b0bec5;">30발 궤적 없는 소음</div>
+          </div>
+          <div class="weapon-card val-clip active-weapon" data-wpn="vandal" onclick="buyWeapon('vandal')">
+            <div style="font-size:10px; color:#8899a6;">원탭 돌격소총 // ASSAULT</div>
+            <div style="font-family:var(--font-title); font-size:18px; color:#fff;">VANDAL</div>
+            <div style="color:var(--val-gold); font-size:12px;">2,900 ¤</div>
+            <div style="font-size:10px; color:#b0bec5;">25발 전거리 헤드 160 원탭</div>
+          </div>
         </div>
-        <div class="weapon-card val-clip" data-wpn="spectre">
-          <div style="font-size:11px; color:#8899a6;">기관단총 // SMG</div>
-          <div style="font-family:var(--font-title); font-size:26px; color:#fff;">SPECTRE (스펙터)</div>
-          <div style="color:var(--val-gold); font-size:13px;">1,600 ¤</div>
-          <div style="font-size:11px; color:#b0bec5; margin-top:4px;">초당 13.3발 초고속 연사<br>30발 탄창 / 런앤건 기동 특화</div>
+
+        <!-- 4. SNIPERS & HEAVY -->
+        <div style="background: rgba(15,25,35,0.7); border: 1px solid var(--val-border); padding: 10px; border-radius: 4px; display:flex; flex-direction:column; gap:8px;">
+          <div style="font-family:var(--font-hud); font-size:13px; font-weight:800; color:var(--val-cyan); border-bottom:1px solid var(--val-border); padding-bottom:4px; letter-spacing:1px;">4. SNIPERS & HEAVY</div>
+          <div class="weapon-card val-clip" data-wpn="marshal" onclick="buyWeapon('marshal')">
+            <div style="font-size:10px; color:#8899a6;">경량 저격총 // LEVER SNIPER</div>
+            <div style="font-family:var(--font-title); font-size:18px; color:#fff;">MARSHAL</div>
+            <div style="color:var(--val-gold); font-size:12px;">950 ¤</div>
+            <div style="font-size:10px; color:#b0bec5;">5발 기동 헤드 202</div>
+          </div>
+          <div class="weapon-card val-clip" data-wpn="outlaw" onclick="buyWeapon('outlaw')">
+            <div style="font-size:10px; color:#8899a6;">더블 저격총 // DOUBLE SNIPER</div>
+            <div style="font-family:var(--font-title); font-size:18px; color:#fff;">OUTLAW</div>
+            <div style="color:var(--val-gold); font-size:12px;">2,400 ¤</div>
+            <div style="font-size:10px; color:#b0bec5;">2발 줌 유지 연속 2발</div>
+          </div>
+          <div class="weapon-card val-clip" data-wpn="operator" onclick="buyWeapon('operator')">
+            <div style="font-size:10px; color:#8899a6;">헤비 저격총 // HEAVY SNIPER</div>
+            <div style="font-family:var(--font-title); font-size:18px; color:#fff;">OPERATOR</div>
+            <div style="color:var(--val-gold); font-size:12px;">4,700 ¤</div>
+            <div style="font-size:10px; color:#b0bec5;">5발 몸통 150 즉사</div>
+          </div>
+          <div class="weapon-card val-clip" data-wpn="ares" onclick="buyWeapon('ares')">
+            <div style="font-size:10px; color:#8899a6;">경기관총 // LMG</div>
+            <div style="font-family:var(--font-title); font-size:18px; color:#fff;">ARES</div>
+            <div style="color:var(--val-gold); font-size:12px;">1,600 ¤</div>
+            <div style="font-size:10px; color:#b0bec5;">50발 제압 사격 가속</div>
+          </div>
+          <div class="weapon-card val-clip" data-wpn="odin" onclick="buyWeapon('odin')">
+            <div style="font-size:10px; color:#8899a6;">중기관총 // HMG</div>
+            <div style="font-family:var(--font-title); font-size:18px; color:#fff;">ODIN</div>
+            <div style="color:var(--val-gold); font-size:12px;">3,200 ¤</div>
+            <div style="font-size:10px; color:#b0bec5;">100발 초토화 난사</div>
+          </div>
         </div>
-        <div class="weapon-card val-clip" data-wpn="sheriff">
-          <div style="font-size:11px; color:#8899a6;">대구경 권총 // REVOLVER</div>
-          <div style="font-family:var(--font-title); font-size:26px; color:#fff;">SHERIFF (셰리프)</div>
-          <div style="color:var(--val-gold); font-size:13px;">800 ¤</div>
-          <div style="font-size:11px; color:#b0bec5; margin-top:4px;">헤드 145 고위력 탄환<br>6발 실린더 / 묵직한 타격감</div>
-        </div>
-        <div class="weapon-card val-clip" data-wpn="classic">
-          <div style="font-size:11px; color:#8899a6;">보조무기 // SIDEARM</div>
-          <div style="font-family:var(--font-title); font-size:26px; color:#fff;">CLASSIC (클래식)</div>
-          <div style="color:var(--val-gold); font-size:13px;">0 ¤ (무료)</div>
-          <div style="font-size:11px; color:#b0bec5; margin-top:4px;">기본 권총 / 우클릭 3점사<br>12발 탄창 / 가벼운 기동성</div>
+
+        <!-- 5. MELEE BLADES -->
+        <div style="background: rgba(15,25,35,0.7); border: 1px solid var(--val-border); padding: 10px; border-radius: 4px; display:flex; flex-direction:column; gap:8px;">
+          <div style="font-family:var(--font-hud); font-size:13px; font-weight:800; color:var(--val-gold); border-bottom:1px solid var(--val-border); padding-bottom:4px; letter-spacing:1px;">5. MELEE</div>
+          <div class="weapon-card val-clip" data-wpn="knife" onclick="buyWeapon('knife')">
+            <div style="font-size:10px; color:#8899a6;">전술 근접 단검 // BLADE</div>
+            <div style="font-family:var(--font-title); font-size:18px; color:#fff;">TACTICAL KNIFE</div>
+            <div style="color:var(--val-gold); font-size:12px;">0 ¤ (FREE)</div>
+            <div style="font-size:10px; color:#b0bec5;">근접 전술 베기</div>
+          </div>
+          <div class="weapon-card val-clip" data-wpn="karambit" onclick="buyWeapon('karambit')">
+            <div style="font-size:10px; color:var(--val-gold);">챔피언스 한정 // MELEE</div>
+            <div style="font-family:var(--font-title); font-size:18px; color:var(--val-gold);">KARAMBIT</div>
+            <div style="color:var(--val-gold); font-size:12px;">0 ¤ (챔피언스)</div>
+            <div style="font-size:10px; color:#b0bec5;">황금 발광 & 스핀 모션</div>
+          </div>
         </div>
       </div>
       <!-- Weapon Skin Selection Bar -->
@@ -1912,6 +2020,16 @@
       <!-- Controls, Graphics Quality & Volume -->
       <div style="border-top:1px solid var(--val-border); padding-top:12px;">
         <div class="settings-row">
+          <span>최대 프레임 레이트 (FPS Limit)</span>
+          <select id="cfg-fps-limit" style="background:#070b10; border:1px solid var(--val-border); color:var(--val-cyan); font-family:var(--font-hud); font-size:14px; padding:3px 8px; outline:none; cursor:pointer;">
+            <option value="0">무제한 (UNCAPPED)</option>
+            <option value="60">60 FPS (절전/안정)</option>
+            <option value="120">120 FPS (고주사율)</option>
+            <option value="144" selected>144 FPS (e스포츠 표준)</option>
+            <option value="240">240 FPS (초고속 프로)</option>
+          </select>
+        </div>
+        <div class="settings-row">
           <span>그래픽 품질 (Graphics Quality)</span>
           <select id="cfg-graphics" style="background:#070b10; border:1px solid var(--val-border); color:var(--val-cyan); font-family:var(--font-hud); font-size:14px; padding:3px 8px; outline:none; cursor:pointer;">
             <option value="min">최소 (0.6x, 그림자 끔)</option>
@@ -1983,6 +2101,7 @@
 
   <!-- In-Game Tactical HUD -->
   <div id="hud">
+    <div id="perf-hud" style="position:absolute; top:12px; right:18px; font-family:var(--font-mono); font-size:13px; color:var(--val-green); font-weight:700; text-shadow:0 0 8px rgba(0,255,136,0.6); pointer-events:none; z-index:30; letter-spacing:1px;">144 FPS // 6.9ms</div>
     <!-- TOP BAR: 10 AGENT HEAD ICONS & SCORES -->
     <div id="top-bar">
       <!-- Attackers 5 Roster -->
@@ -3146,49 +3265,134 @@
        2. WEAPONS ARSENAL (6 WEAPONS)
        ========================================================== */
     const WEAPONS = {
-      vandal: {
-        name: 'VANDAL // 7.62MM', cost: 2900,
-        ammo: 25, maxAmmo: 25, reserve: 75,
-        fireRate: 0.105, dmgHead: 160, dmgBody: 40, dmgLeg: 34,
-        recoilGain: 0.0075, spreadBase: 0.002, isSniper: false, isPistol: false
+      // 1. SIDEARMS (보조 무기 5종)
+      classic: {
+        name: 'CLASSIC // 기본 권총', cost: 0,
+        ammo: 12, maxAmmo: 12, reserve: 36,
+        fireRate: 0.175, dmgHead: 78, dmgBody: 26, dmgLeg: 22,
+        recoilGain: 0.005, spreadBase: 0.003, isSniper: false, isPistol: true, category: 'sidearm'
       },
-      phantom: {
-        name: 'PHANTOM // SILENCED', cost: 2900,
-        ammo: 30, maxAmmo: 30, reserve: 90,
-        fireRate: 0.09, dmgHead: 156, dmgBody: 39, dmgLeg: 33,
-        recoilGain: 0.0055, spreadBase: 0.0016, isSniper: false, isPistol: false
+      shorty: {
+        name: 'SHORTY // 숏티 더블배럴', cost: 300,
+        ammo: 2, maxAmmo: 2, reserve: 10,
+        fireRate: 0.30, dmgHead: 24, dmgBody: 12, dmgLeg: 10, pellets: 12,
+        recoilGain: 0.02, spreadBase: 0.025, isShotgun: true, isPistol: true, category: 'sidearm'
       },
-      operator: {
-        name: 'OPERATOR // SNIPER', cost: 4700,
-        ammo: 5, maxAmmo: 5, reserve: 15,
-        fireRate: 0.85, dmgHead: 255, dmgBody: 150, dmgLeg: 120,
-        recoilGain: 0.045, spreadBase: 0.0001, isSniper: true, isPistol: false
+      frenzy: {
+        name: 'FRENZY // 프렌지 자동권총', cost: 450,
+        ammo: 13, maxAmmo: 13, reserve: 39,
+        fireRate: 0.09, dmgHead: 78, dmgBody: 26, dmgLeg: 21,
+        recoilGain: 0.007, spreadBase: 0.004, isSniper: false, isPistol: true, category: 'sidearm'
       },
-      spectre: {
-        name: 'SPECTRE // SMG', cost: 1600,
-        ammo: 30, maxAmmo: 30, reserve: 90,
-        fireRate: 0.075, dmgHead: 78, dmgBody: 26, dmgLeg: 22,
-        recoilGain: 0.0045, spreadBase: 0.0024, isSniper: false, isPistol: false
+      ghost: {
+        name: 'GHOST // 소음 전술권총', cost: 500,
+        ammo: 15, maxAmmo: 15, reserve: 45,
+        fireRate: 0.145, dmgHead: 105, dmgBody: 30, dmgLeg: 25,
+        recoilGain: 0.0055, spreadBase: 0.0022, isSniper: false, isPistol: true, isSilenced: true, category: 'sidearm'
       },
       sheriff: {
-        name: 'SHERIFF // REVOLVER', cost: 800,
+        name: 'SHERIFF // 매그넘 리볼버', cost: 800,
         ammo: 6, maxAmmo: 6, reserve: 24,
-        fireRate: 0.25, dmgHead: 145, dmgBody: 55, dmgLeg: 46,
-        recoilGain: 0.016, spreadBase: 0.0015, isSniper: false, isPistol: true
+        fireRate: 0.25, dmgHead: 159, dmgBody: 55, dmgLeg: 46,
+        recoilGain: 0.016, spreadBase: 0.0015, isSniper: false, isPistol: true, category: 'sidearm'
       },
-      
+
+      // 2. SMGS & SHOTGUNS (기관단총 & 산탄총 4종)
+      stinger: {
+        name: 'STINGER // 초고속 SMG', cost: 1100,
+        ammo: 20, maxAmmo: 20, reserve: 60,
+        fireRate: 0.055, dmgHead: 67, dmgBody: 27, dmgLeg: 23,
+        recoilGain: 0.006, spreadBase: 0.0035, isSniper: false, isPistol: false, category: 'smg'
+      },
+      spectre: {
+        name: 'SPECTRE // 소음 SMG', cost: 1600,
+        ammo: 30, maxAmmo: 30, reserve: 90,
+        fireRate: 0.075, dmgHead: 78, dmgBody: 26, dmgLeg: 22,
+        recoilGain: 0.0045, spreadBase: 0.0022, isSniper: false, isPistol: false, isSilenced: true, category: 'smg'
+      },
+      bucky: {
+        name: 'BUCKY // 펌프액션 샷건', cost: 850,
+        ammo: 5, maxAmmo: 5, reserve: 15,
+        fireRate: 0.88, dmgHead: 40, dmgBody: 20, dmgLeg: 17, pellets: 15,
+        recoilGain: 0.035, spreadBase: 0.028, isShotgun: true, isPistol: false, category: 'shotgun'
+      },
+      judge: {
+        name: 'JUDGE // 전자동 샷건', cost: 1850,
+        ammo: 7, maxAmmo: 7, reserve: 21,
+        fireRate: 0.28, dmgHead: 34, dmgBody: 17, dmgLeg: 14, pellets: 12,
+        recoilGain: 0.024, spreadBase: 0.032, isShotgun: true, isPistol: false, category: 'shotgun'
+      },
+
+      // 3. RIFLES (돌격 소총 4종)
+      bulldog: {
+        name: 'BULLDOG // 불독 돌격소총', cost: 2050,
+        ammo: 24, maxAmmo: 24, reserve: 72,
+        fireRate: 0.10, dmgHead: 115, dmgBody: 35, dmgLeg: 30,
+        recoilGain: 0.0065, spreadBase: 0.0022, isSniper: false, isPistol: false, category: 'rifle'
+      },
+      guardian: {
+        name: 'GUARDIAN // 가디언 DMR', cost: 2250,
+        ammo: 12, maxAmmo: 12, reserve: 36,
+        fireRate: 0.19, dmgHead: 195, dmgBody: 65, dmgLeg: 49,
+        recoilGain: 0.012, spreadBase: 0.0005, isSniper: false, isPistol: false, category: 'rifle'
+      },
+      phantom: {
+        name: 'PHANTOM // 소음 돌격소총', cost: 2900,
+        ammo: 30, maxAmmo: 30, reserve: 90,
+        fireRate: 0.09, dmgHead: 156, dmgBody: 39, dmgLeg: 33,
+        recoilGain: 0.0055, spreadBase: 0.0016, isSniper: false, isPistol: false, isSilenced: true, category: 'rifle'
+      },
+      vandal: {
+        name: 'VANDAL // 원탭 돌격소총', cost: 2900,
+        ammo: 25, maxAmmo: 25, reserve: 75,
+        fireRate: 0.105, dmgHead: 160, dmgBody: 40, dmgLeg: 34,
+        recoilGain: 0.0075, spreadBase: 0.0018, isSniper: false, isPistol: false, category: 'rifle'
+      },
+
+      // 4. SNIPERS & HEAVY (저격소총 & 중화기 5종)
+      marshal: {
+        name: 'MARSHAL // 레버액션 스나이퍼', cost: 950,
+        ammo: 5, maxAmmo: 5, reserve: 15,
+        fireRate: 0.65, dmgHead: 202, dmgBody: 101, dmgLeg: 85,
+        recoilGain: 0.025, spreadBase: 0.0002, isSniper: true, isPistol: false, category: 'sniper'
+      },
+      outlaw: {
+        name: 'OUTLAW // 더블배럴 스나이퍼', cost: 2400,
+        ammo: 2, maxAmmo: 2, reserve: 10,
+        fireRate: 0.50, dmgHead: 238, dmgBody: 140, dmgLeg: 119,
+        recoilGain: 0.038, spreadBase: 0.0001, isSniper: true, isPistol: false, category: 'sniper'
+      },
+      operator: {
+        name: 'OPERATOR // 헤비 대구경 스나이퍼', cost: 4700,
+        ammo: 5, maxAmmo: 5, reserve: 15,
+        fireRate: 0.85, dmgHead: 255, dmgBody: 150, dmgLeg: 120,
+        recoilGain: 0.045, spreadBase: 0.0001, isSniper: true, isPistol: false, category: 'sniper'
+      },
+      ares: {
+        name: 'ARES // 아레스 경기관총', cost: 1600,
+        ammo: 50, maxAmmo: 50, reserve: 100,
+        fireRate: 0.08, dmgHead: 72, dmgBody: 30, dmgLeg: 25,
+        recoilGain: 0.005, spreadBase: 0.0035, isSniper: false, isPistol: false, category: 'heavy'
+      },
+      odin: {
+        name: 'ODIN // 오딘 초중기관총', cost: 3200,
+        ammo: 100, maxAmmo: 100, reserve: 200,
+        fireRate: 0.065, dmgHead: 95, dmgBody: 38, dmgLeg: 32,
+        recoilGain: 0.0055, spreadBase: 0.003, isSniper: false, isPistol: false, category: 'heavy'
+      },
+
+      // 5. MELEE (근접 무기 2종)
       knife: {
         name: 'TACTICAL BLADE // 근접 전술 단검', cost: 0,
         ammo: 1, maxAmmo: 1, reserve: 0,
         fireRate: 0.38, dmgHead: 150, dmgBody: 75, dmgLeg: 50,
-        recoilGain: 0, spreadBase: 0, isSniper: false, isPistol: false, isKnife: true
+        recoilGain: 0, spreadBase: 0, isSniper: false, isPistol: false, isKnife: true, category: 'melee'
       },
-
-      classic: {
-        name: 'CLASSIC // SEMI-AUTO', cost: 0,
-        ammo: 12, maxAmmo: 12, reserve: 36,
-        fireRate: 0.18, dmgHead: 78, dmgBody: 26, dmgLeg: 22,
-        recoilGain: 0.006, spreadBase: 0.003, isSniper: false, isPistol: true
+      karambit: {
+        name: 'CHAMPIONS KARAMBIT // 황금 카람빗', cost: 0,
+        ammo: 1, maxAmmo: 1, reserve: 0,
+        fireRate: 0.32, dmgHead: 160, dmgBody: 80, dmgLeg: 55,
+        recoilGain: 0, spreadBase: 0, isSniper: false, isPistol: false, isKnife: true, isKarambit: true, category: 'melee'
       }
     };
     let currentWeaponKey = 'vandal';
@@ -3200,11 +3404,12 @@
     const myClientId = 'user_' + Math.random().toString(36).substring(2, 8);
     const networkChannel = new BroadcastChannel('VALORANT_5V5_NET');
 
-    const MAP_LIST = ['ascent', 'bind', 'haven', 'range'];
+    const MAP_LIST = ['ascent', 'bind', 'haven', 'icebox', 'range'];
     const MAP_NAMES = {
       ascent: 'ASCENT (어센트) - 베네치아 요새 & 전동 셔터 도어 [F]',
       bind: 'BIND (바인드) - 모로코 사막 & 차원 이동 텔레포터',
       haven: 'HAVEN (헤이븐) - 부탄 수도원 & 3대 폭파 지점(A/B/C) + 중앙 범종',
+      icebox: 'ICEBOX (아이스박스) - 북극 비밀 연구 기지 & 선적 컨테이너 & 집라인',
       range: 'THE RANGE (사격장) - 사격 훈련장 & 봇 연습'
     };
     let currentMapIndex = 0;
@@ -3345,7 +3550,7 @@
       isChatActive = false;
       chatInput.style.display = 'none';
       chatInput.blur();
-      canvas.requestPointerLock();
+      requestGamePointerLock();
     }
 
     chatInput.addEventListener('keydown', (e) => {
@@ -3559,101 +3764,322 @@
       if (weaponSubMesh) gunGroup.remove(weaponSubMesh);
       weaponSubMesh = new THREE.Group();
 
-      if (wpnKey === 'vandal' || wpnKey === 'phantom') {
-        const isSilenced = (wpnKey === 'phantom');
-        const rec = new THREE.Mesh(new THREE.BoxGeometry(0.065, 0.11, 0.46), matReceiver);
-        rec.position.set(0, 0, -0.1);
+      const matGold = new THREE.MeshStandardMaterial({ color: 0xf5c518, metalness: 0.9, roughness: 0.2 });
+      const matChamberWood = new THREE.MeshStandardMaterial({ color: 0x4a2c11, roughness: 0.5 });
+      const matHeavyMetal = new THREE.MeshStandardMaterial({ color: 0x1f242b, metalness: 0.8, roughness: 0.3 });
+
+      if (wpnKey === 'classic') {
+        const frame = new THREE.Mesh(new THREE.BoxGeometry(0.048, 0.075, 0.24), matReceiver);
+        frame.position.set(0, 0.02, -0.05);
+        weaponSubMesh.add(frame);
+        const grip = new THREE.Mesh(new THREE.BoxGeometry(0.044, 0.13, 0.065), matCarbonTrim);
+        grip.position.set(0, -0.07, 0.05);
+        grip.rotation.x = -0.3;
+        weaponSubMesh.add(grip);
+      } else if (wpnKey === 'shorty') {
+        const body = new THREE.Mesh(new THREE.BoxGeometry(0.065, 0.08, 0.22), matChamberWood);
+        body.position.set(0, 0.01, 0);
+        weaponSubMesh.add(body);
+        const b1 = new THREE.Mesh(new THREE.CylinderGeometry(0.016, 0.016, 0.26, 8), matBarrel);
+        b1.rotation.x = Math.PI / 2;
+        b1.position.set(-0.018, 0.02, -0.18);
+        weaponSubMesh.add(b1);
+        const b2 = new THREE.Mesh(new THREE.CylinderGeometry(0.016, 0.016, 0.26, 8), matBarrel);
+        b2.rotation.x = Math.PI / 2;
+        b2.position.set(0.018, 0.02, -0.18);
+        weaponSubMesh.add(b2);
+        const grip = new THREE.Mesh(new THREE.BoxGeometry(0.048, 0.12, 0.06), matChamberWood);
+        grip.position.set(0, -0.07, 0.08);
+        grip.rotation.x = -0.35;
+        weaponSubMesh.add(grip);
+      } else if (wpnKey === 'frenzy') {
+        const rec = new THREE.Mesh(new THREE.BoxGeometry(0.052, 0.09, 0.25), matReceiver);
+        rec.position.set(0, 0.02, -0.04);
         weaponSubMesh.add(rec);
-
-        const bRad = isSilenced ? 0.024 : 0.017;
-        const bLen = isSilenced ? 0.48 : 0.42;
-        const bGeo = new THREE.CylinderGeometry(bRad, bRad, bLen, 12);
-        const bMesh = new THREE.Mesh(bGeo, matBarrel);
-        bMesh.rotation.x = Math.PI / 2;
-        bMesh.position.set(0, 0.02, -0.5);
-        weaponSubMesh.add(bMesh);
-
-        const mag = new THREE.Mesh(new THREE.BoxGeometry(0.046, 0.2, 0.08), matReceiver);
-        mag.position.set(0, -0.13, -0.15);
-        mag.rotation.x = 0.28;
+        const comp = new THREE.Mesh(new THREE.BoxGeometry(0.048, 0.05, 0.06), matBarrel);
+        comp.position.set(0, 0.03, -0.18);
+        weaponSubMesh.add(comp);
+        const mag = new THREE.Mesh(new THREE.BoxGeometry(0.038, 0.18, 0.05), matCarbonTrim);
+        mag.position.set(0, -0.1, 0.05);
+        mag.rotation.x = -0.28;
         weaponSubMesh.add(mag);
-
+      } else if (wpnKey === 'ghost') {
+        const frame = new THREE.Mesh(new THREE.BoxGeometry(0.046, 0.075, 0.26), matReceiver);
+        frame.position.set(0, 0.02, -0.04);
+        weaponSubMesh.add(frame);
+        const silencer = new THREE.Mesh(new THREE.CylinderGeometry(0.022, 0.022, 0.24, 10), matCarbonTrim);
+        silencer.rotation.x = Math.PI / 2;
+        silencer.position.set(0, 0.025, -0.24);
+        weaponSubMesh.add(silencer);
+        const grip = new THREE.Mesh(new THREE.BoxGeometry(0.042, 0.14, 0.065), matCarbonTrim);
+        grip.position.set(0, -0.07, 0.06);
+        grip.rotation.x = -0.28;
+        weaponSubMesh.add(grip);
+      } else if (wpnKey === 'sheriff') {
+        const frame = new THREE.Mesh(new THREE.BoxGeometry(0.05, 0.08, 0.32), matReceiver);
+        frame.position.set(0, 0.02, -0.05);
+        weaponSubMesh.add(frame);
+        const cylinder = new THREE.Mesh(new THREE.CylinderGeometry(0.034, 0.034, 0.09, 10), matBarrel);
+        cylinder.rotation.x = Math.PI / 2;
+        cylinder.position.set(0, 0.01, -0.05);
+        weaponSubMesh.add(cylinder);
+        const grip = new THREE.Mesh(new THREE.BoxGeometry(0.046, 0.14, 0.07), matCarbonTrim);
+        grip.position.set(0, -0.08, 0.06);
+        grip.rotation.x = -0.3;
+        weaponSubMesh.add(grip);
+      } else if (wpnKey === 'stinger') {
+        const rec = new THREE.Mesh(new THREE.BoxGeometry(0.05, 0.085, 0.30), matReceiver);
+        rec.position.set(0, 0.01, -0.05);
+        weaponSubMesh.add(rec);
+        const barrel = new THREE.Mesh(new THREE.CylinderGeometry(0.014, 0.014, 0.18, 8), matBarrel);
+        barrel.rotation.x = Math.PI / 2;
+        barrel.position.set(0, 0.02, -0.25);
+        weaponSubMesh.add(barrel);
+        const fGrip = new THREE.Mesh(new THREE.BoxGeometry(0.036, 0.09, 0.04), matCarbonTrim);
+        fGrip.position.set(0, -0.06, -0.15);
+        weaponSubMesh.add(fGrip);
+        const mag = new THREE.Mesh(new THREE.BoxGeometry(0.036, 0.18, 0.05), matCarbonTrim);
+        mag.position.set(0, -0.1, 0.03);
+        weaponSubMesh.add(mag);
+      } else if (wpnKey === 'spectre') {
+        const rec = new THREE.Mesh(new THREE.BoxGeometry(0.055, 0.09, 0.34), matReceiver);
+        rec.position.set(0, 0.01, -0.05);
+        weaponSubMesh.add(rec);
+        const silencer = new THREE.Mesh(new THREE.CylinderGeometry(0.028, 0.028, 0.32, 12), matCarbonTrim);
+        silencer.rotation.x = Math.PI / 2;
+        silencer.position.set(0, 0.01, -0.32);
+        weaponSubMesh.add(silencer);
+        const mag = new THREE.Mesh(new THREE.BoxGeometry(0.038, 0.2, 0.06), matCarbonTrim);
+        mag.position.set(0, -0.12, 0.02);
+        mag.rotation.x = 0.15;
+        weaponSubMesh.add(mag);
+        const stock = new THREE.Mesh(new THREE.BoxGeometry(0.04, 0.07, 0.18), matCarbonTrim);
+        stock.position.set(0, -0.01, 0.18);
+        weaponSubMesh.add(stock);
+      } else if (wpnKey === 'bucky') {
+        const rec = new THREE.Mesh(new THREE.BoxGeometry(0.065, 0.095, 0.44), matReceiver);
+        rec.position.set(0, 0.01, -0.08);
+        weaponSubMesh.add(rec);
+        const tube = new THREE.Mesh(new THREE.CylinderGeometry(0.016, 0.016, 0.42, 8), matBarrel);
+        tube.rotation.x = Math.PI / 2;
+        tube.position.set(0, -0.01, -0.36);
+        weaponSubMesh.add(tube);
+        const barrel = new THREE.Mesh(new THREE.CylinderGeometry(0.018, 0.018, 0.44, 8), matBarrel);
+        barrel.rotation.x = Math.PI / 2;
+        barrel.position.set(0, 0.025, -0.37);
+        weaponSubMesh.add(barrel);
+        const pump = new THREE.Mesh(new THREE.CylinderGeometry(0.028, 0.028, 0.16, 8), matCarbonTrim);
+        pump.rotation.x = Math.PI / 2;
+        pump.position.set(0, 0.005, -0.28);
+        weaponSubMesh.add(pump);
+        const stock = new THREE.Mesh(new THREE.BoxGeometry(0.05, 0.10, 0.26), matCarbonTrim);
+        stock.position.set(0, -0.03, 0.22);
+        weaponSubMesh.add(stock);
+      } else if (wpnKey === 'judge') {
+        const rec = new THREE.Mesh(new THREE.BoxGeometry(0.07, 0.11, 0.42), matReceiver);
+        rec.position.set(0, 0.02, -0.06);
+        weaponSubMesh.add(rec);
+        const drum = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.06, 0.09, 12), matCarbonTrim);
+        drum.rotation.z = Math.PI / 2;
+        drum.position.set(0, -0.05, -0.04);
+        weaponSubMesh.add(drum);
+        const barrel = new THREE.Mesh(new THREE.CylinderGeometry(0.022, 0.022, 0.32, 8), matBarrel);
+        barrel.rotation.x = Math.PI / 2;
+        barrel.position.set(0, 0.025, -0.34);
+        weaponSubMesh.add(barrel);
+        const stock = new THREE.Mesh(new THREE.BoxGeometry(0.055, 0.10, 0.22), matCarbonTrim);
+        stock.position.set(0, -0.02, 0.22);
+        weaponSubMesh.add(stock);
+      } else if (wpnKey === 'bulldog') {
+        const rec = new THREE.Mesh(new THREE.BoxGeometry(0.062, 0.11, 0.44), matReceiver);
+        rec.position.set(0, 0.01, -0.06);
+        weaponSubMesh.add(rec);
+        const barrel = new THREE.Mesh(new THREE.CylinderGeometry(0.016, 0.016, 0.32, 8), matBarrel);
+        barrel.rotation.x = Math.PI / 2;
+        barrel.position.set(0, 0.02, -0.36);
+        weaponSubMesh.add(barrel);
+        const mag = new THREE.Mesh(new THREE.BoxGeometry(0.042, 0.2, 0.07), matCarbonTrim);
+        mag.position.set(0, -0.12, 0.14);
+        mag.rotation.x = -0.2;
+        weaponSubMesh.add(mag);
+        const grip = new THREE.Mesh(new THREE.BoxGeometry(0.045, 0.14, 0.06), matCarbonTrim);
+        grip.position.set(0, -0.09, -0.06);
+        grip.rotation.x = -0.35;
+        weaponSubMesh.add(grip);
+      } else if (wpnKey === 'guardian') {
+        const rec = new THREE.Mesh(new THREE.BoxGeometry(0.06, 0.11, 0.52), matReceiver);
+        rec.position.set(0, 0.01, -0.08);
+        weaponSubMesh.add(rec);
+        const barrel = new THREE.Mesh(new THREE.CylinderGeometry(0.017, 0.017, 0.54, 8), matBarrel);
+        barrel.rotation.x = Math.PI / 2;
+        barrel.position.set(0, 0.02, -0.48);
+        weaponSubMesh.add(barrel);
+        const scope = new THREE.Mesh(new THREE.CylinderGeometry(0.026, 0.026, 0.22, 10), matCarbonTrim);
+        scope.rotation.x = Math.PI / 2;
+        scope.position.set(0, 0.09, -0.08);
+        weaponSubMesh.add(scope);
+        const stock = new THREE.Mesh(new THREE.BoxGeometry(0.05, 0.10, 0.26), matChamberWood);
+        stock.position.set(0, -0.03, 0.26);
+        weaponSubMesh.add(stock);
+      } else if (wpnKey === 'phantom') {
+        const rec = new THREE.Mesh(new THREE.BoxGeometry(0.065, 0.11, 0.46), matReceiver);
+        rec.position.set(0, 0.01, -0.1);
+        weaponSubMesh.add(rec);
+        const silencer = new THREE.Mesh(new THREE.CylinderGeometry(0.024, 0.024, 0.48, 12), matCarbonTrim);
+        silencer.rotation.x = Math.PI / 2;
+        silencer.position.set(0, 0.015, -0.42);
+        weaponSubMesh.add(silencer);
+        const mag = new THREE.Mesh(new THREE.BoxGeometry(0.045, 0.22, 0.08), matCarbonTrim);
+        mag.position.set(0, -0.13, -0.06);
+        mag.rotation.x = 0.25;
+        weaponSubMesh.add(mag);
+        const grip = new THREE.Mesh(new THREE.BoxGeometry(0.048, 0.16, 0.06), matCarbonTrim);
+        grip.position.set(0, -0.1, 0.08);
+        grip.rotation.x = -0.35;
+        weaponSubMesh.add(grip);
         const stock = new THREE.Mesh(new THREE.BoxGeometry(0.05, 0.09, 0.24), matCarbonTrim);
-        stock.position.set(0, -0.01, 0.22);
+        stock.position.set(0, -0.02, 0.22);
+        weaponSubMesh.add(stock);
+      } else if (wpnKey === 'vandal') {
+        const rec = new THREE.Mesh(new THREE.BoxGeometry(0.065, 0.11, 0.46), matReceiver);
+        rec.position.set(0, 0.01, -0.1);
+        weaponSubMesh.add(rec);
+        const barrel = new THREE.Mesh(new THREE.CylinderGeometry(0.017, 0.017, 0.42, 12), matBarrel);
+        barrel.rotation.x = Math.PI / 2;
+        barrel.position.set(0, 0.015, -0.42);
+        weaponSubMesh.add(barrel);
+        const mag = new THREE.Mesh(new THREE.BoxGeometry(0.045, 0.22, 0.08), matCarbonTrim);
+        mag.position.set(0, -0.13, -0.06);
+        mag.rotation.x = 0.25;
+        weaponSubMesh.add(mag);
+        const grip = new THREE.Mesh(new THREE.BoxGeometry(0.048, 0.16, 0.06), matCarbonTrim);
+        grip.position.set(0, -0.1, 0.08);
+        grip.rotation.x = -0.35;
+        weaponSubMesh.add(grip);
+        const stock = new THREE.Mesh(new THREE.BoxGeometry(0.05, 0.09, 0.24), matCarbonTrim);
+        stock.position.set(0, -0.02, 0.22);
+        weaponSubMesh.add(stock);
+      } else if (wpnKey === 'marshal') {
+        const rec = new THREE.Mesh(new THREE.BoxGeometry(0.055, 0.095, 0.54), matReceiver);
+        rec.position.set(0, 0.01, -0.1);
+        weaponSubMesh.add(rec);
+        const barrel = new THREE.Mesh(new THREE.CylinderGeometry(0.016, 0.016, 0.60, 8), matBarrel);
+        barrel.rotation.x = Math.PI / 2;
+        barrel.position.set(0, 0.02, -0.52);
+        weaponSubMesh.add(barrel);
+        const scope = new THREE.Mesh(new THREE.CylinderGeometry(0.028, 0.028, 0.28, 10), matCarbonTrim);
+        scope.rotation.x = Math.PI / 2;
+        scope.position.set(0, 0.095, -0.1);
+        weaponSubMesh.add(scope);
+        const stock = new THREE.Mesh(new THREE.BoxGeometry(0.048, 0.11, 0.32), matChamberWood);
+        stock.position.set(0, -0.03, 0.26);
+        weaponSubMesh.add(stock);
+      } else if (wpnKey === 'outlaw') {
+        const rec = new THREE.Mesh(new THREE.BoxGeometry(0.075, 0.12, 0.52), matReceiver);
+        rec.position.set(0, 0.01, -0.08);
+        weaponSubMesh.add(rec);
+        const b1 = new THREE.Mesh(new THREE.CylinderGeometry(0.018, 0.018, 0.62, 8), matBarrel);
+        b1.rotation.x = Math.PI / 2;
+        b1.position.set(-0.02, 0.02, -0.52);
+        weaponSubMesh.add(b1);
+        const b2 = new THREE.Mesh(new THREE.CylinderGeometry(0.018, 0.018, 0.62, 8), matBarrel);
+        b2.rotation.x = Math.PI / 2;
+        b2.position.set(0.02, 0.02, -0.52);
+        weaponSubMesh.add(b2);
+        const scope = new THREE.Mesh(new THREE.CylinderGeometry(0.032, 0.032, 0.30, 10), matCarbonTrim);
+        scope.rotation.x = Math.PI / 2;
+        scope.position.set(0, 0.10, -0.08);
+        weaponSubMesh.add(scope);
+        const stock = new THREE.Mesh(new THREE.BoxGeometry(0.058, 0.11, 0.30), matCarbonTrim);
+        stock.position.set(0, -0.03, 0.28);
         weaponSubMesh.add(stock);
       } else if (wpnKey === 'operator') {
-        const body = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.13, 0.65), matReceiver);
-        body.position.set(0, 0, -0.15);
-        weaponSubMesh.add(body);
-
-        const bGeo = new THREE.CylinderGeometry(0.025, 0.025, 0.68, 12);
-        const bMesh = new THREE.Mesh(bGeo, matBarrel);
-        bMesh.rotation.x = Math.PI / 2;
-        bMesh.position.set(0, 0.03, -0.7);
-        weaponSubMesh.add(bMesh);
-
-        const scopeGeo = new THREE.CylinderGeometry(0.035, 0.038, 0.35, 12);
-        const scope = new THREE.Mesh(scopeGeo, matCarbonTrim);
-        scope.rotation.x = Math.PI / 2;
-        scope.position.set(0, 0.11, -0.12);
-        weaponSubMesh.add(scope);
-      } else if (wpnKey === 'spectre') {
-        const body = new THREE.Mesh(new THREE.BoxGeometry(0.06, 0.1, 0.36), matReceiver);
-        body.position.set(0, 0, -0.08);
-        weaponSubMesh.add(body);
-
-        const silencer = new THREE.Mesh(new THREE.CylinderGeometry(0.026, 0.026, 0.36, 12), matBarrel);
-        silencer.rotation.x = Math.PI / 2;
-        silencer.position.set(0, 0.02, -0.42);
-        weaponSubMesh.add(silencer);
-
-        const mag = new THREE.Mesh(new THREE.BoxGeometry(0.035, 0.22, 0.055), matCarbonTrim);
-        mag.position.set(0, -0.14, -0.06);
-        weaponSubMesh.add(mag);
-      } else if (wpnKey === 'sheriff') {
-        const frame = new THREE.Mesh(new THREE.BoxGeometry(0.05, 0.09, 0.24), matReceiver);
-        frame.position.set(0, 0, -0.05);
-        weaponSubMesh.add(frame);
-
-        const cyl = new THREE.Mesh(new THREE.CylinderGeometry(0.035, 0.035, 0.08, 10), matBarrel);
-        cyl.rotation.x = Math.PI / 2;
-        cyl.position.set(0, 0.01, -0.05);
-        weaponSubMesh.add(cyl);
-
-        const barrel = new THREE.Mesh(new THREE.BoxGeometry(0.035, 0.05, 0.2), matBarrel);
-        barrel.position.set(0, 0.025, -0.22);
+        const rec = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.13, 0.62), matReceiver);
+        rec.position.set(0, 0.01, -0.1);
+        weaponSubMesh.add(rec);
+        const barrel = new THREE.Mesh(new THREE.CylinderGeometry(0.022, 0.025, 0.72, 12), matBarrel);
+        barrel.rotation.x = Math.PI / 2;
+        barrel.position.set(0, 0.02, -0.6);
         weaponSubMesh.add(barrel);
-      
+        const brake = new THREE.Mesh(new THREE.BoxGeometry(0.06, 0.06, 0.1), matBarrel);
+        brake.position.set(0, 0.02, -0.98);
+        weaponSubMesh.add(brake);
+        const scope = new THREE.Mesh(new THREE.CylinderGeometry(0.038, 0.038, 0.36, 12), matCarbonTrim);
+        scope.rotation.x = Math.PI / 2;
+        scope.position.set(0, 0.11, -0.1);
+        weaponSubMesh.add(scope);
+        const bipodL = new THREE.Mesh(new THREE.CylinderGeometry(0.008, 0.008, 0.28, 6), matBarrel);
+        bipodL.position.set(-0.06, -0.12, -0.4);
+        bipodL.rotation.z = -0.3;
+        weaponSubMesh.add(bipodL);
+        const bipodR = new THREE.Mesh(new THREE.CylinderGeometry(0.008, 0.008, 0.28, 6), matBarrel);
+        bipodR.position.set(0.06, -0.12, -0.4);
+        bipodR.rotation.z = 0.3;
+        weaponSubMesh.add(bipodR);
+        const stock = new THREE.Mesh(new THREE.BoxGeometry(0.06, 0.12, 0.3), matCarbonTrim);
+        stock.position.set(0, -0.02, 0.32);
+        weaponSubMesh.add(stock);
+      } else if (wpnKey === 'ares') {
+        const rec = new THREE.Mesh(new THREE.BoxGeometry(0.075, 0.12, 0.55), matHeavyMetal);
+        rec.position.set(0, 0.01, -0.1);
+        weaponSubMesh.add(rec);
+        const barrel = new THREE.Mesh(new THREE.CylinderGeometry(0.022, 0.022, 0.52, 10), matBarrel);
+        barrel.rotation.x = Math.PI / 2;
+        barrel.position.set(0, 0.02, -0.5);
+        weaponSubMesh.add(barrel);
+        const boxMag = new THREE.Mesh(new THREE.BoxGeometry(0.09, 0.14, 0.12), matCarbonTrim);
+        boxMag.position.set(0, -0.12, -0.05);
+        weaponSubMesh.add(boxMag);
+        const stock = new THREE.Mesh(new THREE.BoxGeometry(0.06, 0.11, 0.26), matCarbonTrim);
+        stock.position.set(0, -0.02, 0.28);
+        weaponSubMesh.add(stock);
+      } else if (wpnKey === 'odin') {
+        const rec = new THREE.Mesh(new THREE.BoxGeometry(0.088, 0.14, 0.62), matHeavyMetal);
+        rec.position.set(0, 0.01, -0.12);
+        weaponSubMesh.add(rec);
+        const barrel1 = new THREE.Mesh(new THREE.CylinderGeometry(0.018, 0.018, 0.58, 8), matBarrel);
+        barrel1.rotation.x = Math.PI / 2;
+        barrel1.position.set(-0.016, 0.025, -0.54);
+        weaponSubMesh.add(barrel1);
+        const barrel2 = new THREE.Mesh(new THREE.CylinderGeometry(0.018, 0.018, 0.58, 8), matBarrel);
+        barrel2.rotation.x = Math.PI / 2;
+        barrel2.position.set(0.016, 0.025, -0.54);
+        weaponSubMesh.add(barrel2);
+        const shroud = new THREE.Mesh(new THREE.CylinderGeometry(0.045, 0.045, 0.40, 8), matHeavyMetal);
+        shroud.rotation.x = Math.PI / 2;
+        shroud.position.set(0, 0.025, -0.42);
+        weaponSubMesh.add(shroud);
+        const hugeMag = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.16, 0.14), matReceiver);
+        hugeMag.position.set(0, -0.14, -0.06);
+        weaponSubMesh.add(hugeMag);
+        const stock = new THREE.Mesh(new THREE.BoxGeometry(0.07, 0.13, 0.32), matCarbonTrim);
+        stock.position.set(0, -0.02, 0.30);
+        weaponSubMesh.add(stock);
       } else if (wpnKey === 'knife') {
-        const handle = new THREE.Mesh(new THREE.BoxGeometry(0.035, 0.045, 0.16), matCarbonTrim);
-        handle.position.set(0, -0.04, 0.05);
+        const handle = new THREE.Mesh(new THREE.CylinderGeometry(0.022, 0.025, 0.18, 8), matCarbonTrim);
+        handle.position.set(0, -0.04, 0.08);
+        handle.rotation.x = 0.2;
         weaponSubMesh.add(handle);
-
-        const guard = new THREE.Mesh(new THREE.BoxGeometry(0.04, 0.08, 0.02), matReceiver);
-        guard.position.set(0, -0.02, -0.04);
+        const guard = new THREE.Mesh(new THREE.BoxGeometry(0.07, 0.015, 0.04), matBarrel);
+        guard.position.set(0, 0.04, 0.05);
         weaponSubMesh.add(guard);
-
-        const bladeGeo = new THREE.BoxGeometry(0.015, 0.065, 0.26);
-        const bladeMat = new THREE.MeshStandardMaterial({
-          color: currentSkin.barrelColor || 0x00f0ff,
-          emissive: currentSkin.emissiveColor || 0x00f0ff,
-          emissiveIntensity: 0.8,
-          metalness: 0.95,
-          roughness: 0.15
-        });
-        const blade = new THREE.Mesh(bladeGeo, bladeMat);
-        blade.position.set(0, 0.01, -0.16);
+        const blade = new THREE.Mesh(new THREE.ConeGeometry(0.032, 0.28, 4), matReceiver);
+        blade.position.set(0, 0.18, 0.01);
+        blade.rotation.x = -0.3;
         weaponSubMesh.add(blade);
-
-      } else if (wpnKey === 'classic') {
-        const slide = new THREE.Mesh(new THREE.BoxGeometry(0.046, 0.06, 0.22), matBarrel);
-        slide.position.set(0, 0.02, -0.08);
-        weaponSubMesh.add(slide);
-
-        const grip = new THREE.Mesh(new THREE.BoxGeometry(0.042, 0.12, 0.06), matCarbonTrim);
-        grip.position.set(0, -0.06, 0.02);
-        grip.rotation.x = -0.25;
-        weaponSubMesh.add(grip);
+      } else if (wpnKey === 'karambit') {
+        const handle = new THREE.Mesh(new THREE.TorusGeometry(0.06, 0.018, 8, 16, Math.PI * 0.8), matCarbonTrim);
+        handle.position.set(0, -0.02, 0.06);
+        handle.rotation.z = Math.PI / 2;
+        weaponSubMesh.add(handle);
+        const ring = new THREE.Mesh(new THREE.TorusGeometry(0.026, 0.008, 8, 16), matGold);
+        ring.position.set(0, -0.08, 0.09);
+        weaponSubMesh.add(ring);
+        const curvedBlade = new THREE.Mesh(new THREE.TorusGeometry(0.11, 0.02, 6, 12, Math.PI * 0.55), matGold);
+        curvedBlade.position.set(0, 0.06, 0.02);
+        curvedBlade.rotation.x = Math.PI / 2;
+        curvedBlade.rotation.y = 0.4;
+        weaponSubMesh.add(curvedBlade);
       }
 
       gunGroup.add(weaponSubMesh);
@@ -4075,12 +4501,11 @@
     /* DISTINCT PROCEDURAL 3D AGENT MODELING FOR ALL 8 AGENTS */
     function createAgentModel(isTeammate, agentName = 'Jett') {
       const grp = new THREE.Group();
-      const glowColor = isTeammate ? 0x00ffaa : 0xff1122;
-      const armorColor = isTeammate ? 0x162828 : 0x281616;
+      const glowColor = isTeammate ? 0x00ffaa : 0xff2244;
 
-      const bodyMat = new THREE.MeshStandardMaterial({ color: armorColor, roughness: 0.4 });
+      const bodyMat = new THREE.MeshStandardMaterial({ color: isTeammate ? 0x142028 : 0x2a141a, roughness: 0.5 });
       const glowMat = new THREE.MeshStandardMaterial({
-        color: glowColor, emissive: glowColor, emissiveIntensity: 0.7, roughness: 0.2
+        color: glowColor, emissive: glowColor, emissiveIntensity: 0.75, roughness: 0.2
       });
 
       const head = new THREE.Mesh(new THREE.SphereGeometry(0.24, 14, 14), glowMat);
@@ -4107,33 +4532,64 @@
       grp.add(legL);
       grp.add(legR);
 
-      // Signature Accessories for each Agent
+      // Distinct 3D Visual Customizations for all Agents
       if (agentName === 'Jett') {
         const hair = new THREE.Mesh(new THREE.SphereGeometry(0.12, 8, 8), new THREE.MeshStandardMaterial({ color: 0xffffff }));
         hair.position.set(0, 1.95, -0.16);
         grp.add(hair);
+        const kunaiPouch = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.16, 0.05), new THREE.MeshStandardMaterial({ color: 0x00f0ff }));
+        kunaiPouch.position.set(0.22, 1.1, 0);
+        grp.add(kunaiPouch);
       } else if (agentName === 'Phoenix') {
         const flame = new THREE.Mesh(new THREE.ConeGeometry(0.1, 0.28, 6), new THREE.MeshBasicMaterial({ color: 0xff6600 }));
         flame.position.set(0, 2.05, 0);
         grp.add(flame);
+        const collar = new THREE.Mesh(new THREE.TorusGeometry(0.24, 0.04, 6, 12, Math.PI), new THREE.MeshStandardMaterial({ color: 0xffeedd }));
+        collar.rotation.x = Math.PI / 2;
+        collar.position.set(0, 1.62, -0.06);
+        grp.add(collar);
+      } else if (agentName === 'Reyna') {
+        const crystalL = new THREE.Mesh(new THREE.ConeGeometry(0.06, 0.22, 5), new THREE.MeshStandardMaterial({ color: 0xaa00ff, emissive: 0x8800cc, emissiveIntensity: 0.6 }));
+        crystalL.position.set(-0.28, 1.55, 0);
+        crystalL.rotation.z = 0.5;
+        grp.add(crystalL);
+        const crystalR = new THREE.Mesh(new THREE.ConeGeometry(0.06, 0.22, 5), new THREE.MeshStandardMaterial({ color: 0xaa00ff, emissive: 0x8800cc, emissiveIntensity: 0.6 }));
+        crystalR.position.set(0.28, 1.55, 0);
+        crystalR.rotation.z = -0.5;
+        grp.add(crystalR);
       } else if (agentName === 'Omen') {
-        const hood = new THREE.Mesh(new THREE.ConeGeometry(0.32, 0.35, 8), new THREE.MeshStandardMaterial({ color: 0x111625 }));
-        hood.position.set(0, 1.92, -0.04);
+        const hood = new THREE.Mesh(new THREE.ConeGeometry(0.32, 0.38, 8), new THREE.MeshStandardMaterial({ color: 0x0a0e18, roughness: 0.8 }));
+        hood.position.set(0, 1.94, -0.04);
         grp.add(hood);
+        [-0.05, 0, 0.05].forEach((xOff) => {
+          const slit = new THREE.Mesh(new THREE.BoxGeometry(0.02, 0.06, 0.02), new THREE.MeshBasicMaterial({ color: 0x00ffff }));
+          slit.position.set(xOff, 1.80, 0.22);
+          grp.add(slit);
+        });
       } else if (agentName === 'Brimstone') {
         const beret = new THREE.Mesh(new THREE.CylinderGeometry(0.26, 0.22, 0.08, 10), new THREE.MeshStandardMaterial({ color: 0x5d4037 }));
         beret.rotation.z = 0.2;
         beret.position.set(0.04, 1.95, 0);
         grp.add(beret);
+        const radioPack = new THREE.Mesh(new THREE.BoxGeometry(0.2, 0.24, 0.1), new THREE.MeshStandardMaterial({ color: 0x223322 }));
+        radioPack.position.set(0, 1.3, -0.2);
+        grp.add(radioPack);
       } else if (agentName === 'Sova') {
+        const cape = new THREE.Mesh(new THREE.BoxGeometry(0.44, 0.7, 0.04), new THREE.MeshStandardMaterial({ color: 0x1b3b5f }));
+        cape.position.set(0, 1.1, -0.22);
+        cape.rotation.x = -0.15;
+        grp.add(cape);
         const bow = new THREE.Mesh(new THREE.TorusGeometry(0.32, 0.02, 6, 12, Math.PI), new THREE.MeshStandardMaterial({ color: 0xd4af37 }));
-        bow.position.set(0, 1.25, -0.22);
+        bow.position.set(0, 1.25, -0.25);
         bow.rotation.z = Math.PI / 4;
         grp.add(bow);
       } else if (agentName === 'Sage') {
-        const braid = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.02, 0.6, 6), new THREE.MeshStandardMaterial({ color: 0x050505 }));
-        braid.position.set(0, 1.45, -0.22);
+        const braid = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.02, 0.65, 6), new THREE.MeshStandardMaterial({ color: 0x050505 }));
+        braid.position.set(0, 1.4, -0.22);
         grp.add(braid);
+        const orb = new THREE.Mesh(new THREE.SphereGeometry(0.08, 10, 10), new THREE.MeshStandardMaterial({ color: 0x00ffaa, emissive: 0x00dd88, emissiveIntensity: 0.8 }));
+        orb.position.set(0.2, 0.95, 0.12);
+        grp.add(orb);
       }
 
       return { mesh: grp, head, body, legs: [legL, legR] };
@@ -4565,6 +5021,19 @@
         sunLight.position.set(-35, 80, 50);
         scene.fog.color.setHex(0x452342);
         scene.fog.density = 0.008;
+      } else if (mapKey === 'icebox') {
+        // Arctic Secret Research Excavation Facility / Blizzard Twilight
+        grad.addColorStop(0, '#05111d');
+        grad.addColorStop(0.4, '#0d2238');
+        grad.addColorStop(0.75, '#80c3f0');
+        grad.addColorStop(1, '#d8f1ff');
+        ambientLight.color.setHex(0x9bd4ff);
+        ambientLight.intensity = 0.95;
+        sunLight.color.setHex(0xd0f2ff);
+        sunLight.intensity = 1.3;
+        sunLight.position.set(-60, 75, -45);
+        scene.fog.color.setHex(0x13273d);
+        scene.fog.density = 0.011;
       } else {
         // Range: High-tech military hangar
         grad.addColorStop(0, '#080c10');
@@ -4876,6 +5345,78 @@
       // ==========================================================
       // MAP 4: THE RANGE (사격장) - 사격 훈련장, 거리별 표적 및 LED 전광판
       // ==========================================================
+      else if (mapKey === 'icebox') {
+        // ==========================================================
+        // MAP 4: ICEBOX (아이스박스) - 북극 비밀 연구 기지 & 선적 컨테이너 & 집라인
+        // ==========================================================
+        const matIceFloor = new THREE.MeshStandardMaterial({ color: 0x8fa8bf, roughness: 0.35, metalness: 0.15 });
+        const matIceWall = new THREE.MeshStandardMaterial({ color: 0x243444, roughness: 0.6 });
+        const matContainerOrange = new THREE.MeshStandardMaterial({ color: 0xd95a1e, roughness: 0.4 });
+        const matContainerYellow = new THREE.MeshStandardMaterial({ color: 0xe6b800, roughness: 0.4 });
+        const matContainerBlue = new THREE.MeshStandardMaterial({ color: 0x1976d2, roughness: 0.4 });
+
+        // Outer Perimeter Walls & Icy Snowy Tundra Floor
+        addBox(0, -0.5, 0, 115, 1, 115, matIceFloor);
+        addBox(0, 7, -57, 115, 14, 2, matIceWall);
+        addBox(0, 7, 57, 115, 14, 2, matIceWall);
+        addBox(-57, 7, 0, 2, 14, 115, matIceWall);
+        addBox(57, 7, 0, 2, 14, 115, matIceWall);
+
+        // --- A SITE: A PIPES, NEST & MULTI-TIER CONTAINERS ---
+        addBox(28, 0.05, -24, 24, 0.05, 24, matSiteFloor, false);
+        addTextBillboard(28, 0.2, -24, 'A SITE', 1.8);
+        spikeSiteAreas.push({ minX: 16, maxX: 40, minZ: -36, maxZ: -12, name: 'A SITE' });
+
+        // A Pipes Elevated Walkway (y = 4.5)
+        addPlatform(32, 0, -28, 12, 4.5, 8, matIceWall);
+        addRailing(26, 4.5, -28, 8, 'z');
+        addRailing(32, 4.5, -24, 12, 'x');
+
+        // A Nest High Sniper Perch (y = 5.2)
+        addPlatform(36, 0, -14, 8, 5.2, 10, matIceWall);
+        addStairs(36, -6, 0, 3.2, 5.2, 16, 14, 'z-');
+
+        // A Site Radianite Shipping Containers
+        addBox(20, 1.8, -26, 3.2, 3.6, 7.5, matContainerBlue);
+        addBox(24, 1.8, -16, 3.2, 3.6, 7.5, matContainerOrange);
+        addBox(24, 5.4, -16, 3.2, 3.6, 7.5, matContainerYellow);
+
+        // High Overhead Zipline Steel Cable (from A Nest to A Pipes)
+        const zipGeo = new THREE.CylinderGeometry(0.04, 0.04, 18, 8);
+        const zipMat = new THREE.MeshBasicMaterial({ color: 0x00f0ff });
+        const zipMesh = new THREE.Mesh(zipGeo, zipMat);
+        zipMesh.rotation.z = Math.PI / 2;
+        zipMesh.rotation.y = 0.45;
+        zipMesh.position.set(34, 5.2, -21);
+        scene.add(zipMesh);
+        mapObjects.push(zipMesh);
+
+        // --- B SITE: B YELLOW, SNOWMAN & KITCHEN ---
+        addBox(-28, 0.05, -24, 24, 0.05, 24, matSiteFloor, false);
+        addTextBillboard(-28, 0.2, -24, 'B SITE', 1.8);
+        spikeSiteAreas.push({ minX: -40, maxX: -16, minZ: -36, maxZ: -12, name: 'B SITE' });
+
+        // Iconic "B Yellow" Container Stack
+        addBox(-24, 1.8, -18, 3.2, 3.6, 8.0, matContainerYellow);
+        addBox(-24, 5.4, -18, 3.2, 3.6, 8.0, matContainerOrange);
+
+        // B Snowman Platform (y = 3.6)
+        addPlatform(-34, 0, -32, 12, 3.6, 10, matIceWall);
+        addRailing(-28, 3.6, -32, 10, 'z');
+
+        // B Kitchen Corridor
+        addBox(-16, 2.5, -4, 4.0, 5.0, 16, matIceWall);
+        addArch(-16, 0, -4, 4.0, 4.2, 2.2, matIceWall);
+
+        // --- MID COURTYARD & BOILER ---
+        addBox(0, 1.8, 0, 3.5, 3.6, 9.0, matContainerBlue);
+        addBox(0, 5.4, 0, 3.5, 3.6, 9.0, matContainerOrange);
+        addBox(-10, 1.8, 8, 3.5, 3.6, 7.5, matContainerYellow);
+        addBox(10, 1.8, 8, 3.5, 3.6, 7.5, matContainerBlue);
+
+        // Mid Boiler Room Archway
+        addArch(0, 0, -12, 6.0, 5.2, 2.4, matIceWall);
+      }
       else if (mapKey === 'range') {
         addBox(0, -0.5, 0, 60, 1, 120, matConcrete);
         addBox(0, 7, -60, 60, 14, 2, matWallStone);
@@ -5163,21 +5704,21 @@
         const buyMenu = document.getElementById('buy-menu');
         if (buyMenu && buyMenu.style.display === 'flex') {
           buyMenu.style.display = 'none';
-          canvas.requestPointerLock();
+          requestGamePointerLock();
           updatePlayPrompt();
           return;
         }
         const crPanel = document.getElementById('combat-report-panel');
         if (crPanel && crPanel.style.display === 'flex') {
           crPanel.style.display = 'none';
-          canvas.requestPointerLock();
+          requestGamePointerLock();
           updatePlayPrompt();
           return;
         }
         const settingsModal = document.getElementById('settings-modal');
         if (settingsModal && settingsModal.style.display === 'flex') {
           settingsModal.style.display = 'none';
-          canvas.requestPointerLock();
+          requestGamePointerLock();
           updatePlayPrompt();
           return;
         }
@@ -5250,7 +5791,7 @@
         return;
       }
       if (isPlayerControlActive() && !isPointerLocked) {
-        canvas.requestPointerLock();
+        requestGamePointerLock();
       }
     });
 
@@ -5258,7 +5799,7 @@
     if (clickPrompt) {
       clickPrompt.addEventListener('click', (e) => {
         e.stopPropagation();
-        canvas.requestPointerLock();
+        requestGamePointerLock();
       });
     }
 
@@ -5275,7 +5816,7 @@
 
     document.getElementById('btn-resume-game').addEventListener('click', () => {
       document.getElementById('settings-modal').style.display = 'none';
-      canvas.requestPointerLock();
+      requestGamePointerLock();
       updatePlayPrompt();
     });
 
@@ -5402,27 +5943,43 @@
     });
 
     let isMouseDown = false;
-    let lastMouseX = 0;
-    let lastMouseY = 0;
+    let lastClientX = null;
+    let lastClientY = null;
+
+    function requestGamePointerLock() {
+      if (isPointerLocked) return;
+      try {
+        const p = requestGamePointerLock();
+        if (p && typeof p.catch === 'function') {
+          p.catch(() => {});
+        }
+      } catch (e) {}
+    }
+
+    document.addEventListener('pointerlockerror', () => {
+      // Handled gracefully via universal delta fallback
+    });
 
     window.addEventListener('mousedown', (e) => {
       if (e.target.closest('button, input, select, textarea, .modal, .val-btn, #chat-container, #radio-wheel-modal, .weapon-card, .map-card, .agent-card, .ch-preset-btn, .skin-btn')) {
         return;
       }
       isMouseDown = true;
-      lastMouseX = e.clientX;
-      lastMouseY = e.clientY;
+      lastClientX = e.clientX;
+      lastClientY = e.clientY;
 
-      if (!isPointerLocked) {
-        if (isPlayerControlActive()) {
-          canvas.requestPointerLock();
-        }
-        return;
+      if (!isPointerLocked && isPlayerControlActive()) {
+        requestGamePointerLock();
       }
+
+      if (!isPlayerControlActive()) return;
 
       if (e.button === 0) {
         if (abilities.x.active) throwBladeSingle();
-        else keys['Mouse0'] = true;
+        else {
+          keys['Mouse0'] = true;
+          shootWeapon();
+        }
       }
       if (e.button === 2) {
         if (abilities.x.active) throwBladeShotgun();
@@ -5439,37 +5996,47 @@
       if (e.button === 0) keys['Mouse0'] = false;
     });
 
+    // UNIVERSAL MOUSE TRACKING: ROTATES CAMERA INSTANTLY WHETHER POINTER LOCKED OR NOT
     window.addEventListener('mousemove', (e) => {
+      if (!isPlayerControlActive()) return;
+
+      let dx = 0;
+      let dy = 0;
+
       if (isPointerLocked) {
-        if (freeFlyMode) {
-          yaw -= e.movementX * mouseSensitivity;
-          pitch -= e.movementY * mouseSensitivity;
-          pitch = Math.max(-Math.PI / 2.05, Math.min(Math.PI / 2.05, pitch));
-          return;
+        dx = (typeof e.movementX === 'number' && !isNaN(e.movementX)) ? e.movementX : 0;
+        dy = (typeof e.movementY === 'number' && !isNaN(e.movementY)) ? e.movementY : 0;
+      } else {
+        if (lastClientX !== null && lastClientY !== null) {
+          dx = e.clientX - lastClientX;
+          dy = e.clientY - lastClientY;
+          if (Math.abs(dx) > 250 || Math.abs(dy) > 250) { dx = 0; dy = 0; }
         }
-        const sens = player.isADS ? mouseSensitivity * 0.5 : mouseSensitivity;
-        yaw -= e.movementX * sens;
-        pitch -= e.movementY * sens;
-        pitch = Math.max(-Math.PI / 2.1, Math.min(Math.PI / 2.1, pitch));
-
-        // Procedural weapon sway inertia
-        gunSwayYaw = THREE.MathUtils.clamp(gunSwayYaw - e.movementX * 0.0006, -0.06, 0.06);
-        gunSwayPitch = THREE.MathUtils.clamp(gunSwayPitch - e.movementY * 0.0006, -0.05, 0.05);
-      } else if (isMouseDown && isPlayerControlActive()) {
-        // Fallback: mouse drag to look around seamlessly even without pointer lock!
-        const dx = e.clientX - lastMouseX;
-        const dy = e.clientY - lastMouseY;
-        lastMouseX = e.clientX;
-        lastMouseY = e.clientY;
-
-        const sens = (player.isADS ? mouseSensitivity * 0.5 : mouseSensitivity) * 1.5;
-        yaw -= dx * sens;
-        pitch -= dy * sens;
-        pitch = Math.max(-Math.PI / 2.1, Math.min(Math.PI / 2.1, pitch));
-
-        gunSwayYaw = THREE.MathUtils.clamp(gunSwayYaw - dx * 0.0006, -0.06, 0.06);
-        gunSwayPitch = THREE.MathUtils.clamp(gunSwayPitch - dy * 0.0006, -0.05, 0.05);
+        lastClientX = e.clientX;
+        lastClientY = e.clientY;
       }
+
+      if (dx === 0 && dy === 0) return;
+
+      if (freeFlyMode) {
+        yaw -= dx * mouseSensitivity;
+        pitch -= dy * mouseSensitivity;
+        pitch = Math.max(-Math.PI / 2.05, Math.min(Math.PI / 2.05, pitch));
+        return;
+      }
+
+      const sens = player.isADS ? mouseSensitivity * 0.5 : mouseSensitivity;
+      yaw -= dx * sens;
+      pitch -= dy * sens;
+      pitch = Math.max(-Math.PI / 2.1, Math.min(Math.PI / 2.1, pitch));
+
+      gunSwayYaw = THREE.MathUtils.clamp(gunSwayYaw - dx * 0.0006, -0.06, 0.06);
+      gunSwayPitch = THREE.MathUtils.clamp(gunSwayPitch - dy * 0.0006, -0.05, 0.05);
+    });
+
+    window.addEventListener('mouseleave', () => {
+      lastClientX = null;
+      lastClientY = null;
     });
     window.addEventListener('contextmenu', e => e.preventDefault());
 
@@ -5502,7 +6069,7 @@
       const bm = document.getElementById('buy-menu');
       if (bm.style.display === 'flex') {
         bm.style.display = 'none';
-        canvas.requestPointerLock();
+        requestGamePointerLock();
       } else {
         bm.style.display = 'flex';
         document.getElementById('buy-credits-display').innerText = `크레딧: ${player.credits} ¤`;
@@ -5511,8 +6078,25 @@
     }
     document.getElementById('btn-close-buy').addEventListener('click', () => {
       document.getElementById('buy-menu').style.display = 'none';
-      canvas.requestPointerLock();
+      requestGamePointerLock();
     });
+
+    window.buyWeapon = function(wpn) {
+      if (!WEAPONS[wpn]) return;
+      const cost = WEAPONS[wpn].cost;
+      if (player.credits >= cost) {
+        player.credits -= cost;
+        switchWeapon(wpn);
+        const credElem = document.getElementById('buy-credits-display');
+        if (credElem) credElem.innerText = `크레딧: ${player.credits} ¤`;
+        document.querySelectorAll('.weapon-card').forEach(c => {
+          c.classList.toggle('active-weapon', c.getAttribute('data-wpn') === wpn);
+        });
+        showToast(`${WEAPONS[wpn].name} 장착 완료 (- ${cost}¤)`);
+      } else {
+        showToast('크레딧이 부족합니다!');
+      }
+    };
 
     document.querySelectorAll('.weapon-card').forEach(card => {
       card.addEventListener('click', () => {
@@ -5675,7 +6259,7 @@
       if (!modal) return;
       if (modal.style.display === 'flex') {
         modal.style.display = 'none';
-        canvas.requestPointerLock();
+        requestGamePointerLock();
       } else {
         document.exitPointerLock();
         modal.style.display = 'flex';
@@ -5686,7 +6270,7 @@
     function sendRadioCommand(cmd) {
       const modal = document.getElementById('radio-wheel-modal');
       if (modal) modal.style.display = 'none';
-      canvas.requestPointerLock();
+      requestGamePointerLock();
       sound.playPing();
 
       const myAgent = lobbySlots[myTeam][mySlotIdx].agent;
@@ -5913,7 +6497,7 @@
       gunGroup.visible = true;
       renderTopAgentsBar();
       updateHUD();
-      canvas.requestPointerLock();
+      requestGamePointerLock();
     }
 
     document.getElementById('takeover-prompt').addEventListener('click', executeTakeover);
@@ -6029,7 +6613,7 @@
         updateHUD();
         updatePlayPrompt();
         if (isPlayerControlActive()) {
-          canvas.requestPointerLock();
+          requestGamePointerLock();
         }
       }, 4000);
     }
@@ -6117,14 +6701,19 @@
       pitch = Math.max(-Math.PI / 2.1, Math.min(Math.PI / 2.1, pitch));
       recoilOffset += currentWeapon.recoilGain;
 
-      const rayDir = new THREE.Vector3(
-        (Math.random() - 0.5) * spread,
-        (Math.random() - 0.5) * spread,
-        -1
-      ).normalize().applyQuaternion(camera.quaternion);
+      const pellets = currentWeapon.pellets || 1;
+      for (let pIdx = 0; pIdx < pellets; pIdx++) {
+        const curSpread = (currentWeapon.isShotgun ? spread * 1.8 : spread);
+        const rayDir = new THREE.Vector3(
+          (Math.random() - 0.5) * curSpread,
+          (Math.random() - 0.5) * curSpread,
+          -1
+        ).normalize().applyQuaternion(camera.quaternion);
 
-      const raycaster = new THREE.Raycaster(camera.position, rayDir, 0.1, 280);
-      createBulletTracer(camera.position, rayDir);
+        const raycaster = new THREE.Raycaster(camera.position, rayDir, 0.1, 280);
+        if (pIdx === 0 || currentWeapon.isShotgun) {
+          createBulletTracer(camera.position, rayDir);
+        }
 
       // Check practice targets on Range
       for (let pBot of practiceBots) {
@@ -6221,6 +6810,7 @@
         createBulletHoleDecal(firstWall.point, firstWall.face.normal);
         spawnImpactSparks(firstWall.point, firstWall.face.normal, false);
       }
+      } // End pellet loop
     }
 
     
@@ -7879,7 +8469,7 @@
       document.getElementById('crosshair-container').style.display = 'block';
       updateHUD();
       updatePlayPrompt();
-      canvas.requestPointerLock();
+      requestGamePointerLock();
       showToast('새 경기 시작! 건투를 빕니다.');
       radioVoice.speak('Let us do this!');
     });
@@ -7914,10 +8504,14 @@
       applyCrosshairSettings();
       updateHUD();
       updatePlayPrompt();
-      canvas.requestPointerLock();
+      requestGamePointerLock();
     });
 
     let lastTime = performance.now();
+    let fpsFrames = 0;
+    let fpsLastSec = performance.now();
+    let fpsDisplayVal = 144;
+    let frameTimeMsVal = 6.9;
     let enemyShotTimer = 0;
 
     function animate() {
@@ -7925,9 +8519,32 @@
 
       try {
         const now = performance.now();
+
+        // FPS Limiter Throttle Check
+        const fpsLimitSelect = document.getElementById('cfg-fps-limit');
+        const maxFpsSetting = fpsLimitSelect ? parseInt(fpsLimitSelect.value, 10) : 144;
+        if (maxFpsSetting > 0) {
+          const minFrameDelta = 1000 / maxFpsSetting;
+          if (now - lastTime < minFrameDelta - 0.5) {
+            return;
+          }
+        }
       const rawDt = Math.min((now - lastTime) / 1000, 0.1);
       const dt = rawDt * gameTimeScale;
       lastTime = now;
+
+      // Real-time FPS & latency counter
+      fpsFrames++;
+      if (now - fpsLastSec >= 500) {
+        fpsDisplayVal = Math.round((fpsFrames * 1000) / (now - fpsLastSec));
+        frameTimeMsVal = (rawDt * 1000).toFixed(1);
+        fpsFrames = 0;
+        fpsLastSec = now;
+        const perfElem = document.getElementById('perf-hud');
+        if (perfElem) {
+          perfElem.innerText = `${fpsDisplayVal} FPS // ${frameTimeMsVal}ms`;
+        }
+      }
 
       // Animate Active 3D Finisher Monuments
       finisherObjects.forEach(f => {
