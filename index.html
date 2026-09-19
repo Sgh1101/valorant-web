@@ -3936,7 +3936,7 @@
     const myClientId = 'user_' + Math.random().toString(36).substring(2, 8);
     const networkChannel = new BroadcastChannel('VALORANT_5V5_NET');
 
-    const MAP_LIST = ['ascent', 'bind', 'haven', 'icebox', 'split', 'lotus', 'breeze', 'sunset', 'pearl', 'fracture', 'abyss', 'district', 'drift', 'glitch', 'kasbah', 'piazza', 'bastion', 'colosseum', 'corrode', 'sanctum', 'zenith', 'subzero', 'oasis', 'eclipse', 'magma', 'cyberia', 'overgrowth', 'aerodrome', 'catacomb', 'solarium', 'citadel', 'foundry', 'chronos', 'monsoon', 'monolith', 'aurora', 'nexus', 'mirage', 'abyssal', 'inferno', 'vortex', 'celestial', 'canyon', 'necropolis', 'zen', 'reactor', 'horizon', 'valhalla', 'shangrila', 'atlantis', 'titan', 'olympus', 'matrix', 'range'];
+    const MAP_LIST = ['ascent', 'bind', 'haven', 'icebox', 'split', 'lotus', 'breeze', 'sunset', 'pearl', 'fracture', 'abyss', 'district', 'drift', 'glitch', 'kasbah', 'piazza', 'bastion', 'colosseum', 'corrode', 'sanctum', 'zenith', 'subzero', 'oasis', 'eclipse', 'magma', 'cyberia', 'overgrowth', 'aerodrome', 'catacomb', 'solarium', 'citadel', 'foundry', 'chronos', 'monsoon', 'monolith', 'aurora', 'nexus', 'mirage', 'abyssal', 'inferno', 'vortex', 'celestial', 'canyon', 'necropolis', 'zen', 'reactor', 'horizon', 'valhalla', 'shangrila', 'atlantis', 'titan', 'olympus', 'matrix', 'singularity', 'neo_tokyo', 'shrine', 'sandstorm', 'cybervault', 'abyss_deep', 'range'];
     const MAP_NAMES = {
       ascent: 'ASCENT (어센트) - 베네치아 요새 & 전동 셔터 도어 [F]',
       bind: 'BIND (바인드) - 모로코 사막 & 차원 이동 텔레포터',
@@ -3991,6 +3991,12 @@
       titan: 'TITAN (타이탄) - 토성 위성 타이탄 메탄 호수 채굴 기지 & 메탄 제트 로켓 도약 [F]',
       olympus: 'OLYMPUS (올림포스) - 그리스 판테온 공중 신전 & 제우스 번개 텔레포트 [F]',
       matrix: 'MATRIX (매트릭스) - 네오 사이버 가상현실 데이터 정글 & 디지털 글리치 코드 터널 [F]',
+      singularity: 'SINGULARITY (싱귤래리티) - 블랙홀 사건의 지평선 연구소 & 중력 왜곡 부유 회랑 [F]',
+      neo_tokyo: 'NEO TOKYO (네오 도쿄) - 시부야 네온 루프탑 & 옥상 헬리패드 & 초고속 짚라인 [F]',
+      shrine: 'SHRINE (슈라인) - 교토 붉은 토리이 터널 & 벚꽃 정원 호수 & 차원 종각 [F]',
+      sandstorm: 'SANDSTORM (샌드스톰) - 이집트 거대 모래폭풍 피라미드 내부 & 모래 기류 슬라이드 [F]',
+      cybervault: 'CYBERVAULT (사이버볼트) - 스위스 알프스 지하 라디어나이트 초고보안 금고 & 양자 레이저 차단문 [F]',
+      abyss_deep: 'ABYSS DEEP (어비스 딥) - 대서양 해저 심연 참호 & 수압 충격파 간헐천 [F]',
       range: 'THE RANGE (사격장) - 사격 훈련장 & 봇 연습'
     };
     let currentMapIndex = 0;
@@ -7861,101 +7867,299 @@
        PHASE 34: PROCEDURAL TACTICAL MAP EXPANSION & DENSE STRUCTURES
        Adds 40+ tactical covers, mid corridors, sniper nests, and flank routes per map
        ========================================================== */
+    /* ==========================================================
+       PHASE 35: 6 DISTINCT ARCHITECTURAL ARCHETYPES (EXTREME DIVERSITY)
+       Every map gets a unique tactical layout based on its theme archetype
+       ========================================================== */
     function injectExtendedStructures(mapKey) {
       if (mapKey === 'range') return;
 
-      // Select theme materials based on map identity
+      // Theme materials
       let wallMat = matWallStone;
       let coverMat = matConcrete;
       let accentMat = matRadianiteBox;
 
-      if (['bind', 'kasbah', 'oasis', 'solarium', 'canyon', 'mirage', 'sanctum'].includes(mapKey)) {
+      if (['bind', 'kasbah', 'oasis', 'solarium', 'canyon', 'mirage', 'sanctum', 'sandstorm'].includes(mapKey)) {
         wallMat = matSandstone;
         coverMat = matSandstone;
-      } else if (['haven', 'zen', 'lotus', 'monsoon', 'shangrila'].includes(mapKey)) {
+      } else if (['haven', 'zen', 'lotus', 'monsoon', 'shangrila', 'shrine'].includes(mapKey)) {
         wallMat = matWoodPagoda;
         coverMat = matTrimStone;
-      } else if (['icebox', 'subzero', 'aurora', 'bastion'].includes(mapKey)) {
+      } else if (['icebox', 'subzero', 'aurora', 'bastion', 'cybervault'].includes(mapKey)) {
         wallMat = matConcrete;
         coverMat = matTrimStone;
-      } else if (['district', 'drift', 'glitch', 'matrix', 'cyberia', 'nexus'].includes(mapKey)) {
+      } else if (['district', 'drift', 'glitch', 'matrix', 'cyberia', 'nexus', 'neo_tokyo'].includes(mapKey)) {
         wallMat = matDarkTile;
         coverMat = matConcrete;
         accentMat = matRadianiteBox;
-      } else if (['colosseum', 'olympus', 'atlantis'].includes(mapKey)) {
+      } else if (['colosseum', 'olympus', 'atlantis', 'abyss_deep', 'singularity'].includes(mapKey)) {
         wallMat = matTrimStone;
         coverMat = matSandstone;
-      } else {
-        wallMat = matWallStone;
-        coverMat = matConcrete;
       }
 
-      // 1. Mid Lane Tactical Complex (Courtyard buildings & arches)
-      addBox(0, 3.5, 0, 14, 7, 10, wallMat);
-      addArch(0, 0, -6, 4.5, 5, 1.8, wallMat);
-      addArch(0, 0, 6, 4.5, 5, 1.8, wallMat);
-      addBox(11, 2.5, 2, 5, 5, 6, wallMat);
-      addBox(-11, 2.5, 2, 5, 5, 6, wallMat);
-      addArch(11, 0, -1.5, 3, 4, 1.2, wallMat);
-      addArch(-11, 0, -1.5, 3, 4, 1.2, wallMat);
+      // ====================================================================
+      // ARCHETYPE 1: VERTICAL FORTRESS (입체 요새형 고저차 3층 구조 & 공중 회랑)
+      // ====================================================================
+      if (['split', 'icebox', 'subzero', 'bastion', 'corrode', 'chronos', 'foundry', 'reactor', 'aerodrome', 'cybervault'].includes(mapKey)) {
+        // High Skybridge at Mid (y = 5.2m)
+        addPlatform(0, 0, 0, 28, 5.2, 8, wallMat);
+        addRailing(0, 5.2, -4, 28, 'x');
+        addRailing(0, 5.2, 4, 28, 'x');
+        addStairs(16, -14, 0, 3.2, 5.2, 14, 14, 'z-');
+        addStairs(-16, 14, 0, 3.2, 5.2, 14, 14, 'z+');
 
-      // Mid Radianite peeking crates
-      addBox(5, 1.4, 12, 2.8, 2.8, 2.8, accentMat);
-      addBox(-5, 1.4, 12, 2.8, 2.8, 2.8, accentMat);
-      addBox(0, 1.2, -14, 5, 2.4, 2.4, coverMat);
+        // Industrial Shipping Containers Stacked at Mid
+        addBox(-6, 2.5, -12, 5, 5, 12, coverMat);
+        addBox(6, 2.5, 12, 5, 5, 12, coverMat);
+        addBox(-6, 6.2, -12, 4.5, 2.4, 10, accentMat);
 
-      // 2. East Flank Corridor (Lane cover & arches)
-      addBox(38, 3, 0, 2, 6, 36, wallMat);
-      addArch(38, 0, -12, 3.5, 4.5, 1.5, wallMat);
-      addArch(38, 0, 12, 3.5, 4.5, 1.5, wallMat);
-      addCrateStack(35, -4, 2.2);
-      addCrateStack(35, 16, 1.8);
-      addBox(34, 1.2, -22, 3, 2.4, 3, coverMat);
+        // Multi-tier Catwalks along Flanks
+        addPlatform(42, 0, -10, 8, 4.2, 28, wallMat);
+        addRailing(37.9, 4.2, -10, 28, 'z');
+        addStairs(42, 6, 0, 3.2, 4.2, 11, 11, 'z+');
 
-      // 3. West Flank Corridor (Lane cover & arches)
-      addBox(-38, 3, 0, 2, 6, 36, wallMat);
-      addArch(-38, 0, -12, 3.5, 4.5, 1.5, wallMat);
-      addArch(-38, 0, 12, 3.5, 4.5, 1.5, wallMat);
-      addCrateStack(-35, -4, 2.2);
-      addCrateStack(-35, 16, 1.8);
-      addBox(-34, 1.2, -22, 3, 2.4, 3, coverMat);
+        addPlatform(-42, 0, 10, 8, 4.2, 28, wallMat);
+        addRailing(-37.9, 4.2, 10, 28, 'z');
+        addStairs(-42, -6, 0, 3.2, 4.2, 11, 11, 'z-');
 
-      // 4. Elevated Sniper Vantage Towers (East & West)
-      addPlatform(42, 0, -26, 8, 4.2, 8, wallMat);
-      addStairs(42, -15, 0, 3.2, 4.2, 11, 11, 'z-');
-      addRailing(37.9, 4.2, -26, 8, 'z');
+        // Lower Subterranean Trench Cover
+        addBox(20, 1.2, -22, 4, 2.4, 4, coverMat);
+        addBox(-20, 1.2, -22, 4, 2.4, 4, coverMat);
+        addCrateStack(28, 14, 2.2);
+        addCrateStack(-28, -14, 2.2);
 
-      addPlatform(-42, 0, -26, 8, 4.2, 8, wallMat);
-      addStairs(-42, -15, 0, 3.2, 4.2, 11, 11, 'z-');
-      addRailing(-37.9, 4.2, -26, 8, 'z');
+        // Spawn Bunkers
+        addBox(16, 2, 34, 6, 4, 3, wallMat);
+        addBox(-16, 2, 34, 6, 4, 3, wallMat);
+        addBox(0, 1.5, -36, 8, 3, 2, coverMat);
+      }
 
-      // 5. Site Reinforcements (Tactical barricades & cover crates)
-      addBox(22, 1.5, -16, 3.2, 3, 3.2, coverMat);
-      addBox(34, 2, -10, 2, 4, 6, wallMat);
-      addCrateStack(26, -6, 2.0);
-      addBox(16, 1.2, -28, 4, 2.4, 2, accentMat);
+      // ====================================================================
+      // ARCHETYPE 2: TRIPLE SITE MEGAPLAZA (3대 사이트 광역 원형 광장 & 회랑)
+      // ====================================================================
+      else if (['haven', 'lotus', 'solarium', 'piazza', 'monsoon', 'shangrila', 'zenith', 'valhalla', 'sanctum', 'shrine'].includes(mapKey)) {
+        // Central Rotunda Pavilion with 4 Arches at Mid
+        addBox(0, 4.5, 0, 16, 1, 16, wallMat); // Roof
+        addArch(0, 0, -8, 6, 4.5, 1.5, wallMat);
+        addArch(0, 0, 8, 6, 4.5, 1.5, wallMat);
+        addArch(-8, 0, 0, 1.5, 4.5, 6, wallMat);
+        addArch(8, 0, 0, 1.5, 4.5, 6, wallMat);
 
-      addBox(-22, 1.5, -16, 3.2, 3, 3.2, coverMat);
-      addBox(-34, 2, -10, 2, 4, 6, wallMat);
-      addCrateStack(-26, -6, 2.0);
-      addBox(-16, 1.2, -28, 4, 2.4, 2, accentMat);
+        // Decorative Pagoda Pillars & Altar in Rotunda Center
+        addBox(0, 1.2, 0, 4, 2.4, 4, accentMat);
+        [[-6,-6], [6,-6], [-6,6], [6,6]].forEach(([cx, cz]) => {
+          addBox(cx, 2.2, cz, 1.5, 4.5, 1.5, wallMat);
+        });
 
-      // 6. Spawn Staging Barricades
-      addBox(14, 1.5, 30, 4, 3, 2, coverMat);
-      addBox(-14, 1.5, 30, 4, 3, 2, coverMat);
-      addCrateStack(0, 34, 2.0);
-      addPlatform(0, 0, 42, 32, 0.4, 12, coverMat);
+        // Curving Outer Colonnades (Flanks)
+        [36, -36].forEach(fx => {
+          addBox(fx, 3, -12, 2, 6, 24, wallMat);
+          addArch(fx, 0, -20, 3.5, 4.5, 1.2, wallMat);
+          addArch(fx, 0, -4, 3.5, 4.5, 1.2, wallMat);
+          addPlatform(fx, 0, 8, 8, 3.5, 8, coverMat);
+          addStairs(fx, -1, 0, 3, 3.5, 9, 9, 'z-');
+        });
 
-      addBox(12, 1.5, -34, 4, 3, 2, coverMat);
-      addBox(-12, 1.5, -34, 4, 3, 2, coverMat);
-      addCrateStack(0, -36, 1.8);
-      addPlatform(0, 0, -42, 32, 0.4, 12, coverMat);
+        // Triple Site Barricades
+        addBox(24, 1.5, -24, 4, 3, 4, coverMat);
+        addBox(-24, 1.5, -24, 4, 3, 4, coverMat);
+        addCrateStack(0, -22, 2.0); // Center site / mid
+        addCrateStack(32, -6, 2.0);
+        addCrateStack(-32, -6, 2.0);
 
-      // 7. Tactical Pillars for Peeking
-      [18, -18].forEach(px => {
-        addBox(px, 3.5, 10, 1.6, 7, 1.6, wallMat);
-        addBox(px, 3.5, -10, 1.6, 7, 1.6, wallMat);
-      });
+        // Plaza Fountain & Garden Platforms
+        addPlatform(0, 0, 24, 20, 0.6, 10, coverMat);
+        addPlatform(0, 0, -24, 20, 0.6, 10, coverMat);
+      }
+
+      // ====================================================================
+      // ARCHETYPE 3: WIDE OPEN ATOLL (초광활 원거리 저격 & 해안/사막 피라미드)
+      // ====================================================================
+      else if (['breeze', 'drift', 'horizon', 'atlantis', 'canyon', 'oasis', 'mirage', 'kasbah', 'titan', 'sandstorm'].includes(mapKey)) {
+        // Grand Stepped Pyramid Monument at Mid
+        addPlatform(0, 0, 0, 22, 1.2, 22, wallMat);
+        addPlatform(0, 1.2, 0, 16, 1.2, 16, wallMat);
+        addPlatform(0, 2.4, 0, 10, 1.2, 10, wallMat);
+        addBox(0, 4.5, 0, 4, 2.0, 4, accentMat); // Top rad apex
+
+        // Long-range Sniper Vantage Towers
+        addPlatform(46, 0, -28, 9, 5.0, 9, wallMat);
+        addStairs(46, -16, 0, 3.5, 5.0, 12, 12, 'z-');
+        addRailing(41.4, 5.0, -28, 9, 'z');
+
+        addPlatform(-46, 0, -28, 9, 5.0, 9, wallMat);
+        addStairs(-46, -16, 0, 3.5, 5.0, 12, 12, 'z-');
+        addRailing(-41.4, 5.0, -28, 9, 'z');
+
+        // Desert / Coastal Broken Aqueduct Walls
+        addBox(30, 2.5, 6, 2, 5, 28, wallMat);
+        addArch(30, 0, -4, 4, 4, 1.5, wallMat);
+        addArch(30, 0, 14, 4, 4, 1.5, wallMat);
+
+        addBox(-30, 2.5, 6, 2, 5, 28, wallMat);
+        addArch(-30, 0, -4, 4, 4, 1.5, wallMat);
+        addArch(-30, 0, 14, 4, 4, 1.5, wallMat);
+
+        // Scatter Dunes & Beach Cabana Crates
+        addCrateStack(18, 18, 2.4);
+        addCrateStack(-18, 18, 2.4);
+        addCrateStack(20, -18, 2.2);
+        addCrateStack(-20, -18, 2.2);
+        addBox(0, 1.2, 34, 8, 2.4, 3, coverMat);
+      }
+
+      // ====================================================================
+      // ARCHETYPE 4: NEO CYBER LABYRINTH (사이버 네오 미로 & 고속 골목)
+      // ====================================================================
+      else if (['district', 'matrix', 'glitch', 'cyberia', 'nexus', 'monolith', 'eclipse', 'neo_tokyo'].includes(mapKey)) {
+        // High-Density Cyber Chicanes & Server Towers at Mid
+        addBox(-8, 4, 0, 3, 8, 18, wallMat);
+        addBox(8, 4, 0, 3, 8, 18, wallMat);
+        addArch(0, 0, -8, 6, 4.5, 1.5, wallMat);
+        addArch(0, 0, 8, 6, 4.5, 1.5, wallMat);
+
+        // Radiant Tech Cores in Mid Alley
+        addBox(0, 2, 0, 3, 4, 3, accentMat);
+        addBox(-4, 1.2, 12, 2.4, 2.4, 2.4, accentMat);
+        addBox(4, 1.2, -12, 2.4, 2.4, 2.4, accentMat);
+
+        // Angled Wall-run Corridors along Flanks
+        addBox(40, 3.5, -4, 2, 7, 32, wallMat);
+        addBox(34, 3.5, 14, 2, 7, 24, wallMat);
+        addArch(37, 0, 1, 4, 4.5, 1.5, wallMat);
+
+        addBox(-40, 3.5, -4, 2, 7, 32, wallMat);
+        addBox(-34, 3.5, 14, 2, 7, 24, wallMat);
+        addArch(-37, 0, 1, 4, 4.5, 1.5, wallMat);
+
+        // Cyber Platforms & Rooftop Peeks
+        addPlatform(42, 0, -28, 8, 4.0, 8, coverMat);
+        addStairs(42, -18, 0, 3.2, 4.0, 10, 10, 'z-');
+        addPlatform(-42, 0, -28, 8, 4.0, 8, coverMat);
+        addStairs(-42, -18, 0, 3.2, 4.0, 10, 10, 'z-');
+
+        // Neon Barrier Dividers
+        addBox(18, 1.5, -20, 2, 3, 8, coverMat);
+        addBox(-18, 1.5, -20, 2, 3, 8, coverMat);
+        addCrateStack(26, 8, 2.0);
+        addCrateStack(-26, 8, 2.0);
+      }
+
+      // ====================================================================
+      // ARCHETYPE 5: ANCIENT SANCTUARY CATACOMB (고대 지하 묘실 & 웅장한 석기둥)
+      // ====================================================================
+      else if (['catacomb', 'necropolis', 'zen', 'abyssal', 'inferno', 'magma', 'olympus', 'vortex', 'celestial', 'abyss_deep', 'singularity'].includes(mapKey)) {
+        // Vaulted Crypt Great Hall with Massive Columns
+        [-14, 14].forEach(cx => {
+          [-16, 0, 16].forEach(cz => {
+            addBox(cx, 4.5, cz, 2.4, 9, 2.4, wallMat); // Massive 9m stone pillars
+          });
+          addBox(cx, 9.2, 0, 2.4, 1, 36, wallMat); // Overhead crossbeams
+        });
+
+        // Central Altar Chamber
+        addPlatform(0, 0, 0, 14, 1.0, 14, wallMat);
+        addBox(0, 2.0, 0, 4, 2.0, 4, accentMat); // Ritual relic box
+        addArch(0, 0, -10, 5, 5, 2, wallMat);
+        addArch(0, 0, 10, 5, 5, 2, wallMat);
+
+        // Chasm Flank Walls & Narrow Crossing Bridges
+        addBox(38, 3.5, 0, 2.5, 7, 34, wallMat);
+        addArch(38, 0, -10, 3.5, 4.5, 1.5, wallMat);
+        addArch(38, 0, 10, 3.5, 4.5, 1.5, wallMat);
+
+        addBox(-38, 3.5, 0, 2.5, 7, 34, wallMat);
+        addArch(-38, 0, -10, 3.5, 4.5, 1.5, wallMat);
+        addArch(-38, 0, 10, 3.5, 4.5, 1.5, wallMat);
+
+        // Elevated Priest / Sniper Balconies
+        addPlatform(40, 0, -26, 8, 4.5, 8, wallMat);
+        addStairs(40, -16, 0, 3, 4.5, 10, 10, 'z-');
+        addRailing(35.9, 4.5, -26, 8, 'z');
+
+        addPlatform(-40, 0, -26, 8, 4.5, 8, wallMat);
+        addStairs(-40, -16, 0, 3, 4.5, 10, 10, 'z-');
+        addRailing(-35.9, 4.5, -26, 8, 'z');
+
+        // Crypt Sarcophagus Cover
+        addBox(20, 1.4, -18, 5, 2.8, 3, coverMat);
+        addBox(-20, 1.4, -18, 5, 2.8, 3, coverMat);
+        addCrateStack(26, 14, 2.0);
+        addCrateStack(-26, 14, 2.0);
+      }
+
+      // ====================================================================
+      // ARCHETYPE 6: TACTICAL CLASSIC COMPETITIVE (정통 대회형 3-레인 아레나)
+      // ====================================================================
+      else {
+        // Maps: ascent, bind, sunset, pearl, fracture, abyss, colosseum, overgrowth, citadel, aurora
+        // Mid Courtyard Building & Market Archway
+        addBox(0, 3.5, 0, 14, 7, 10, wallMat);
+        addArch(0, 0, -6, 4.5, 5, 1.8, wallMat);
+        addArch(0, 0, 6, 4.5, 5, 1.8, wallMat);
+        addBox(11, 2.5, 2, 5, 5, 6, wallMat);
+        addBox(-11, 2.5, 2, 5, 5, 6, wallMat);
+        addArch(11, 0, -1.5, 3, 4, 1.2, wallMat);
+        addArch(-11, 0, -1.5, 3, 4, 1.2, wallMat);
+
+        // Mid Radianite peeking crates
+        addBox(5, 1.4, 12, 2.8, 2.8, 2.8, accentMat);
+        addBox(-5, 1.4, 12, 2.8, 2.8, 2.8, accentMat);
+        addBox(0, 1.2, -14, 5, 2.4, 2.4, coverMat);
+
+        // East Flank Corridor (Lane cover & arches)
+        addBox(38, 3, 0, 2, 6, 36, wallMat);
+        addArch(38, 0, -12, 3.5, 4.5, 1.5, wallMat);
+        addArch(38, 0, 12, 3.5, 4.5, 1.5, wallMat);
+        addCrateStack(35, -4, 2.2);
+        addCrateStack(35, 16, 1.8);
+        addBox(34, 1.2, -22, 3, 2.4, 3, coverMat);
+
+        // West Flank Corridor (Lane cover & arches)
+        addBox(-38, 3, 0, 2, 6, 36, wallMat);
+        addArch(-38, 0, -12, 3.5, 4.5, 1.5, wallMat);
+        addArch(-38, 0, 12, 3.5, 4.5, 1.5, wallMat);
+        addCrateStack(-35, -4, 2.2);
+        addCrateStack(-35, 16, 1.8);
+        addBox(-34, 1.2, -22, 3, 2.4, 3, coverMat);
+
+        // Elevated Sniper Vantage Towers (East & West)
+        addPlatform(42, 0, -26, 8, 4.2, 8, wallMat);
+        addStairs(42, -15, 0, 3.2, 4.2, 11, 11, 'z-');
+        addRailing(37.9, 4.2, -26, 8, 'z');
+
+        addPlatform(-42, 0, -26, 8, 4.2, 8, wallMat);
+        addStairs(-42, -15, 0, 3.2, 4.2, 11, 11, 'z-');
+        addRailing(-37.9, 4.2, -26, 8, 'z');
+
+        // Site Reinforcements
+        addBox(22, 1.5, -16, 3.2, 3, 3.2, coverMat);
+        addBox(34, 2, -10, 2, 4, 6, wallMat);
+        addCrateStack(26, -6, 2.0);
+        addBox(16, 1.2, -28, 4, 2.4, 2, accentMat);
+
+        addBox(-22, 1.5, -16, 3.2, 3, 3.2, coverMat);
+        addBox(-34, 2, -10, 2, 4, 6, wallMat);
+        addCrateStack(-26, -6, 2.0);
+        addBox(-16, 1.2, -28, 4, 2.4, 2, accentMat);
+
+        // Spawn Staging Barricades
+        addBox(14, 1.5, 30, 4, 3, 2, coverMat);
+        addBox(-14, 1.5, 30, 4, 3, 2, coverMat);
+        addCrateStack(0, 34, 2.0);
+        addPlatform(0, 0, 42, 32, 0.4, 12, coverMat);
+
+        addBox(12, 1.5, -34, 4, 3, 2, coverMat);
+        addBox(-12, 1.5, -34, 4, 3, 2, coverMat);
+        addCrateStack(0, -36, 1.8);
+        addPlatform(0, 0, -42, 32, 0.4, 12, coverMat);
+
+        // Tactical Pillars
+        [18, -18].forEach(px => {
+          addBox(px, 3.5, 10, 1.6, 7, 1.6, wallMat);
+          addBox(px, 3.5, -10, 1.6, 7, 1.6, wallMat);
+        });
+      }
     }
 
     function build5v5Map(mapKey) {
@@ -11659,6 +11863,117 @@
 
         addPlatform(0, 0, 42, 42, 0.5, 16, matGridFloor);
         addPlatform(0, 0, -42, 42, 0.5, 16, matGridFloor);
+      }
+      else if (mapKey === 'singularity') {
+        // MAP 54: SINGULARITY (싱귤래리티) - 블랙홀 연구소 & 부유 중력 회랑 [F]
+        const matVoidDark = new THREE.MeshStandardMaterial({ color: 0x120024, roughness: 0.3, metalness: 0.9 });
+        const matEventHorizon = new THREE.MeshBasicMaterial({ color: 0xab47bc });
+        addBox(0, -0.5, 0, 120, 1, 120, matVoidDark);
+        addBox(0, 7, -60, 120, 14, 2, matVoidDark);
+        addBox(0, 7, 60, 120, 14, 2, matVoidDark);
+        addBox(-60, 7, 0, 2, 14, 120, matVoidDark);
+        addBox(60, 7, 0, 2, 14, 120, matVoidDark);
+
+        const padMesh = addPlatform(0, 0, 0, 8, 0.4, 8, matEventHorizon, true);
+        const singHolo = new THREE.Mesh(new THREE.TorusGeometry(3.6, 0.4, 8, 24), matEventHorizon);
+        singHolo.rotation.x = Math.PI / 2.2;
+        singHolo.position.set(0, 1.4, 0);
+        scene.add(singHolo); mapObjects.push(singHolo);
+        addTextBillboard(0, 2.8, 0, '[F] 중력 왜곡 부유 회랑 (GRAVITY WARP)', 1.5, '#e1bee7');
+
+        addPlatform(30, 0, -20, 24, 0.5, 24, matSiteFloor);
+        spikeSiteAreas.push({ minX: 18, maxX: 42, minZ: -32, maxZ: -8, name: 'A SITE' });
+        addPlatform(-30, 0, -20, 24, 0.5, 24, matSiteFloor);
+        spikeSiteAreas.push({ minX: -42, maxX: -18, minZ: -32, maxZ: -8, name: 'B SITE' });
+      }
+      else if (mapKey === 'neo_tokyo') {
+        // MAP 55: NEO TOKYO (네오 도쿄) - 시부야 네온 루프탑 & 헬리패드 [F]
+        const matRooftop = new THREE.MeshStandardMaterial({ color: 0x18181b, roughness: 0.4, metalness: 0.6 });
+        const matNeonPink = new THREE.MeshStandardMaterial({ color: 0xff007f, emissive: 0xff007f, emissiveIntensity: 0.8 });
+        addBox(0, -0.5, 0, 120, 1, 120, matRooftop);
+        addBox(0, 7, -60, 120, 14, 2, matRooftop);
+        addBox(0, 7, 60, 120, 14, 2, matRooftop);
+        addBox(-60, 7, 0, 2, 14, 120, matRooftop);
+        addBox(60, 7, 0, 2, 14, 120, matRooftop);
+
+        addPlatform(0, 0, 0, 12, 0.4, 12, matNeonPink, true);
+        addTextBillboard(0, 2.4, 0, '[F] 네오 헬리패드 짚라인 (SKYLINE ZIP)', 1.5, '#ff007f');
+
+        addPlatform(30, 0, -20, 24, 0.5, 24, matSiteFloor);
+        spikeSiteAreas.push({ minX: 18, maxX: 42, minZ: -32, maxZ: -8, name: 'A SITE' });
+        addPlatform(-30, 0, -20, 24, 0.5, 24, matSiteFloor);
+        spikeSiteAreas.push({ minX: -42, maxX: -18, minZ: -32, maxZ: -8, name: 'B SITE' });
+      }
+      else if (mapKey === 'shrine') {
+        // MAP 56: SHRINE (슈라인) - 교토 토리이 터널 & 차원 종각 [F]
+        const matTatami = new THREE.MeshStandardMaterial({ color: 0x27272a, roughness: 0.8 });
+        const matToriiRed = new THREE.MeshStandardMaterial({ color: 0xd90429, roughness: 0.5 });
+        addBox(0, -0.5, 0, 120, 1, 120, matTatami);
+        addBox(0, 7, -60, 120, 14, 2, matToriiRed);
+        addBox(0, 7, 60, 120, 14, 2, matToriiRed);
+        addBox(-60, 7, 0, 2, 14, 120, matToriiRed);
+        addBox(60, 7, 0, 2, 14, 120, matToriiRed);
+
+        addPlatform(0, 0, 0, 10, 0.4, 10, matToriiRed, true);
+        addTextBillboard(0, 2.5, 0, '[F] 차원 토리이 영혼의 종각 (SOUL BELL)', 1.5, '#ff99aa');
+
+        addPlatform(30, 0, -20, 24, 0.5, 24, matSiteFloor);
+        spikeSiteAreas.push({ minX: 18, maxX: 42, minZ: -32, maxZ: -8, name: 'A SITE' });
+        addPlatform(-30, 0, -20, 24, 0.5, 24, matSiteFloor);
+        spikeSiteAreas.push({ minX: -42, maxX: -18, minZ: -32, maxZ: -8, name: 'B SITE' });
+      }
+      else if (mapKey === 'sandstorm') {
+        // MAP 57: SANDSTORM (샌드스톰) - 피라미드 내부 & 모래 슬라이드 [F]
+        const matPyramidSand = new THREE.MeshStandardMaterial({ color: 0xb45309, roughness: 0.9 });
+        addBox(0, -0.5, 0, 120, 1, 120, matPyramidSand);
+        addBox(0, 7, -60, 120, 14, 2, matPyramidSand);
+        addBox(0, 7, 60, 120, 14, 2, matPyramidSand);
+        addBox(-60, 7, 0, 2, 14, 120, matPyramidSand);
+        addBox(60, 7, 0, 2, 14, 120, matPyramidSand);
+
+        addPlatform(0, 0, 0, 14, 0.3, 6, matPyramidSand, true);
+        addTextBillboard(0, 2.5, 0, '[F] 피라미드 모래 기류 슬라이드 (SAND SLIDE)', 1.5, '#ffcc80');
+
+        addPlatform(30, 0, -20, 24, 0.5, 24, matSiteFloor);
+        spikeSiteAreas.push({ minX: 18, maxX: 42, minZ: -32, maxZ: -8, name: 'A SITE' });
+        addPlatform(-30, 0, -20, 24, 0.5, 24, matSiteFloor);
+        spikeSiteAreas.push({ minX: -42, maxX: -18, minZ: -32, maxZ: -8, name: 'B SITE' });
+      }
+      else if (mapKey === 'cybervault') {
+        // MAP 58: CYBERVAULT (사이버볼트) - 라디어나이트 초고보안 금고 [F]
+        const matVaultPlate = new THREE.MeshStandardMaterial({ color: 0x0f172a, metalness: 0.9, roughness: 0.2 });
+        const matEmeraldRadianite = new THREE.MeshBasicMaterial({ color: 0x10b981 });
+        addBox(0, -0.5, 0, 120, 1, 120, matVaultPlate);
+        addBox(0, 7, -60, 120, 14, 2, matVaultPlate);
+        addBox(0, 7, 60, 120, 14, 2, matVaultPlate);
+        addBox(-60, 7, 0, 2, 14, 120, matVaultPlate);
+        addBox(60, 7, 0, 2, 14, 120, matVaultPlate);
+
+        addPlatform(0, 0, 0, 8, 0.4, 8, matEmeraldRadianite, true);
+        addTextBillboard(0, 2.5, 0, '[F] 양자 레이저 금고 게이트 (QUANTUM GATE)', 1.5, '#34d399');
+
+        addPlatform(30, 0, -20, 24, 0.5, 24, matSiteFloor);
+        spikeSiteAreas.push({ minX: 18, maxX: 42, minZ: -32, maxZ: -8, name: 'A SITE' });
+        addPlatform(-30, 0, -20, 24, 0.5, 24, matSiteFloor);
+        spikeSiteAreas.push({ minX: -42, maxX: -18, minZ: -32, maxZ: -8, name: 'B SITE' });
+      }
+      else if (mapKey === 'abyss_deep') {
+        // MAP 59: ABYSS DEEP (어비스 딥) - 심해 참호 & 수압 충격파 [F]
+        const matTrenchBasalt = new THREE.MeshStandardMaterial({ color: 0x020617, roughness: 0.85 });
+        const matDeepAqua = new THREE.MeshBasicMaterial({ color: 0x0284c7 });
+        addBox(0, -0.5, 0, 120, 1, 120, matTrenchBasalt);
+        addBox(0, 7, -60, 120, 14, 2, matTrenchBasalt);
+        addBox(0, 7, 60, 120, 14, 2, matTrenchBasalt);
+        addBox(-60, 7, 0, 2, 14, 120, matTrenchBasalt);
+        addBox(60, 7, 0, 2, 14, 120, matTrenchBasalt);
+
+        addPlatform(0, 0, 0, 10, 0.4, 10, matDeepAqua, true);
+        addTextBillboard(0, 2.5, 0, '[F] 해저 수압 충격파 간헐천 (PRESSURE GEYSER)', 1.5, '#38bdf8');
+
+        addPlatform(30, 0, -20, 24, 0.5, 24, matSiteFloor);
+        spikeSiteAreas.push({ minX: 18, maxX: 42, minZ: -32, maxZ: -8, name: 'A SITE' });
+        addPlatform(-30, 0, -20, 24, 0.5, 24, matSiteFloor);
+        spikeSiteAreas.push({ minX: -42, maxX: -18, minZ: -32, maxZ: -8, name: 'B SITE' });
       }
       else if (mapKey === 'range') {
         addBox(0, -0.5, 0, 60, 1, 120, matConcrete);
@@ -15788,6 +16103,48 @@
         { label: 'CYBER MID', x: 0, z: 0, color: '#052e16' },
         { label: 'DEF SPAWN', x: 0, z: -42, color: '#00ffaa' },
         { label: 'ATK SPAWN', x: 0, z: 42, color: '#ff4655' }
+      ],
+      singularity: [
+        { label: 'A EVENT', x: 28, z: -24, color: '#ab47bc' },
+        { label: 'B HORIZON', x: -28, z: -24, color: '#ab47bc' },
+        { label: 'SINGULARITY', x: 0, z: 0, color: '#e1bee7' },
+        { label: 'DEF SPAWN', x: 0, z: -48, color: '#00ffaa' },
+        { label: 'ATK SPAWN', x: 0, z: 46, color: '#ff4655' }
+      ],
+      neo_tokyo: [
+        { label: 'A HELIPAD', x: 28, z: -24, color: '#ff007f' },
+        { label: 'B ROOFTOP', x: -28, z: -24, color: '#00f0ff' },
+        { label: 'SKYLINE', x: 0, z: 0, color: '#ff007f' },
+        { label: 'DEF SPAWN', x: 0, z: -48, color: '#00ffaa' },
+        { label: 'ATK SPAWN', x: 0, z: 46, color: '#ff4655' }
+      ],
+      shrine: [
+        { label: 'A TORII', x: 28, z: -24, color: '#ff4655' },
+        { label: 'B SAKURA', x: -28, z: -24, color: '#ff99aa' },
+        { label: 'SOUL BELL', x: 0, z: 0, color: '#ffd700' },
+        { label: 'DEF SPAWN', x: 0, z: -48, color: '#00ffaa' },
+        { label: 'ATK SPAWN', x: 0, z: 46, color: '#ff4655' }
+      ],
+      sandstorm: [
+        { label: 'A TOMB', x: 28, z: -24, color: '#ffc83b' },
+        { label: 'B DUNES', x: -28, z: -24, color: '#ffc83b' },
+        { label: 'SAND SLIDE', x: 0, z: 0, color: '#ffab91' },
+        { label: 'DEF SPAWN', x: 0, z: -48, color: '#00ffaa' },
+        { label: 'ATK SPAWN', x: 0, z: 46, color: '#ff4655' }
+      ],
+      cybervault: [
+        { label: 'A VAULT', x: 28, z: -24, color: '#10b981' },
+        { label: 'B ARCHIVE', x: -28, z: -24, color: '#10b981' },
+        { label: 'QUANTUM GATE', x: 0, z: 0, color: '#34d399' },
+        { label: 'DEF SPAWN', x: 0, z: -48, color: '#00ffaa' },
+        { label: 'ATK SPAWN', x: 0, z: 46, color: '#ff4655' }
+      ],
+      abyss_deep: [
+        { label: 'A TRENCH', x: 28, z: -24, color: '#0284c7' },
+        { label: 'B RIDGE', x: -28, z: -24, color: '#0284c7' },
+        { label: 'GEYSER', x: 0, z: 0, color: '#38bdf8' },
+        { label: 'DEF SPAWN', x: 0, z: -48, color: '#00ffaa' },
+        { label: 'ATK SPAWN', x: 0, z: 46, color: '#ff4655' }
       ],
       range: [
         { label: 'TARGETS', x: 0, z: -22, color: '#00f0ff' },
