@@ -5440,30 +5440,30 @@
         ]
       },
       {
-        id: "baekho", name: "백호", role: "감시자", color: "#e0e0e0", accent: "#ffffff",
-        quote: "숨어도 내 시선은 피할 수 없다.",
-        desc: "초장거리 저격과 초감각 센서로 전장을 감시하는 정밀 저격수. 벽을 꿰뚫는 관통탄을 보유했다.",
+        id: "baekho", name: "백호 (Jett)", role: "타격대", color: "#00f0ff", accent: "#e0f7fa",
+        quote: "날 따라잡아 봐!",
+        desc: "폭풍처럼 빠른 기동성과 공중 도약으로 전장을 종횡무진 유린하는 돌격형 바람의 요원.",
         abilities: [
-          { key: "Q", name: "관통 사격", cost: 200, charges: 2, cd: 0, type: "pierce", desc: "모든 지형과 벽을 관통하는 고압 레일건 탄환 발사. 적중 시 80 피해." },
-          { key: "E", name: "경계 센서", cost: 0, charges: 1, cd: 30, type: "sensor", desc: "감지 트랩 설치. 적 통과 시 6초간 실시간 노출 및 60% 둔화." },
-          { key: "C", name: "연막탄", cost: 150, charges: 2, cd: 0, type: "smoke_fast", desc: "즉시 터지는 전술 신속 연막탄 투척. 10초간 시야 차단." },
-          { key: "X", name: "응시", cost: 0, charges: 1, cd: 0, ult: 5, type: "ult_snipe", desc: "궁극기 — 모든 적의 위치를 8초간 벽 너머로 실시간 투시 및 즉발 저격 모드." }
+          { key: "C", name: "연막구", cost: 200, charges: 2, cd: 0, type: "jett_smoke", desc: "시야를 즉시 차단하는 전술 구름 연막을 전방으로 사출한다. 12초 지속." },
+          { key: "Q", name: "상승기류", cost: 150, charges: 2, cd: 0, type: "jett_updraft", desc: "돌풍을 일으켜 공중으로 높이 도약한다. 지형 극복 및 공중 사격 가능." },
+          { key: "E", name: "순풍", cost: 0, charges: 1, cd: 30, type: "jett_dash", desc: "이동 방향으로 폭풍처럼 순간 돌진한다. 고속 기동 및 회피." },
+          { key: "X", name: "칼날 폭풍", cost: 0, charges: 1, cd: 0, ult: 5, type: "jett_bladestorm", desc: "궁극기 — 5개의 신화 비수를 소환한다. 좌클릭 100% 무확산 정밀 투척(헤드샷 150 즉사, 적 처치 시 5개 비수 즉시 완충), 우클릭 비수 일제 산탄 투척." }
         ]
       }
     ];
 
     // Normalized Agent Resolver supporting both English legacy names and Korean official names
     function getAgentDef(nameOrId) {
-      if (!nameOrId) return AGENTS[0];
+      if (!nameOrId) return AGENTS[6];
       const s = String(nameOrId).toLowerCase().trim();
-      if (s === 'hwaryeong' || s === '화령' || s === 'phoenix') return AGENTS[0];
-      if (s === 'seorin' || s === '서린' || s === 'sage') return AGENTS[1];
-      if (s === 'muyeong' || s === '무영' || s === 'omen' || s === 'reyna' || s === 'fade') return AGENTS[2];
-      if (s === 'gangcheol' || s === '강철' || s === 'breach' || s === 'raze') return AGENTS[3];
-      if (s === 'yeonhwa' || s === '연화' || s === 'skye') return AGENTS[4];
-      if (s === 'noeun' || s === '노은' || s === 'killjoy' || s === 'cypher' || s === 'brimstone') return AGENTS[5];
-      if (s === 'baekho' || s === '백호' || s === 'jett' || s === 'sova' || s === 'chamber') return AGENTS[6];
-      return AGENTS.find(a => a.id === s || a.name === nameOrId) || AGENTS[0];
+      if (s === 'hwaryeong' || s === '화령' || s === 'phoenix' || s.includes('화령') || s.includes('phoenix')) return AGENTS[0];
+      if (s === 'seorin' || s === '서린' || s === 'sage' || s.includes('서린') || s.includes('sage')) return AGENTS[1];
+      if (s === 'muyeong' || s === '무영' || s === 'omen' || s === 'reyna' || s === 'fade' || s.includes('무영') || s.includes('omen')) return AGENTS[2];
+      if (s === 'gangcheol' || s === '강철' || s === 'breach' || s === 'raze' || s.includes('강철') || s.includes('raze')) return AGENTS[3];
+      if (s === 'yeonhwa' || s === '연화' || s === 'skye' || s.includes('연화') || s.includes('skye')) return AGENTS[4];
+      if (s === 'noeun' || s === '노은' || s === 'killjoy' || s === 'cypher' || s === 'brimstone' || s.includes('노은') || s.includes('killjoy')) return AGENTS[5];
+      if (s === 'baekho' || s === '백호' || s === 'jett' || s.includes('jett') || s.includes('백호') || s === 'sova' || s === 'chamber') return AGENTS[6];
+      return AGENTS.find(a => a.id === s || a.name === nameOrId || a.name.includes(nameOrId)) || AGENTS[6];
     }
 
     const lobbySlots = {
@@ -6559,15 +6559,17 @@
       renderTopAgentsBar();
 
       // Update HUD Skill labels
+      const agentDef = getAgentDef(agentName);
+      if (typeof updateSkillsHUD === 'function') updateSkillsHUD(agentDef);
       const labels = AGENT_SKILL_LABELS[agentName];
-      const slotC = document.getElementById('skill-slot-c');
-      const slotQ = document.getElementById('skill-slot-q');
-      const slotE = document.getElementById('skill-slot-e');
-      const slotX = document.getElementById('skill-slot-x');
-      if (slotC && labels) slotC.querySelector('.skill-name').innerText = labels.c;
-      if (slotQ && labels) slotQ.querySelector('.skill-name').innerText = labels.q;
-      if (slotE && labels) slotE.querySelector('.skill-name').innerText = labels.e;
-      if (slotX && labels) slotX.querySelector('.skill-name').innerText = labels.x;
+      const slotC = document.getElementById('slot-c') || document.getElementById('skill-slot-c');
+      const slotQ = document.getElementById('slot-q') || document.getElementById('skill-slot-q');
+      const slotE = document.getElementById('slot-e') || document.getElementById('skill-slot-e');
+      const slotX = document.getElementById('slot-x') || document.getElementById('skill-slot-x');
+      if (slotC && labels) { const el = slotC.querySelector('.skill-name'); if (el) el.innerText = labels.c; }
+      if (slotQ && labels) { const el = slotQ.querySelector('.skill-name'); if (el) el.innerText = labels.q; }
+      if (slotE && labels) { const el = slotE.querySelector('.skill-name'); if (el) el.innerText = labels.e; }
+      if (slotX && labels) { const el = slotX.querySelector('.skill-name'); if (el) el.innerText = labels.x; }
     }
 
     function cyclePlayableAgent() {
@@ -7315,7 +7317,7 @@
     const _vTether = new THREE.Vector3();
 
     function collideXZ(oldPos, deltaX, deltaZ) {
-      const pRad = 0.38; // Tactical player collision radius
+      const pRad = 0.36; // Tactical player collision radius
       const stepUpLimit = 0.46; // Obstacles lower than this are stepped onto, not blocked horizontally
       const curEyeH = (player && player.currentEyeH) ? player.currentEyeH : 1.7;
       const footY = oldPos.y - curEyeH;
@@ -7324,86 +7326,91 @@
       let curX = oldPos.x;
       let curZ = oldPos.z;
 
-      // 1. Anti-Stuck Depenetration Solver:
-      // If player is ALREADY inside an obstacle (due to landing, doors, or edge shifts), push out to closest free space!
-      for (let i = 0; i < colliders.length; i++) {
-        const c = colliders[i];
-        if (c.mesh && c.mesh.visible === false) continue;
-        const b = c.box;
+      // Contact solver function for a single point against all colliders
+      function resolvePointCollisions(px, pz, updateVel = true) {
+        // 3-pass relaxation to prevent corner wedging between adjacent perpendicular walls
+        for (let pass = 0; pass < 3; pass++) {
+          let passMoved = false;
+          for (let i = 0; i < colliders.length; i++) {
+            const c = colliders[i];
+            if (!c) continue;
+            if (c.mesh && c.mesh.visible === false) continue;
+            const b = c.box;
+            if (!b) continue;
+            if (b.max.y <= footY + stepUpLimit || b.min.y >= headY) continue;
 
-        if (b.max.y <= footY + stepUpLimit || b.min.y >= headY) continue;
+            // Clamping to find closest point on AABB to player center
+            const cx = Math.max(b.min.x, Math.min(px, b.max.x));
+            const cz = Math.max(b.min.z, Math.min(pz, b.max.z));
 
-        if (curX + pRad > b.min.x && curX - pRad < b.max.x &&
-            curZ + pRad > b.min.z && curZ - pRad < b.max.z) {
-          const pushLeft = (curX + pRad) - b.min.x;   // push towards -X
-          const pushRight = b.max.x - (curX - pRad);  // push towards +X
-          const pushNear = (curZ + pRad) - b.min.z;   // push towards -Z
-          const pushFar = b.max.z - (curZ - pRad);    // push towards +Z
+            const dx = px - cx;
+            const dz = pz - cz;
+            const distSq = dx * dx + dz * dz;
 
-          const minPushX = (pushLeft < pushRight) ? -pushLeft : pushRight;
-          const minPushZ = (pushNear < pushFar) ? -pushNear : pushFar;
+            if (distSq === 0) {
+              // Deep penetration: Center is strictly inside box bounds
+              const dLeft = px - b.min.x;
+              const dRight = b.max.x - px;
+              const dNear = pz - b.min.z;
+              const dFar = b.max.z - pz;
+              const minD = Math.min(dLeft, dRight, dNear, dFar);
 
-          if (Math.abs(minPushX) < Math.abs(minPushZ)) {
-            curX += minPushX + (minPushX > 0 ? 0.005 : -0.005);
-            if (player && player.velocity) player.velocity.x = 0;
-          } else {
-            curZ += minPushZ + (minPushZ > 0 ? 0.005 : -0.005);
-            if (player && player.velocity) player.velocity.z = 0;
+              let nx = 0, nz = 0;
+              if (minD === dLeft) { px = b.min.x - pRad - 0.002; nx = -1; }
+              else if (minD === dRight) { px = b.max.x + pRad + 0.002; nx = 1; }
+              else if (minD === dNear) { pz = b.min.z - pRad - 0.002; nz = -1; }
+              else { pz = b.max.z + pRad + 0.002; nz = 1; }
+
+              if (updateVel && player && player.velocity) {
+                const vn = player.velocity.x * nx + player.velocity.z * nz;
+                if (vn < 0) {
+                  player.velocity.x -= vn * nx;
+                  player.velocity.z -= vn * nz;
+                }
+              }
+              passMoved = true;
+            } else if (distSq < pRad * pRad) {
+              // Circle-AABB edge or corner penetration
+              const dist = Math.sqrt(distSq);
+              const nx = dx / dist;
+              const nz = dz / dist;
+              const overlap = (pRad - dist) + 0.002;
+
+              px += nx * overlap;
+              pz += nz * overlap;
+
+              if (updateVel && player && player.velocity) {
+                const vn = player.velocity.x * nx + player.velocity.z * nz;
+                if (vn < 0) {
+                  player.velocity.x -= vn * nx;
+                  player.velocity.z -= vn * nz;
+                }
+              }
+              passMoved = true;
+            }
           }
+          if (!passMoved) break;
         }
+        return { x: px, z: pz };
       }
 
-      // 2. Continuous Collision Sub-stepping (Anti-Tunneling at high velocity / dash):
+      // Step 1: Pre-resolve if already penetrating (e.g. from door closing or teleport)
+      const initial = resolvePointCollisions(curX, curZ, true);
+      curX = initial.x;
+      curZ = initial.z;
+
+      // Step 2: Continuous Collision Sub-stepping with dynamic tangential deflection
       const totalDist = Math.hypot(deltaX, deltaZ);
-      const subSteps = Math.max(1, Math.ceil(totalDist / 0.18));
+      const subSteps = Math.max(1, Math.ceil(totalDist / 0.12));
       const stepDX = deltaX / subSteps;
       const stepDZ = deltaZ / subSteps;
 
       for (let s = 0; s < subSteps; s++) {
-        let nextX = curX + stepDX;
-        let nextZ = curZ + stepDZ;
-
-        // Test X-axis movement
-        const minX_X = nextX - pRad, maxX_X = nextX + pRad;
-        const minZ_X = curZ - pRad, maxZ_X = curZ + pRad;
-        for (let i = 0; i < colliders.length; i++) {
-          const c = colliders[i];
-          if (c.mesh && c.mesh.visible === false) continue;
-          const b = c.box;
-          if (b.max.y <= footY + stepUpLimit || b.min.y >= headY) continue;
-
-          if (maxX_X >= b.min.x && minX_X <= b.max.x &&
-              maxZ_X >= b.min.z && minZ_X <= b.max.z) {
-            // Fluid wall-sliding surface clamp
-            if (stepDX > 0) nextX = b.min.x - pRad - 0.002;
-            else if (stepDX < 0) nextX = b.max.x + pRad + 0.002;
-            else nextX = curX;
-            if (player && player.velocity) player.velocity.x = 0;
-            break;
-          }
-        }
-        curX = nextX;
-
-        // Test Z-axis movement
-        const minX_Z = curX - pRad, maxX_Z = curX + pRad;
-        const minZ_Z = nextZ - pRad, maxZ_Z = nextZ + pRad;
-        for (let i = 0; i < colliders.length; i++) {
-          const c = colliders[i];
-          if (c.mesh && c.mesh.visible === false) continue;
-          const b = c.box;
-          if (b.max.y <= footY + stepUpLimit || b.min.y >= headY) continue;
-
-          if (maxX_Z >= b.min.x && minX_Z <= b.max.x &&
-              maxZ_Z >= b.min.z && minZ_Z <= b.max.z) {
-            // Fluid wall-sliding surface clamp
-            if (stepDZ > 0) nextZ = b.min.z - pRad - 0.002;
-            else if (stepDZ < 0) nextZ = b.max.z + pRad + 0.002;
-            else nextZ = curZ;
-            if (player && player.velocity) player.velocity.z = 0;
-            break;
-          }
-        }
-        curZ = nextZ;
+        curX += stepDX;
+        curZ += stepDZ;
+        const res = resolvePointCollisions(curX, curZ, true);
+        curX = res.x;
+        curZ = res.z;
       }
 
       return { x: curX, z: curZ };
@@ -14527,12 +14534,16 @@
        ========================================================== */
     function updateDynamicCrosshair() {
       let spreadOffset = 0;
-      if (!player.isGrounded) spreadOffset += 14;
-      else if (keys['KeyW'] || keys['KeyS'] || keys['KeyA'] || keys['KeyD']) {
-        spreadOffset += player.isWalking ? 4 : 9;
+      if (abilities.x.active && kunaiRig.visible) {
+        spreadOffset = 0;
+      } else {
+        if (!player.isGrounded) spreadOffset += 14;
+        else if (keys['KeyW'] || keys['KeyS'] || keys['KeyA'] || keys['KeyD']) {
+          spreadOffset += player.isWalking ? 4 : 9;
+        }
+        if (player.isCrouching) spreadOffset -= 2;
+        spreadOffset += Math.min(18, continuousShots * 1.6);
       }
-      if (player.isCrouching) spreadOffset -= 2;
-      spreadOffset += Math.min(18, continuousShots * 1.6);
 
       const curGap = Math.max(2, crosshairSettings.gap + spreadOffset);
       const t = document.getElementById('ch-t');
@@ -15170,14 +15181,14 @@
       if (!isPlayerControlActive()) return;
 
       if (e.button === 0) {
-        if (abilities.x.active) throwBladeSingle();
+        if (abilities.x.active && kunaiRig.visible) throwBladeSingle();
         else {
           keys['Mouse0'] = true;
           shootWeapon();
         }
       }
       if (e.button === 2) {
-        if (abilities.x.active) throwBladeShotgun();
+        if (abilities.x.active && kunaiRig.visible) throwBladeShotgun();
         else {
           player.isADS = !player.isADS;
           updateADS();
@@ -15260,6 +15271,12 @@
       currentWeaponKey = key;
       currentWeapon = WEAPONS[key];
       if (cheats.infiniteAmmo) { currentWeapon.ammo = currentWeapon.maxAmmo; currentWeapon.reserve = 999; }
+      if (abilities.x.active) {
+        kunaiRig.visible = false;
+        const bcp = document.getElementById('blade-counter-panel');
+        if (bcp) bcp.style.display = 'none';
+      }
+      gunGroup.visible = true;
       rebuildWeaponModel(key);
       player.isADS = false;
       updateADS();
@@ -16480,11 +16497,13 @@
         if (isHeadshot) player.headshots++;
 
         // Refresh Blade Storm knives on kill!
-        if (abilities.x.active && lobbySlots[myTeam][mySlotIdx].agent === 'Jett') {
+        const curAgentName = (lobbySlots && lobbySlots[myTeam] && lobbySlots[myTeam][mySlotIdx]) ? lobbySlots[myTeam][mySlotIdx].agent : '';
+        const isJett = (String(curAgentName).toLowerCase().includes('jett') || String(curAgentName).includes('백호'));
+        if (abilities.x.active && isJett) {
           abilities.x.knives = 5;
           sound.playBladeStorm();
           radioVoice.speak('Watch this!');
-          showToast('비수 재충전! (KNIVES RESTORED)');
+          showToast('🗡️ [칼날 폭풍] 처치 완료! 비수 5개 즉시 완충! (RESET)');
           renderBladePips();
         }
 
@@ -18962,6 +18981,26 @@
           showToast('👁️ [백호] 응시 발동! 모든 적 위치 8초간 투시!');
           break;
         }
+
+        case 'jett_smoke': {
+          castJettCloudburst();
+          break;
+        }
+
+        case 'jett_updraft': {
+          castJettUpdraft();
+          break;
+        }
+
+        case 'jett_dash': {
+          castJettTailwind();
+          break;
+        }
+
+        case 'jett_bladestorm': {
+          castJettBladestorm();
+          break;
+        }
       }
     }
 
@@ -18987,7 +19026,8 @@
         nade: '💣', shield: '🛡️', charge: '💥', ult_smash: '⚡',
         heal: '🌱', root: '🌿', smoke: '🌸', ult_res: '✨',
         emp: '⚡', drone: '🤖', mine: '💥', ult_emp: '⚡',
-        pierce: '🎯', sensor: '🚨', smoke_fast: '💨', ult_snipe: '👁️'
+        pierce: '🎯', sensor: '🚨', smoke_fast: '💨', ult_snipe: '👁️',
+        jett_smoke: '💨', jett_updraft: '🌪️', jett_dash: '⚡', jett_bladestorm: '🗡️'
       };
 
       if (slotC) {
@@ -19179,16 +19219,68 @@
     function castSkillX() {
       const agentDef = getAgentDef(lobbySlots[myTeam][mySlotIdx].agent);
       const abil = agentDef.abilities.find(a => a.key === 'X') || agentDef.abilities[3];
+      if (abilities.x.active) {
+        // Toggle stow / re-equip kunai
+        if (kunaiRig.visible) {
+          kunaiRig.visible = false;
+          gunGroup.visible = true;
+          const bcp = document.getElementById('blade-counter-panel');
+          if (bcp) bcp.style.display = 'none';
+          showToast('🗡️ 비수 수납 (총기 전환)');
+        } else {
+          kunaiRig.visible = true;
+          gunGroup.visible = false;
+          const bcp = document.getElementById('blade-counter-panel');
+          if (bcp) bcp.style.display = 'flex';
+          renderBladePips();
+          showToast('🗡️ 칼날 폭풍 재장착!');
+        }
+        return;
+      }
       castAbility(abil.type, abil);
     }
-
 
     function renderBladePips() {
       for (let i = 0; i < 5; i++) {
         const el = document.getElementById(`blade-${i + 1}`);
-        if (el) el.style.opacity = (i < abilities.x.knives) ? '1' : '0.2';
+        if (el) {
+          el.style.opacity = (i < abilities.x.knives) ? '1' : '0.18';
+          el.style.filter = (i < abilities.x.knives) ? 'drop-shadow(0 0 6px #00f0ff)' : 'none';
+          el.style.transform = (i < abilities.x.knives) ? 'scale(1.15)' : 'scale(0.85)';
+        }
         if (kunaiMeshes[i]) kunaiMeshes[i].visible = (i < abilities.x.knives);
       }
+    }
+
+    function spawnFlyingKunai(origin, dir) {
+      const geo = new THREE.ConeGeometry(0.04, 0.28, 6);
+      const mat = new THREE.MeshBasicMaterial({ color: 0x00f0ff });
+      const mesh = new THREE.Mesh(geo, mat);
+      mesh.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), dir);
+      mesh.position.copy(origin).addScaledVector(dir, 0.5);
+      scene.add(mesh);
+
+      const trailGeo = new THREE.CylinderGeometry(0.015, 0.015, 0.6, 4);
+      const trailMat = new THREE.MeshBasicMaterial({ color: 0x80ffff, transparent: true, opacity: 0.85 });
+      const trail = new THREE.Mesh(trailGeo, trailMat);
+      trail.position.copy(mesh.position);
+      trail.quaternion.copy(mesh.quaternion);
+      scene.add(trail);
+
+      let dist = 0;
+      const speed = 85;
+      const iv = setInterval(() => {
+        dist += speed * 0.016;
+        mesh.position.addScaledVector(dir, speed * 0.016);
+        trail.position.copy(mesh.position).addScaledVector(dir, -0.3);
+        trail.scale.y = Math.min(3, dist * 0.3);
+        if (dist > 75) {
+          clearInterval(iv);
+          scene.remove(mesh);
+          scene.remove(trail);
+          geo.dispose(); mat.dispose(); trailGeo.dispose(); trailMat.dispose();
+        }
+      }, 16);
     }
 
     function throwBladeSingle() {
@@ -19198,18 +19290,19 @@
       renderBladePips();
 
       const rayDir = new THREE.Vector3(0, 0, -1).applyQuaternion(camera.quaternion);
+      spawnFlyingKunai(camera.position, rayDir);
       const raycaster = new THREE.Raycaster(camera.position, rayDir, 0.1, 260);
 
       for (let enemy of enemiesList) {
         if (enemy.isDead) continue;
         const headHits = raycaster.intersectObject(enemy.head);
         if (headHits.length > 0) {
-          damageEnemy(enemy, 150, true);
+          damageEnemy(enemy, 150, 'head');
           break;
         }
         const bodyHits = raycaster.intersectObject(enemy.body);
         if (bodyHits.length > 0) {
-          damageEnemy(enemy, 50, false);
+          damageEnemy(enemy, 50, 'body');
           break;
         }
       }
@@ -19225,16 +19318,22 @@
       renderBladePips();
 
       for (let i = 0; i < count; i++) {
-        const spreadX = (Math.random() - 0.5) * 0.08;
-        const spreadY = (Math.random() - 0.5) * 0.08;
+        const spreadX = (Math.random() - 0.5) * 0.09;
+        const spreadY = (Math.random() - 0.5) * 0.09;
         const rayDir = new THREE.Vector3(spreadX, spreadY, -1).normalize().applyQuaternion(camera.quaternion);
+        spawnFlyingKunai(camera.position, rayDir);
         const raycaster = new THREE.Raycaster(camera.position, rayDir, 0.1, 260);
 
         for (let enemy of enemiesList) {
           if (enemy.isDead) continue;
+          const headHits = raycaster.intersectObject(enemy.head);
+          if (headHits.length > 0) {
+            damageEnemy(enemy, 150, 'head');
+            break;
+          }
           const bodyHits = raycaster.intersectObject(enemy.body);
           if (bodyHits.length > 0) {
-            damageEnemy(enemy, 50, false);
+            damageEnemy(enemy, 50, 'body');
             break;
           }
         }
@@ -19244,10 +19343,12 @@
 
     function exitBladeStorm() {
       abilities.x.active = false;
+      abilities.x.knives = 0;
       kunaiRig.visible = false;
       gunGroup.visible = true;
-      document.getElementById('blade-counter-panel').style.display = 'none';
-      showToast('칼날 폭풍 종료');
+      const bcp = document.getElementById('blade-counter-panel');
+      if (bcp) bcp.style.display = 'none';
+      showToast('🗡️ 칼날 폭풍 종료');
     }
 
     /* TELEPORTER CHECK WITH DEBOUNCE */
@@ -20642,8 +20743,14 @@
             player.lastGroundedTime = 0;
             player.jumpBufferedTime = 0;
             keys['Space'] = false;
-          }
           player.velocity.y -= 24 * dt;
+
+          // Jett Passive: Airborne Glide (스페이스바 활강)
+          const curAgName = (lobbySlots && lobbySlots[myTeam] && lobbySlots[myTeam][mySlotIdx]) ? lobbySlots[myTeam][mySlotIdx].agent : '';
+          const isJettGlide = (String(curAgName).toLowerCase().includes('jett') || String(curAgName).includes('백호'));
+          if (isJettGlide && !player.isGrounded && keys['Space'] && player.velocity.y < -1.6) {
+            player.velocity.y = -1.6; // Gentle glide descent
+          }
 
           // Compute vertical displacement using updated velocity.y
           let nextY = player.physicalY + player.velocity.y * dt;
@@ -21012,6 +21119,7 @@
             activeSmokePuffs.splice(i, 1);
           }
         }
+      }
 
         // Smooth per-frame recoil impulse & weapon sway recovery (Damps back to 0)
         gunRecoilKickZ = THREE.MathUtils.lerp(gunRecoilKickZ, 0, Math.min(1, 20 * dt));
@@ -21189,6 +21297,27 @@
           gunGroup.rotation.x = gunRecoilRotX + gunSwayPitch;
           gunGroup.rotation.y = gunSwayYaw;
           gunGroup.rotation.z = (gunSwayYaw * 0.35) + strafeTilt;
+        }
+
+        // Floating Kunai Wave Animation for Blade Storm (X)
+        if (kunaiRig && kunaiRig.visible) {
+          const t = now * 0.003;
+          for (let k = 0; k < kunaiMeshes.length; k++) {
+            const kMesh = kunaiMeshes[k];
+            if (kMesh) {
+              const angle = (k - 2) * 0.28;
+              const waveY = Math.sin(t * 3.5 + k * 1.2) * 0.016;
+              const waveX = Math.cos(t * 2.5 + k * 0.9) * 0.008;
+              const waveZ = Math.sin(t * 2.0 + k) * 0.012;
+              kMesh.position.set(
+                Math.sin(angle) * 0.32 + waveX,
+                -0.15 + Math.cos(angle) * 0.05 + waveY,
+                -0.45 + waveZ
+              );
+              kMesh.rotation.z = Math.sin(t * 3.0 + k) * 0.06;
+              kMesh.rotation.x = Math.cos(t * 2.0 + k) * 0.04;
+            }
+          }
         }
       } // End if (!player.isDead)
 
