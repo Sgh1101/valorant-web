@@ -6268,6 +6268,7 @@
     };
 
     let ascentDoor = null;
+    let ascentDoors = [];
     let lotusDoor = null;
     let sunsetMarketDoor = null;
     let pearlAirlock = null;
@@ -8832,9 +8833,12 @@
       if (rangeAimTestState.active) endRangeAimChallenge();
       rangeAimTestConsolePos = null;
 
-      if (ascentDoor && ascentDoor.mesh) {
-        scene.remove(ascentDoor.mesh);
-        scene.remove(ascentDoor.switchMesh);
+      if (ascentDoors && ascentDoors.length > 0) {
+        ascentDoors.forEach(d => {
+          if (d.mesh) scene.remove(d.mesh);
+          if (d.switchMesh) scene.remove(d.switchMesh);
+        });
+        ascentDoors.length = 0;
       }
       ascentDoor = null;
 
@@ -9663,7 +9667,7 @@
        Every map gets a unique tactical layout based on its theme archetype
        ========================================================== */
     function injectExtendedStructures(mapKey) {
-      if (mapKey === 'range') return;
+      if (mapKey === 'range' || mapKey === 'ascent') return;
 
       // Theme materials
       let wallMat = matWallStone;
@@ -9972,112 +9976,244 @@
       if (mapKey === 'ascent') {
         buildAscentFloatingSky();
 
-        // Outer Venetian Perimeter Walls & Floor (forceNoTrim on floor)
+        // 1. Outer Perimeter Walls & Venetian Ground Pavement (110m x 110m)
         addBox(0, -0.5, 0, 110, 1, 110, matAscentFloor, true, true);
         addBox(0, 7, -55, 110, 14, 2, matAscentWall);
         addBox(0, 7, 55, 110, 14, 2, matAscentWall);
         addBox(-55, 7, 0, 2, 14, 110, matAscentWall);
         addBox(55, 7, 0, 2, 14, 110, matAscentWall);
 
-        // --- A SITE ---
-        addSiteDecal(28, -24, 'A SITE', 22, '#00f0ff');
-        addTextBillboard(28, 0.2, -24, 'A SITE', 1.8);
-        spikeSiteAreas.push({ minX: 17, maxX: 39, minZ: -35, maxZ: -13, name: 'A SITE' });
+        // ==========================================================
+        // 2. DEFENDER SPAWN (수비팀 진영 시작 지점 - 북측 z: -50 ~ -36)
+        // ==========================================================
+        // North Palazzo Facade with "THE FOX" Workshop Signboard
+        addBox(0, 6, -50, 42, 12, 3, matAscentWall);
+        addTextBillboard(0, 7.5, -48.4, 'THE FOX // VENICE REPAIR', 1.6, '#ffc83b');
+        addTextBillboard(0, 2.0, -44, 'DEFENDER SPAWN // 수비팀 진영', 1.2, '#00ffaa');
 
-        // A Heaven 2F Balcony (y = 4.2)
-        addPlatform(34, 0, -34, 14, 4.2, 10, matAscentWall);
-        addRailing(27, 4.2, -34, 10, 'z');
-        addRailing(34, 4.2, -29, 14, 'x');
-        addArch(34, 4.2, -38.5, 4, 3.2, 1.0, matTrimStone);
+        // Defender Spawn Exits:
+        addArch(-20, 0, -40, 5.0, 5.0, 1.8, matAscentWall); // West Exit to B Boathouse
+        addArch(0, 0, -36, 6.0, 5.8, 2.0, matAscentWall);   // Center Exit to Mid Top
+        addArch(20, 0, -38, 5.0, 5.0, 1.8, matAscentWall);  // East Exit to A Heaven / Hell
 
-        // A Heaven Staircase leading up from ground to 2F
-        addStairs(34, -14, 0, 3.6, 4.2, 15, 14, 'z-');
+        // North-Mid Barrier Buildings
+        addBox(-10, 6, -34, 12, 12, 4, matBrick);
+        addBox(10, 6, -34, 12, 12, 4, matBrick);
+        addLantern(-8, 0, -42, 0xffc83b);
+        addLantern(8, 0, -42, 0xffc83b);
 
-        // A Main Arched Gateway Entrance
-        addArch(26, 0, 8, 6.5, 5.5, 2.2, matAscentWall);
+        // ==========================================================
+        // 3. ATTACKER SPAWN (공격팀 진영 시작 지점 - 남측 z: +36 ~ +50)
+        // ==========================================================
+        addBox(0, 5, 52, 36, 10, 2, matAscentWall);
+        addRailing(0, 1.2, 48, 24, 'x');
+        addTextBillboard(0, 2.0, 44, 'ATTACKER SPAWN // 공격팀 진영', 1.2, '#ff4655');
 
-        // A Site Green Generator Unit & Radianite Cover Stack
-        addBox(22, 2.0, -22, 3.6, 4.0, 3.6, matConcrete);
-        addCrateStack(30, -22, 2.4);
-        addBox(24, 1.2, -30, 3, 2.4, 3, matRadianiteBox); // Wine nook cover
+        // Exits leading north:
+        addArch(-16, 0, 36, 5.2, 5.2, 1.8, matAscentWall); // West exit to B Lobby
+        addArch(0, 0, 34, 5.5, 5.5, 1.8, matAscentWall);   // Center exit to Mid Bottom
+        addArch(18, 0, 36, 5.2, 5.2, 1.8, matAscentWall);  // East exit to A Lobby
+        addLantern(-6, 0, 42, 0xffc83b);
+        addLantern(6, 0, 42, 0xffc83b);
+        addCrateStack(0, 42, 2.0);
 
-        // --- MID COURTYARD & CATWALK ---
-        // Triple Archway across Mid
-        addArch(0, 0, 0, 8, 6.5, 2.6, matAscentWall);
-        addArch(-10, 0, 0, 6, 5.5, 2.2, matAscentWall);
-        addArch(10, 0, 0, 6, 5.5, 2.2, matAscentWall);
+        // ==========================================================
+        // 4. B LANE (B 마당 -> B 메인 -> B 사이트 -> B 보바)
+        // ==========================================================
+        // --- B 마당 (B Lobby) ---
+        addBox(-10, 6, 26, 8, 12, 16, matBrick); // Divider from Mid Bottom
 
-        // Mid Catwalk (Elevated walkway at y = 3.0)
-        addPlatform(12, 0, -8, 4.2, 3.0, 16, matAscentWall);
-        addRailing(9.9, 3.0, -8, 16, 'z');
-        addStairs(12, 4, 0, 3.8, 3.0, 8, 10, 'z-'); // Catwalk stairs
+        // --- B 메인 (B Main Corridor) ---
+        addBox(-46, 6, 14, 16, 12, 32, matAscentWall); // Outer West Wall Block
+        addBox(-22, 6, 10, 10, 12, 20, matBrick);      // Inner East Wall Block
+        addArch(-32, 0, 24, 6.0, 5.5, 2.0, matAscentWall); // Entrance from B Lobby
+        addArch(-32, 0, 0, 6.5, 6.0, 2.2, matAscentWall);  // Choke entering B Site
+        addBox(-35, 1.1, 12, 2.2, 2.2, 2.2, matWoodPagoda);
+        addLantern(-28, 0, 12, 0xffc83b);
 
-        // Mid Market Building & Interior Counter
-        addBox(-12, 2.5, -4, 10, 5, 8, matBrick);
-        addBox(-7.2, 0.7, -4, 1.2, 1.4, 6, matWoodPagoda); // Market counter table
-        addEave(-12, 5.0, -4, 11, 9, matDarkTile); // Roof eave
+        // --- B 사이트 (B Site) ---
+        addSiteDecal(-28, -18, 'B SITE', 20, '#00f0ff');
+        addTextBillboard(-28, 0.2, -18, 'B SITE', 1.8);
+        spikeSiteAreas.push({ minX: -38, maxX: -18, minZ: -26, maxZ: -10, name: 'B SITE' });
 
-        // Courtyard Street Lanterns
-        addLantern(6, 0, 6);
-        addLantern(-6, 0, 6);
-        addLantern(0, 0, -14);
+        // B Central Shed & B Pillar (B 기둥)
+        addBox(-25, 2.6, -17, 4.6, 5.2, 4.6, matBrick);
+        addCrateStack(-21.2, -17, 2.2);
 
-        // --- B SITE ---
-        addSiteDecal(-28, -24, 'B SITE', 22, '#ffc83b');
-        addTextBillboard(-28, 0.2, -24, 'B SITE', 1.8);
-        spikeSiteAreas.push({ minX: -39, maxX: -17, minZ: -35, maxZ: -13, name: 'B SITE' });
+        // B Western Elevated Platform (y = 1.3) & Green Radianite Crates
+        addPlatform(-35, 0, -17, 6, 1.3, 12, matConcrete);
+        addRailing(-32, 1.3, -17, 12, 'z');
+        addCrateStack(-35, -15, 2.2);
 
-        // B Pillar (Thick brick cover column)
-        addBox(-28, 3.5, -24, 4.5, 7.0, 4.5, matBrick);
+        // --- B 보바 (B Boathouse / Backsite) ---
+        addBox(-39, 5, -31, 2, 10, 12, matAscentWall); // West wall
+        addBox(-32, 5, -37, 14, 10, 2, matAscentWall); // North wall
+        addBox(-25, 5, -31, 2, 10, 12, matAscentWall); // East wall
+        addBox(-32, 9.2, -31, 16, 0.6, 14, matDarkTile, true, true); // Roof
+        addArch(-32, 0, -25, 4.6, 4.8, 1.4, matAscentWall); // Front Door to B Site
+        addArch(-27, 0, -37, 4.0, 4.4, 1.4, matAscentWall); // Back Door to Def Spawn
+        addBox(-35, 0.8, -31, 1.6, 1.6, 4.0, matWoodPagoda);
+        createRadianiteCrate(-35, 2.0, -31, 1.8, 0.15, true);
 
-        // B Boathouse (Back-site covered shelter)
-        addBox(-38, 2.5, -30, 8, 5, 10, matAscentWall);
-        addBox(-34, 1.2, -30, 2.4, 2.4, 2.4, matRadianiteBox);
+        // ==========================================================
+        // 5. B MARKET (B 시장 & B 셔터 도어)
+        // ==========================================================
+        // North Wall containing B Shutter Door
+        addBox(-22, 4.5, -14, 4, 9, 1.6, matAscentWall);
+        addBox(-14, 4.5, -14, 4, 9, 1.6, matAscentWall);
+        addBox(-18, 7.8, -14, 4.2, 2.4, 1.6, matConcrete);
 
-        // B Site Elevated Platform & Crates
-        addPlatform(-36, 0, -18, 8, 1.2, 8, matConcrete);
-        addCrateStack(-22, -24, 2.4);
-
-        // B Main Tunnel Entrance
-        addArch(-26, 0, 6, 5.5, 5.0, 2.2, matAscentWall);
-
-        // Ascent B Connector Shutter Door & Switch (Interactive [F] + 500 HP destructible)
-        addBox(-23, 3.5, -14, 6, 7, 1.2, matAscentWall);
-        addBox(-13, 3.5, -14, 6, 7, 1.2, matAscentWall);
-        addBox(-18, 7.5, -14, 4, 1.2, 1.2, matConcrete);
-
-        const doorGeo = new THREE.BoxGeometry(4, 6.8, 0.35);
-        const doorMat = new THREE.MeshStandardMaterial({
+        // B Shutter Door Mesh & Switch
+        const doorBGeo = new THREE.BoxGeometry(4.0, 6.8, 0.35);
+        const doorBMat = new THREE.MeshStandardMaterial({
           color: 0x1c2430, roughness: 0.3, metalness: 0.8
         });
-        const doorMesh = new THREE.Mesh(doorGeo, doorMat);
-        doorMesh.position.set(-18, 3.4, -14);
-        doorMesh.castShadow = true;
-        doorMesh.receiveShadow = true;
-        scene.add(doorMesh);
-        mapObjects.push(doorMesh);
-        colliders.push({ box: new THREE.Box3().setFromObject(doorMesh), mesh: doorMesh });
+        const doorBMesh = new THREE.Mesh(doorBGeo, doorBMat);
+        doorBMesh.position.set(-18, 3.4, -14);
+        doorBMesh.castShadow = true; doorBMesh.receiveShadow = true;
+        scene.add(doorBMesh); mapObjects.push(doorBMesh);
+        colliders.push({ box: new THREE.Box3().setFromObject(doorBMesh), mesh: doorBMesh });
 
-        const swGeo = new THREE.BoxGeometry(0.3, 0.4, 0.2);
-        const swMat = new THREE.MeshStandardMaterial({
+        const swBGeo = new THREE.BoxGeometry(0.3, 0.4, 0.2);
+        const swBMat = new THREE.MeshStandardMaterial({
           color: 0x00ff88, emissive: 0x00ff88, emissiveIntensity: 0.8
         });
-        const switchMesh = new THREE.Mesh(swGeo, swMat);
-        switchMesh.position.set(-15.8, 1.6, -13.3);
-        scene.add(switchMesh);
-        mapObjects.push(switchMesh);
+        const switchBMesh = new THREE.Mesh(swBGeo, swBMat);
+        switchBMesh.position.set(-15.8, 1.6, -13.3);
+        scene.add(switchBMesh); mapObjects.push(switchBMesh);
 
-        ascentDoor = {
-          mesh: doorMesh,
-          switchMesh: switchMesh,
-          swMat: swMat,
-          isOpen: false,
-          targetY: 3.4,
-          hp: 500,
-          maxHp: 500,
-          isDestroyed: false,
-          switchPos: new THREE.Vector3(-15.8, 1.6, -13.3)
-        };
+        // South & East Walls of Market
+        addBox(-14, 4.5, -4, 16, 9, 1.6, matBrick);
+        addArch(-10, 0, -4, 4.5, 4.2, 1.6, matAscentWall); // Service window arch
+        addBox(-10, 0.7, -7, 1.4, 1.4, 5.0, matWoodPagoda); // Counter
+        addBox(-15, 1.6, -6, 2.4, 3.2, 2.0, matBrick);      // Pizza oven
+        addEave(-14, 9.0, -9, 16, 13, matDarkTile);
+
+        // ==========================================================
+        // 6. MID (중앙 하단부 -> 중앙 타일 -> 중앙 안뜰 -> 중앙 상단부 / 캣워크)
+        // ==========================================================
+        // --- 중앙 안뜰 (Mid Courtyard / Piazza) ---
+        addBox(0, 0.6, 2, 4.2, 1.2, 4.2, matTrimStone);
+        addPillar(0, 1.2, 2, 1.0, 1.8, matTrimStone);
+        addLantern(6, 0, 5, 0xffc83b);
+        addLantern(-6, 0, 5, 0xffc83b);
+        addLantern(0, 0, -6, 0xffc83b);
+
+        // --- 중앙 타일 & 중앙 하단부 ---
+        addBox(12, 6, 24, 10, 12, 16, matBrick); // Divider from A Lobby
+
+        // --- 중앙 상단부 (Mid Top / Catwalk & Arch) ---
+        addArch(0, 0, -10, 6.2, 6.2, 2.2, matAscentWall);
+        addArch(-6, 0, -10, 4.4, 5.0, 1.8, matAscentWall);
+
+        // Elevated Catwalk (y = 2.4)
+        addPlatform(8, 0, -6, 4.0, 2.4, 16, matAscentWall);
+        addRailing(6.0, 2.4, -6, 16, 'z');
+        addStairs(8, 6, 0, 3.6, 2.4, 7, 8, 'z-');  // South Stairs
+        addStairs(8, -18, 0, 3.6, 2.4, 7, 8, 'z+'); // North Stairs
+
+        // North Mid Lane corridor walls
+        addBox(-4, 6, -24, 2, 12, 16, matAscentWall);
+        addBox(4, 6, -24, 2, 12, 16, matAscentWall);
+
+        // ==========================================================
+        // 7. A TREE / A LINK (A 연결부 & A 셔터 도어)
+        // ==========================================================
+        addArch(10, 0, -8, 4.4, 4.6, 1.4, matAscentWall); // West Entrance from Mid
+
+        // East Wall with A Shutter Door
+        addBox(18, 4.5, -16, 1.6, 9, 4.2, matAscentWall);
+        addBox(18, 4.5, -8, 1.6, 9, 4.2, matAscentWall);
+        addBox(18, 7.8, -12, 1.6, 2.4, 4.2, matConcrete);
+
+        // A Shutter Door Mesh & Switch
+        const doorAGeo = new THREE.BoxGeometry(0.35, 6.8, 4.0);
+        const doorAMat = new THREE.MeshStandardMaterial({
+          color: 0x1c2430, roughness: 0.3, metalness: 0.8
+        });
+        const doorAMesh = new THREE.Mesh(doorAGeo, doorAMat);
+        doorAMesh.position.set(18, 3.4, -12);
+        doorAMesh.castShadow = true; doorAMesh.receiveShadow = true;
+        scene.add(doorAMesh); mapObjects.push(doorAMesh);
+        colliders.push({ box: new THREE.Box3().setFromObject(doorAMesh), mesh: doorAMesh });
+
+        const swAGeo = new THREE.BoxGeometry(0.2, 0.4, 0.3);
+        const swAMat = new THREE.MeshStandardMaterial({
+          color: 0x00ff88, emissive: 0x00ff88, emissiveIntensity: 0.8
+        });
+        const switchAMesh = new THREE.Mesh(swAGeo, swAMat);
+        switchAMesh.position.set(16.5, 1.6, -10.8);
+        scene.add(switchAMesh); mapObjects.push(switchAMesh);
+
+        // A Tree Center Planter with Cypress Foliage
+        addBox(14, 0.4, -10, 3.0, 0.8, 3.0, matTrimStone);
+        addPillar(14, 0.8, -10, 0.25, 3.2, matWoodPagoda);
+        const treeTop = new THREE.Mesh(new THREE.ConeGeometry(1.6, 3.0, 6), new THREE.MeshStandardMaterial({ color: 0x224422, roughness: 0.9 }));
+        treeTop.position.set(14, 3.5, -10);
+        treeTop.castShadow = true; scene.add(treeTop); mapObjects.push(treeTop);
+
+        // ==========================================================
+        // 8. A LANE (A 마당 -> A 메인 -> A ㄱ자 골목 -> A 사이트 -> A 헤븐)
+        // ==========================================================
+        // --- A 마당 & A 메인 ---
+        addBox(16, 6, 10, 8, 12, 18, matBrick);        // Divider from Mid Courtyard
+        addBox(46, 6, 14, 16, 12, 32, matAscentWall);  // Outer East Building Block
+        addArch(28, 0, -5, 6.5, 6.0, 2.2, matAscentWall); // Choke Arch into A Site
+
+        // --- A ㄱ자 골목 (A Wine / Wine Cellar Nook) ---
+        addBox(38, 1.0, 14, 2.4, 2.0, 2.4, matWoodPagoda);
+        createRadianiteCrate(37, 1.1, 10, 2.2, 0.35, true);
+        addLantern(34, 0, 10, 0xffc83b);
+
+        // --- A 사이트 (A Site) ---
+        addSiteDecal(27, -18, 'A SITE', 20, '#00f0ff');
+        addTextBillboard(27, 0.2, -18, 'A SITE', 1.8);
+        spikeSiteAreas.push({ minX: 18, maxX: 38, minZ: -28, maxZ: -8, name: 'A SITE' });
+
+        // A Green Generator Unit (그린 발전기)
+        addBox(23, 2.1, -17, 3.8, 4.2, 5.0, matConcrete);
+        createRadianiteCrate(23, 4.2 + 0.8, -17, 1.6, 0, true);
+
+        // A Site Central Double Radianite Crate Stack
+        addCrateStack(29, -17, 2.2);
+
+        // --- A 헤븐 (A Heaven 2F Balcony, y = 4.2) & A 헬 (A Hell) ---
+        addPlatform(33, 0, -29.5, 10, 4.2, 9, matAscentWall);
+        addRailing(28, 4.2, -29.5, 9, 'z');
+        addRailing(33, 4.2, -25, 10, 'x');
+        addArch(33, 4.2, -34.5, 4.5, 3.5, 1.0, matTrimStone);
+        addStairs(26, -38, 0, 3.6, 4.2, 12, 14, 'z-'); // Stairs from Def Spawn
+
+        // ==========================================================
+        // 9. DUAL INTERACTIVE SHUTTER DOORS REGISTRATION
+        // ==========================================================
+        ascentDoors = [
+          {
+            name: 'B 시장 셔터 도어',
+            mesh: doorBMesh,
+            switchMesh: switchBMesh,
+            swMat: swBMat,
+            isOpen: false,
+            targetY: 3.4,
+            hp: 500,
+            maxHp: 500,
+            isDestroyed: false,
+            switchPos: new THREE.Vector3(-15.8, 1.6, -13.3)
+          },
+          {
+            name: 'A 연결부(트리) 셔터 도어',
+            mesh: doorAMesh,
+            switchMesh: switchAMesh,
+            swMat: swAMat,
+            isOpen: false,
+            targetY: 3.4,
+            hp: 500,
+            maxHp: 500,
+            isDestroyed: false,
+            switchPos: new THREE.Vector3(16.5, 1.6, -10.8)
+          }
+        ];
+        ascentDoor = ascentDoors[0]; // Backwards compatibility
       }
       // ==========================================================
       // MAP 2: BIND (바인드) - 사막 연구소, 노미드(NO MID), 일방통행 텔레포터
@@ -13835,8 +13971,12 @@
 
       // PLAYER & AGENTS SPAWN
       const playerIsAtk = (myTeam === 'atk');
-      const mySpawnZ = (mapKey === 'range') ? 15 : (playerIsAtk ? 38 : -25);
-      const enemySpawnZ = playerIsAtk ? -25 : 38;
+      let mySpawnZ = (mapKey === 'range') ? 15 : (playerIsAtk ? 38 : -25);
+      let enemySpawnZ = playerIsAtk ? -25 : 38;
+      if (mapKey === 'ascent') {
+        mySpawnZ = playerIsAtk ? 44 : -42;
+        enemySpawnZ = playerIsAtk ? -42 : 44;
+      }
 
       camera.position.set(0, 1.7, mySpawnZ);
       yaw = playerIsAtk ? 0 : Math.PI;
@@ -15432,17 +15572,22 @@
         }
       }
 
-      // Check Ascent B Shutter Door Impact
-      if (ascentDoor && !ascentDoor.isDestroyed && ascentDoor.mesh && !ascentDoor.isOpen) {
-        const doorHits = raycaster.intersectObject(ascentDoor.mesh);
-        if (doorHits.length > 0) {
-          damageAscentDoor(currentWeapon.dmgBody, doorHits[0].point, doorHits[0].face.normal);
-          // Door penetration check (Wallbang through shutter!)
-          if (closestTarget && closestTarget.dist > doorHits[0].distance && (closestTarget.dist - doorHits[0].distance < 3.2)) {
-            const wbDmg = Math.floor(closestTarget.dmg * 0.6);
-            damageEnemy(closestTarget.enemy, wbDmg, closestTarget.part, true);
+      // Check Ascent Dual Shutter Doors Impact (B Market & A Tree)
+      if (ascentDoors && ascentDoors.length > 0) {
+        for (let i = 0; i < ascentDoors.length; i++) {
+          const ad = ascentDoors[i];
+          if (!ad.isDestroyed && ad.mesh && !ad.isOpen) {
+            const doorHits = raycaster.intersectObject(ad.mesh);
+            if (doorHits.length > 0) {
+              damageAscentDoor(ad, currentWeapon.dmgBody, doorHits[0].point, doorHits[0].face.normal);
+              // Door penetration check (Wallbang through shutter!)
+              if (closestTarget && closestTarget.dist > doorHits[0].distance && (closestTarget.dist - doorHits[0].distance < 3.2)) {
+                const wbDmg = Math.floor(closestTarget.dmg * 0.6);
+                damageEnemy(closestTarget.enemy, wbDmg, closestTarget.part, true);
+              }
+              return;
+            }
           }
-          return;
         }
       }
 
@@ -15893,19 +16038,29 @@
       }
     }
 
-    function damageAscentDoor(amount, point, normal) {
-      if (!ascentDoor || ascentDoor.isDestroyed) return;
-      ascentDoor.hp -= amount;
+    function damageAscentDoor(doorObjOrAmount, amount, point, normal) {
+      let doorObj = doorObjOrAmount;
+      let dmg = amount;
+      let pt = point;
+      let norm = normal;
+      if (typeof doorObjOrAmount === 'number') {
+        doorObj = (ascentDoors && ascentDoors[0]) || ascentDoor;
+        dmg = doorObjOrAmount;
+        pt = amount;
+        norm = point;
+      }
+      if (!doorObj || doorObj.isDestroyed) return;
+      doorObj.hp -= dmg;
       sound.playBodyHit();
-      createBulletHoleDecal(point, normal);
-      showToast(`도어 피격! 남은 내구도: ${Math.max(0, Math.floor(ascentDoor.hp))}/500`);
+      createBulletHoleDecal(pt, norm);
+      showToast(`[${doorObj.name || '어센트 셔터 도어'}] 피격! 남은 내구도: ${Math.max(0, Math.floor(doorObj.hp))}/500`);
 
-      if (ascentDoor.hp <= 0) {
-        ascentDoor.isDestroyed = true;
+      if (doorObj.hp <= 0) {
+        doorObj.isDestroyed = true;
         sound.playDoorBreak();
-        scene.remove(ascentDoor.mesh);
-        colliders = colliders.filter(c => c.mesh !== ascentDoor.mesh);
-        showToast('[어센트 B] 셔터 도어가 완전히 파괴되었습니다!');
+        scene.remove(doorObj.mesh);
+        colliders = colliders.filter(c => c.mesh !== doorObj.mesh);
+        showToast(`[${doorObj.name || '어센트 셔터 도어'}] 완전히 파괴되었습니다!`);
         radioVoice.speak('Door destroyed!');
       }
     }
@@ -16371,23 +16526,29 @@
         }
       }
 
-      // 4. Ascent B Shutter Door
-      if (!ascentDoor || ascentDoor.isDestroyed) return;
-      const dist = camera.position.distanceTo(ascentDoor.switchPos);
-      if (dist < 4.0) {
-        sound.playSwitchClick();
-        sound.playDoorSlide();
-        ascentDoor.isOpen = !ascentDoor.isOpen;
-        ascentDoor.targetY = ascentDoor.isOpen ? 9.8 : 3.4;
-        ascentDoor.swMat.color.setHex(ascentDoor.isOpen ? 0xff4655 : 0x00ff88);
-        ascentDoor.swMat.emissive.setHex(ascentDoor.isOpen ? 0xff4655 : 0x00ff88);
+      // 4. Ascent Dual Shutter Doors (B Market & A Tree)
+      if (ascentDoors && ascentDoors.length > 0) {
+        for (let i = 0; i < ascentDoors.length; i++) {
+          const ad = ascentDoors[i];
+          if (ad.isDestroyed) continue;
+          const dist = camera.position.distanceTo(ad.switchPos);
+          if (dist < 4.0) {
+            sound.playSwitchClick();
+            sound.playDoorSlide();
+            ad.isOpen = !ad.isOpen;
+            ad.targetY = ad.isOpen ? 9.8 : 3.4;
+            ad.swMat.color.setHex(ad.isOpen ? 0xff4655 : 0x00ff88);
+            ad.swMat.emissive.setHex(ad.isOpen ? 0xff4655 : 0x00ff88);
 
-        if (ascentDoor.isOpen) {
-          colliders = colliders.filter(c => c.mesh !== ascentDoor.mesh);
-          showToast('셔터 도어 개방 (OPEN)');
-        } else {
-          colliders.push({ box: new THREE.Box3().setFromObject(ascentDoor.mesh), mesh: ascentDoor.mesh });
-          showToast('셔터 도어 폐쇄 (CLOSED)');
+            if (ad.isOpen) {
+              colliders = colliders.filter(c => c.mesh !== ad.mesh);
+              showToast(`[${ad.name}] 셔터 도어 개방 (OPEN)`);
+            } else {
+              colliders.push({ box: new THREE.Box3().setFromObject(ad.mesh), mesh: ad.mesh });
+              showToast(`[${ad.name}] 셔터 도어 폐쇄 (CLOSED)`);
+            }
+            return;
+          }
         }
       }
     }
@@ -18848,15 +19009,22 @@
 
     const MAP_CALLOUTS = {
       ascent: [
-        { label: 'A SITE', x: 28, z: -24, color: '#00f0ff' },
-        { label: 'A HEAVEN', x: 34, z: -34, color: '#88a0b8' },
-        { label: 'MID ARCH', x: 0, z: 0, color: '#ffc83b' },
-        { label: 'CATWALK', x: 12, z: -8, color: '#88a0b8' },
-        { label: 'MARKET', x: -12, z: -4, color: '#88a0b8' },
-        { label: 'B SITE', x: -28, z: -24, color: '#00f0ff' },
-        { label: 'B SHUTTER', x: -18, z: -14, color: '#ff4655' },
-        { label: 'DEF SPAWN', x: 0, z: -48, color: '#00ffaa' },
-        { label: 'ATK SPAWN', x: 0, z: 46, color: '#ff4655' }
+        { label: '수비팀 진영 시작 지점', x: 0, z: -43, color: '#00ffaa' },
+        { label: 'B 보바', x: -32, z: -32, color: '#88a0b8' },
+        { label: 'B', x: -28, z: -18, color: '#ff4655' },
+        { label: 'B 시장', x: -14, z: -10, color: '#88a0b8' },
+        { label: 'B 메인', x: -32, z: 12, color: '#88a0b8' },
+        { label: 'B 마당', x: -18, z: 32, color: '#88a0b8' },
+        { label: '중앙 상단부', x: 0, z: -16, color: '#ffc83b' },
+        { label: '중앙 안뜰', x: 0, z: 2, color: '#ffc83b' },
+        { label: '중앙 타일', x: 4, z: 12, color: '#88a0b8' },
+        { label: '중앙 하단부', x: 0, z: 22, color: '#88a0b8' },
+        { label: 'A 연결부', x: 16, z: -8, color: '#88a0b8' },
+        { label: 'A', x: 27, z: -18, color: '#ff4655' },
+        { label: 'A ㄱ자 골목', x: 38, z: 10, color: '#88a0b8' },
+        { label: 'A 메인', x: 28, z: 12, color: '#88a0b8' },
+        { label: 'A 마당', x: 24, z: 32, color: '#88a0b8' },
+        { label: '공격팀 진영 시작 지점', x: 0, z: 44, color: '#ff4655' }
       ],
       bind: [
         { label: 'A SITE', x: 26, z: -22, color: '#00f0ff' },
@@ -21142,24 +21310,33 @@
           }
         }
 
-        if (ascentDoor && !ascentDoor.isDestroyed && ascentDoor.mesh) {
-          if (Math.abs(ascentDoor.mesh.position.y - ascentDoor.targetY) > 0.05) {
-            ascentDoor.mesh.position.y += (ascentDoor.targetY - ascentDoor.mesh.position.y) * 4.5 * dt;
-            const cEntry = colliders.find(c => c.mesh === ascentDoor.mesh);
-            if (cEntry) cEntry.box.setFromObject(ascentDoor.mesh);
-          }
-
-          const distToSwitch = camera.position.distanceTo(ascentDoor.switchPos);
-          const dp = document.getElementById('door-prompt');
-          if (dp) {
-            if (distToSwitch < 4.0 && !ascentDoor.isDestroyed) {
-              dp.style.display = 'flex';
-              document.getElementById('door-prompt-text').innerText = 
-                ascentDoor.isOpen ? '셔터 도어 스위치 [F] (닫기)' : '셔터 도어 스위치 [F] (열기)';
-              document.getElementById('door-hp-text').innerText = `HP: ${Math.max(0, Math.floor(ascentDoor.hp))}/500`;
-            } else {
-              dp.style.display = 'none';
+        let activeAscentPromptDoor = null;
+        if (ascentDoors && ascentDoors.length > 0) {
+          ascentDoors.forEach(ad => {
+            if (!ad.isDestroyed && ad.mesh) {
+              if (Math.abs(ad.mesh.position.y - ad.targetY) > 0.05) {
+                ad.mesh.position.y += (ad.targetY - ad.mesh.position.y) * 4.5 * dt;
+                const cEntry = colliders.find(c => c.mesh === ad.mesh);
+                if (cEntry) cEntry.box.setFromObject(ad.mesh);
+              }
+              const distToSwitch = camera.position.distanceTo(ad.switchPos);
+              if (distToSwitch < 4.0 && !ad.isDestroyed) {
+                activeAscentPromptDoor = ad;
+              }
             }
+          });
+        }
+        const dp = document.getElementById('door-prompt');
+        if (dp) {
+          if (activeAscentPromptDoor) {
+            dp.style.display = 'flex';
+            document.getElementById('door-prompt-text').innerText = 
+              activeAscentPromptDoor.isOpen ? `${activeAscentPromptDoor.name} [F] (닫기)` : `${activeAscentPromptDoor.name} [F] (열기)`;
+            document.getElementById('door-hp-text').innerText = `HP: ${Math.max(0, Math.floor(activeAscentPromptDoor.hp))}/500`;
+          } else if (sunsetMarketDoor && camera.position.distanceTo(sunsetMarketDoor.switchPos) < 4.0 && !sunsetMarketDoor.isDestroyed) {
+            // Handled by sunset
+          } else {
+            dp.style.display = 'none';
           }
         }
 
