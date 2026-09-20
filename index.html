@@ -1375,7 +1375,7 @@
       position: absolute;
       top: 0; left: 0; width: 100%; height: 100%;
       background: rgba(8, 12, 16, 0.92);
-      z-index: 48;
+      z-index: 70;
       display: none;
       align-items: center;
       justify-content: center;
@@ -1510,48 +1510,341 @@
       border-top: 1px solid var(--val-border);
       padding-top: 12px;
     }
+    /* ══════ COMPACT & INTUITIVE IN-GAME SETTINGS MODAL ([ESC]) ══════ */
     .settings-container {
-      background: rgba(14, 22, 30, 0.98);
-      border: 1px solid var(--val-border);
-      border-top: 4px solid var(--val-cyan);
-      padding: 28px 40px;
-      max-width: 820px;
-      width: 90%;
+      background: linear-gradient(180deg, rgba(12, 18, 26, 0.98) 0%, rgba(7, 10, 15, 0.99) 100%);
+      border: 1px solid rgba(0, 240, 255, 0.25);
+      border-top: 3px solid var(--val-cyan);
+      box-shadow: 0 0 40px rgba(0, 0, 0, 0.85), 0 0 20px rgba(0, 240, 255, 0.15);
+      padding: 12px 16px;
+      max-width: 580px;
+      width: 92%;
+      max-height: 86vh;
       display: flex;
       flex-direction: column;
-      gap: 20px;
+      gap: 9px;
+      border-radius: 2px;
+      box-sizing: border-box;
+      user-select: none;
+    }
+    .settings-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      padding-bottom: 7px;
+    }
+    .settings-title-group {
+      display: flex;
+      align-items: baseline;
+      gap: 8px;
     }
     .settings-title {
       font-family: var(--font-title);
-      font-size: 38px;
+      font-size: 18px;
       color: #fff;
+      letter-spacing: 1.5px;
+      font-weight: 900;
+      line-height: 1;
+    }
+    .settings-title-sub {
+      font-family: var(--font-mono);
+      font-size: 10.5px;
+      color: var(--val-cyan);
+      letter-spacing: 0.8px;
+    }
+    .settings-close-btn {
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: #fff;
+      padding: 3px 10px;
+      cursor: pointer;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      transition: all 0.15s ease;
+    }
+    .settings-close-btn:hover {
+      background: rgba(255, 70, 85, 0.2);
+      border-color: var(--val-red);
+      color: #ff858d;
+    }
+
+    /* Tab Bar (칸별 탭 네비게이션) */
+    .settings-tab-bar {
+      display: flex;
+      gap: 4px;
+      background: rgba(4, 7, 12, 0.6);
+      padding: 3px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 2px;
+    }
+    .settings-tab-btn {
+      flex: 1;
+      background: transparent;
+      border: 1px solid transparent;
+      color: #8899a6;
+      font-family: var(--font-hud);
+      font-size: 11.5px;
+      font-weight: 700;
+      padding: 5px 6px;
+      cursor: pointer;
+      text-align: center;
+      transition: all 0.15s ease;
+      white-space: nowrap;
+      border-radius: 2px;
+    }
+    .settings-tab-btn:hover {
+      color: #fff;
+      background: rgba(255, 255, 255, 0.05);
+    }
+    .settings-tab-btn.active {
+      background: rgba(0, 240, 255, 0.14);
+      color: var(--val-cyan);
+      border-color: rgba(0, 240, 255, 0.4);
+      box-shadow: 0 0 8px rgba(0, 240, 255, 0.2);
+    }
+
+    /* Scrollable Body for Compartments */
+    .settings-body {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      max-height: 56vh;
+      overflow-y: auto;
+      padding-right: 4px;
+    }
+    .settings-body::-webkit-scrollbar {
+      width: 4px;
+    }
+    .settings-body::-webkit-scrollbar-thumb {
+      background: rgba(0, 240, 255, 0.3);
+      border-radius: 2px;
+    }
+
+    /* Individual Compartments (칸 스타일) */
+    .settings-compartment {
+      background: rgba(14, 22, 32, 0.65);
+      border: 1px solid rgba(0, 240, 255, 0.14);
+      border-left: 3px solid var(--val-cyan);
+      padding: 9px 12px;
+      border-radius: 2px;
+      display: none;
+      flex-direction: column;
+      gap: 7px;
+    }
+    .settings-compartment.active {
+      display: flex;
+    }
+    .comp-header {
       display: flex;
       justify-content: space-between;
-      border-bottom: 1px solid var(--val-border);
-      padding-bottom: 8px;
+      align-items: center;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+      padding-bottom: 5px;
+      margin-bottom: 2px;
     }
+    .comp-title {
+      font-family: var(--font-hud);
+      font-size: 12px;
+      font-weight: 800;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      letter-spacing: 0.5px;
+    }
+    .comp-tag {
+      font-family: var(--font-mono);
+      font-size: 9px;
+      font-weight: 800;
+      background: rgba(0, 240, 255, 0.18);
+      color: var(--val-cyan);
+      padding: 1px 5px;
+      border-radius: 2px;
+      border: 1px solid rgba(0, 240, 255, 0.3);
+    }
+    .comp-subtitle {
+      font-family: var(--font-mono);
+      font-size: 9.5px;
+      color: #7b8f9f;
+    }
+
     .settings-row {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      font-size: 15px;
-      font-weight: 700;
-      padding: 6px 0;
-      border-bottom: 1px solid rgba(255,255,255,0.06);
+      font-size: 12px;
+      font-weight: 600;
+      color: #d1d8e0;
+      padding: 4px 0;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.04);
     }
-    .color-picker-box {
+    .settings-row:last-child {
+      border-bottom: none;
+    }
+    .settings-label-group {
       display: flex;
+      flex-direction: column;
+      gap: 1px;
+    }
+    .settings-label {
+      font-size: 12px;
+      color: #e5ebf2;
+      font-weight: 700;
+    }
+    .settings-sublabel {
+      font-size: 9.5px;
+      color: #7a8c9e;
+      font-family: var(--font-mono);
+    }
+    .settings-control-wrap {
+      display: flex;
+      align-items: center;
       gap: 8px;
     }
+
+    /* Intuitive Numerical Value Badge */
+    .val-num-badge {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      font-weight: 800;
+      color: var(--val-cyan);
+      background: rgba(0, 240, 255, 0.1);
+      border: 1px solid rgba(0, 240, 255, 0.25);
+      padding: 2px 6px;
+      border-radius: 2px;
+      min-width: 42px;
+      text-align: center;
+    }
+
+    /* Crosshair Preset Buttons */
+    .ch-presets-bar {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 4px;
+    }
+    .ch-preset-btn {
+      width: 100% !important;
+      display: inline-flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      font-size: 10px !important;
+      font-family: var(--font-hud) !important;
+      font-weight: 700 !important;
+      letter-spacing: 0px !important;
+      padding: 4px 2px !important;
+      background: rgba(255, 255, 255, 0.05) !important;
+      border: 1px solid rgba(255, 255, 255, 0.15) !important;
+      color: #c7d2de !important;
+      white-space: nowrap !important;
+      transform: none !important;
+      cursor: pointer;
+    }
+    .ch-preset-btn:hover {
+      background: rgba(0, 240, 255, 0.15) !important;
+      border-color: var(--val-cyan) !important;
+      color: #fff !important;
+    }
+
+    .color-picker-box {
+      display: flex;
+      gap: 6px;
+    }
     .color-swatch {
-      width: 24px; height: 24px;
+      width: 18px; height: 18px;
       border-radius: 2px;
       cursor: pointer;
       border: 2px solid transparent;
-      transition: transform 0.1s;
+      transition: transform 0.1s, box-shadow 0.1s;
     }
-    .color-swatch:hover { transform: scale(1.15); }
+    .color-swatch:hover { transform: scale(1.18); }
     .color-swatch.active-swatch { border-color: #fff; box-shadow: 0 0 8px #fff; }
+
+    /* Compact Sliders & Selects */
+    .settings-container input[type="range"] {
+      width: 120px;
+      height: 5px;
+      accent-color: var(--val-cyan);
+      cursor: pointer;
+    }
+    .settings-container select {
+      background: #070b10;
+      border: 1px solid rgba(0, 240, 255, 0.25);
+      color: var(--val-cyan);
+      font-family: var(--font-hud);
+      font-size: 11px;
+      padding: 3px 6px;
+      outline: none;
+      cursor: pointer;
+      border-radius: 2px;
+    }
+    .settings-container select:focus {
+      border-color: var(--val-cyan);
+      box-shadow: 0 0 6px rgba(0, 240, 255, 0.3);
+    }
+
+    /* Keybind Quick Reference Cards */
+    .keybind-mini-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 5px;
+      background: rgba(4, 7, 12, 0.4);
+      padding: 6px 8px;
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 2px;
+    }
+    .keybind-pill {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 11px;
+      color: #8c9dae;
+    }
+    .key-badge {
+      font-family: var(--font-mono);
+      font-size: 9.5px;
+      font-weight: 700;
+      color: #fff;
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      padding: 1px 5px;
+      border-radius: 2px;
+    }
+
+    /* Footer Action Buttons */
+    .settings-footer {
+      display: flex;
+      justify-content: space-between;
+      gap: 8px;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      padding-top: 6px;
+    }
+    .btn-settings-quit {
+      flex: 1;
+      background: rgba(255, 70, 85, 0.12) !important;
+      border-color: rgba(255, 70, 85, 0.4) !important;
+      color: #ff9da4 !important;
+      font-size: 11px !important;
+      padding: 6px 10px !important;
+    }
+    .btn-settings-quit:hover {
+      background: rgba(255, 70, 85, 0.28) !important;
+      border-color: var(--val-red) !important;
+      color: #fff !important;
+    }
+    .btn-settings-resume {
+      flex: 1.4;
+      background: rgba(0, 240, 255, 0.15) !important;
+      border-color: var(--val-cyan) !important;
+      color: #fff !important;
+      font-size: 11.5px !important;
+      font-weight: 800 !important;
+      padding: 6px 12px !important;
+    }
+    .btn-settings-resume:hover {
+      background: rgba(0, 240, 255, 0.3) !important;
+      box-shadow: 0 0 12px rgba(0, 240, 255, 0.4) !important;
+    }
 
     /* ══════ GRAPHICS & VISUAL SETTINGS SUITE MODAL ([F2]) ══════ */
     #gfx-modal {
@@ -2698,139 +2991,267 @@
   </div>
 
   <!-- IN-GAME SETTINGS & CROSSHAIR CUSTOMIZER ([ESC]) -->
+  <!-- IN-GAME SETTINGS & CROSSHAIR CUSTOMIZER ([ESC]) -->
   <div id="settings-modal">
     <div class="settings-container val-clip-tl-br">
-      <div class="settings-title">
-        <span>TACTICAL SETTINGS // 환경 설정</span>
-        <span style="font-size: 16px; color: var(--val-cyan); font-family: var(--font-mono);">[ESC] 닫기</span>
+      <div class="settings-header">
+        <div class="settings-title-group">
+          <span class="settings-title">SETTINGS</span>
+          <span class="settings-title-sub">// 전술 환경 설정</span>
+        </div>
+        <button class="settings-close-btn val-clip" id="btn-settings-close" onclick="closeSettingsModal()">✕ [ESC] 닫기</button>
       </div>
 
-      <!-- Crosshair Settings -->
-      <div style="margin-bottom: 12px; padding: 10px 14px; background: rgba(8, 12, 16, 0.6); border: 1px solid rgba(255,255,255,0.08);">
-        <div style="font-size: 12px; color: var(--val-gold); font-weight: 700; margin-bottom: 8px; letter-spacing: 1px;">프로 조준선 프리셋 // PRO CROSSHAIR PRESETS</div>
-        <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-          <button class="map-select-btn val-clip ch-preset-btn" data-preset="tenz" style="font-size: 12px; padding: 4px 12px;">TenZ (사이언)</button>
-          <button class="map-select-btn val-clip ch-preset-btn" data-preset="boaster" style="font-size: 12px; padding: 4px 12px;">Boaster (그린)</button>
-          <button class="map-select-btn val-clip ch-preset-btn" data-preset="aspas" style="font-size: 12px; padding: 4px 12px;">aspas (레드)</button>
-          <button class="map-select-btn val-clip ch-preset-btn" data-preset="demon1" style="font-size: 12px; padding: 4px 12px;">Demon1 (도트화이트)</button>
-          <button class="map-select-btn val-clip ch-preset-btn" data-preset="dot" style="font-size: 12px; padding: 4px 12px;">Dot Only (골드 점)</button>
-        </div>
+      <!-- Tab Bar (칸별 선택 탭) -->
+      <div class="settings-tab-bar">
+        <button class="settings-tab-btn active" data-tab="crosshair" onclick="switchSettingsTab('crosshair')">🎯 조준선</button>
+        <button class="settings-tab-btn" data-tab="controls" onclick="switchSettingsTab('controls')">🎮 조작/감도</button>
+        <button class="settings-tab-btn" data-tab="video" onclick="switchSettingsTab('video')">🖥️ 화면/성능</button>
+        <button class="settings-tab-btn" data-tab="audio" onclick="switchSettingsTab('audio')">🔊 오디오</button>
+        <button class="settings-tab-btn" data-tab="all" onclick="switchSettingsTab('all')">📋 전체 칸</button>
       </div>
-      <div style="display:flex; gap:30px;">
-        <div style="flex:1;">
-          <div style="font-size: 13px; color: var(--val-gold); margin-bottom: 8px; letter-spacing: 1px;">조준선 색상 (CROSSHAIR COLOR)</div>
-          <div class="color-picker-box">
-            <div class="color-swatch active-swatch" style="background:#00ff88;" data-color="#00ff88"></div>
-            <div class="color-swatch" style="background:#00f0ff;" data-color="#00f0ff"></div>
-            <div class="color-swatch" style="background:#ffc83b;" data-color="#ffc83b"></div>
-            <div class="color-swatch" style="background:#ffffff;" data-color="#ffffff"></div>
-            <div class="color-swatch" style="background:#ff4655;" data-color="#ff4655"></div>
-            <div class="color-swatch" style="background:#ff3399;" data-color="#ff3399"></div>
+
+      <!-- Compartments Body -->
+      <div class="settings-body" id="settings-body-wrap">
+        
+        <!-- [칸 1: 🎯 조준선 커스터마이징] -->
+        <div class="settings-compartment active" id="comp-crosshair">
+          <div class="comp-header">
+            <div class="comp-title">
+              <span class="comp-tag">칸 1</span>
+              <span>🎯 조준선 설정 // CROSSHAIR</span>
+            </div>
+            <div class="comp-subtitle">PRO PRESETS & CUSTOM</div>
           </div>
 
-          <div class="settings-row" style="margin-top:14px;">
-            <span>중앙 점 (Center Dot)</span>
-            <input type="checkbox" id="cfg-dot" checked style="transform: scale(1.3); cursor: pointer;">
+          <!-- Quick Presets -->
+          <div style="display:flex; flex-direction:column; gap:4px;">
+            <div style="font-size:10.5px; color:var(--val-gold); font-weight:700; letter-spacing:0.5px;">⚡ 프로 프리셋 빠른 적용</div>
+            <div class="ch-presets-bar">
+              <button class="map-select-btn val-clip ch-preset-btn" data-preset="tenz">TenZ (사이언)</button>
+              <button class="map-select-btn val-clip ch-preset-btn" data-preset="boaster">Boaster (그린)</button>
+              <button class="map-select-btn val-clip ch-preset-btn" data-preset="aspas">aspas (레드)</button>
+              <button class="map-select-btn val-clip ch-preset-btn" data-preset="demon1">Demon1 (도트화이트)</button>
+              <button class="map-select-btn val-clip ch-preset-btn" data-preset="dot">Dot Only (골드 점)</button>
+            </div>
+          </div>
+
+          <!-- Color & Sliders + Live Preview -->
+          <div style="display:flex; gap:12px; margin-top:2px;">
+            <div style="flex:1; display:flex; flex-direction:column; gap:2px;">
+              <div class="settings-row" style="padding:2px 0;">
+                <div class="settings-label-group">
+                  <span class="settings-label">조준선 색상</span>
+                  <span class="settings-sublabel">Crosshair Color</span>
+                </div>
+                <div class="color-picker-box">
+                  <div class="color-swatch active-swatch" style="background:#00ff88;" data-color="#00ff88"></div>
+                  <div class="color-swatch" style="background:#00f0ff;" data-color="#00f0ff"></div>
+                  <div class="color-swatch" style="background:#ffc83b;" data-color="#ffc83b"></div>
+                  <div class="color-swatch" style="background:#ffffff;" data-color="#ffffff"></div>
+                  <div class="color-swatch" style="background:#ff4655;" data-color="#ff4655"></div>
+                  <div class="color-swatch" style="background:#ff3399;" data-color="#ff3399"></div>
+                </div>
+              </div>
+              <div class="settings-row">
+                <div class="settings-label-group">
+                  <span class="settings-label">중앙 점</span>
+                  <span class="settings-sublabel">Center Dot</span>
+                </div>
+                <input type="checkbox" id="cfg-dot" checked style="transform: scale(1.15); cursor: pointer; accent-color: var(--val-cyan);">
+              </div>
+              <div class="settings-row">
+                <div class="settings-label-group">
+                  <span class="settings-label">선 길이</span>
+                  <span class="settings-sublabel">Length</span>
+                </div>
+                <div class="settings-control-wrap">
+                  <input type="range" id="cfg-len" min="4" max="14" value="8">
+                  <span class="val-num-badge" id="num-len">8px</span>
+                </div>
+              </div>
+              <div class="settings-row">
+                <div class="settings-label-group">
+                  <span class="settings-label">선 두께</span>
+                  <span class="settings-sublabel">Thickness</span>
+                </div>
+                <div class="settings-control-wrap">
+                  <input type="range" id="cfg-thick" min="1" max="4" value="2">
+                  <span class="val-num-badge" id="num-thick">2px</span>
+                </div>
+              </div>
+              <div class="settings-row">
+                <div class="settings-label-group">
+                  <span class="settings-label">선 간격</span>
+                  <span class="settings-sublabel">Gap</span>
+                </div>
+                <div class="settings-control-wrap">
+                  <input type="range" id="cfg-gap" min="1" max="10" value="5">
+                  <span class="val-num-badge" id="num-gap">5px</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Mini Live Preview -->
+            <div style="width:96px; display:flex; flex-direction:column; align-items:center; justify-content:center; background:#060a0f; border:1px solid rgba(0,240,255,0.2); border-radius:2px; padding:8px;">
+              <div style="font-size:9.5px; color:#8899a6; font-family:var(--font-mono); margin-bottom:10px;">실시간 미리보기</div>
+              <div style="position:relative; width:50px; height:50px; background:radial-gradient(circle, rgba(0,240,255,0.06) 0%, rgba(0,0,0,0.4) 100%); border:1px dashed rgba(255,255,255,0.1);" id="preview-crosshair-box">
+                <div id="pv-dot" style="position:absolute; width:2px; height:2px; background:#00ff88; left:24px; top:24px;"></div>
+                <div id="pv-t" style="position:absolute; width:2px; height:8px; background:#00ff88; left:24px; top:11px;"></div>
+                <div id="pv-b" style="position:absolute; width:2px; height:8px; background:#00ff88; left:24px; top:31px;"></div>
+                <div id="pv-l" style="position:absolute; width:8px; height:2px; background:#00ff88; left:11px; top:24px;"></div>
+                <div id="pv-r" style="position:absolute; width:8px; height:2px; background:#00ff88; left:31px; top:24px;"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- [칸 2: 🎮 조작 & 마우스 감도] -->
+        <div class="settings-compartment" id="comp-controls">
+          <div class="comp-header">
+            <div class="comp-title">
+              <span class="comp-tag">칸 2</span>
+              <span>🎮 조작 & 마우스 감도 // CONTROLS</span>
+            </div>
+            <div class="comp-subtitle">SENSITIVITY & KEYBINDS</div>
           </div>
           <div class="settings-row">
-            <span>선 길이 (Length)</span>
-            <input type="range" id="cfg-len" min="4" max="14" value="8" style="cursor: pointer;">
+            <div class="settings-label-group">
+              <span class="settings-label">마우스 감도</span>
+              <span class="settings-sublabel">Mouse Sensitivity (Raw Input)</span>
+            </div>
+            <div class="settings-control-wrap">
+              <input type="range" id="cfg-sens" min="5" max="35" value="18">
+              <span class="val-num-badge" id="num-sens">18</span>
+            </div>
+          </div>
+
+          <!-- Quick Keybind Reference Card -->
+          <div style="margin-top:4px;">
+            <div style="font-size:10.5px; color:var(--val-gold); font-weight:700; margin-bottom:5px; letter-spacing:0.5px;">📋 기본 전술 단축키 안내</div>
+            <div class="keybind-mini-grid">
+              <div class="keybind-pill"><span>이동 / 보행</span><span class="key-badge">WASD / Shift</span></div>
+              <div class="keybind-pill"><span>점프 / 앉기</span><span class="key-badge">Space / Ctrl</span></div>
+              <div class="keybind-pill"><span>무기 교체</span><span class="key-badge">1 (주) / 2 (권총) / 3 (칼)</span></div>
+              <div class="keybind-pill"><span>요원 스킬</span><span class="key-badge">C / Q / E (고유) / X (궁)</span></div>
+              <div class="keybind-pill"><span>문·오브젝트</span><span class="key-badge">F 상호작용</span></div>
+              <div class="keybind-pill"><span>전술 핑 / 무전</span><span class="key-badge">T 핑 / Z 라디오</span></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- [칸 3: 🖥️ 화면 & 성능 최적화] -->
+        <div class="settings-compartment" id="comp-video">
+          <div class="comp-header">
+            <div class="comp-title">
+              <span class="comp-tag">칸 3</span>
+              <span>🖥️ 화면 & 그래픽 최적화 // VIDEO</span>
+            </div>
+            <div class="comp-subtitle">DISPLAY & PERFORMANCE</div>
+          </div>
+          <div style="display:flex; justify-content:space-between; align-items:center; background:rgba(0,240,255,0.06); border:1px dashed rgba(0,240,255,0.25); padding:6px 10px; border-radius:2px; margin-bottom:4px;">
+            <span style="font-size:11px; color:var(--val-gold); font-weight:700;">⚡ 프로 e스포츠 원클릭 최적화</span>
+            <button class="map-select-btn val-clip" id="btn-esports-optimize" style="font-size:10.5px; padding:3px 10px; background:rgba(0,240,255,0.15); border-color:var(--val-cyan);">원클릭 144Hz 락 적용</button>
           </div>
           <div class="settings-row">
-            <span>선 두께 (Thickness)</span>
-            <input type="range" id="cfg-thick" min="1" max="4" value="2" style="cursor: pointer;">
+            <div class="settings-label-group">
+              <span class="settings-label">그래픽 품질</span>
+              <span class="settings-sublabel">Graphics Quality Preset</span>
+            </div>
+            <select id="cfg-graphics">
+              <option value="min">최소 (0.6x, 그림자 OFF)</option>
+              <option value="perf">성능 (0.8x, 저사양)</option>
+              <option value="balanced" selected>균형 (1.0x, 표준 그림자)</option>
+              <option value="visual">비주얼 (1.4x, 고품질 그림자)</option>
+              <option value="ultra">최고 (2.0x, 슈퍼샘플링)</option>
+            </select>
           </div>
           <div class="settings-row">
-            <span>선 간격 (Gap)</span>
-            <input type="range" id="cfg-gap" min="1" max="10" value="5" style="cursor: pointer;">
+            <div class="settings-label-group">
+              <span class="settings-label">최대 프레임 레이트</span>
+              <span class="settings-sublabel">FPS Limit</span>
+            </div>
+            <select id="cfg-fps-limit">
+              <option value="auto">스마트 자동 최적화 (144Hz 락)</option>
+              <option value="0">무제한 (UNCAPPED)</option>
+              <option value="60">60 FPS (표준 60Hz)</option>
+              <option value="120">120 FPS (고주사율 120Hz)</option>
+              <option value="144" selected>144 FPS (e스포츠 표준 144Hz)</option>
+              <option value="240">240 FPS (초고속 프로 240Hz)</option>
+              <option value="360">360 FPS (Apex 360Hz)</option>
+              <option value="1000">1000 FPS (Ultra Sub-1ms)</option>
+            </select>
+          </div>
+          <div class="settings-row">
+            <div class="settings-label-group">
+              <span class="settings-label">렌더링 해상도 스케일</span>
+              <span class="settings-sublabel">Render Scale</span>
+            </div>
+            <select id="cfg-render-scale">
+              <option value="0.5">0.50x (초저사양 / 최대 FPS)</option>
+              <option value="0.75">0.75x (성능 우선)</option>
+              <option value="1.0" selected>1.00x (네이티브 표준 100%)</option>
+              <option value="1.25">1.25x (고화질 선명도)</option>
+              <option value="1.5">1.50x (초고화질 슈퍼샘플링)</option>
+            </select>
+          </div>
+          <div class="settings-row">
+            <div class="settings-label-group">
+              <span class="settings-label">동적 해상도 스케일링</span>
+              <span class="settings-sublabel">Dynamic Resolution (DRS)</span>
+            </div>
+            <select id="cfg-drs">
+              <option value="on" selected>켜짐 (ON - 프레임 안정화)</option>
+              <option value="off">꺼짐 (OFF - 고정 스케일)</option>
+            </select>
+          </div>
+          <div class="settings-row">
+            <div class="settings-label-group">
+              <span class="settings-label">퍼포먼스 HUD</span>
+              <span class="settings-sublabel">FPS / Latency Overlay</span>
+            </div>
+            <select id="cfg-perf-hud">
+              <option value="full" selected>전체 표시 (FPS + Latency + Res + Map)</option>
+              <option value="simple">간단히 (FPS만)</option>
+              <option value="off">숨기기 (OFF)</option>
+            </select>
           </div>
         </div>
 
-        <div style="width:200px; display:flex; flex-direction:column; align-items:center; justify-content:center; background:#070b10; border:1px solid var(--val-border); padding:20px;">
-          <div style="font-size:11px; color:#8899a6; margin-bottom:20px;">실시간 조준선 미리보기</div>
-          <div style="position:relative; width:60px; height:60px;" id="preview-crosshair-box">
-            <div id="pv-dot" style="position:absolute; width:2px; height:2px; background:#00ff88; left:29px; top:29px;"></div>
-            <div id="pv-t" style="position:absolute; width:2px; height:8px; background:#00ff88; left:29px; top:16px;"></div>
-            <div id="pv-b" style="position:absolute; width:2px; height:8px; background:#00ff88; left:29px; top:36px;"></div>
-            <div id="pv-l" style="position:absolute; width:8px; height:2px; background:#00ff88; left:16px; top:29px;"></div>
-            <div id="pv-r" style="position:absolute; width:8px; height:2px; background:#00ff88; left:36px; top:29px;"></div>
+        <!-- [칸 4: 🔊 오디오 & 볼륨] -->
+        <div class="settings-compartment" id="comp-audio">
+          <div class="comp-header">
+            <div class="comp-title">
+              <span class="comp-tag">칸 4</span>
+              <span>🔊 오디오 & 사운드 // AUDIO</span>
+            </div>
+            <div class="comp-subtitle">MASTER VOLUME & SFX</div>
+          </div>
+          <div class="settings-row">
+            <div class="settings-label-group">
+              <span class="settings-label">마스터 볼륨</span>
+              <span class="settings-sublabel">Master Volume</span>
+            </div>
+            <div class="settings-control-wrap">
+              <input type="range" id="cfg-vol" min="0" max="100" value="80">
+              <span class="val-num-badge" id="num-vol">80%</span>
+            </div>
+          </div>
+          <div class="settings-row">
+            <div class="settings-label-group">
+              <span class="settings-label">전술 음향 및 발소리</span>
+              <span class="settings-sublabel">Spatial Audio & Gunfire SFX</span>
+            </div>
+            <span style="font-size:11px; color:var(--val-green); font-family:var(--font-mono); font-weight:700;">● 정상 작동 중 (ACTIVE)</span>
           </div>
         </div>
+
       </div>
 
-      <!-- Controls, Graphics Quality & Volume -->
-      <div style="border-top:1px solid var(--val-border); padding-top:12px;">
-        <div class="settings-row">
-          <span>최대 프레임 레이트 (FPS Limit)</span>
-          <select id="cfg-fps-limit" style="background:#070b10; border:1px solid var(--val-border); color:var(--val-cyan); font-family:var(--font-hud); font-size:14px; padding:3px 8px; outline:none; cursor:pointer;">
-            <option value="auto">스마트 자동 최적화 (144Hz 락)</option>
-            <option value="0">무제한 (UNCAPPED)</option>
-            <option value="30">30 FPS (절전 / 배터리 세이버)</option>
-            <option value="60">60 FPS (표준 60Hz)</option>
-            <option value="90">90 FPS (부드러운 90Hz)</option>
-            <option value="120">120 FPS (고주사율 120Hz)</option>
-            <option value="144" selected>144 FPS (e스포츠 표준 144Hz)</option>
-            <option value="165">165 FPS (게이밍 모니터 165Hz)</option>
-            <option value="240">240 FPS (초고속 프로 240Hz)</option>
-            <option value="360">360 FPS (Apex 최상위 360Hz)</option>
-            <option value="480">480 FPS (e스포츠 극한 주사율 480Hz)</option>
-            <option value="500">500 FPS (최상위 초고속 500Hz)</option>
-            <option value="1000">1000 FPS (Apex Ultra 1000Hz / Sub-1ms)</option>
-          </select>
-        </div>
-        <div class="settings-row">
-          <span>렌더링 해상도 스케일 (Render Scale)</span>
-          <select id="cfg-render-scale" style="background:#070b10; border:1px solid var(--val-border); color:var(--val-cyan); font-family:var(--font-hud); font-size:14px; padding:3px 8px; outline:none; cursor:pointer;">
-            <option value="0.5">0.50x (초저사양 / 최대 FPS)</option>
-            <option value="0.75">0.75x (성능 우선)</option>
-            <option value="1.0" selected>1.00x (네이티브 표준 100%)</option>
-            <option value="1.25">1.25x (고화질 선명도)</option>
-            <option value="1.5">1.50x (초고화질 슈퍼샘플링)</option>
-          </select>
-        </div>
-        <div class="settings-row">
-          <span>동적 해상도 스케일링 (DRS)</span>
-          <select id="cfg-drs" style="background:#070b10; border:1px solid var(--val-border); color:var(--val-cyan); font-family:var(--font-hud); font-size:14px; padding:3px 8px; outline:none; cursor:pointer;">
-            <option value="on" selected>켜짐 (ON - 프레임 안정화)</option>
-            <option value="off">꺼짐 (OFF - 고정 스케일)</option>
-          </select>
-        </div>
-        <div class="settings-row">
-          <span>퍼포먼스 HUD (Performance HUD)</span>
-          <select id="cfg-perf-hud" style="background:#070b10; border:1px solid var(--val-border); color:var(--val-cyan); font-family:var(--font-hud); font-size:14px; padding:3px 8px; outline:none; cursor:pointer;">
-            <option value="full" selected>전체 표시 (FPS + Latency + Res + Map)</option>
-            <option value="simple">간단히 (FPS만)</option>
-            <option value="off">숨기기 (OFF)</option>
-          </select>
-        </div>
-        <div class="settings-row">
-          <span>그래픽 품질 (Graphics Quality)</span>
-          <select id="cfg-graphics" style="background:#070b10; border:1px solid var(--val-border); color:var(--val-cyan); font-family:var(--font-hud); font-size:14px; padding:3px 8px; outline:none; cursor:pointer;">
-            <option value="min">최소 (0.6x, 그림자 끔)</option>
-            <option value="perf">성능 (0.8x, 저사양)</option>
-            <option value="balanced" selected>균형 (1.0x, 1024 그림자)</option>
-            <option value="visual">비주얼 (1.4x, 2048 그림자)</option>
-            <option value="ultra">최고 (2.0x, 4096 그림자)</option>
-          </select>
-        </div>
-        <div class="settings-row">
-          <span>마우스 감도 (Sensitivity)</span>
-          <input type="range" id="cfg-sens" min="5" max="35" value="18" style="cursor: pointer;">
-        </div>
-        <div class="settings-row">
-          <span>마스터 볼륨 (Master Volume)</span>
-          <input type="range" id="cfg-vol" min="0" max="100" value="80" style="cursor: pointer;">
-        </div>
-        <div style="margin-top:14px; padding-top:10px; border-top:1px dashed rgba(255,255,255,0.12); display:flex; justify-content:space-between; align-items:center;">
-          <span style="font-size:12px; color:var(--val-gold); font-weight:700;">⚡ 프로 e스포츠 원클릭 최적화</span>
-          <button class="map-select-btn val-clip" id="btn-esports-optimize" style="font-size:11px; padding:4px 12px; background:rgba(0,240,255,0.15); border-color:var(--val-cyan);">원클릭 144Hz 락 적용</button>
-        </div>
-      </div>
-
-      <!-- Action Buttons -->
-      <div style="display:flex; justify-content:space-between; margin-top:10px;">
-        <button class="map-select-btn val-clip" style="width:200px; background:rgba(255,255,255,0.08); border-color:#8899a6;" id="btn-quit-to-lobby">로비로 나가기 (QUIT)</button>
-        <button class="map-select-btn val-clip" style="width:220px;" id="btn-resume-game">게임 계속하기 (RESUME)</button>
+      <!-- Compact Action Buttons Footer -->
+      <div class="settings-footer">
+        <button class="map-select-btn val-clip btn-settings-quit" id="btn-quit-to-lobby">🚪 로비로 나가기 (QUIT)</button>
+        <button class="map-select-btn val-clip btn-settings-resume" id="btn-resume-game">▶ 게임 계속하기 (RESUME / ESC)</button>
       </div>
     </div>
   </div>
@@ -14553,6 +14974,55 @@
     document.getElementById('btn-round-13').addEventListener('click', () => setTargetRounds(13));
     document.getElementById('btn-round-7').addEventListener('click', () => setTargetRounds(7));
     document.getElementById('btn-round-3').addEventListener('click', () => setTargetRounds(3));
+    function closeSettingsModal() {
+      const sm = document.getElementById('settings-modal');
+      if (sm) sm.style.display = 'none';
+      requestGamePointerLock();
+      updatePlayPrompt();
+    }
+
+    function switchSettingsTab(tabKey) {
+      document.querySelectorAll('.settings-tab-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.getAttribute('data-tab') === tabKey);
+      });
+      const compartments = document.querySelectorAll('.settings-compartment');
+      if (tabKey === 'all') {
+        compartments.forEach(c => {
+          c.classList.add('active');
+          c.style.display = 'flex';
+        });
+      } else {
+        compartments.forEach(c => {
+          const isTarget = (c.id === `comp-${tabKey}`);
+          c.classList.toggle('active', isTarget);
+          c.style.display = isTarget ? 'flex' : 'none';
+        });
+      }
+      try { sound.playTick(); } catch(e) {}
+    }
+
+    function updateSettingsBadges() {
+      const lenEl = document.getElementById('cfg-len');
+      const numLen = document.getElementById('num-len');
+      if (lenEl && numLen) numLen.innerText = `${lenEl.value}px`;
+
+      const thickEl = document.getElementById('cfg-thick');
+      const numThick = document.getElementById('num-thick');
+      if (thickEl && numThick) numThick.innerText = `${thickEl.value}px`;
+
+      const gapEl = document.getElementById('cfg-gap');
+      const numGap = document.getElementById('num-gap');
+      if (gapEl && numGap) numGap.innerText = `${gapEl.value}px`;
+
+      const sensEl = document.getElementById('cfg-sens');
+      const numSens = document.getElementById('num-sens');
+      if (sensEl && numSens) numSens.innerText = `${sensEl.value}`;
+
+      const volEl = document.getElementById('cfg-vol');
+      const numVol = document.getElementById('num-vol');
+      if (volEl && numVol) numVol.innerText = `${volEl.value}%`;
+    }
+
     document.getElementById('btn-quit-to-lobby').addEventListener('click', () => {
       document.getElementById('settings-modal').style.display = 'none';
       document.getElementById('hud').style.display = 'none';
@@ -14597,6 +15067,7 @@
           s.classList.toggle('active-swatch', s.getAttribute('data-color') === p.color);
         });
 
+        updateSettingsBadges();
         applyCrosshairSettings();
         showToast(`조준선 프리셋 적용: [${btn.innerText.trim()}]`);
       });
@@ -14608,22 +15079,35 @@
     });
     document.getElementById('cfg-len').addEventListener('input', (e) => {
       crosshairSettings.length = parseInt(e.target.value);
+      const numLen = document.getElementById('num-len');
+      if (numLen) numLen.innerText = `${e.target.value}px`;
       applyCrosshairSettings();
     });
     document.getElementById('cfg-thick').addEventListener('input', (e) => {
       crosshairSettings.thickness = parseInt(e.target.value);
+      const numThick = document.getElementById('num-thick');
+      if (numThick) numThick.innerText = `${e.target.value}px`;
       applyCrosshairSettings();
     });
     document.getElementById('cfg-gap').addEventListener('input', (e) => {
       crosshairSettings.gap = parseInt(e.target.value);
+      const numGap = document.getElementById('num-gap');
+      if (numGap) numGap.innerText = `${e.target.value}px`;
       applyCrosshairSettings();
     });
     document.getElementById('cfg-sens').addEventListener('input', (e) => {
       mouseSensitivity = (parseInt(e.target.value) / 100) * 0.012;
+      const numSens = document.getElementById('num-sens');
+      if (numSens) numSens.innerText = `${e.target.value}`;
     });
     document.getElementById('cfg-vol').addEventListener('input', (e) => {
       sound.setMasterVolume(parseInt(e.target.value) / 100);
+      const numVol = document.getElementById('num-vol');
+      if (numVol) numVol.innerText = `${e.target.value}%`;
     });
+
+    // Initial badge setup
+    updateSettingsBadges();
 
     let isMouseDown = false;
     let lastClientX = null;
