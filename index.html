@@ -5414,17 +5414,26 @@
     const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.08, 350);
     camera.position.set(0, 1.7, 0);
 
-    const ambientLight = new THREE.AmbientLight(0xdde8f2, 0.9);
+    const ambientLight = new THREE.AmbientLight(0xdde8f2, 0.65);
     scene.add(ambientLight);
 
-    const sunLight = new THREE.DirectionalLight(0xfff6e5, 1.25);
-    sunLight.position.set(45, 90, 55);
+    // Global Illumination: Hemisphere Light (Cool sky ambient + Warm ground bounce)
+    const hemiLight = new THREE.HemisphereLight(0xe8f2ff, 0x4a3d32, 0.65);
+    scene.add(hemiLight);
+
+    const sunLight = new THREE.DirectionalLight(0xfff6e5, 1.4);
+    sunLight.position.set(45, 95, 55);
     sunLight.castShadow = true;
-    sunLight.shadow.mapSize.width = 1024;
-    sunLight.shadow.mapSize.height = 1024;
-    sunLight.shadow.camera.near = 0.5;
-    sunLight.shadow.camera.far = 280;
-    sunLight.shadow.bias = -0.0005;
+    sunLight.shadow.mapSize.width = 2048;
+    sunLight.shadow.mapSize.height = 2048;
+    sunLight.shadow.camera.near = 1.0;
+    sunLight.shadow.camera.far = 320;
+    sunLight.shadow.camera.left = -85;
+    sunLight.shadow.camera.right = 85;
+    sunLight.shadow.camera.top = 85;
+    sunLight.shadow.camera.bottom = -85;
+    sunLight.shadow.bias = -0.0003;
+    sunLight.shadow.normalBias = 0.02;
     scene.add(sunLight);
 
     const weaponRig = new THREE.Group();
@@ -6337,83 +6346,521 @@
     let mouseSensitivity = 0.0022;
 
     
-    function createGridTexture(colorStr, lineStr, size, dash=false) {
+    /* ==========================================================
+       AUTHENTIC VALORANT PROCEDURAL PBR TEXTURES & MATERIALS ENGINE
+       ========================================================== */
+    function createAscentStuccoTexture() {
       const cvs = document.createElement('canvas');
-      cvs.width = 512; cvs.height = 512;
+      cvs.width = 1024; cvs.height = 1024;
       const ctx = cvs.getContext('2d');
-      ctx.fillStyle = colorStr;
-      ctx.fillRect(0, 0, 512, 512);
-      ctx.strokeStyle = lineStr;
-      ctx.lineWidth = 4;
-      if (dash) ctx.setLineDash([20, 20]);
-      ctx.strokeRect(0, 0, 512, 512);
+
+      // 1. Base Venetian Plaster Stucco (Warm off-white)
+      ctx.fillStyle = '#e8e2d8';
+      ctx.fillRect(0, 0, 1024, 1024);
+
+      // 2. Mottled Painterly Wash & Brushwork Gradients
+      const washes = ['#ded6c8', '#ede7dd', '#d5cdc0', '#e3dcce', '#ece5d9'];
+      for (let i = 0; i < 40; i++) {
+        ctx.fillStyle = washes[i % washes.length];
+        ctx.globalAlpha = 0.25;
+        const x = (i * 137) % 900;
+        const y = (i * 229) % 900;
+        const w = 180 + (i * 23) % 220;
+        const h = 120 + (i * 31) % 160;
+        ctx.beginPath();
+        ctx.ellipse(x + w/2, y + h/2, w/2, h/2, (i * 0.4), 0, Math.PI * 2);
+        ctx.fill();
+      }
+      ctx.globalAlpha = 1.0;
+
+      // 3. Exposed Venetian Terracotta Brick Patches (Ascent Signature Weathering)
+      function drawExposedBrickPatch(px, py, pw, ph) {
+        ctx.fillStyle = '#2d1f18';
+        if (ctx.roundRect) ctx.roundRect(px - 4, py - 4, pw + 8, ph + 8, 12);
+        else ctx.rect(px - 4, py - 4, pw + 8, ph + 8);
+        ctx.fill();
+
+        ctx.fillStyle = '#f8f4ee';
+        if (ctx.roundRect) ctx.roundRect(px - 2, py - 2, pw + 4, ph + 4, 10);
+        else ctx.rect(px - 2, py - 2, pw + 4, ph + 4);
+        ctx.fill();
+
+        ctx.fillStyle = '#3e322a';
+        ctx.fillRect(px, py, pw, ph);
+
+        const bH = 26;
+        const bW = 68;
+        const brickTones = ['#a2462b', '#ba5436', '#8e381f', '#b14d30', '#993f24'];
+        let rowIdx = 0;
+        for (let by = py + 2; by < py + ph - 4; by += bH + 4) {
+          const shift = (rowIdx % 2 === 0) ? 0 : bW / 2;
+          for (let bx = px - bW + shift; bx < px + pw + bW; bx += bW + 4) {
+            if (bx + bW > px && bx < px + pw && by + bH > py && by < py + ph) {
+              const clipX = Math.max(bx, px);
+              const clipY = Math.max(by, py);
+              const clipW = Math.min(bx + bW, px + pw) - clipX;
+              const clipH = Math.min(by + bH, py + ph) - clipY;
+              const brickColor = brickTones[Math.abs(Math.floor(bx + by)) % brickTones.length];
+              ctx.fillStyle = brickColor;
+              ctx.fillRect(clipX, clipY, clipW, clipH);
+              ctx.fillStyle = 'rgba(255,255,255,0.18)';
+              ctx.fillRect(clipX, clipY, clipW, 2);
+              ctx.fillStyle = 'rgba(0,0,0,0.22)';
+              ctx.fillRect(clipX, clipY + clipH - 2, clipW, 2);
+            }
+          }
+          rowIdx++;
+        }
+      }
+
+      drawExposedBrickPatch(80, 520, 260, 220);
+      drawExposedBrickPatch(640, 140, 280, 180);
+
+      // 4. Subtle Surface Micro-Pitting / Grain
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.035)';
+      for (let s = 0; s < 600; s++) {
+        const sx = (s * 397) % 1024;
+        const sy = (s * 613) % 1024;
+        ctx.fillRect(sx, sy, 3, 3);
+      }
+
+      // 5. Architectural Panel Seam Line
+      ctx.strokeStyle = 'rgba(80, 70, 60, 0.18)';
+      ctx.lineWidth = 3;
       ctx.beginPath();
-      ctx.moveTo(256, 0); ctx.lineTo(256, 512);
-      ctx.moveTo(0, 256); ctx.lineTo(512, 256);
+      ctx.moveTo(0, 820); ctx.lineTo(1024, 820);
       ctx.stroke();
+
       const tex = new THREE.CanvasTexture(cvs);
       tex.wrapS = THREE.RepeatWrapping;
       tex.wrapT = THREE.RepeatWrapping;
+      tex.repeat.set(3, 2);
       return tex;
     }
 
-    function createBrickTexture(color1, color2) {
+    function createAscentStuccoBump() {
       const cvs = document.createElement('canvas');
       cvs.width = 512; cvs.height = 512;
       const ctx = cvs.getContext('2d');
-      ctx.fillStyle = color1;
+      ctx.fillStyle = '#808080';
       ctx.fillRect(0, 0, 512, 512);
-      ctx.fillStyle = color2;
-      for(let y=0; y<512; y+=64) {
-        let offsetX = (y % 128 === 0) ? 0 : 64;
-        for(let x=-64; x<512; x+=128) {
-          ctx.fillRect(x + offsetX + 4, y + 4, 120, 56);
+      ctx.fillStyle = '#404040';
+      ctx.fillRect(40, 260, 130, 110);
+      ctx.fillRect(320, 70, 140, 90);
+      ctx.strokeStyle = '#d0d0d0';
+      ctx.lineWidth = 4;
+      ctx.strokeRect(40, 260, 130, 110);
+      ctx.strokeRect(320, 70, 140, 90);
+      const tex = new THREE.CanvasTexture(cvs);
+      tex.wrapS = THREE.RepeatWrapping;
+      tex.wrapT = THREE.RepeatWrapping;
+      tex.repeat.set(3, 2);
+      return tex;
+    }
+
+    function createAscentPiazzaPaversTexture() {
+      const cvs = document.createElement('canvas');
+      cvs.width = 1024; cvs.height = 1024;
+      const ctx = cvs.getContext('2d');
+
+      ctx.fillStyle = '#2b313a';
+      ctx.fillRect(0, 0, 1024, 1024);
+
+      const stoneTones = [
+        '#8f9aa7', '#9da8b5', '#7d8794', '#a4afbe',
+        '#939ea9', '#86909d', '#99a4b2', '#76808c'
+      ];
+
+      const slabW = 128;
+      const slabH = 64;
+      const gap = 4;
+      let row = 0;
+
+      for (let y = 0; y < 1024; y += slabH) {
+        const offset = (row % 2 === 0) ? 0 : slabW / 2;
+        for (let x = -slabW + offset; x < 1024 + slabW; x += slabW) {
+          const toneIdx = Math.abs(Math.floor((x * 7 + y * 13) / 100)) % stoneTones.length;
+          const stoneColor = stoneTones[toneIdx];
+          const curX = x + gap / 2;
+          const curY = y + gap / 2;
+          const curW = slabW - gap;
+          const curH = slabH - gap;
+
+          ctx.fillStyle = stoneColor;
+          ctx.fillRect(curX, curY, curW, curH);
+
+          // 3D Beveled Chisel Highlights
+          ctx.fillStyle = 'rgba(255, 255, 255, 0.28)';
+          ctx.fillRect(curX, curY, curW, 3);
+          ctx.fillRect(curX, curY, 3, curH);
+
+          ctx.fillStyle = 'rgba(15, 20, 25, 0.38)';
+          ctx.fillRect(curX, curY + curH - 3, curW, 3);
+          ctx.fillRect(curX + curW - 3, curY, 3, curH);
+
+          ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
+          ctx.fillRect(curX + 16, curY + 12, 18, 14);
+          ctx.fillRect(curX + 54, curY + 36, 24, 12);
+        }
+        row++;
+      }
+
+      // Tactical Courtyard Brass Manhole / Drainage Grate in the center
+      ctx.strokeStyle = '#4a5568';
+      ctx.lineWidth = 6;
+      ctx.strokeRect(480, 480, 64, 64);
+      ctx.fillStyle = '#202630';
+      ctx.fillRect(484, 484, 56, 56);
+      ctx.fillStyle = '#4a5568';
+      for (let g = 490; g < 536; g += 8) {
+        ctx.fillRect(g, 488, 3, 48);
+      }
+
+      const tex = new THREE.CanvasTexture(cvs);
+      tex.wrapS = THREE.RepeatWrapping;
+      tex.wrapT = THREE.RepeatWrapping;
+      tex.repeat.set(6, 6);
+      return tex;
+    }
+
+    function createRadianiteCrateTextures() {
+      const cvs = document.createElement('canvas');
+      cvs.width = 1024; cvs.height = 1024;
+      const ctx = cvs.getContext('2d');
+
+      ctx.fillStyle = '#141a22';
+      ctx.fillRect(0, 0, 1024, 1024);
+
+      ctx.fillStyle = '#1b232e';
+      for (let y = 0; y < 1024; y += 16) {
+        for (let x = 0; x < 1024; x += 16) {
+          if ((x + y) % 32 === 0) ctx.fillRect(x, y, 8, 8);
+        }
+      }
+
+      ctx.strokeStyle = '#2d3748';
+      ctx.lineWidth = 24;
+      ctx.strokeRect(12, 12, 1000, 1000);
+
+      function drawHazardStripe(sy, sh) {
+        ctx.fillStyle = '#0e1217';
+        ctx.fillRect(24, sy, 976, sh);
+        ctx.save();
+        ctx.beginPath();
+        ctx.rect(24, sy, 976, sh);
+        ctx.clip();
+        const stripeW = 48;
+        ctx.fillStyle = '#ff6600';
+        for (let x = -200; x < 1300; x += stripeW * 2) {
+          ctx.beginPath();
+          ctx.moveTo(x, sy + sh);
+          ctx.lineTo(x + stripeW, sy + sh);
+          ctx.lineTo(x + stripeW + sh, sy);
+          ctx.lineTo(x + sh, sy);
+          ctx.closePath();
+          ctx.fill();
+        }
+        ctx.restore();
+      }
+
+      drawHazardStripe(40, 70);
+      drawHazardStripe(914, 70);
+
+      const cx = 512, cy = 512;
+      ctx.fillStyle = '#060a0e';
+      ctx.beginPath();
+      ctx.arc(cx, cy, 260, 0, Math.PI * 2);
+      ctx.fill();
+
+      const grad = ctx.createRadialGradient(cx, cy, 30, cx, cy, 250);
+      grad.addColorStop(0, '#ffffff');
+      grad.addColorStop(0.25, '#00ffaa');
+      grad.addColorStop(0.65, '#00b488');
+      grad.addColorStop(1, '#051814');
+      ctx.fillStyle = grad;
+      ctx.beginPath();
+      ctx.arc(cx, cy, 220, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.strokeStyle = '#00f0ff';
+      ctx.lineWidth = 6;
+      for (let r = 50; r <= 200; r += 50) {
+        ctx.beginPath();
+        for (let a = 0; a < 6; a++) {
+          const angle = (a * Math.PI) / 3;
+          const hx = cx + r * Math.cos(angle);
+          const hy = cy + r * Math.sin(angle);
+          if (a === 0) ctx.moveTo(hx, hy);
+          else ctx.lineTo(hx, hy);
+        }
+        ctx.closePath();
+        ctx.stroke();
+      }
+
+      ctx.fillStyle = '#ffffff';
+      ctx.font = 'bold 36px "Chakra Petch", monospace';
+      ctx.fillText('K-SEC // RAD-01', 340, 180);
+      ctx.font = 'bold 24px "Rajdhani", sans-serif';
+      ctx.fillStyle = '#ff9900';
+      ctx.fillText('HAZARDOUS RADIANITE EXTRACTION CORE', 310, 215);
+
+      ctx.fillStyle = '#718096';
+      ctx.font = 'bold 22px monospace';
+      ctx.fillText('CONTAINMENT MATRIX: 100%', 360, 840);
+      ctx.fillText('KINGDOM CORP // PROTOCOL-7', 350, 875);
+
+      const cornerSize = 140;
+      ctx.fillStyle = '#ff6600';
+      [[0, 0], [1024 - cornerSize, 0], [0, 1024 - cornerSize], [1024 - cornerSize, 1024 - cornerSize]].forEach(([x, y]) => {
+        ctx.fillRect(x, y, cornerSize, cornerSize);
+        ctx.fillStyle = '#e2e8f0';
+        ctx.beginPath();
+        ctx.arc(x + cornerSize/2, y + cornerSize/2, 16, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = '#ff6600';
+      });
+
+      const diffuseTex = new THREE.CanvasTexture(cvs);
+
+      const eCvs = document.createElement('canvas');
+      eCvs.width = 512; eCvs.height = 512;
+      const eCtx = eCvs.getContext('2d');
+      eCtx.fillStyle = '#000000';
+      eCtx.fillRect(0, 0, 512, 512);
+
+      const eGrad = eCtx.createRadialGradient(256, 256, 20, 256, 256, 120);
+      eGrad.addColorStop(0, '#ffffff');
+      eGrad.addColorStop(0.4, '#00ffcc');
+      eGrad.addColorStop(0.9, '#00aa77');
+      eGrad.addColorStop(1, '#000000');
+      eCtx.fillStyle = eGrad;
+      eCtx.beginPath();
+      eCtx.arc(256, 256, 120, 0, Math.PI * 2);
+      eCtx.fill();
+
+      const emissiveTex = new THREE.CanvasTexture(eCvs);
+
+      return { diffuse: diffuseTex, emissive: emissiveTex };
+    }
+
+    function createDesertSandstoneTexture() {
+      const cvs = document.createElement('canvas');
+      cvs.width = 1024; cvs.height = 1024;
+      const ctx = cvs.getContext('2d');
+
+      ctx.fillStyle = '#cfa06d';
+      ctx.fillRect(0, 0, 1024, 1024);
+
+      for (let y = 0; y < 1024; y += 4) {
+        ctx.fillStyle = (y % 16 === 0) ? '#be8c59' : ((y % 32 === 0) ? '#dfb382' : '#ca9865');
+        ctx.globalAlpha = 0.35;
+        ctx.fillRect(0, y, 1024, 4);
+      }
+      ctx.globalAlpha = 1.0;
+
+      ctx.strokeStyle = 'rgba(75, 45, 20, 0.35)';
+      ctx.lineWidth = 5;
+      let r = 0;
+      for (let y = 0; y < 1024; y += 128) {
+        const off = (r % 2 === 0) ? 0 : 128;
+        ctx.beginPath();
+        ctx.moveTo(0, y); ctx.lineTo(1024, y);
+        ctx.stroke();
+        for (let x = off; x <= 1024; x += 256) {
+          ctx.beginPath();
+          ctx.moveTo(x, y); ctx.lineTo(x, y + 128);
+          ctx.stroke();
+        }
+        r++;
+      }
+
+      const tex = new THREE.CanvasTexture(cvs);
+      tex.wrapS = THREE.RepeatWrapping;
+      tex.wrapT = THREE.RepeatWrapping;
+      tex.repeat.set(4, 4);
+      return tex;
+    }
+
+    function createTacticalConcreteTexture() {
+      const cvs = document.createElement('canvas');
+      cvs.width = 1024; cvs.height = 1024;
+      const ctx = cvs.getContext('2d');
+
+      ctx.fillStyle = '#545b66';
+      ctx.fillRect(0, 0, 1024, 1024);
+
+      ctx.strokeStyle = '#393e46';
+      ctx.lineWidth = 4;
+      for (let y = 0; y < 1024; y += 256) {
+        ctx.strokeRect(0, y, 1024, 256);
+        for (let x = 0; x < 1024; x += 512) {
+          ctx.strokeRect(x, y, 512, 256);
+          [[x + 36, y + 36], [x + 476, y + 36], [x + 36, y + 220], [x + 476, y + 220]].forEach(([hx, hy]) => {
+            ctx.fillStyle = '#22262c';
+            ctx.beginPath();
+            ctx.arc(hx, hy, 10, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.strokeStyle = '#757e8a';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+          });
+        }
+      }
+
+      ctx.fillStyle = 'rgba(0,0,0,0.06)';
+      for (let i = 0; i < 400; i++) {
+        ctx.fillRect((i * 311) % 1024, (i * 479) % 1024, 3, 3);
+      }
+
+      const tex = new THREE.CanvasTexture(cvs);
+      tex.wrapS = THREE.RepeatWrapping;
+      tex.wrapT = THREE.RepeatWrapping;
+      tex.repeat.set(3, 3);
+      return tex;
+    }
+
+    function createTrimStoneTexture() {
+      const cvs = document.createElement('canvas');
+      cvs.width = 512; cvs.height = 512;
+      const ctx = cvs.getContext('2d');
+
+      ctx.fillStyle = '#cbd2dc';
+      ctx.fillRect(0, 0, 512, 512);
+
+      ctx.fillStyle = '#b6bfc9';
+      ctx.fillRect(0, 0, 512, 24);
+      ctx.fillRect(0, 488, 512, 24);
+      ctx.fillStyle = 'rgba(255,255,255,0.4)';
+      ctx.fillRect(0, 24, 512, 4);
+
+      ctx.strokeStyle = 'rgba(40,50,60,0.2)';
+      ctx.lineWidth = 2;
+      for (let x = 0; x < 512; x += 64) {
+        ctx.beginPath();
+        ctx.moveTo(x, 0); ctx.lineTo(x, 512);
+        ctx.stroke();
+      }
+
+      const tex = new THREE.CanvasTexture(cvs);
+      tex.wrapS = THREE.RepeatWrapping;
+      tex.wrapT = THREE.RepeatWrapping;
+      tex.repeat.set(4, 1);
+      return tex;
+    }
+
+    function createBrickTexture() {
+      const cvs = document.createElement('canvas');
+      cvs.width = 1024; cvs.height = 1024;
+      const ctx = cvs.getContext('2d');
+
+      ctx.fillStyle = '#3a3028';
+      ctx.fillRect(0, 0, 1024, 1024);
+
+      const bW = 120;
+      const bH = 48;
+      const gap = 6;
+      const brickTones = ['#9e452a', '#b45233', '#89361c', '#a8492c', '#7d2e16'];
+      let r = 0;
+
+      for (let y = 0; y < 1024; y += bH + gap) {
+        const off = (r % 2 === 0) ? 0 : bW / 2;
+        for (let x = -bW + off; x < 1024 + bW; x += bW + gap) {
+          const color = brickTones[Math.abs(Math.floor(x * 3 + y * 7)) % brickTones.length];
+          ctx.fillStyle = color;
+          ctx.fillRect(x, y, bW, bH);
+
+          ctx.fillStyle = 'rgba(255, 255, 255, 0.22)';
+          ctx.fillRect(x, y, bW, 3);
+          ctx.fillStyle = 'rgba(0, 0, 0, 0.35)';
+          ctx.fillRect(x, y + bH - 3, bW, 3);
+        }
+        r++;
+      }
+
+      const tex = new THREE.CanvasTexture(cvs);
+      tex.wrapS = THREE.RepeatWrapping;
+      tex.wrapT = THREE.RepeatWrapping;
+      tex.repeat.set(4, 4);
+      return tex;
+    }
+
+    function createPagodaWoodTexture() {
+      const cvs = document.createElement('canvas');
+      cvs.width = 1024; cvs.height = 1024;
+      const ctx = cvs.getContext('2d');
+      ctx.fillStyle = '#3c2214';
+      ctx.fillRect(0, 0, 1024, 1024);
+      ctx.strokeStyle = '#221209';
+      ctx.lineWidth = 5;
+      for (let y = 0; y < 1024; y += 64) {
+        ctx.strokeRect(0, y, 1024, 64);
+        ctx.fillStyle = 'rgba(255,255,255,0.08)';
+        ctx.fillRect(0, y + 2, 1024, 3);
+        for (let x = 60; x < 1024; x += 160) {
+          ctx.fillStyle = '#180c05';
+          ctx.beginPath();
+          ctx.arc(x + (y % 128), y + 32, 6, 0, Math.PI * 2);
+          ctx.fill();
         }
       }
       const tex = new THREE.CanvasTexture(cvs);
-      tex.wrapS = THREE.RepeatWrapping;
-      tex.wrapT = THREE.RepeatWrapping;
+      tex.wrapS = THREE.RepeatWrapping; tex.wrapT = THREE.RepeatWrapping;
+      tex.repeat.set(6, 6);
       return tex;
     }
-    
-    function createGradientSky() {
-      const cvs = document.createElement('canvas');
-      cvs.width = 2; cvs.height = 512;
-      const ctx = cvs.getContext('2d');
-      const grad = ctx.createLinearGradient(0, 0, 0, 512);
-      grad.addColorStop(0, '#0a101a'); // Zenith
-      grad.addColorStop(0.5, '#1e2d42'); // Horizon top
-      grad.addColorStop(0.55, '#ff7055'); // Sunset horizon
-      grad.addColorStop(1, '#080c10'); // Ground
-      ctx.fillStyle = grad;
-      ctx.fillRect(0, 0, 2, 512);
-      const tex = new THREE.CanvasTexture(cvs);
-      scene.background = tex;
-    }
 
+    // Generate Procedural Textures
+    const texAscentStucco = createAscentStuccoTexture();
+    const texAscentStuccoBump = createAscentStuccoBump();
+    const texAscentPiazza = createAscentPiazzaPaversTexture();
+    const radCratePack = createRadianiteCrateTextures();
+    const texRadianiteCrate = radCratePack.diffuse;
+    const texRadianiteEmissive = radCratePack.emissive;
+    const texSandstone = createDesertSandstoneTexture();
+    const texConcrete = createTacticalConcreteTexture();
+    const texTrimStone = createTrimStoneTexture();
+    const texBrick = createBrickTexture();
+    const texWoodPagoda = createPagodaWoodTexture();
 
-    const texConcrete = createGridTexture("#40454d", "#30343a", 512);
-    const texWall = createBrickTexture("#9fa6ac", "#c8ced4");
-    const texSandstone = createBrickTexture("#c39e70", "#d9b382");
-
-    const matConcrete = new THREE.MeshStandardMaterial({ color: 0xffffff, map: texConcrete, roughness: 0.8 });
-    const matWallStone = new THREE.MeshStandardMaterial({ color: 0xffffff, map: texWall, roughness: 0.65 });
-    const matBrick = new THREE.MeshStandardMaterial({ color: 0x826759, roughness: 0.85 });
-    const matSandstone = new THREE.MeshStandardMaterial({ color: 0xffffff, map: texSandstone, roughness: 0.75 });
-    const matWoodPagoda = new THREE.MeshStandardMaterial({ color: 0x5c3a21, roughness: 0.7 });
-    const matRadianiteBox = new THREE.MeshStandardMaterial({
-      color: 0x145a47, emissive: 0x00e599, emissiveIntensity: 0.4, roughness: 0.3, metalness: 0.6
+    // High-Fidelity Thematic Materials
+    const matAscentWall = new THREE.MeshStandardMaterial({
+      map: texAscentStucco,
+      bumpMap: texAscentStuccoBump,
+      bumpScale: 0.04,
+      roughness: 0.8,
+      metalness: 0.05
     });
+    const matWallStone = matAscentWall;
+    const matAscentFloor = new THREE.MeshStandardMaterial({
+      map: texAscentPiazza,
+      roughness: 0.65,
+      metalness: 0.12
+    });
+    const matDesertFloor = new THREE.MeshStandardMaterial({ map: texSandstone, roughness: 0.95 });
+    const matSandstoneWall = new THREE.MeshStandardMaterial({ map: texSandstone, roughness: 0.85 });
+    const matConcrete = new THREE.MeshStandardMaterial({ map: texConcrete, roughness: 0.78, metalness: 0.2 });
+    const matBrick = new THREE.MeshStandardMaterial({ map: texBrick, roughness: 0.85 });
+    const matTrimStone = new THREE.MeshStandardMaterial({ map: texTrimStone, roughness: 0.6, metalness: 0.08 });
+    const matRadianiteBox = new THREE.MeshStandardMaterial({
+      map: texRadianiteCrate,
+      emissiveMap: texRadianiteEmissive,
+      emissive: 0x00ffaa,
+      emissiveIntensity: 0.85,
+      roughness: 0.35,
+      metalness: 0.75
+    });
+    const matDarkTile = new THREE.MeshStandardMaterial({ color: 0x1c232d, roughness: 0.35, metalness: 0.65 });
+    const matWoodPagoda = new THREE.MeshStandardMaterial({ map: texWoodPagoda, roughness: 0.68 });
+    const matPagodaFloor = matWoodPagoda;
+    const matPagodaWall = matWoodPagoda;
     const matSiteFloor = new THREE.MeshStandardMaterial({ color: 0xffc83b, roughness: 0.5, transparent: true, opacity: 0.35 });
     const matBarrier = new THREE.MeshStandardMaterial({
       color: 0x00f0ff, emissive: 0x00aacc, emissiveIntensity: 0.5, transparent: true, opacity: 0.4, wireframe: false
     });
-    const matTrimStone = new THREE.MeshStandardMaterial({ color: 0x929ba5, roughness: 0.7 });
-    const matDarkTile = new THREE.MeshStandardMaterial({ color: 0x22262c, roughness: 0.4 });
     const matCrimsonPillar = new THREE.MeshStandardMaterial({ color: 0x8b1e1e, roughness: 0.5 });
     const matBronzeGong = new THREE.MeshStandardMaterial({ color: 0xd4a02c, roughness: 0.3, metalness: 0.85 });
     const matSandbags = new THREE.MeshStandardMaterial({ color: 0x8f7d63, roughness: 0.9 });
-    const matRailing = new THREE.MeshStandardMaterial({ color: 0x181e24, roughness: 0.4, metalness: 0.8 });
+    const matRailing = new THREE.MeshStandardMaterial({ color: 0x161c24, roughness: 0.35, metalness: 0.85 });
 
     const walkableSurfaces = []; // Dynamic stair & platform traversal bounds { minX, maxX, minZ, maxZ, topY }
 
@@ -6500,9 +6947,35 @@
 
     function addArch(x, y, z, width, height, depth, mat = matWallStone) {
       const postW = 1.0;
-      addBox(x - width / 2 + postW / 2, y + height / 2, z, postW, height, depth, mat, true);
-      addBox(x + width / 2 - postW / 2, y + height / 2, z, postW, height, depth, mat, true);
-      addBox(x, y + height + 0.5, z, width + 0.4, 1.0, depth + 0.2, matTrimStone, true);
+      // Vertical Columns with base plinths and capital impost moldings
+      addBox(x - width / 2 + postW / 2, y + height / 2, z, postW, height, depth, mat, true, true);
+      addBox(x + width / 2 - postW / 2, y + height / 2, z, postW, height, depth, mat, true, true);
+
+      // Capital Impost molding blocks
+      const impostGeo = new THREE.BoxGeometry(postW + 0.22, 0.45, depth + 0.22);
+      const imp1 = new THREE.Mesh(impostGeo, matTrimStone);
+      imp1.position.set(x - width / 2 + postW / 2, y + height - 0.22, z);
+      imp1.castShadow = true; scene.add(imp1); mapObjects.push(imp1);
+      const imp2 = new THREE.Mesh(impostGeo, matTrimStone);
+      imp2.position.set(x + width / 2 - postW / 2, y + height - 0.22, z);
+      imp2.castShadow = true; scene.add(imp2); mapObjects.push(imp2);
+
+      // Arch Header Entablature Lintel
+      addBox(x, y + height + 0.5, z, width + 0.5, 1.0, depth + 0.25, matTrimStone, true, true);
+
+      // Neoclassical Venetian Keystone (이맛돌)
+      const keystoneGeo = new THREE.BoxGeometry(0.7, 1.15, depth + 0.42);
+      const keystone = new THREE.Mesh(keystoneGeo, matTrimStone);
+      keystone.position.set(x, y + height + 0.45, z);
+      keystone.castShadow = true; keystone.receiveShadow = true;
+      scene.add(keystone); mapObjects.push(keystone);
+
+      // Overhanging Top Cornice Crown
+      const crownGeo = new THREE.BoxGeometry(width + 0.8, 0.35, depth + 0.45);
+      const crown = new THREE.Mesh(crownGeo, matTrimStone);
+      crown.position.set(x, y + height + 1.15, z);
+      crown.castShadow = true; crown.receiveShadow = true;
+      scene.add(crown); mapObjects.push(crown);
     }
 
     function addStairs(startX, startZ, startY, width, totalHeight, totalLength, stepsCount, dir = 'z+') {
@@ -6529,7 +7002,7 @@
           d = width;
         }
 
-        const mesh = addBox(stepX, curH / 2, stepZ, w, curH, d, matWallStone, true);
+        const mesh = addBox(stepX, curH / 2, stepZ, w, curH, d, matWallStone, true, true);
         walkableSurfaces.push({
           minX: stepX - w / 2, maxX: stepX + w / 2,
           minZ: stepZ - d / 2, maxZ: stepZ + d / 2,
@@ -6539,7 +7012,7 @@
     }
 
     function addPlatform(x, y, z, w, h, d, mat = matWallStone, collidable = true) {
-      const mesh = addBox(x, y + h / 2, z, w, h, d, mat, collidable);
+      const mesh = addBox(x, y + h / 2, z, w, h, d, mat, collidable, true);
       walkableSurfaces.push({
         minX: x - w / 2, maxX: x + w / 2,
         minZ: z - d / 2, maxZ: z + d / 2,
@@ -6549,7 +7022,7 @@
     }
 
     function addLantern(x, y, z, color = 0xffc83b) {
-      const post = addBox(x, y + 1.2, z, 0.2, 2.4, 0.2, matRailing, false);
+      const post = addBox(x, y + 1.2, z, 0.2, 2.4, 0.2, matRailing, false, true);
       const lanternGeo = new THREE.BoxGeometry(0.45, 0.55, 0.45);
       const lanternMat = new THREE.MeshBasicMaterial({ color: color });
       const lanternMesh = new THREE.Mesh(lanternGeo, lanternMat);
@@ -6568,14 +7041,69 @@
       const railThick = 0.12;
       const w = (dir === 'x') ? length : railThick;
       const d = (dir === 'x') ? railThick : length;
-      addBox(x, y + railH / 2, z, w, railH, d, matRailing, true);
+      addBox(x, y + railH / 2, z, w, railH, d, matRailing, true, true);
+    }
+
+    // Authentic Kingdom Corporation Radianite Crate Generator
+    const _crateClampGeo = new THREE.BoxGeometry(0.24, 0.24, 0.24);
+    const _crateClampMat = new THREE.MeshStandardMaterial({ color: 0xff5500, roughness: 0.35, metalness: 0.8 });
+    const _crateCoreMat = new THREE.MeshStandardMaterial({ color: 0x00ffcc, emissive: 0x00ffaa, emissiveIntensity: 1.2, roughness: 0.2 });
+
+    function createRadianiteCrate(x, y, z, size = 2.4, rotY = 0, collidable = true) {
+      const grp = new THREE.Group();
+      grp.position.set(x, y, z);
+      grp.rotation.y = rotY;
+
+      // Main Crate Shell
+      const mainGeo = new THREE.BoxGeometry(size, size, size);
+      const mainMesh = new THREE.Mesh(mainGeo, matRadianiteBox);
+      mainMesh.castShadow = true;
+      mainMesh.receiveShadow = true;
+      grp.add(mainMesh);
+
+      // Pulsating Inner Radianite Energy Diamond
+      const coreSize = size * 0.36;
+      const coreMesh = new THREE.Mesh(new THREE.OctahedronGeometry(coreSize, 0), _crateCoreMat);
+      coreMesh.rotation.x = Math.PI / 4;
+      grp.add(coreMesh);
+
+      // 8 Heavy Industrial Corner Brackets
+      const bOffset = size / 2 - 0.12;
+      [
+        [-bOffset, -bOffset, -bOffset], [bOffset, -bOffset, -bOffset],
+        [-bOffset, -bOffset, bOffset],  [bOffset, -bOffset, bOffset],
+        [-bOffset, bOffset, -bOffset],  [bOffset, bOffset, -bOffset],
+        [-bOffset, bOffset, bOffset],   [bOffset, bOffset, bOffset]
+      ].forEach(([bx, by, bz]) => {
+        const clamp = new THREE.Mesh(_crateClampGeo, _crateClampMat);
+        clamp.position.set(bx, by, bz);
+        clamp.castShadow = true;
+        grp.add(clamp);
+      });
+
+      // Top Mechanical Latch Handle
+      const latchGeo = new THREE.BoxGeometry(size * 0.45, 0.08, 0.12);
+      const latchMat = new THREE.MeshStandardMaterial({ color: 0x11161d, roughness: 0.4, metalness: 0.9 });
+      const latchMesh = new THREE.Mesh(latchGeo, latchMat);
+      latchMesh.position.set(0, size / 2 + 0.04, 0);
+      grp.add(latchMesh);
+
+      scene.add(grp);
+      mapObjects.push(grp);
+
+      if (collidable) {
+        colliders.push({ box: new THREE.Box3().setFromObject(mainMesh), mesh: mainMesh });
+      }
+      return grp;
     }
 
     function addCrateStack(x, z, size = 2.4) {
-      addBox(x, size / 2, z, size, size, size, matRadianiteBox, true);
-      addBox(x + 0.25, size + size / 2, z - 0.2, size * 0.9, size, size * 0.9, matRadianiteBox, true);
+      createRadianiteCrate(x, size / 2, z, size, 0, true);
+      const topSize = size * 0.88;
+      createRadianiteCrate(x + 0.15, size + topSize / 2, z - 0.15, topSize, 0.14, true);
+
       walkableSurfaces.push({ minX: x - size / 2, maxX: x + size / 2, minZ: z - size / 2, maxZ: z + size / 2, topY: size });
-      walkableSurfaces.push({ minX: x - size / 2, maxX: x + size / 2, minZ: z - size / 2, maxZ: z + size / 2, topY: size * 2 });
+      walkableSurfaces.push({ minX: x - size / 2, maxX: x + size / 2, minZ: z - size / 2, maxZ: z + size / 2, topY: size + topSize });
     }
 
     function addEave(x, y, z, w, d, mat = matDarkTile) {
@@ -6588,7 +7116,12 @@
       mapObjects.push(mesh);
     }
 
-    function addBox(x, y, z, w, h, d, mat, collidable = true) {
+    function addBox(x, y, z, w, h, d, mat, collidable = true, forceNoTrim = false) {
+      // Automatic Radianite Crate upgrade for cube containers
+      if (mat === matRadianiteBox && Math.abs(w - d) < 0.6 && Math.abs(w - h) < 0.6) {
+        return createRadianiteCrate(x, y, z, w, 0, collidable);
+      }
+
       const geo = new THREE.BoxGeometry(w, h, d);
       const mesh = new THREE.Mesh(geo, mat);
       mesh.position.set(x, y, z);
@@ -6597,7 +7130,110 @@
       scene.add(mesh);
       mapObjects.push(mesh);
       if (collidable) colliders.push({ box: new THREE.Box3().setFromObject(mesh), mesh });
+
+      // Architectural Molding Trims for structural walls (Eliminates flat block game look)
+      const isLargeWall = h >= 3.2 && (w >= 3.0 || d >= 3.0) && mat !== matSiteFloor && mat !== matBarrier && !mat.transparent && !forceNoTrim;
+      if (isLargeWall) {
+        // Top Cornice Wall Cap (상부 두겁석 몰딩) - catches sunlight, casts sharp rim shadow
+        const capH = 0.38;
+        const capOver = 0.28;
+        const capW = (w > 1.8) ? w + capOver : w;
+        const capD = (d > 1.8) ? d + capOver : d;
+        const capMesh = new THREE.Mesh(new THREE.BoxGeometry(capW, capH, capD), matTrimStone);
+        capMesh.position.set(x, y + h / 2 + capH / 2, z);
+        capMesh.castShadow = true;
+        capMesh.receiveShadow = true;
+        scene.add(capMesh);
+        mapObjects.push(capMesh);
+
+        // Bottom Plinth Baseboard Trim (하부 기단석 몰딩) - grounds wall firmly to pavement
+        const plinthH = 0.48;
+        const plinthOver = 0.16;
+        const plinthW = (w > 1.8) ? w + plinthOver : w;
+        const plinthD = (d > 1.8) ? d + plinthOver : d;
+        const plinthMesh = new THREE.Mesh(new THREE.BoxGeometry(plinthW, plinthH, plinthD), matTrimStone);
+        plinthMesh.position.set(x, y - h / 2 + plinthH / 2, z);
+        plinthMesh.receiveShadow = true;
+        scene.add(plinthMesh);
+        mapObjects.push(plinthMesh);
+      }
+
       return mesh;
+    }
+
+    function buildAscentFloatingSky() {
+      // 1. East Floating Venetian Palazzo Island
+      const is1 = new THREE.Group();
+      is1.position.set(82, 16, -42);
+
+      const rockGeo1 = new THREE.ConeGeometry(22, 28, 6);
+      const rockMat = new THREE.MeshStandardMaterial({ color: 0x2e251e, roughness: 0.95 });
+      const rock1 = new THREE.Mesh(rockGeo1, rockMat);
+      rock1.rotation.z = Math.PI;
+      is1.add(rock1);
+
+      const plateauGeo1 = new THREE.CylinderGeometry(22, 20, 2, 7);
+      const plateau1 = new THREE.Mesh(plateauGeo1, matAscentFloor);
+      plateau1.position.y = 1;
+      is1.add(plateau1);
+
+      const b1 = new THREE.Mesh(new THREE.BoxGeometry(12, 16, 9), matAscentWall);
+      b1.position.set(-2, 9, 0);
+      is1.add(b1);
+      const roof1 = new THREE.Mesh(new THREE.ConeGeometry(11, 4, 4), matDarkTile);
+      roof1.rotation.y = Math.PI / 4;
+      roof1.position.set(-2, 19, 0);
+      is1.add(roof1);
+
+      scene.add(is1);
+      mapObjects.push(is1);
+
+      // 2. West Floating Bell Tower Island (St Mark's Style Campanile)
+      const is2 = new THREE.Group();
+      is2.position.set(-88, 22, 28);
+
+      const rockGeo2 = new THREE.ConeGeometry(18, 24, 5);
+      const rock2 = new THREE.Mesh(rockGeo2, rockMat);
+      rock2.rotation.z = Math.PI;
+      is2.add(rock2);
+
+      const plateau2 = new THREE.Mesh(new THREE.CylinderGeometry(18, 16, 2, 6), matAscentFloor);
+      plateau2.position.y = 1;
+      is2.add(plateau2);
+
+      const tower = new THREE.Mesh(new THREE.BoxGeometry(6, 36, 6), matBrick);
+      tower.position.set(0, 19, 0);
+      is2.add(tower);
+
+      const bArch = new THREE.Mesh(new THREE.BoxGeometry(7, 4, 7), matTrimStone);
+      bArch.position.set(0, 39, 0);
+      is2.add(bArch);
+
+      const spire = new THREE.Mesh(new THREE.ConeGeometry(4.5, 12, 4), new THREE.MeshStandardMaterial({ color: 0x2a5d4e, roughness: 0.4 }));
+      spire.rotation.y = Math.PI / 4;
+      spire.position.set(0, 47, 0);
+      is2.add(spire);
+
+      scene.add(is2);
+      mapObjects.push(is2);
+
+      // 3. Floating Shattered Ruins to the North
+      const is3 = new THREE.Group();
+      is3.position.set(20, 28, 86);
+      const rock3 = new THREE.Mesh(new THREE.DodecahedronGeometry(14, 0), rockMat);
+      is3.add(rock3);
+      const ruinsWall = new THREE.Mesh(new THREE.BoxGeometry(8, 6, 2), matAscentWall);
+      ruinsWall.position.set(0, 8, 0);
+      ruinsWall.rotation.z = 0.2;
+      is3.add(ruinsWall);
+      scene.add(is3);
+      mapObjects.push(is3);
+
+      // 4. Massive Tension Cables Connecting Floating Islands
+      addOverheadCables(50, 14, -30, 80, 20, -40);
+      addOverheadCables(52, 10, -48, 82, 16, -45);
+      addOverheadCables(-50, 14, 20, -84, 24, 26);
+      addOverheadCables(-52, 10, 36, -86, 22, 30);
     }
 
     function addSiteDecal(x, z, label, size = 22, color = '#ffc83b') {
@@ -8220,83 +8856,7 @@
     
     /* ==========================================================
        MAP PROCEDURAL TEXTURES & THEMATIC ATMOSPHERE
-       ========================================================== */
-    function createPiazzaTexture() {
-      const cvs = document.createElement('canvas');
-      cvs.width = 512; cvs.height = 512;
-      const ctx = cvs.getContext('2d');
-      ctx.fillStyle = '#6b7280';
-      ctx.fillRect(0, 0, 512, 512);
-      ctx.strokeStyle = '#4b5563';
-      ctx.lineWidth = 4;
-      for (let y = 0; y < 512; y += 64) {
-        for (let x = 0; x < 512; x += 64) {
-          ctx.fillStyle = ((x / 64 + y / 64) % 2 === 0) ? '#79818e' : '#68707c';
-          ctx.fillRect(x + 2, y + 2, 60, 60);
-          ctx.strokeRect(x, y, 64, 64);
-        }
-      }
-      const tex = new THREE.CanvasTexture(cvs);
-      tex.wrapS = THREE.RepeatWrapping; tex.wrapT = THREE.RepeatWrapping;
-      tex.repeat.set(6, 6);
-      return tex;
-    }
-
-    function createSandDuneTexture() {
-      const cvs = document.createElement('canvas');
-      cvs.width = 512; cvs.height = 512;
-      const ctx = cvs.getContext('2d');
-      ctx.fillStyle = '#d4a373';
-      ctx.fillRect(0, 0, 512, 512);
-      ctx.strokeStyle = '#c49262';
-      ctx.lineWidth = 6;
-      for (let y = 16; y < 512; y += 48) {
-        ctx.beginPath();
-        ctx.moveTo(0, y);
-        ctx.bezierCurveTo(128, y - 12, 256, y + 12, 512, y);
-        ctx.stroke();
-      }
-      const tex = new THREE.CanvasTexture(cvs);
-      tex.wrapS = THREE.RepeatWrapping; tex.wrapT = THREE.RepeatWrapping;
-      tex.repeat.set(8, 8);
-      return tex;
-    }
-
-    function createPagodaWoodTexture() {
-      const cvs = document.createElement('canvas');
-      cvs.width = 512; cvs.height = 512;
-      const ctx = cvs.getContext('2d');
-      ctx.fillStyle = '#4a2c17';
-      ctx.fillRect(0, 0, 512, 512);
-      ctx.strokeStyle = '#2b170a';
-      ctx.lineWidth = 4;
-      for (let y = 0; y < 512; y += 32) {
-        ctx.strokeRect(0, y, 512, 32);
-        for (let x = 30; x < 512; x += 120) {
-          ctx.beginPath();
-          ctx.moveTo(x + (y % 64), y);
-          ctx.lineTo(x + (y % 64), y + 32);
-          ctx.stroke();
-        }
-      }
-      const tex = new THREE.CanvasTexture(cvs);
-      tex.wrapS = THREE.RepeatWrapping; tex.wrapT = THREE.RepeatWrapping;
-      tex.repeat.set(6, 6);
-      return tex;
-    }
-
-    const texAscentPiazza = createPiazzaTexture();
-    const texDesertSand = createSandDuneTexture();
-    const texWoodPagodaPlanks = createPagodaWoodTexture();
-
-    // Themed Materials
-    const matAscentFloor = new THREE.MeshStandardMaterial({ map: texAscentPiazza, roughness: 0.75, metalness: 0.1 });
-    const matAscentWall = new THREE.MeshStandardMaterial({ color: 0xd8dde4, roughness: 0.6 });
-    const matDesertFloor = new THREE.MeshStandardMaterial({ map: texDesertSand, roughness: 0.95 });
-    const matSandstoneWall = new THREE.MeshStandardMaterial({ color: 0xcd9f6c, roughness: 0.85 });
-    const matPagodaFloor = new THREE.MeshStandardMaterial({ map: texWoodPagodaPlanks, roughness: 0.6 });
-    const matPagodaWall = new THREE.MeshStandardMaterial({ color: 0x8a705e, roughness: 0.7 });
-
+    /* Legacy procedural textures now unified in Section 5 Procedural PBR Engine */
     let havenGongMesh = null;
 
     function setMapAtmosphere(mapKey) {
@@ -8312,12 +8872,17 @@
         grad.addColorStop(0.7, '#e3f3ff');
         grad.addColorStop(1, '#1b2836');
         ambientLight.color.setHex(0xd0e8ff);
-        ambientLight.intensity = 0.9;
+        ambientLight.intensity = 0.65;
+        if (typeof hemiLight !== 'undefined' && hemiLight) {
+          hemiLight.color.setHex(0xd8ecff);
+          hemiLight.groundColor.setHex(0x483a30);
+          hemiLight.intensity = 0.75;
+        }
         sunLight.color.setHex(0xfffaee);
-        sunLight.intensity = 1.35;
-        sunLight.position.set(45, 90, 55);
+        sunLight.intensity = 1.45;
+        sunLight.position.set(45, 95, 55);
         scene.fog.color.setHex(0xbadcf5);
-        scene.fog.density = 0.007;
+        scene.fog.density = 0.0052;
       } else if (mapKey === 'bind') {
         // Scorching Moroccan Sunset Twilight
         grad.addColorStop(0, '#2d0b0e');
@@ -9337,15 +9902,17 @@
       // MAP 1: ASCENT (어센트) - 이탈리아 베네치아 요새 & 전동 셔터 도어
       // ==========================================================
       if (mapKey === 'ascent') {
-        // Outer Venetian Perimeter Walls & Floor
-        addBox(0, -0.5, 0, 110, 1, 110, matAscentFloor);
+        buildAscentFloatingSky();
+
+        // Outer Venetian Perimeter Walls & Floor (forceNoTrim on floor)
+        addBox(0, -0.5, 0, 110, 1, 110, matAscentFloor, true, true);
         addBox(0, 7, -55, 110, 14, 2, matAscentWall);
         addBox(0, 7, 55, 110, 14, 2, matAscentWall);
         addBox(-55, 7, 0, 2, 14, 110, matAscentWall);
         addBox(55, 7, 0, 2, 14, 110, matAscentWall);
 
         // --- A SITE ---
-        addBox(28, 0.05, -24, 22, 0.05, 22, matSiteFloor, false);
+        addSiteDecal(28, -24, 'A SITE', 22, '#00f0ff');
         addTextBillboard(28, 0.2, -24, 'A SITE', 1.8);
         spikeSiteAreas.push({ minX: 17, maxX: 39, minZ: -35, maxZ: -13, name: 'A SITE' });
 
@@ -9388,7 +9955,7 @@
         addLantern(0, 0, -14);
 
         // --- B SITE ---
-        addBox(-28, 0.05, -24, 22, 0.05, 22, matSiteFloor, false);
+        addSiteDecal(-28, -24, 'B SITE', 22, '#ffc83b');
         addTextBillboard(-28, 0.2, -24, 'B SITE', 1.8);
         spikeSiteAreas.push({ minX: -39, maxX: -17, minZ: -35, maxZ: -13, name: 'B SITE' });
 
