@@ -6868,9 +6868,10 @@
       const curMap = (MAP_LIST && MAP_LIST[currentMapIndex]) || '';
       let highestY = (curMap === 'abyss') ? -100 : 0;
       let foundSurface = false;
+      const margin = 0.10; // Edge tolerance for smooth stair and crate transitions
       for (let i = 0; i < walkableSurfaces.length; i++) {
         const s = walkableSurfaces[i];
-        if (x >= s.minX && x <= s.maxX && z >= s.minZ && z <= s.maxZ) {
+        if (x >= s.minX - margin && x <= s.maxX + margin && z >= s.minZ - margin && z <= s.maxZ + margin) {
           if (s.topY <= curFootY + 0.65 && (s.topY > highestY || !foundSurface)) {
             highestY = s.topY;
             foundSurface = true;
@@ -6892,46 +6893,98 @@
     const _vTether = new THREE.Vector3();
 
     function collideXZ(oldPos, deltaX, deltaZ) {
-      const pRad = 0.4;
-      let newX = oldPos.x + deltaX;
-      let newZ = oldPos.z + deltaZ;
+      const pRad = 0.38; // Tactical player collision radius
+      const stepUpLimit = 0.46; // Obstacles lower than this are stepped onto, not blocked horizontally
+      const curEyeH = (player && player.currentEyeH) ? player.currentEyeH : 1.7;
+      const footY = oldPos.y - curEyeH;
+      const headY = oldPos.y + 0.18;
 
-      const minY = oldPos.y - 1.6;
-      const maxY = oldPos.y + 0.2;
+      let curX = oldPos.x;
+      let curZ = oldPos.z;
 
-      // X-axis scalar AABB collision (Zero heap allocations, 15x faster than Box3.intersectsBox)
-      const minX_X = newX - pRad, maxX_X = newX + pRad;
-      const minZ_X = oldPos.z - pRad, maxZ_X = oldPos.z + pRad;
+      // 1. Anti-Stuck Depenetration Solver:
+      // If player is ALREADY inside an obstacle (due to landing, doors, or edge shifts), push out to closest free space!
       for (let i = 0; i < colliders.length; i++) {
         const c = colliders[i];
         if (c.mesh && c.mesh.visible === false) continue;
         const b = c.box;
-        if (maxX_X >= b.min.x && minX_X <= b.max.x &&
-            maxY >= b.min.y && minY <= b.max.y &&
-            maxZ_X >= b.min.z && minZ_X <= b.max.z) {
-          newX = oldPos.x;
-          break;
+
+        if (b.max.y <= footY + stepUpLimit || b.min.y >= headY) continue;
+
+        if (curX + pRad > b.min.x && curX - pRad < b.max.x &&
+            curZ + pRad > b.min.z && curZ - pRad < b.max.z) {
+          const pushLeft = (curX + pRad) - b.min.x;   // push towards -X
+          const pushRight = b.max.x - (curX - pRad);  // push towards +X
+          const pushNear = (curZ + pRad) - b.min.z;   // push towards -Z
+          const pushFar = b.max.z - (curZ - pRad);    // push towards +Z
+
+          const minPushX = (pushLeft < pushRight) ? -pushLeft : pushRight;
+          const minPushZ = (pushNear < pushFar) ? -pushNear : pushFar;
+
+          if (Math.abs(minPushX) < Math.abs(minPushZ)) {
+            curX += minPushX + (minPushX > 0 ? 0.005 : -0.005);
+            if (player && player.velocity) player.velocity.x = 0;
+          } else {
+            curZ += minPushZ + (minPushZ > 0 ? 0.005 : -0.005);
+            if (player && player.velocity) player.velocity.z = 0;
+          }
         }
       }
 
-      // Z-axis scalar AABB collision
-      const minX_Z = newX - pRad, maxX_Z = newX + pRad;
-      const minZ_Z = newZ - pRad, maxZ_Z = newZ + pRad;
-      for (let i = 0; i < colliders.length; i++) {
-        const c = colliders[i];
-        if (c.mesh && c.mesh.visible === false) continue;
-        const b = c.box;
-        if (maxX_Z >= b.min.x && minX_Z <= b.max.x &&
-            maxY >= b.min.y && minY <= b.max.y &&
-            maxZ_Z >= b.min.z && minZ_Z <= b.max.z) {
-          newZ = oldPos.z;
-          break;
+      // 2. Continuous Collision Sub-stepping (Anti-Tunneling at high velocity / dash):
+      const totalDist = Math.hypot(deltaX, deltaZ);
+      const subSteps = Math.max(1, Math.ceil(totalDist / 0.18));
+      const stepDX = deltaX / subSteps;
+      const stepDZ = deltaZ / subSteps;
+
+      for (let s = 0; s < subSteps; s++) {
+        let nextX = curX + stepDX;
+        let nextZ = curZ + stepDZ;
+
+        // Test X-axis movement
+        const minX_X = nextX - pRad, maxX_X = nextX + pRad;
+        const minZ_X = curZ - pRad, maxZ_X = curZ + pRad;
+        for (let i = 0; i < colliders.length; i++) {
+          const c = colliders[i];
+          if (c.mesh && c.mesh.visible === false) continue;
+          const b = c.box;
+          if (b.max.y <= footY + stepUpLimit || b.min.y >= headY) continue;
+
+          if (maxX_X >= b.min.x && minX_X <= b.max.x &&
+              maxZ_X >= b.min.z && minZ_X <= b.max.z) {
+            // Fluid wall-sliding surface clamp
+            if (stepDX > 0) nextX = b.min.x - pRad - 0.002;
+            else if (stepDX < 0) nextX = b.max.x + pRad + 0.002;
+            else nextX = curX;
+            if (player && player.velocity) player.velocity.x = 0;
+            break;
+          }
         }
+        curX = nextX;
+
+        // Test Z-axis movement
+        const minX_Z = curX - pRad, maxX_Z = curX + pRad;
+        const minZ_Z = nextZ - pRad, maxZ_Z = nextZ + pRad;
+        for (let i = 0; i < colliders.length; i++) {
+          const c = colliders[i];
+          if (c.mesh && c.mesh.visible === false) continue;
+          const b = c.box;
+          if (b.max.y <= footY + stepUpLimit || b.min.y >= headY) continue;
+
+          if (maxX_Z >= b.min.x && minX_Z <= b.max.x &&
+              maxZ_Z >= b.min.z && minZ_Z <= b.max.z) {
+            // Fluid wall-sliding surface clamp
+            if (stepDZ > 0) nextZ = b.min.z - pRad - 0.002;
+            else if (stepDZ < 0) nextZ = b.max.z + pRad + 0.002;
+            else nextZ = curZ;
+            if (player && player.velocity) player.velocity.z = 0;
+            break;
+          }
+        }
+        curZ = nextZ;
       }
 
-      _collideResult.x = newX;
-      _collideResult.z = newZ;
-      return _collideResult;
+      return { x: curX, z: curZ };
     }
 
     function addPillar(x, y, z, radius, height, mat = matWallStone) {
@@ -7093,6 +7146,11 @@
 
       if (collidable) {
         colliders.push({ box: new THREE.Box3().setFromObject(mainMesh), mesh: mainMesh });
+        walkableSurfaces.push({
+          minX: x - size / 2, maxX: x + size / 2,
+          minZ: z - size / 2, maxZ: z + size / 2,
+          topY: y + size / 2
+        });
       }
       return grp;
     }
@@ -7129,7 +7187,17 @@
       mesh.receiveShadow = true;
       scene.add(mesh);
       mapObjects.push(mesh);
-      if (collidable) colliders.push({ box: new THREE.Box3().setFromObject(mesh), mesh });
+      if (collidable) {
+        colliders.push({ box: new THREE.Box3().setFromObject(mesh), mesh });
+        // Register top of box as solid walkable surface if height <= 8.0 (crates, covers, tables, platforms)
+        if (h <= 8.0 && mat !== matBarrier && mat !== matSiteFloor) {
+          walkableSurfaces.push({
+            minX: x - w / 2, maxX: x + w / 2,
+            minZ: z - d / 2, maxZ: z + d / 2,
+            topY: y + h / 2
+          });
+        }
+      }
 
       // Architectural Molding Trims for structural walls (Eliminates flat block game look)
       const isLargeWall = h >= 3.2 && (w >= 3.0 || d >= 3.0) && mat !== matSiteFloor && mat !== matBarrier && !mat.transparent && !forceNoTrim;
@@ -13866,6 +13934,8 @@
       shield: 50, maxShield: 50,
       credits: 9000,
       speed: 10, isGrounded: true,
+      physicalY: 1.7, currentEyeH: 1.7,
+      lastGroundedTime: 0, jumpBufferedTime: 0,
       velocity: new THREE.Vector3(),
       isWalking: false, isCrouching: false, isADS: false, isDead: false,
       kills: 0, headshots: 0
@@ -14201,7 +14271,10 @@
       if (e.code === 'Digit4') switchWeapon('phantom');
       if (e.code === 'Digit5') switchWeapon('spectre');
       if (e.code === 'Digit6') switchWeapon('sheriff');
-      if (e.code === 'Space' && player.isDead) executeTakeover();
+      if (e.code === 'Space') {
+        player.jumpBufferedTime = performance.now();
+        if (player.isDead) executeTakeover();
+      }
       if (player.isDead && roundState === 'IN_ROUND') {
         const aliveAllies = teammatesList.filter(t => !t.isDead);
         if (aliveAllies.length > 1) {
@@ -19865,13 +19938,17 @@
             if (keys['KeyD']) moveDir.x += 1;
           }
 
+          // Initialize physical position tracker & jump responsiveness timers
+          if (typeof player.physicalY === 'undefined' || Math.abs(player.physicalY - camera.position.y) > 0.5) {
+            player.physicalY = camera.position.y;
+          }
+          if (typeof player.lastGroundedTime === 'undefined') player.lastGroundedTime = 0;
+          if (typeof player.jumpBufferedTime === 'undefined') player.jumpBufferedTime = 0;
+
           // Smooth AAA-grade camera crouch descent & ascent interpolation
           if (typeof player.currentEyeH === 'undefined') player.currentEyeH = 1.7;
           const targetEyeH = player.isCrouching ? 1.05 : 1.7;
           player.currentEyeH = THREE.MathUtils.lerp(player.currentEyeH, targetEyeH, Math.min(1, 14 * dt));
-          let nextY = camera.position.y + player.velocity.y * dt;
-          const curFloorY = groundAt(camera.position.x, camera.position.z, nextY - player.currentEyeH);
-          const minEyeY = curFloorY + player.currentEyeH;
 
           if (moveDir.lengthSq() > 0) {
             moveDir.normalize().applyAxisAngle(_vAxisY, yaw);
@@ -19890,7 +19967,8 @@
               else if (currentMapKey === 'icebox') stepSurface = 'stone';
               else if (currentMapKey === 'split') stepSurface = 'stone';
               else if (currentMapKey === 'lotus') stepSurface = 'stone';
-              if (curFloorY > 0.3) stepSurface = 'metal';
+              const curFloorYForStep = groundAt(camera.position.x, camera.position.z, player.physicalY - player.currentEyeH);
+              if (curFloorYForStep > 0.3) stepSurface = 'metal';
               sound.playFootstep(stepSurface);
             }
           } else {
@@ -19898,17 +19976,35 @@
             player.velocity.z = THREE.MathUtils.lerp(player.velocity.z, 0, Math.min(1, 18 * dt));
           }
 
-          if (canMove && keys['Space'] && player.isGrounded) {
-            player.velocity.y = 8.2;
+          // Instant 0ms Jump Input Buffering (160ms window) + Coyote Time (100ms window)
+          const nowMs = performance.now();
+          if (player.isGrounded) {
+            player.lastGroundedTime = nowMs;
+          }
+          const jumpRequested = keys['Space'] || (nowMs - player.jumpBufferedTime < 160);
+          const canJump = player.isGrounded || (nowMs - player.lastGroundedTime < 100);
+
+          if (canMove && jumpRequested && canJump) {
+            player.velocity.y = 8.5; // Snappy Valorant-standard vertical impulse
             player.isGrounded = false;
+            player.lastGroundedTime = 0;
+            player.jumpBufferedTime = 0;
+            keys['Space'] = false;
           }
           player.velocity.y -= 24 * dt;
 
-          // Wall Sliding Collision along X and Z
+          // Compute vertical displacement using updated velocity.y
+          let nextY = player.physicalY + player.velocity.y * dt;
+
+          // Wall Sliding Collision along X and Z with anti-tunneling sub-steps and depenetration
           const nextXZ = collideXZ(camera.position, player.velocity.x * dt, player.velocity.z * dt);
           camera.position.x = nextXZ.x;
           camera.position.z = nextXZ.z;
 
+          const curFloorY = groundAt(camera.position.x, camera.position.z, nextY - player.currentEyeH);
+          const minEyeY = curFloorY + player.currentEyeH;
+
+          // Robust Grounding & Slope-Snapping
           if (nextY <= minEyeY) {
             nextY = minEyeY;
             if (!player.isGrounded && player.velocity.y < -3.2) {
@@ -19917,17 +20013,32 @@
             }
             player.velocity.y = 0;
             player.isGrounded = true;
+            player.lastGroundedTime = nowMs;
+          } else {
+            // Slope/step-down assist: If walking down stairs/slopes within 0.08m, snap to ground so running doesn't jitter grounded status
+            // Only snap if downward moving (player.velocity.y <= 0) and not during jump ascent!
+            if (player.isGrounded && (nextY - minEyeY) < 0.08 && player.velocity.y <= 0 && player.velocity.y > -2.0) {
+              nextY = minEyeY;
+              player.velocity.y = 0;
+              player.isGrounded = true;
+              player.lastGroundedTime = nowMs;
+            } else {
+              player.isGrounded = false;
+            }
           }
-          camera.position.y = nextY - landingDip;
+          player.physicalY = nextY;
+
+          // Visual-only camera height presentation (Physical Y is fully preserved)
           if (landingDip > 0) {
             landingDip = THREE.MathUtils.lerp(landingDip, 0, Math.min(1, 16 * dt));
           }
-          // Subtle tactical head-bob while walking/sprinting
+          let headBobOffset = 0;
           if (moveDir.lengthSq() > 0 && player.isGrounded) {
             const bobFreq = player.isWalking ? 7.5 : 12;
             const bobAmp = player.isWalking ? 0.008 : 0.016;
-            camera.position.y += Math.sin(now * 0.001 * bobFreq) * bobAmp;
+            headBobOffset = Math.sin(now * 0.001 * bobFreq) * bobAmp;
           }
+          camera.position.y = player.physicalY - landingDip + headBobOffset;
 
           // ABYSS Fatal Void Drop Detection (Falling off the cliffs)
           if (MAP_LIST[currentMapIndex] === 'abyss' && camera.position.y < -12 && !player.isDead) {
