@@ -102,7 +102,8 @@
     .ch-part {
       position: absolute;
       background: var(--val-green);
-      box-shadow: 0 0 2px rgba(0,0,0,0.9);
+      outline: 1px solid rgba(0, 0, 0, 0.95);
+      box-shadow: 0 0 2px rgba(0, 0, 0, 0.9);
       transition: transform 0.04s ease-out;
     }
     .ch-t { width: 2px; height: 8px; left: -1px; top: -13px; }
@@ -1115,17 +1116,26 @@
     #hit-marker {
       position: absolute;
       top: 50%; left: 50%;
-      transform: translate(-50%, -50%);
-      width: 28px; height: 28px;
+      transform: translate(-50%, -50%) scale(0.85);
+      width: 32px; height: 32px;
       pointer-events: none;
       opacity: 0;
-      transition: opacity 0.08s;
+      transition: opacity 0.08s, transform 0.08s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     }
-    .hit-mark { position: absolute; width: 7px; height: 2px; background: var(--val-red); }
-    .hm-1 { top: 3px; left: 3px; transform: rotate(45deg); }
-    .hm-2 { top: 3px; right: 3px; transform: rotate(-45deg); }
-    .hm-3 { bottom: 3px; left: 3px; transform: rotate(-45deg); }
-    .hm-4 { bottom: 3px; right: 3px; transform: rotate(45deg); }
+    #hit-marker.pop {
+      transform: translate(-50%, -50%) scale(1.15);
+    }
+    .hit-mark {
+      position: absolute;
+      width: 8px; height: 2.5px;
+      background: var(--val-red);
+      border-radius: 1px;
+      box-shadow: 0 0 3px rgba(0,0,0,0.9);
+    }
+    .hm-1 { top: 4px; left: 4px; transform: rotate(45deg); }
+    .hm-2 { top: 4px; right: 4px; transform: rotate(-45deg); }
+    .hm-3 { bottom: 4px; left: 4px; transform: rotate(-45deg); }
+    .hm-4 { bottom: 4px; right: 4px; transform: rotate(45deg); }
 
     /* Enhanced 3D In-World Combat Damage Popups */
     .dmg-popup {
@@ -4357,18 +4367,54 @@
       playHeadshot() {
         if (!this.ctx) return;
         const now = this.ctx.currentTime;
-        [1980, 2640, 3960].forEach((f, idx) => {
+
+        // 1. High-frequency metallic transient snap (12ms bandpassed noise)
+        try {
+          const bufferSize = Math.floor(this.ctx.sampleRate * 0.014);
+          const noiseBuffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
+          const output = noiseBuffer.getChannelData(0);
+          for (let i = 0; i < bufferSize; i++) output[i] = Math.random() * 2 - 1;
+          const whiteNoise = this.ctx.createBufferSource();
+          whiteNoise.buffer = noiseBuffer;
+          const filter = this.ctx.createBiquadFilter();
+          filter.type = 'bandpass';
+          filter.frequency.setValueAtTime(3600, now);
+          filter.Q.setValueAtTime(4.5, now);
+          const noiseGain = this.ctx.createGain();
+          noiseGain.gain.setValueAtTime(0.55, now);
+          noiseGain.gain.exponentialRampToValueAtTime(0.001, now + 0.014);
+          whiteNoise.connect(filter);
+          filter.connect(noiseGain);
+          noiseGain.connect(this.masterGain);
+          whiteNoise.start(now);
+        } catch (e) {}
+
+        // 2. Dual high-frequency pure metallic resonant ringing (Iconic "DINK")
+        [2940, 3920, 5200].forEach((freq, idx) => {
           const osc = this.ctx.createOscillator();
           const gain = this.ctx.createGain();
-          osc.type = 'triangle';
-          osc.frequency.setValueAtTime(f, now);
-          gain.gain.setValueAtTime(0.38 / (idx + 1), now);
-          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.42);
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(freq, now);
+          gain.gain.setValueAtTime(0.42 / (idx + 1), now);
+          gain.gain.exponentialRampToValueAtTime(0.0005, now + 0.38);
           osc.connect(gain);
-          gain.connect(this.dest);
+          gain.connect(this.masterGain);
           osc.start(now);
-          osc.stop(now + 0.42);
+          osc.stop(now + 0.40);
         });
+
+        // 3. Sub-bass kinetic thud (Visceral punch)
+        const punchOsc = this.ctx.createOscillator();
+        const punchGain = this.ctx.createGain();
+        punchOsc.type = 'triangle';
+        punchOsc.frequency.setValueAtTime(140, now);
+        punchOsc.frequency.exponentialRampToValueAtTime(35, now + 0.07);
+        punchGain.gain.setValueAtTime(0.5, now);
+        punchGain.gain.exponentialRampToValueAtTime(0.001, now + 0.08);
+        punchOsc.connect(punchGain);
+        punchGain.connect(this.masterGain);
+        punchOsc.start(now);
+        punchOsc.stop(now + 0.09);
       }
 
       playBodyHit() {
@@ -4390,42 +4436,64 @@
       playKillSound() {
         if (!this.ctx) return;
         const now = this.ctx.currentTime;
-        if (Date.now() - this.lastKillTime > 8000) this.killStreak = 0;
+        if (Date.now() - this.lastKillTime > 8500) this.killStreak = 0;
         this.killStreak = Math.min(this.killStreak + 1, 5);
         this.lastKillTime = Date.now();
 
-        // 5-Tone Musical Chord Progression: C -> E -> G -> B -> High C (ACE)
+        // Authentic VALORANT 5-Step Harmonic Chord Progression:
         const chords = [
-          [261.63, 523.25],                  // Kill 1: C4 + C5
-          [329.63, 659.25],                  // Kill 2: E4 + E5
-          [392.00, 783.99, 1174.66],         // Kill 3: G4 + G5 + D6
-          [493.88, 987.77, 1234.71],         // Kill 4: B4 + B5 + D#6
-          [523.25, 659.25, 783.99, 1046.5, 1318.5] // Kill 5 (ACE): Full Angelic Major Chord
+          [440.00, 659.25],                                          // Kill 1: A4 + E5 - Crisp bell chime
+          [554.37, 880.00],                                          // Kill 2: C#5 + A5 - Rising double ping
+          [659.25, 830.61, 987.77],                                  // Kill 3: E5 + G#5 + B5 - Rich major triad
+          [880.00, 1108.73, 1318.51],                                // Kill 4: A5 + C#6 + E6 - High tense fanfare
+          [440.00, 554.37, 659.25, 880.00, 1108.73, 1318.51]        // Kill 5 (ACE): Full glorious symphonic chord
         ];
 
-        // Deep impact sub-bass thump
+        // Heavy sub-bass kill punch
+        const isAce = (this.killStreak === 5);
         const bassOsc = this.ctx.createOscillator();
         const bassGain = this.ctx.createGain();
         bassOsc.type = 'triangle';
-        bassOsc.frequency.setValueAtTime(90, now);
-        bassOsc.frequency.exponentialRampToValueAtTime(30, now + 0.22);
-        bassGain.gain.setValueAtTime(0.65, now);
-        bassGain.gain.exponentialRampToValueAtTime(0.001, now + 0.22);
+        bassOsc.frequency.setValueAtTime(isAce ? 110 : 85, now);
+        bassOsc.frequency.exponentialRampToValueAtTime(25, now + (isAce ? 0.35 : 0.20));
+        bassGain.gain.setValueAtTime(isAce ? 0.85 : 0.65, now);
+        bassGain.gain.exponentialRampToValueAtTime(0.001, now + (isAce ? 0.35 : 0.20));
         bassOsc.connect(bassGain); bassGain.connect(this.masterGain);
-        bassOsc.start(now); bassOsc.stop(now + 0.24);
+        bassOsc.start(now); bassOsc.stop(now + (isAce ? 0.36 : 0.22));
 
-        // Resonant Chord Tones
+        // Resonant Chord Harmonic Synthesizer
         const currentChord = chords[this.killStreak - 1] || chords[0];
-        currentChord.forEach(freq => {
+        const duration = isAce ? 2.2 : (0.55 + this.killStreak * 0.12);
+
+        currentChord.forEach((freq, idx) => {
           const osc = this.ctx.createOscillator();
           const gain = this.ctx.createGain();
-          osc.type = (this.killStreak >= 4) ? 'sawtooth' : 'sine';
+          osc.type = isAce ? (idx % 2 === 0 ? 'sine' : 'triangle') : 'sine';
           osc.frequency.setValueAtTime(freq, now);
-          gain.gain.setValueAtTime(0.24, now);
-          gain.gain.exponentialRampToValueAtTime(0.001, now + (this.killStreak === 5 ? 1.6 : 0.7));
-          osc.connect(gain); gain.connect(this.masterGain);
-          osc.start(now); osc.stop(now + (this.killStreak === 5 ? 1.7 : 0.8));
+
+          const peakGain = (0.28 / Math.sqrt(currentChord.length)) * (isAce ? 1.4 : 1.0);
+          gain.gain.setValueAtTime(peakGain, now);
+          gain.gain.exponentialRampToValueAtTime(0.0005, now + duration);
+
+          osc.connect(gain);
+          gain.connect(this.masterGain);
+          osc.start(now);
+          osc.stop(now + duration + 0.05);
         });
+
+        // ACE fanfare cathedral shimmer overtone
+        if (isAce) {
+          const shimmer = this.ctx.createOscillator();
+          const sGain = this.ctx.createGain();
+          shimmer.type = 'sawtooth';
+          shimmer.frequency.setValueAtTime(1760.0, now + 0.08); // High A6
+          sGain.gain.setValueAtTime(0.12, now + 0.08);
+          sGain.gain.exponentialRampToValueAtTime(0.0001, now + 2.0);
+          shimmer.connect(sGain);
+          sGain.connect(this.masterGain);
+          shimmer.start(now + 0.08);
+          shimmer.stop(now + 2.1);
+        }
 
         return this.killStreak;
       }
@@ -4812,18 +4880,43 @@
       playBladeStorm() {
         if (!this.ctx) return;
         const now = this.ctx.currentTime;
-        [880, 1100, 1320, 1760].forEach((f, i) => {
+
+        // Ascending crystalline wind chime fanfare (Jett ultimate activation / reset chime)
+        [659.25, 880.0, 1174.66, 1567.98, 2093.0].forEach((f, i) => {
           const osc = this.ctx.createOscillator();
           const gain = this.ctx.createGain();
-          osc.type = 'sine';
-          osc.frequency.setValueAtTime(f, now + i * 0.06);
-          gain.gain.setValueAtTime(0.3, now + i * 0.06);
-          gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.06 + 0.5);
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(f, now + i * 0.045);
+          gain.gain.setValueAtTime(0.32, now + i * 0.045);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.045 + 0.65);
           osc.connect(gain);
-          gain.connect(this.dest);
-          osc.start(now + i * 0.06);
-          osc.stop(now + i * 0.06 + 0.52);
+          gain.connect(this.masterGain);
+          osc.start(now + i * 0.045);
+          osc.stop(now + i * 0.045 + 0.68);
         });
+
+        // Wind vortex rush
+        try {
+          const bufferSize = Math.floor(this.ctx.sampleRate * 0.45);
+          const buffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
+          const data = buffer.getChannelData(0);
+          for (let i = 0; i < bufferSize; i++) data[i] = (Math.random() * 2 - 1) * Math.sin((i / bufferSize) * Math.PI);
+          const noise = this.ctx.createBufferSource();
+          noise.buffer = buffer;
+          const filter = this.ctx.createBiquadFilter();
+          filter.type = 'bandpass';
+          filter.frequency.setValueAtTime(450, now);
+          filter.frequency.exponentialRampToValueAtTime(1400, now + 0.25);
+          filter.frequency.exponentialRampToValueAtTime(500, now + 0.45);
+          filter.Q.setValueAtTime(3.0, now);
+          const wGain = this.ctx.createGain();
+          wGain.gain.setValueAtTime(0.4, now);
+          wGain.gain.exponentialRampToValueAtTime(0.001, now + 0.45);
+          noise.connect(filter);
+          filter.connect(wGain);
+          wGain.connect(this.masterGain);
+          noise.start(now);
+        } catch (e) {}
       }
 
       playKnifeSlash() {
@@ -4845,17 +4938,41 @@
       playKnifeThrow() {
         if (!this.ctx) return;
         const now = this.ctx.currentTime;
+
+        // Sharp aerodynamic wind displacement whoosh
+        try {
+          const bufferSize = Math.floor(this.ctx.sampleRate * 0.16);
+          const buffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
+          const data = buffer.getChannelData(0);
+          for (let i = 0; i < bufferSize; i++) data[i] = (Math.random() * 2 - 1);
+          const noise = this.ctx.createBufferSource();
+          noise.buffer = buffer;
+          const filter = this.ctx.createBiquadFilter();
+          filter.type = 'bandpass';
+          filter.frequency.setValueAtTime(2400, now);
+          filter.frequency.exponentialRampToValueAtTime(650, now + 0.14);
+          filter.Q.setValueAtTime(3.5, now);
+          const nGain = this.ctx.createGain();
+          nGain.gain.setValueAtTime(0.5, now);
+          nGain.gain.exponentialRampToValueAtTime(0.001, now + 0.15);
+          noise.connect(filter);
+          filter.connect(nGain);
+          nGain.connect(this.masterGain);
+          noise.start(now);
+        } catch (e) {}
+
+        // High steel slice pitch whip
         const osc = this.ctx.createOscillator();
         const gain = this.ctx.createGain();
         osc.type = 'sine';
-        osc.frequency.setValueAtTime(1600, now);
-        osc.frequency.exponentialRampToValueAtTime(300, now + 0.15);
-        gain.gain.setValueAtTime(0.4, now);
-        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.15);
+        osc.frequency.setValueAtTime(2200, now);
+        osc.frequency.exponentialRampToValueAtTime(420, now + 0.13);
+        gain.gain.setValueAtTime(0.45, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.14);
         osc.connect(gain);
-        gain.connect(this.dest);
+        gain.connect(this.masterGain);
         osc.start(now);
-        osc.stop(now + 0.16);
+        osc.stop(now + 0.15);
       }
 
       playBarrierDown() {
@@ -5882,20 +5999,79 @@
     kunaiRig.visible = false;
     const kunaiMeshes = [];
 
+    // High-Fidelity Jett Tactical Kunai Daggers
+    const matKunaiBlade = new THREE.MeshStandardMaterial({
+      color: 0xd8f4fc,
+      metalness: 0.95,
+      roughness: 0.18,
+      emissive: 0x00f0ff,
+      emissiveIntensity: 0.35
+    });
+    const matKunaiRune = new THREE.MeshStandardMaterial({
+      color: 0x00f0ff,
+      emissive: 0x00f0ff,
+      emissiveIntensity: 2.8,
+      roughness: 0.1
+    });
+    const matKunaiGrip = new THREE.MeshStandardMaterial({
+      color: 0x0a1018,
+      metalness: 0.7,
+      roughness: 0.8
+    });
+    const matKunaiSteel = new THREE.MeshStandardMaterial({
+      color: 0x1a2634,
+      metalness: 0.95,
+      roughness: 0.2
+    });
+
     for (let k = 0; k < 5; k++) {
       const kGrp = new THREE.Group();
-      const bladeGeo = new THREE.ConeGeometry(0.04, 0.24, 4);
-      const bladeMat = new THREE.MeshStandardMaterial({
-        color: 0x00f0ff, emissive: 0x00f0ff, emissiveIntensity: 0.9, metalness: 0.9
-      });
-      const blade = new THREE.Mesh(bladeGeo, bladeMat);
-      blade.rotation.x = -Math.PI / 2;
+
+      // 1. Faceted Diamond Double-Edged Kunai Blade
+      const bladeGeo = new THREE.OctahedronGeometry(1, 0);
+      const blade = new THREE.Mesh(bladeGeo, matKunaiBlade);
+      blade.scale.set(0.046, 0.012, 0.22);
+      blade.position.z = -0.05;
       kGrp.add(blade);
 
-      const ringGeo = new THREE.TorusGeometry(0.03, 0.008, 8, 16);
-      const ring = new THREE.Mesh(ringGeo, bladeMat);
-      ring.position.z = 0.16;
-      kGrp.add(ring);
+      // 2. Glowing Cyan Wind Energy Spine Rune
+      const runeGeo = new THREE.BoxGeometry(0.007, 0.015, 0.26);
+      const rune = new THREE.Mesh(runeGeo, matKunaiRune);
+      rune.position.z = -0.05;
+      kGrp.add(rune);
+
+      // 3. Tsuba / Blade Collar Guard
+      const collarGeo = new THREE.BoxGeometry(0.056, 0.018, 0.016);
+      const collar = new THREE.Mesh(collarGeo, matKunaiSteel);
+      collar.position.z = 0.07;
+      kGrp.add(collar);
+
+      // 4. Tactical Grip / Handle
+      const gripGeo = new THREE.CylinderGeometry(0.009, 0.008, 0.11, 8);
+      const grip = new THREE.Mesh(gripGeo, matKunaiGrip);
+      grip.rotation.x = Math.PI / 2;
+      grip.position.z = 0.13;
+      kGrp.add(grip);
+
+      // 5. Grip Accent Rings
+      for (let r = 0; r < 3; r++) {
+        const wrapGeo = new THREE.TorusGeometry(0.010, 0.002, 6, 12);
+        const wrap = new THREE.Mesh(wrapGeo, matKunaiSteel);
+        wrap.position.z = 0.095 + r * 0.035;
+        kGrp.add(wrap);
+      }
+
+      // 6. Aerodynamic Ring Pommel
+      const pommelGeo = new THREE.TorusGeometry(0.024, 0.0055, 8, 20);
+      const pommel = new THREE.Mesh(pommelGeo, matKunaiSteel);
+      pommel.position.z = 0.20;
+      kGrp.add(pommel);
+
+      // 7. Glowing Cyan Energy Gem in Pommel Core
+      const coreGeo = new THREE.SphereGeometry(0.007, 8, 8);
+      const core = new THREE.Mesh(coreGeo, matKunaiRune);
+      core.position.z = 0.20;
+      kGrp.add(core);
 
       const angle = (k - 2) * 0.28;
       kGrp.position.set(Math.sin(angle) * 0.32, -0.15 + Math.cos(angle) * 0.05, -0.45);
@@ -6007,10 +6183,12 @@
     const SKIN_KEYS = ['default', 'prime', 'reaver', 'glitchpop'];
     let currentSkinIdx = 0;
     let currentSkin = WEAPON_SKINS['default'];
+    let currentSkinKey = 'default';
 
     function cycleWeaponSkin() {
       currentSkinIdx = (currentSkinIdx + 1) % SKIN_KEYS.length;
-      currentSkin = WEAPON_SKINS[SKIN_KEYS[currentSkinIdx]];
+      currentSkinKey = SKIN_KEYS[currentSkinIdx];
+      currentSkin = WEAPON_SKINS[currentSkinKey];
 
       matReceiver.color.setHex(currentSkin.receiverColor);
       matReceiver.metalness = currentSkin.metalness;
@@ -14518,7 +14696,25 @@
 
     let isInspecting = false;
     let inspectTimer = 0;
+    let isKunaiInspecting = false;
+    let kunaiFlickRecoil = 0;
+    let kunaiFlickRot = 0;
+    let cameraPunchPitch = 0;
+    let cameraPunchYaw = 0;
     let recoilOffset = 0;
+
+    function triggerCameraPunch(pitchAmt = 0.007, yawAmt = 0.003) {
+      cameraPunchPitch += pitchAmt;
+      cameraPunchYaw += (Math.random() > 0.5 ? 1 : -1) * yawAmt;
+    }
+
+    function triggerWindBurst() {
+      const slo = document.getElementById('speed-lines-overlay');
+      if (slo) {
+        slo.style.opacity = '1';
+        setTimeout(() => { slo.style.opacity = '0'; }, 240);
+      }
+    }
 
     const crosshairSettings = {
       color: '#00ff88',
@@ -15428,7 +15624,14 @@
       inspectTimer = performance.now();
       sound.init();
       sound.playInspect();
-      showToast('🔍 무기 점검 // INSPECTING ' + currentWeapon.name.toUpperCase());
+      if (abilities.x.active && kunaiRig && kunaiRig.visible) {
+        isKunaiInspecting = true;
+        sound.playKnifeSlash();
+        showToast('🗡️ 비수 점검 // INSPECTING BLADE STORM');
+      } else {
+        isKunaiInspecting = false;
+        showToast('🔍 무기 점검 // INSPECTING ' + currentWeapon.name.toUpperCase());
+      }
     }
 
     function updateADS() {
@@ -15980,6 +16183,7 @@
       // Punchy recoil impulse with zero accumulated arm rotation
       gunRecoilKickZ = Math.min(gunRecoilKickZ + 0.045, 0.12);
       gunRecoilRotX = Math.max(gunRecoilRotX - 0.045, -0.14);
+      triggerCameraPunch(currentWeapon.isSniper ? 0.012 : (currentWeapon.category === 'heavy' ? 0.005 : 0.0035), 0.0015);
 
       let spread = currentWeapon.spreadBase;
       if (player.isCrouching) spread *= 0.5;
@@ -16413,13 +16617,18 @@
       hitWorldPos.y += isHeadshot ? 1.5 : 0.9;
       spawnImpactSparks(hitWorldPos, new THREE.Vector3(0, 1, 0), true);
       showDamagePopup(amount, isHeadshot, hitWorldPos, isHeadshot ? 'head' : 'body');
-      if (isHeadshot) sound.playHeadshot();
-      else sound.playBodyHit();
+      if (isHeadshot) {
+        sound.playHeadshot();
+        triggerCameraPunch(0.007, 0.002);
+      } else {
+        sound.playBodyHit();
+      }
 
       if (pBot.hp <= 0 && !pBot.isDead) {
         pBot.isDead = true;
         pBot.mesh.visible = false;
         sound.playKillSound();
+        triggerCameraPunch(isHeadshot ? 0.009 : 0.006, 0.003);
         if (rangeAimTestState.active) {
           rangeAimTestState.score++;
           if (isHeadshot) rangeAimTestState.headshots++;
@@ -16443,13 +16652,12 @@
 
       if (!roundCombatData.dealt[enemy.id]) {
         roundCombatData.dealt[enemy.id] = {
-          id: enemy.id,
           name: enemy.name,
           agent: enemy.agent,
+          totalDmg: 0,
           head: 0,
           body: 0,
           leg: 0,
-          totalDmg: 0,
           killed: false
         };
       }
@@ -16461,10 +16669,10 @@
 
       const hitWorldPos = enemy.mesh ? enemy.mesh.position.clone() : camera.position.clone();
       hitWorldPos.y += isHeadshot ? 1.4 : 0.8;
+      spawnImpactSparks(hitWorldPos, new THREE.Vector3(0, 1, 0), true, isHeadshot);
 
-      if (enemy.shield === undefined) enemy.shield = 50;
-      const prevEnemyShield = enemy.shield;
-      if (prevEnemyShield > 0) {
+      if (enemy.shield > 0) {
+        const prevEnemyShield = enemy.shield;
         const absorb = Math.min(prevEnemyShield, Math.floor(amount * 0.66));
         enemy.shield -= absorb;
         const remainder = amount - absorb;
@@ -16482,8 +16690,12 @@
       showHitmarker(isHeadshot);
       showDamagePopup(amount, isHeadshot, hitWorldPos, hitPart, isWallbang);
 
-      if (isHeadshot) sound.playHeadshot();
-      else sound.playBodyHit();
+      if (isHeadshot) {
+        sound.playHeadshot();
+        triggerCameraPunch(0.007, 0.002);
+      } else {
+        sound.playBodyHit();
+      }
 
       if (enemy.hp <= 0 && !enemy.isDead) {
         lastKilledEnemyPos = enemy.mesh.position.clone();
@@ -16495,6 +16707,7 @@
         roundKillsThisRound++;
         player.credits += 200;
         if (isHeadshot) player.headshots++;
+        triggerCameraPunch(isHeadshot ? 0.010 : 0.007, 0.003);
 
         // Refresh Blade Storm knives on kill!
         const curAgentName = (lobbySlots && lobbySlots[myTeam] && lobbySlots[myTeam][mySlotIdx]) ? lobbySlots[myTeam][mySlotIdx].agent : '';
@@ -16505,6 +16718,8 @@
           radioVoice.speak('Watch this!');
           showToast('🗡️ [칼날 폭풍] 처치 완료! 비수 5개 즉시 완충! (RESET)');
           renderBladePips();
+          triggerWindBurst();
+          triggerCameraPunch(0.008, 0.004);
         }
 
         // Empress Auto-Devour & Soul Feast on kill!
@@ -17115,9 +17330,17 @@
 
     function showHitmarker(isHeadshot) {
       const hm = document.getElementById('hit-marker');
-      hm.querySelectorAll('.hit-mark').forEach(el => el.style.background = isHeadshot ? '#ff4655' : '#ffffff');
+      if (!hm) return;
+      hm.querySelectorAll('.hit-mark').forEach(el => {
+        el.style.background = isHeadshot ? '#ff4655' : '#ffffff';
+        el.style.boxShadow = isHeadshot ? '0 0 6px #ff4655' : '0 0 4px #ffffff';
+      });
+      hm.classList.add('pop');
       hm.style.opacity = '1';
-      setTimeout(() => hm.style.opacity = '0', 90);
+      setTimeout(() => {
+        hm.style.opacity = '0';
+        hm.classList.remove('pop');
+      }, 95);
     }
 
     function showDamagePopup(dmg, isHeadshot, worldPos = null, hitPart = 'body', isWallbang = false) {
@@ -17205,6 +17428,12 @@
         spawnAceCelebrationConfetti();
         radioVoice.speak('ACE! Magnificent work!');
         triggerAceFinisher(lastKilledEnemyPos);
+        const tpOverlay = document.getElementById('tp-flash-overlay');
+        if (tpOverlay) {
+          tpOverlay.style.background = 'radial-gradient(circle, transparent 20%, rgba(255, 200, 59, 0.45) 70%, rgba(255, 200, 59, 0.8) 100%)';
+          tpOverlay.style.opacity = '1';
+          setTimeout(() => { tpOverlay.style.opacity = '0'; }, 600);
+        }
       }
 
       if (streakTag) streakTag.innerText = isHeadshot ? '💀 HEADSHOT // ONE TAP' : `KILL ${streak}`;
@@ -19253,32 +19482,42 @@
     }
 
     function spawnFlyingKunai(origin, dir) {
-      const geo = new THREE.ConeGeometry(0.04, 0.28, 6);
-      const mat = new THREE.MeshBasicMaterial({ color: 0x00f0ff });
-      const mesh = new THREE.Mesh(geo, mat);
-      mesh.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), dir);
-      mesh.position.copy(origin).addScaledVector(dir, 0.5);
-      scene.add(mesh);
+      const kGrp = new THREE.Group();
+      const bladeMat = new THREE.MeshStandardMaterial({
+        color: 0xd8f4fc, emissive: 0x00f0ff, emissiveIntensity: 2.0, metalness: 0.95, roughness: 0.1
+      });
+      const blade = new THREE.Mesh(new THREE.OctahedronGeometry(1, 0), bladeMat);
+      blade.scale.set(0.045, 0.012, 0.24);
+      kGrp.add(blade);
+      const ringMat = new THREE.MeshBasicMaterial({ color: 0x00f0ff });
+      const ring = new THREE.Mesh(new THREE.TorusGeometry(0.022, 0.005, 8, 16), ringMat);
+      ring.position.z = 0.18;
+      kGrp.add(ring);
 
-      const trailGeo = new THREE.CylinderGeometry(0.015, 0.015, 0.6, 4);
-      const trailMat = new THREE.MeshBasicMaterial({ color: 0x80ffff, transparent: true, opacity: 0.85 });
+      kGrp.quaternion.setFromUnitVectors(new THREE.Vector3(0, 0, -1), dir);
+      kGrp.position.copy(origin).addScaledVector(dir, 0.5);
+      scene.add(kGrp);
+
+      const trailGeo = new THREE.CylinderGeometry(0.014, 0.014, 0.75, 4);
+      const trailMat = new THREE.MeshBasicMaterial({ color: 0x00f0ff, transparent: true, opacity: 0.85 });
       const trail = new THREE.Mesh(trailGeo, trailMat);
-      trail.position.copy(mesh.position);
-      trail.quaternion.copy(mesh.quaternion);
+      trail.position.copy(kGrp.position);
+      trail.quaternion.copy(kGrp.quaternion);
       scene.add(trail);
 
       let dist = 0;
-      const speed = 85;
+      const speed = 90;
       const iv = setInterval(() => {
         dist += speed * 0.016;
-        mesh.position.addScaledVector(dir, speed * 0.016);
-        trail.position.copy(mesh.position).addScaledVector(dir, -0.3);
-        trail.scale.y = Math.min(3, dist * 0.3);
-        if (dist > 75) {
+        kGrp.position.addScaledVector(dir, speed * 0.016);
+        kGrp.rotateZ(0.45);
+        trail.position.copy(kGrp.position).addScaledVector(dir, -0.35);
+        trail.scale.y = Math.min(3.5, dist * 0.35);
+        if (dist > 80) {
           clearInterval(iv);
-          scene.remove(mesh);
+          scene.remove(kGrp);
           scene.remove(trail);
-          geo.dispose(); mat.dispose(); trailGeo.dispose(); trailMat.dispose();
+          bladeMat.dispose(); ringMat.dispose(); trailGeo.dispose(); trailMat.dispose();
         }
       }, 16);
     }
@@ -19287,6 +19526,11 @@
       if (!abilities.x.active || abilities.x.knives <= 0) return;
       abilities.x.knives--;
       sound.playKnifeThrow();
+      triggerCameraPunch(0.006, 0.002);
+      kunaiFlickRecoil = 0.14;
+      kunaiFlickRot = 0.18;
+      isInspecting = false;
+      isKunaiInspecting = false;
       renderBladePips();
 
       const rayDir = new THREE.Vector3(0, 0, -1).applyQuaternion(camera.quaternion);
@@ -19315,6 +19559,11 @@
       const count = abilities.x.knives;
       abilities.x.knives = 0;
       sound.playKnifeThrow();
+      triggerCameraPunch(0.012, 0.005);
+      kunaiFlickRecoil = 0.22;
+      kunaiFlickRot = 0.26;
+      isInspecting = false;
+      isKunaiInspecting = false;
       renderBladePips();
 
       for (let i = 0; i < count; i++) {
@@ -20632,8 +20881,10 @@
         if (keys['ArrowDown']) pitch = Math.max(-Math.PI / 2.1, pitch - turnSpeed * 0.8 * dt);
 
         camera.rotation.order = 'YXZ';
-        camera.rotation.y = yaw;
-        camera.rotation.x = pitch;
+        cameraPunchPitch = THREE.MathUtils.lerp(cameraPunchPitch, 0, Math.min(1, 18 * dt));
+        cameraPunchYaw = THREE.MathUtils.lerp(cameraPunchYaw, 0, Math.min(1, 18 * dt));
+        camera.rotation.y = yaw + cameraPunchYaw;
+        camera.rotation.x = pitch + cameraPunchPitch;
 
         // Subtle organic camera roll on strafe
         const strafeVel = -player.velocity.x * Math.sin(yaw) + player.velocity.z * Math.cos(yaw);
@@ -21299,23 +21550,60 @@
           gunGroup.rotation.z = (gunSwayYaw * 0.35) + strafeTilt;
         }
 
-        // Floating Kunai Wave Animation for Blade Storm (X)
+        // Floating Kunai Animation & Inspection Flourish for Blade Storm (X)
         if (kunaiRig && kunaiRig.visible) {
           const t = now * 0.003;
-          for (let k = 0; k < kunaiMeshes.length; k++) {
-            const kMesh = kunaiMeshes[k];
-            if (kMesh) {
-              const angle = (k - 2) * 0.28;
-              const waveY = Math.sin(t * 3.5 + k * 1.2) * 0.016;
-              const waveX = Math.cos(t * 2.5 + k * 0.9) * 0.008;
-              const waveZ = Math.sin(t * 2.0 + k) * 0.012;
-              kMesh.position.set(
-                Math.sin(angle) * 0.32 + waveX,
-                -0.15 + Math.cos(angle) * 0.05 + waveY,
-                -0.45 + waveZ
-              );
-              kMesh.rotation.z = Math.sin(t * 3.0 + k) * 0.06;
-              kMesh.rotation.x = Math.cos(t * 2.0 + k) * 0.04;
+
+          // Smooth throwing flick recoil & spring recovery
+          kunaiFlickRecoil = THREE.MathUtils.lerp(kunaiFlickRecoil, 0, Math.min(1, 16 * dt));
+          kunaiFlickRot = THREE.MathUtils.lerp(kunaiFlickRot, 0, Math.min(1, 16 * dt));
+          kunaiRig.position.z = kunaiFlickRecoil;
+          kunaiRig.rotation.x = -kunaiFlickRot;
+
+          if (isKunaiInspecting) {
+            const inspectElapsed = (now - inspectTimer) / 1000;
+            const inspectDuration = 1.6;
+            if (inspectElapsed >= inspectDuration) {
+              isKunaiInspecting = false;
+              isInspecting = false;
+            } else {
+              const prog = inspectElapsed / inspectDuration;
+              const spinAngle = prog * Math.PI * 2;
+              const radius = 0.24 + Math.sin(prog * Math.PI) * 0.14;
+              for (let k = 0; k < kunaiMeshes.length; k++) {
+                const kMesh = kunaiMeshes[k];
+                if (kMesh) {
+                  const baseAngle = (k / 5) * Math.PI * 2 + spinAngle;
+                  kMesh.position.set(
+                    Math.cos(baseAngle) * radius,
+                    -0.12 + Math.sin(baseAngle) * radius * 0.45,
+                    -0.38 - Math.sin(prog * Math.PI) * 0.18
+                  );
+                  kMesh.rotation.z = -baseAngle + Math.PI / 2;
+                  kMesh.rotation.x = Math.sin(prog * Math.PI * 2) * 0.35;
+                  kMesh.rotation.y = Math.cos(prog * Math.PI) * 0.25;
+                }
+              }
+            }
+          }
+
+          if (!isKunaiInspecting) {
+            for (let k = 0; k < kunaiMeshes.length; k++) {
+              const kMesh = kunaiMeshes[k];
+              if (kMesh) {
+                const angle = (k - 2) * 0.28;
+                const waveY = Math.sin(t * 3.5 + k * 1.2) * 0.016;
+                const waveX = Math.cos(t * 2.5 + k * 0.9) * 0.008;
+                const waveZ = Math.sin(t * 2.0 + k) * 0.012;
+                kMesh.position.set(
+                  Math.sin(angle) * 0.32 + waveX,
+                  -0.15 + Math.cos(angle) * 0.05 + waveY,
+                  -0.45 + waveZ
+                );
+                kMesh.rotation.z = Math.sin(t * 3.0 + k) * 0.06;
+                kMesh.rotation.x = Math.cos(t * 2.0 + k) * 0.04;
+                kMesh.rotation.y = 0;
+              }
             }
           }
         }
